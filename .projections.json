@@ -1,0 +1,18 @@
+{
+  "lisp/*.c": {
+    "alternate": "lisp/{}.h",
+    "type": "lisp_source"
+  },
+  "lisp/*.h": {
+    "alternate": "lisp/{}.c",
+    "type": "lisp_header"
+  },
+  "syntax/*.c": {
+    "alternate": "syntax/{}.h",
+    "type": "syntax_source"
+  },
+  "syntax/*.h": {
+    "alternate": "syntax/{}.c",
+    "type": "syntax_header"
+  }
+}
