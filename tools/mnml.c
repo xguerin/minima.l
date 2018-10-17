@@ -7,12 +7,14 @@ static bool show_prompt = true;
 void
 syntax_error()
 {
+  fprintf(stdout, "! syntax error\n");
   show_prompt = true;
 }
 
 void
 lisp_consumer(const cell_t cell)
 {
+  printf("-> ");
   lisp_print(cell);
   lisp_free(cell);
   show_prompt = true;
@@ -29,7 +31,7 @@ main(const int argc, char ** const argv)
    * Run the parser loop.
    */
 loop:
-  if (show_prompt) {
+  if (show_prompt && lexer->depth == 0) {
     fprintf(stdout, ": ");
     fflush(stdout);
     show_prompt = false;

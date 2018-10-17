@@ -83,7 +83,8 @@ dot    = '.';
 quote  = '\'';
 number = [1-9] digit*;
 string = '"' [^"]* '"';
-symbol = alpha alnum*;
+marks  = [~!@#$%^&*_+\-={}\[\]:;|\\<>?,./];
+symbol = (alpha | marks) (alnum | marks)*;
 comment = '#' [^\n]*;
 
 main := |*
