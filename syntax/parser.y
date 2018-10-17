@@ -24,7 +24,7 @@ extern void syntax_error();
   syntax_error();
 }
 
-root ::= list(A).
+root ::= quote(A).
 {
   consumer(A);
 }
@@ -42,7 +42,7 @@ list(A) ::= POPEN items(B) PCLOSE.
 list(A) ::= POPEN items(B) DOT item(C) PCLOSE.
 {
   cell_t p = B;
-  while (GET_TYPE(p->cdr) == T_CELL) p = GET_PNTR(cell_t, p->cdr);
+  while (GET_TYPE(p->cdr) == T_LIST) p = GET_PNTR(cell_t, p->cdr);
   SET_TYPE(p->cdr, GET_TYPE(C->car));
   SET_DATA(p->cdr, GET_DATA(C->car));
   A = B;
@@ -56,8 +56,8 @@ items(A) ::= quote(B).
 items(A) ::= items(B) quote(C).
 {
   cell_t p = B;
-  while (GET_TYPE(p->cdr) == T_CELL) p = GET_PNTR(cell_t, p->cdr);
-  SET_TYPE(p->cdr, T_CELL);
+  while (GET_TYPE(p->cdr) == T_LIST) p = GET_PNTR(cell_t, p->cdr);
+  SET_TYPE(p->cdr, T_LIST);
   SET_DATA(p->cdr, C);
   A = B;
 }
@@ -84,7 +84,7 @@ quote(A) ::= QUOTE item(B).
    */
   posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
   memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_CELL);
+  SET_TYPE(A->car, T_LIST);
   SET_DATA(A->car, Q);
   SET_TYPE(A->cdr, T_NIL);
 }
@@ -120,7 +120,7 @@ item(A) ::= list(B).
 {
   posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
   memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_CELL);
+  SET_TYPE(A->car, T_LIST);
   SET_DATA(A->car, (char *)B);
   SET_TYPE(A->cdr, T_NIL);
 }

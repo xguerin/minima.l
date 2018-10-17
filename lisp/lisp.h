@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /*
  * Lisp types.
@@ -15,7 +16,7 @@ typedef enum _cell_type_t
   T_STRING,
   T_SYMBOL,
   T_SYMBOL_INLINE,
-  T_CELL,
+  T_LIST,
   T_NIL
 }
 cell_type_t;
@@ -51,4 +52,4 @@ typedef void (* lisp_consumer_t)(const cell_t);
  */
 
 void lisp_free(const cell_t cell);
-void lisp_print(const cell_t cell);
+void lisp_print(FILE * const fp, const cell_t cell);

@@ -24,7 +24,7 @@ syntax_error()
 void
 lisp_consumer(const cell_t cell)
 {
-  lisp_print(cell);
+  lisp_print(stdout, cell);
   lisp_free(cell);
 }
 

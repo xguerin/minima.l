@@ -65,16 +65,25 @@ action tok_number
 {
   uint64_t value = get_number(ts, te);
   Parse(lexer->parser, NUMBER, (void *)value, NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
 }
 
 action tok_string
 {
   Parse(lexer->parser, STRING, get_string(ts+1, te-1), NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
 }
 
 action tok_symbol
 { 
   Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
 }
 
 popen  = '(';

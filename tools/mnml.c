@@ -14,8 +14,8 @@ syntax_error()
 void
 lisp_consumer(const cell_t cell)
 {
-  printf("-> ");
-  lisp_print(cell);
+  fprintf(stdout, "-> ");
+  lisp_print(stdout, cell);
   lisp_free(cell);
   show_prompt = true;
 }
