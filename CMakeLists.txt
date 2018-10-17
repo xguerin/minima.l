@@ -71,6 +71,7 @@ find_package(Ragel REQUIRED)
 
 add_subdirectory(lisp)
 add_subdirectory(syntax)
+add_subdirectory(tools)
 
 enable_testing()
 add_subdirectory(tests)

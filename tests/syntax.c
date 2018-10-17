@@ -1,7 +1,7 @@
 #include "primitives.h"
 #include <syntax/lexer.h>
 
-const char * text =
+const char * testA =
 "(prog # This is a program  \n"
 "  (sub 1 1)                \n"
 "  (add 2 2)                \n"
@@ -11,13 +11,38 @@ const char * text =
 "  \"\"                     \n"
 ")                          \n";
 
+const char * testB =
+"() ()"
+"     ";
+
+void
+syntax_error()
+{
+
+}
+
+void
+lisp_consumer(const cell_t cell)
+{
+  lisp_print(cell);
+  lisp_free(cell);
+}
+
 int
 main(const int argc, char ** const argv)
 {
-  lexer_t lexer = lexer_create();
-  cell_t cell = lexer_parse(lexer, text, strlen(text));
-  assert(cell != NULL);
-  lisp_print(cell);
+  /*
+   * Create the lexer.
+   */
+  lexer_t lexer = lexer_create(lisp_consumer);
+  /*
+   * Run the tests.
+   */
+  lexer_parse(lexer, testA);
+  lexer_parse(lexer, testB);
+  /*
+   * Clean-up.
+   */
   lexer_destroy(lexer);
   return 0;
 }

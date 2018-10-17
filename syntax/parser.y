@@ -1,4 +1,4 @@
-%extra_argument { cell_t * result }
+%extra_argument { lisp_consumer_t consumer }
 
 %token_type { void * }
 %type list  { cell_t }
@@ -8,16 +8,30 @@
 
 %include
 {
-#include <stdlib.h>
 #include <lisp/lisp.h>
+#include <stdlib.h>
+
+extern void syntax_error();
 }
 
-%syntax_error  { }
-%parse_failure { }
+%syntax_error
+{
+  syntax_error();
+}
+
+%parse_failure
+{
+  syntax_error();
+}
 
 root ::= list(A).
 {
-  *result = A;
+  consumer(A);
+}
+
+list(A) ::= POPEN PCLOSE.
+{
+  A = NULL;
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
@@ -28,28 +42,23 @@ list(A) ::= POPEN items(B) PCLOSE.
 list(A) ::= POPEN items(B) DOT item(C) PCLOSE.
 {
   cell_t p = B;
-  while (p->cdr.type == T_CELL) p = p->cdr.value.cell;
-  p->cdr.type = C->car.type;
-  p->cdr.value = C->car.value;
+  while (GET_TYPE(p->cdr) == T_CELL) p = GET_PNTR(cell_t, p->cdr);
+  SET_TYPE(p->cdr, GET_TYPE(C->car));
+  SET_DATA(p->cdr, GET_DATA(C->car));
   A = B;
-  free(C);
 }
 
-items(A) ::= .
+items(A) ::= quote(B).
 {
-  A = NULL;
+  A = B;
 }
 
-items(A) ::= quote(B) items(C).
+items(A) ::= items(B) quote(C).
 {
-  if (C == NULL) {
-    B->cdr.type = T_NIL;
-    B->cdr.value.cell = NULL;
-  }
-  else {
-    B->cdr.type = T_CELL;
-    B->cdr.value.cell = C;
-  }
+  cell_t p = B;
+  while (GET_TYPE(p->cdr) == T_CELL) p = GET_PNTR(cell_t, p->cdr);
+  SET_TYPE(p->cdr, T_CELL);
+  SET_DATA(p->cdr, C);
   A = B;
 }
 
@@ -60,37 +69,58 @@ quote(A) ::= item(B).
 
 quote(A) ::= QUOTE item(B).
 {
-  A = B;
+  /*
+   * Build the QUOTE cell.
+   */
+  cell_t Q;
+  posix_memalign((void **)&Q, 16, sizeof(struct _cell_t));
+  memset(Q, 0, sizeof(struct _cell_t));
+  SET_TYPE(Q->car, T_SYMBOL_INLINE);
+  SET_SYMB(Q->car, "quote");
+  SET_TYPE(Q->cdr, GET_TYPE(B->car));
+  SET_DATA(Q->cdr, GET_DATA(B->car));
+  /*
+   * Add the QUOTE cell into the list.
+   */
+  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
+  memset(A, 0, sizeof(struct _cell_t));
+  SET_TYPE(A->car, T_CELL);
+  SET_DATA(A->car, Q);
+  SET_TYPE(A->cdr, T_NIL);
 }
 
 item(A) ::= NUMBER(B).
 {
-  A = (cell_t)malloc(sizeof(struct _cell_t));
-  A->car.type = T_NUMBER;
-  A->car.value.number = (uint64_t)B;
-  A->cdr.type = T_NIL;
+  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
+  memset(A, 0, sizeof(struct _cell_t));
+  SET_TYPE(A->car, T_NUMBER);
+  SET_NUMB(A->car, (uint64_t)B);
+  SET_TYPE(A->cdr, T_NIL);
 }
 
 item(A) ::= STRING(B).
 {
-  A = (cell_t)malloc(sizeof(struct _cell_t));
-  A->car.type = T_STRING;
-  A->car.value.string = (char *)B;
-  A->cdr.type = T_NIL;
+  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
+  memset(A, 0, sizeof(struct _cell_t));
+  SET_TYPE(A->car, T_STRING);
+  SET_DATA(A->car, (char *)B);
+  SET_TYPE(A->cdr, T_NIL);
 }
 
 item(A) ::= SYMBOL(B).
 {
-  A = (cell_t)malloc(sizeof(struct _cell_t));
-  A->car.type = T_SYMBOL;
-  A->car.value.symbol = (char *)B;
-  A->cdr.type = T_NIL;
+  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
+  memset(A, 0, sizeof(struct _cell_t));
+  SET_TYPE(A->car, T_SYMBOL);
+  SET_DATA(A->car, (char *)B);
+  SET_TYPE(A->cdr, T_NIL);
 }
 
 item(A) ::= list(B).
 {
-  A = (cell_t)malloc(sizeof(struct _cell_t));
-  A->car.type = T_CELL;
-  A->car.value.cell = B;
-  A->cdr.type = T_NIL;
+  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
+  memset(A, 0, sizeof(struct _cell_t));
+  SET_TYPE(A->car, T_CELL);
+  SET_DATA(A->car, (char *)B);
+  SET_TYPE(A->cdr, T_NIL);
 }

@@ -16,7 +16,8 @@ static char *
 get_string(const char * const s, const char * const e)
 {
   size_t len = e - s;
-  char * result = (char *)malloc(len + 1);
+  char * result = NULL;
+  posix_memalign((void **)&result, 16, len + 1);
   memset(result, 0, len + 1);
   strncpy(result, s, len);
   return result;
@@ -25,20 +26,40 @@ get_string(const char * const s, const char * const e)
 static uint64_t
 get_number(const char * const s, const char * const e)
 {
-  char * str = get_string(s, e);
-  uint64_t result = strtoll(str, NULL, 10);
-  free(str);
-  return result;
+  size_t len = e - s + 1;
+  char * val = (char *)alloca(len);
+  strncpy(val, s, len);
+  return strtoll(val, NULL, 10);
 }
 
 %%{
 
-machine Minimal;
+machine minimal;
 
-action tok_popen  { Parse(lexer->parser, POPEN, 0, NULL); }
-action tok_pclose { Parse(lexer->parser, PCLOSE, 0, NULL); }
-action tok_dot    { Parse(lexer->parser, DOT, 0, NULL); }
-action tok_quote  { Parse(lexer->parser, QUOTE, 0, NULL); }
+action tok_popen
+{
+  Parse(lexer->parser, POPEN, 0, NULL);
+  lexer->depth += 1;
+}
+
+action tok_pclose
+{
+  Parse(lexer->parser, PCLOSE, 0, NULL);
+  lexer->depth -= 1;
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
+
+action tok_dot
+{
+  Parse(lexer->parser, DOT, 0, NULL);
+}
+
+action tok_quote
+{
+  Parse(lexer->parser, QUOTE, 0, NULL);
+}
 
 action tok_number
 {
@@ -82,10 +103,12 @@ main := |*
 %% write data;
 
 lexer_t
-lexer_create()
+lexer_create(const lisp_consumer_t consumer)
 {
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
+  lexer->consumer = consumer;
+  lexer->depth = 0;
   lexer->parser = ParseAlloc(malloc);
   return lexer;
 }
@@ -97,14 +120,11 @@ lexer_destroy(const lexer_t lexer)
   free(lexer);
 }
 
-cell_t
-lexer_parse(const lexer_t lexer, const char * const str, const size_t len)
+void
+lexer_parse(const lexer_t lexer, const char * const str)
 {
   const char* p = str;
-  const char* pe = str + len;
+  const char* pe = str + strlen(str);
   const char* eof = pe;
-  cell_t result = NULL;
   %% write exec;
-  Parse(lexer->parser, 0, 0, &result);
-  return result;
 }

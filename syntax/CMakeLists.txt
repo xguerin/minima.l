@@ -8,5 +8,5 @@ file(GLOB SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.c *.h)
 LEMON(parser SYNTAX_SOURCE)
 RAGEL(lexer ${SYNTAX_SOURCE} SOURCES)
 
-add_library(minimal_syntax STATIC ${SOURCES})
+add_library(minimal_syntax OBJECT ${SOURCES})
 set_property(TARGET minimal_syntax PROPERTY C_STANDARD 99)

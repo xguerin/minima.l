@@ -7,12 +7,12 @@
     "alternate": "lisp/{}.c",
     "type": "lisp_header"
   },
-  "syntax/*.c": {
+  "syntax/*.rl": {
     "alternate": "syntax/{}.h",
     "type": "syntax_source"
   },
   "syntax/*.h": {
-    "alternate": "syntax/{}.c",
+    "alternate": "syntax/{}.rl",
     "type": "syntax_header"
   }
 }
