@@ -12,33 +12,22 @@
 
 #define OK { return true; }
 
-#define ASSERT_EQUAL_TOK(__a, __b)                                    \
-{                                                                     \
-  int __l = __LINE__;                                                 \
-  typeof(__a) __v = __a;                                              \
-  if (__v != __b) {                                                   \
-    printf("line %d: " #__a " == %d, %d expected\n", __l, __v, __b);  \
-    return false;                                                     \
-  }                                                                   \
+#define ASSERT_EQUAL(__a, __b)                                  \
+{                                                               \
+  int __l = __LINE__;                                           \
+  uint64_t __v = __a;                                           \
+  if (__v != (uint64_t)__b) {                                   \
+    printf("line %d: " #__a " == 0x%llx, 0x%llx expected\n",    \
+           __l, (uint64_t)__v, (uint64_t)__b);                  \
+    return false;                                               \
+  }                                                             \
 }
 
-#define ASSERT_EQUAL_NUM(__a, __b)                                        \
-{                                                                         \
-  int __l = __LINE__;                                                     \
-  typeof(__a) __v = __a;                                                  \
-  if (__v != __b) {                                                       \
-    printf("line %d: " #__a " == %lld, %lld expected\n", __l, __v, __b);  \
-    return false;                                                         \
-  }                                                                       \
-}
-
-#define ASSERT_EQUAL_STR(__a, __b)                                          \
-{                                                                           \
-  int __l = __LINE__;                                                       \
-  int __r = strncmp(__a, __b, strlen(__b));                                 \
-  if (__r != 0) {                                                           \
-    printf("line %d: \"" #__a "\" == \"%s\", \"%s\" expected (err = %d)\n", \
-           __l, __a, __b, __r);                                             \
-    return false;                                                           \
-  }                                                                         \
+#define ASSERT_TRUE(__a)                          \
+{                                                 \
+  int __l = __LINE__;                             \
+  if (!__a) {                                     \
+    printf("line %d: " #__a " is false\n", __l);  \
+    return false;                                 \
+  }                                               \
 }

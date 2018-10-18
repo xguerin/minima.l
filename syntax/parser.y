@@ -31,12 +31,13 @@ root ::= quote(A).
 
 list(A) ::= POPEN PCLOSE.
 {
-  A = NULL;
+  A = lisp_make_nil();
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
 {
-  A = B;
+  A = lisp_make_list(B);
+  lisp_free(B);
 }
 
 list(A) ::= POPEN items(B) DOT item(C) PCLOSE.
@@ -69,58 +70,31 @@ quote(A) ::= item(B).
 
 quote(A) ::= QUOTE item(B).
 {
-  /*
-   * Build the QUOTE cell.
-   */
-  cell_t Q;
-  posix_memalign((void **)&Q, 16, sizeof(struct _cell_t));
-  memset(Q, 0, sizeof(struct _cell_t));
-  SET_TYPE(Q->car, T_SYMBOL_INLINE);
-  SET_SYMB(Q->car, "quote");
+  cell_t Q = lisp_make_symbol("quote");
   SET_TYPE(Q->cdr, GET_TYPE(B->car));
   SET_DATA(Q->cdr, GET_DATA(B->car));
-  /*
-   * Add the QUOTE cell into the list.
-   */
-  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
-  memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_LIST);
-  SET_DATA(A->car, Q);
-  SET_TYPE(A->cdr, T_NIL);
+  A = lisp_make_list(Q);
+  lisp_free(Q);
 }
 
 item(A) ::= NUMBER(B).
 {
-  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
-  memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_NUMBER);
-  SET_NUMB(A->car, (uint64_t)B);
-  SET_TYPE(A->cdr, T_NIL);
+  A = lisp_make_number((uint64_t)B);
 }
 
 item(A) ::= STRING(B).
 {
-  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
-  memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_STRING);
-  SET_DATA(A->car, (char *)B);
-  SET_TYPE(A->cdr, T_NIL);
+  A = lisp_make_string((char *)B);
+  free(B);
 }
 
 item(A) ::= SYMBOL(B).
 {
-  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
-  memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_SYMBOL);
-  SET_DATA(A->car, (char *)B);
-  SET_TYPE(A->cdr, T_NIL);
+  A = lisp_make_symbol((char *)B);
+  free(B);
 }
 
 item(A) ::= list(B).
 {
-  posix_memalign((void **)&A, 16, sizeof(struct _cell_t));
-  memset(A, 0, sizeof(struct _cell_t));
-  SET_TYPE(A->car, T_LIST);
-  SET_DATA(A->car, (char *)B);
-  SET_TYPE(A->cdr, T_NIL);
+  A = B;
 }
