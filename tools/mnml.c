@@ -16,7 +16,7 @@ lisp_consumer(const cell_t cell)
 {
   fprintf(stdout, "-> ");
   lisp_print(stdout, cell);
-  lisp_free(cell);
+  lisp_free(1, cell);
   show_prompt = true;
 }
 

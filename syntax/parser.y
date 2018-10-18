@@ -37,16 +37,13 @@ list(A) ::= POPEN PCLOSE.
 list(A) ::= POPEN items(B) PCLOSE.
 {
   A = lisp_make_list(B);
-  lisp_free(B);
+  lisp_free(1, B);
 }
 
 list(A) ::= POPEN items(B) DOT item(C) PCLOSE.
 {
-  cell_t p = B;
-  while (GET_TYPE(p->cdr) == T_LIST) p = GET_PNTR(cell_t, p->cdr);
-  SET_TYPE(p->cdr, GET_TYPE(C->car));
-  SET_DATA(p->cdr, GET_DATA(C->car));
-  A = B;
+  A = lisp_cons(B, C);
+  lisp_free(2, B, C);
 }
 
 items(A) ::= quote(B).
@@ -57,7 +54,9 @@ items(A) ::= quote(B).
 items(A) ::= items(B) quote(C).
 {
   cell_t p = B;
-  while (GET_TYPE(p->cdr) == T_LIST) p = GET_PNTR(cell_t, p->cdr);
+  while (GET_TYPE(p->cdr) == T_LIST) {
+    p = GET_PNTR(cell_t, p->cdr);
+  }
   SET_TYPE(p->cdr, T_LIST);
   SET_DATA(p->cdr, C);
   A = B;
@@ -71,10 +70,8 @@ quote(A) ::= item(B).
 quote(A) ::= QUOTE item(B).
 {
   cell_t Q = lisp_make_symbol("quote");
-  SET_TYPE(Q->cdr, GET_TYPE(B->car));
-  SET_DATA(Q->cdr, GET_DATA(B->car));
-  A = lisp_make_list(Q);
-  lisp_free(Q);
+  A = lisp_cons(Q, B);
+  lisp_free(2, Q, B);
 }
 
 item(A) ::= NUMBER(B).

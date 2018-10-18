@@ -12,12 +12,12 @@ struct _cell_t;
 
 typedef enum _cell_type_t
 {
+  T_NIL,
   T_NUMBER,
   T_STRING,
   T_SYMBOL,
   T_SYMBOL_INLINE,
-  T_LIST,
-  T_NIL
+  T_LIST
 }
 cell_type_t;
 
@@ -47,6 +47,17 @@ typedef struct _cell_t
   uintptr_t cdr;
 }
 * cell_t;
+
+#define FOREACH(__c, __e)                               \
+  for (cell_t __e = __c; GET_TYPE(__e->cdr) == T_LIST;  \
+       __e = GET_PNTR(cell_t, __e->cdr))
+
+/*
+ * Interpreter statistics.
+ */
+
+void lisp_stats_print(FILE * fp);
+bool lisp_stats_balanced_allocs();
 
 /*
  * Function types.
@@ -83,6 +94,14 @@ cell_t lisp_cdr(const cell_t cell);
 size_t lisp_len(const cell_t cell);
 
 /*
+ * Internal list construction functions. CONS is pure, CONC is destructive.
+ */
+
+bool   lisp_equl(const cell_t a, const cell_t b);
+cell_t lisp_cons(const cell_t a, const cell_t b);
+cell_t lisp_conc(const cell_t a, const cell_t b);
+
+/*
  * Helper functions.
  */
 
@@ -91,6 +110,7 @@ cell_t lisp_make_number(const uint64_t num);
 cell_t lisp_make_string(const char * const str);
 cell_t lisp_make_symbol(const char * const sym);
 cell_t lisp_make_list(const cell_t cell);
+cell_t lisp_make_slot(const uintptr_t slot);
 
-void lisp_free(const cell_t cell);
+void lisp_free(const size_t n, ...);
 void lisp_print(FILE * const fp, const cell_t cell);

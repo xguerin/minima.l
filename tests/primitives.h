@@ -15,10 +15,9 @@
 #define ASSERT_EQUAL(__a, __b)                                  \
 {                                                               \
   int __l = __LINE__;                                           \
-  uint64_t __v = __a;                                           \
-  if (__v != (uint64_t)__b) {                                   \
+  if (__a != __b) {                                             \
     printf("line %d: " #__a " == 0x%llx, 0x%llx expected\n",    \
-           __l, (uint64_t)__v, (uint64_t)__b);                  \
+           __l, (uint64_t)__a, (uint64_t)__b);                  \
     return false;                                               \
   }                                                             \
 }
