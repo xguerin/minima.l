@@ -90,7 +90,7 @@ popen  = '(';
 pclose = ')';
 dot    = '.';
 quote  = '\'';
-number = [1-9] digit*;
+number = digit+;
 string = '"' [^"]* '"';
 marks  = [~!@#$%^&*_+\-={}\[\]:;|\\<>?,./];
 symbol = (alpha | marks) (alnum | marks)*;

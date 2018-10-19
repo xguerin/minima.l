@@ -1,3 +1,4 @@
+#include <functions/functions.h>
 #include <syntax/lexer.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,8 +15,15 @@ syntax_error()
 void
 lisp_consumer(const cell_t cell)
 {
-  fprintf(stdout, "-> ");
-  lisp_print(stdout, cell);
+  cell_t result = NULL;
+  if (lisp_eval(cell, &result)) {
+    fprintf(stdout, "-> ");
+    lisp_print(stdout, result);
+    lisp_free(1, result);
+  }
+  else {
+    fprintf(stdout, "! eval  error\n");
+  }
   lisp_free(1, cell);
   show_prompt = true;
 }
@@ -30,6 +38,7 @@ main(const int argc, char ** const argv)
   /*
    * Run the parser loop.
    */
+  lisp_function_register_all();
 loop:
   if (show_prompt && lexer->depth == 0) {
     fprintf(stdout, ": ");

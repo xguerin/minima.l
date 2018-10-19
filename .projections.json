@@ -1,4 +1,12 @@
 {
+  "functions/*.c": {
+    "alternate": "functions/{}.h",
+    "type": "functions_source"
+  },
+  "functions/*.h": {
+    "alternate": "functions/{}.c",
+    "type": "functions_header"
+  },
   "lisp/*.c": {
     "alternate": "lisp/{}.h",
     "type": "lisp_source"

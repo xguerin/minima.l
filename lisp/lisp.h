@@ -64,7 +64,7 @@ bool lisp_stats_balanced_allocs();
  */
 
 #define FUNCTION_TABLE_LEN 96
-#define FUNCTION_TABLE_LVL 3
+#define FUNCTION_TABLE_LVL 5
 
 typedef cell_t (* function_t)(const cell_t cell);
 
@@ -98,6 +98,7 @@ size_t lisp_len(const cell_t cell);
  */
 
 bool   lisp_equl(const cell_t a, const cell_t b);
+bool   lisp_eval(const cell_t a, cell_t * const r);
 cell_t lisp_cons(const cell_t a, const cell_t b);
 cell_t lisp_conc(const cell_t a, const cell_t b);
 
