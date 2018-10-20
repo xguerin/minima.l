@@ -1,9 +1,15 @@
+#include "functions.h"
 #include "lisp.h"
 #include "symbols.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define TRACE(__c) {                                \
+  printf("%s:%d: ", __PRETTY_FUNCTION__, __LINE__); \
+  lisp_print(stdout, car);                          \
+}
 
 /*
  * Statistics.
@@ -217,44 +223,35 @@ lisp_eval_list(const cell_t cell)
   cell_t car = lisp_car(cell);
   cell_t cdr = lisp_cdr(cell);
   /*
-   * Process CAR.
+   * Check what the first argument is.
    */
-  char * sym = NULL;
   switch (GET_TYPE(car->car)) {
     case T_SYMBOL:
-      sym = GET_PNTR(char *, car->car);
-      break;
     case T_SYMBOL_INLINE:
-      sym = GET_SYMB(car->car);
+    case T_LIST:
+      car = lisp_eval(car);
       break;
-    default: break;
+    default:
+      res = lisp_dup(cell);
+      lisp_free(3, cell, car, cdr);
+      return res;
   }
   /*
-   * Call the function.
+   * Process the result. FIXME Add support for lambda evaluation.
    */
-  uintptr_t fun = 0;
-  if (sym == NULL || (fun = lisp_symbol_lookup(sym)) == 0) {
-    res = lisp_make_nil();
-    lisp_free(1, cdr);
-  }
-  /*
-   * Find a better way to handle this.
-   */
-  else {
-    if (IS_EVAL(fun)) {
-      cdr = lisp_eval_args(cdr);
-    }
-    if (IS_FUNC(fun)) {
-      res = GET_PNTR(function_t, fun)(cdr);
-    }
-    /*
-     * FIXME Add support for lambda evaluation.
-     */
-    else {
+  if (GET_TYPE(car->car) != T_NUMBER) {
       res = lisp_make_nil();
-      lisp_free(1, cdr);
-    }
+      lisp_free(2, cell, car, cdr);
+      return res;
   }
+  uintptr_t fun = GET_NUMB(car->car);
+  /*
+   * Call the function. May SIGSEV.
+   */
+  if (IS_EVAL(fun)) {
+    cdr = lisp_eval_args(cdr);
+  }
+  res = GET_PNTR(function_t, fun)(cdr);
   /*
    * Clean-up;
    */
@@ -275,17 +272,13 @@ lisp_eval(const cell_t cell)
     case T_SYMBOL: {
       char * sym = GET_PNTR(char *, cell->car);
       lisp_free(1, cell);
-      uintptr_t fun = lisp_symbol_lookup(sym);
-      if (fun == 0) return lisp_make_nil();
-      return lisp_make_number(fun);
+      return lisp_symbol_lookup(sym);
       break;
     }
     case T_SYMBOL_INLINE: {
       char * sym = GET_SYMB(cell->car);
       lisp_free(1, cell);
-      uintptr_t fun = lisp_symbol_lookup(sym);
-      if (fun == 0) return lisp_make_nil();
-      return lisp_make_number(fun);
+      return lisp_symbol_lookup(sym);
     }
     case T_LIST: {
       return lisp_eval_list(cell);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lisp/lisp.h>
+#include "lisp.h"
 #include <unistd.h>
 
 /*
@@ -21,10 +21,10 @@ typedef struct _lexer_t
 /*
  * Lexer lifecycle.
  */
-lexer_t lexer_create(const lisp_consumer_t consumer);
-void lexer_destroy(const lexer_t lexer);
+lexer_t lisp_create(const lisp_consumer_t consumer);
+void lisp_destroy(const lexer_t lexer);
 
 /*
  * Lexer parse.
  */
-void lexer_parse(const lexer_t lexer, const char * const str);
+void lisp_parse(const lexer_t lexer, const char * const str);

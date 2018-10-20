@@ -1,4 +1,4 @@
-#include <syntax/lexer.h>
+#include "lexer.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,7 +113,7 @@ main := |*
 %% write data;
 
 lexer_t
-lexer_create(const lisp_consumer_t consumer)
+lisp_create(const lisp_consumer_t consumer)
 {
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
@@ -124,14 +124,14 @@ lexer_create(const lisp_consumer_t consumer)
 }
 
 void
-lexer_destroy(const lexer_t lexer)
+lisp_destroy(const lexer_t lexer)
 {
   ParseFree(lexer->parser, free);
   free(lexer);
 }
 
 void
-lexer_parse(const lexer_t lexer, const char * const str)
+lisp_parse(const lexer_t lexer, const char * const str)
 {
   const char* p = str;
   const char* pe = str + strlen(str);

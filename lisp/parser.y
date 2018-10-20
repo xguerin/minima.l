@@ -8,7 +8,7 @@
 
 %include
 {
-#include <lisp/lisp.h>
+#include "lisp.h"
 #include <stdlib.h>
 
 extern void syntax_error();

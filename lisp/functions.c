@@ -1,12 +1,11 @@
-#include <functions/functions.h>
-#include <lisp/lisp.h>
-#include <lisp/symbols.h>
+#include "functions.h"
+#include "symbols.h"
 
 /*
  * QUOTE.
  */
 
-static cell_t
+cell_t
 lisp_function_quote(const cell_t cell)
 {
   return cell;
@@ -182,25 +181,27 @@ lisp_function_len(const cell_t cell)
   return lisp_make_number(len);
 }
 
+#define MAKE_SYMBOL(__f) (lisp_make_number((uintptr_t)__f))
+
 void
 lisp_function_register_all()
 {
-  lisp_symbol_register("quote", MAKE_SYMBOL(lisp_function_quote, FUNC_FLAG            ));
-  lisp_symbol_register("eval" , MAKE_SYMBOL(lisp_function_eval , FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("quote", MAKE_SYMBOL(lisp_function_quote));
+  lisp_symbol_register("eval" , MAKE_SYMBOL(lisp_function_eval ));
 
-  lisp_symbol_register("car"  , MAKE_SYMBOL(lisp_function_car  , FUNC_FLAG | EVAL_FLAG));
-  lisp_symbol_register("cdr"  , MAKE_SYMBOL(lisp_function_cdr  , FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("car"  , MAKE_SYMBOL(lisp_function_car  ));
+  lisp_symbol_register("cdr"  , MAKE_SYMBOL(lisp_function_cdr  ));
 
-  lisp_symbol_register("conc" , MAKE_SYMBOL(lisp_function_conc , FUNC_FLAG | EVAL_FLAG));
-  lisp_symbol_register("cons" , MAKE_SYMBOL(lisp_function_cons , FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("conc" , MAKE_SYMBOL(lisp_function_conc ));
+  lisp_symbol_register("cons" , MAKE_SYMBOL(lisp_function_cons ));
 
-  lisp_symbol_register("inc"  , MAKE_SYMBOL(lisp_function_inc  , FUNC_FLAG | EVAL_FLAG));
-  lisp_symbol_register("dec"  , MAKE_SYMBOL(lisp_function_dec  , FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("inc"  , MAKE_SYMBOL(lisp_function_inc  ));
+  lisp_symbol_register("dec"  , MAKE_SYMBOL(lisp_function_dec  ));
 
-  lisp_symbol_register("num?" , MAKE_SYMBOL(lisp_function_isnum, FUNC_FLAG | EVAL_FLAG));
-  lisp_symbol_register("str?" , MAKE_SYMBOL(lisp_function_isstr, FUNC_FLAG | EVAL_FLAG));
-  lisp_symbol_register("sym?" , MAKE_SYMBOL(lisp_function_issym, FUNC_FLAG | EVAL_FLAG));
-  lisp_symbol_register("lst?" , MAKE_SYMBOL(lisp_function_islst, FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("num?" , MAKE_SYMBOL(lisp_function_isnum));
+  lisp_symbol_register("str?" , MAKE_SYMBOL(lisp_function_isstr));
+  lisp_symbol_register("sym?" , MAKE_SYMBOL(lisp_function_issym));
+  lisp_symbol_register("lst?" , MAKE_SYMBOL(lisp_function_islst));
 
-  lisp_symbol_register("len"  , MAKE_SYMBOL(lisp_function_len  , FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("len"  , MAKE_SYMBOL(lisp_function_len  ));
 }

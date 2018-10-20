@@ -1,5 +1,5 @@
 #include "primitives.h"
-#include <syntax/lexer.h>
+#include <lisp/lexer.h>
 
 void
 syntax_error() { }
@@ -33,17 +33,17 @@ basic_tests()
   /*
    * Create the lexer.
    */
-  lexer_t lexer = lexer_create(lisp_consumer);
+  lexer_t lexer = lisp_create(lisp_consumer);
   /*
    * Run the tests.
    */
-  lexer_parse(lexer, testA);
+  lisp_parse(lexer, testA);
   lisp_print(stdout, lisp_result);
   lisp_free(1, lisp_result);
   /*
    * Clean-up.
    */
-  lexer_destroy(lexer);
+  lisp_destroy(lexer);
   lisp_stats_print(stdout);
   ASSERT_TRUE(lisp_stats_balanced_allocs());
   OK;
@@ -60,11 +60,11 @@ car_cdr_tests()
   /*
    * Create the lexer.
    */
-  lexer_t lexer = lexer_create(lisp_consumer);
+  lexer_t lexer = lisp_create(lisp_consumer);
   /*
    * Run the tests.
    */
-  lexer_parse(lexer, "1");
+  lisp_parse(lexer, "1");
   car = lisp_car(lisp_result);
   cdr = lisp_cdr(lisp_result);
   lisp_free(1, lisp_result);
@@ -73,7 +73,7 @@ car_cdr_tests()
   lisp_free(2, car, cdr);
   /*
    */
-  lexer_parse(lexer, "()");
+  lisp_parse(lexer, "()");
   car = lisp_car(lisp_result);
   cdr = lisp_cdr(lisp_result);
   ASSERT_TRUE(IS_NULL(car));
@@ -81,7 +81,7 @@ car_cdr_tests()
   lisp_free(3, car, cdr, lisp_result);
   /*
    */
-  lexer_parse(lexer, "(1)");
+  lisp_parse(lexer, "(1)");
   car = lisp_car(lisp_result);
   cdr = lisp_cdr(lisp_result);
   ASSERT_TRUE(IS_NUMB(car) && GET_NUMB(car->car) == 1);
@@ -89,33 +89,33 @@ car_cdr_tests()
   lisp_free(3, car, cdr, lisp_result);
   /*
    */
-  lexer_parse(lexer, "(1 2)");
+  lisp_parse(lexer, "(1 2)");
   car = lisp_car(lisp_result);
   cdr = lisp_cdr(lisp_result);
   lisp_free(1, lisp_result);
   ASSERT_TRUE(IS_NUMB(car) && GET_NUMB(car->car) == 1);
   ASSERT_TRUE(IS_LIST(cdr));
-  lexer_parse(lexer, "(2)");
+  lisp_parse(lexer, "(2)");
   ASSERT_TRUE(lisp_equl(cdr, lisp_result));
   lisp_free(3, car, cdr, lisp_result);
   /*
    */
-  lexer_parse(lexer, "((1 2) 2)");
+  lisp_parse(lexer, "((1 2) 2)");
   car = lisp_car(lisp_result);
   cdr = lisp_cdr(lisp_result);
   lisp_free(1, lisp_result);
   ASSERT_TRUE(IS_LIST(car));
   ASSERT_TRUE(IS_LIST(cdr));
-  lexer_parse(lexer, "(1 2)");
+  lisp_parse(lexer, "(1 2)");
   ASSERT_TRUE(lisp_equl(car, lisp_result));
   lisp_free(1, lisp_result);
-  lexer_parse(lexer, "(2)");
+  lisp_parse(lexer, "(2)");
   ASSERT_TRUE(lisp_equl(cdr, lisp_result));
   lisp_free(3, car, cdr, lisp_result);
   /*
    * Clean-up.
    */
-  lexer_destroy(lexer);
+  lisp_destroy(lexer);
   lisp_stats_print(stdout);
   ASSERT_TRUE(lisp_stats_balanced_allocs());
   OK;
@@ -132,56 +132,56 @@ conc_cons_tests()
   /*
    * Create the lexer.
    */
-  lexer_t lexer = lexer_create(lisp_consumer);
+  lexer_t lexer = lisp_create(lisp_consumer);
   /*
    * Run the tests.
    */
-  lexer_parse(lexer, "(1)");
+  lisp_parse(lexer, "(1)");
   tmp1 = lisp_result;
-  lexer_parse(lexer, "2");
+  lisp_parse(lexer, "2");
   lisp_conc(tmp1, lisp_result);
-  lexer_parse(lexer, "(1 . 2)");
+  lisp_parse(lexer, "(1 . 2)");
   ASSERT_TRUE(lisp_equl(tmp1, lisp_result));
   lisp_free(2, tmp1, lisp_result);
   /*
    */
-  lexer_parse(lexer, "(1)");
+  lisp_parse(lexer, "(1)");
   tmp1 = lisp_result;
-  lexer_parse(lexer, "(2)");
+  lisp_parse(lexer, "(2)");
   lisp_conc(tmp1, lisp_result);
   lisp_free(1, tmp1);
   /*
    */
-  lexer_parse(lexer, "(())");
+  lisp_parse(lexer, "(())");
   tmp1 = lisp_result;
-  lexer_parse(lexer, "(2)");
+  lisp_parse(lexer, "(2)");
   lisp_conc(tmp1, lisp_result);
   lisp_free(1, tmp1);
   /*
    */
-  lexer_parse(lexer, "1");
+  lisp_parse(lexer, "1");
   tmp1 = lisp_result;
-  lexer_parse(lexer, "2");
+  lisp_parse(lexer, "2");
   tmp2 = lisp_cons(tmp1, lisp_result);
   lisp_free(3, tmp1, tmp2, lisp_result);
   /*
    */
-  lexer_parse(lexer, "(1)");
+  lisp_parse(lexer, "(1)");
   tmp1 = lisp_result;
-  lexer_parse(lexer, "2");
+  lisp_parse(lexer, "2");
   tmp2 = lisp_cons(tmp1, lisp_result);
   lisp_free(3, tmp1, tmp2, lisp_result);
   /*
    */
-  lexer_parse(lexer, "1");
+  lisp_parse(lexer, "1");
   tmp1 = lisp_result;
-  lexer_parse(lexer, "(2)");
+  lisp_parse(lexer, "(2)");
   tmp2 = lisp_cons(tmp1, lisp_result);
   lisp_free(3, tmp1, tmp2, lisp_result);
   /*
    * Clean-up.
    */
-  lexer_destroy(lexer);
+  lisp_destroy(lexer);
   lisp_stats_print(stdout);
   ASSERT_TRUE(lisp_stats_balanced_allocs());
   OK;

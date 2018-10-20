@@ -1,5 +1,5 @@
-#include <functions/functions.h>
-#include <syntax/lexer.h>
+#include <lisp/functions.h>
+#include <lisp/lexer.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,7 +16,9 @@ void
 lisp_repl_consumer(const cell_t cell)
 {
   cell_t result = lisp_eval(cell);
-  fprintf(stdout, "[%ld, %ld]-> ", lisp_stats_get_alloc(), lisp_stats_get_free());
+  size_t allocs = lisp_stats_get_alloc();
+  size_t frees = lisp_stats_get_free();
+  fprintf(stdout, "[%ld, %ld, %ld]-> ", allocs, frees, allocs - frees);
   lisp_print(stdout, result);
   lisp_free(1, result);
   show_prompt = true;
@@ -28,7 +30,7 @@ main(const int argc, char ** const argv)
   char * line = NULL;
   size_t linecap = 0;
   ssize_t linelen;
-  lexer_t lexer = lexer_create(lisp_repl_consumer);
+  lexer_t lexer = lisp_create(lisp_repl_consumer);
   /*
    * Run the parser loop.
    */
@@ -41,7 +43,7 @@ loop:
   }
   linelen = getline(&line, &linecap, stdin);
   if (linelen > 0) {
-    lexer_parse(lexer, line);
+    lisp_parse(lexer, line);
     goto loop;
   }
   /*
@@ -49,6 +51,6 @@ loop:
    */
   printf("\n");
   free(line);
-  lexer_destroy(lexer);
+  lisp_destroy(lexer);
   return 0;
 }

@@ -5,7 +5,7 @@
 static symbol_entry_t symbol_table = { 0, NULL };
 
 bool
-lisp_symbol_register(const char * const sym, const uintptr_t symbol)
+lisp_symbol_register(const char * const sym, const cell_t cell)
 {
   size_t len = strlen(sym);
   /*
@@ -35,11 +35,11 @@ lisp_symbol_register(const char * const sym, const uintptr_t symbol)
   /*
    * Register the function.
    */
-  entry->sym = symbol;
+  entry->cell = cell;
   return true;
 }
 
-uintptr_t
+cell_t
 lisp_symbol_lookup(const char * const sym)
 {
   size_t len = strlen(sym);
@@ -68,7 +68,8 @@ lisp_symbol_lookup(const char * const sym)
   /*
    * Found the entry, return the function (may be NULL).
    */
-  return entry->sym;
+  if (entry->cell == NULL) {
+    return lisp_make_nil();
+  }
+  return lisp_dup(entry->cell);
 }
-
-
