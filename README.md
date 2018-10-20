@@ -393,12 +393,10 @@ Create a list with `any` arguments.
 ### Predicates
 
 ```lisp
-(nil? 'any)
 (num? 'any)
 (str? 'any)
 (sym? 'any)
 (lst? 'any)
-(fun? 'any)
 ```
 
 Respectively test if `any` is a number, a string, a symbol, a list, or an

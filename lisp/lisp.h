@@ -39,6 +39,8 @@ cell_type_t;
 
 #define IS_NULL(__c) (GET_TYPE(__c->car) == T_NIL)
 #define IS_NUMB(__c) (GET_TYPE(__c->car) == T_NUMBER)
+#define IS_STRN(__c) (GET_TYPE(__c->car) == T_STRING)
+#define IS_SYMB(__c) (GET_TYPE(__c->car) == T_SYMBOL || GET_TYPE(__c->car) == T_SYMBOL_INLINE)
 #define IS_LIST(__c) (GET_TYPE(__c->car) == T_LIST)
 
 typedef struct _cell_t

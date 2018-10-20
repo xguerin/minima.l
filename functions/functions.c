@@ -71,6 +71,47 @@ lisp_function_cons(const cell_t cell)
 }
 
 /*
+ * Tester functions.
+ * (fun? 'any)
+ */
+
+static cell_t
+lisp_function_isnum(const cell_t cell)
+{
+  cell_t car = lisp_car(cell);
+  cell_t res = IS_NUMB(car) ? lisp_make_true() : lisp_make_nil();
+  lisp_free(1, cell, car);
+  return res;
+}
+
+static cell_t
+lisp_function_isstr(const cell_t cell)
+{
+  cell_t car = lisp_car(cell);
+  cell_t res = IS_STRN(car) ? lisp_make_true() : lisp_make_nil();
+  lisp_free(1, cell, car);
+  return res;
+}
+
+static cell_t
+lisp_function_issym(const cell_t cell)
+{
+  cell_t car = lisp_car(cell);
+  cell_t res = IS_SYMB(car) ? lisp_make_true() : lisp_make_nil();
+  lisp_free(1, cell, car);
+  return res;
+}
+
+static cell_t
+lisp_function_islst(const cell_t cell)
+{
+  cell_t car = lisp_car(cell);
+  cell_t res = IS_LIST(car) ? lisp_make_true() : lisp_make_nil();
+  lisp_free(1, cell, car);
+  return res;
+}
+
+/*
  * Other functions.
  */
 
@@ -155,6 +196,11 @@ lisp_function_register_all()
 
   lisp_symbol_register("inc"  , MAKE_SYMBOL(lisp_function_inc  , FUNC_FLAG | EVAL_FLAG));
   lisp_symbol_register("dec"  , MAKE_SYMBOL(lisp_function_dec  , FUNC_FLAG | EVAL_FLAG));
+
+  lisp_symbol_register("num?" , MAKE_SYMBOL(lisp_function_isnum, FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("str?" , MAKE_SYMBOL(lisp_function_isstr, FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("sym?" , MAKE_SYMBOL(lisp_function_issym, FUNC_FLAG | EVAL_FLAG));
+  lisp_symbol_register("lst?" , MAKE_SYMBOL(lisp_function_islst, FUNC_FLAG | EVAL_FLAG));
 
   lisp_symbol_register("len"  , MAKE_SYMBOL(lisp_function_len  , FUNC_FLAG | EVAL_FLAG));
 }
