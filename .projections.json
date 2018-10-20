@@ -15,7 +15,15 @@
     "alternate": "lisp/{}.c",
     "type": "lisp_header"
   },
-  "syntax/*.rl": {
+  "symbols/*.c": {
+    "alternate": "symbols/{}.h",
+    "type": "symbols_source"
+  },
+  "symbols/*.h": {
+    "alternate": "symbols/{}.c",
+    "type": "symbols_header"
+  },
+  "syntax/*.c": {
     "alternate": "syntax/{}.h",
     "type": "syntax_source"
   },

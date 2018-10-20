@@ -1,4 +1,5 @@
 #pragma once
 
-void
-lisp_function_register_all();
+#include <lisp/lisp.h>
+
+void lisp_function_register_all();

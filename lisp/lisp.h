@@ -12,30 +12,30 @@ struct _cell_t;
 
 typedef enum _cell_type_t
 {
-  T_NIL,
-  T_NUMBER,
-  T_STRING,
-  T_SYMBOL,
-  T_SYMBOL_INLINE,
-  T_LIST
+  T_NIL           = 0,
+  T_TRUE          = 1,
+  T_NUMBER        = 2,
+  T_STRING        = 3,
+  T_SYMBOL        = 4,
+  T_SYMBOL_INLINE = 5,
+  T_LIST          = 6
 }
 cell_type_t;
 
 #define TYPE_MASK 0xFULL
-#define RCNT_MASK 0xFFFF000000000000ULL
-
+#define PNTR_MASK ~TYPE_MASK
 #define INLINE_SYMBOL_LEN 6
 
-#define SET_TYPE(__e, __t) __e = ((__e & ~TYPE_MASK) | (               __t        &  TYPE_MASK))
-#define SET_NUMB(__e, __v) __e = ((__e &  TYPE_MASK) | ( ((uintptr_t  )__v << 4)  & ~TYPE_MASK))
-#define SET_SYMB(__e, __v) __e = ((__e &  TYPE_MASK) | ((*(uintptr_t *)__v << 8)  & ~TYPE_MASK))
-#define SET_DATA(__e, __v) __e = ((__e &  TYPE_MASK) | (  (uintptr_t  )__v        & ~TYPE_MASK))
+#define SET_TYPE(__e, __t) __e = ((__e & PNTR_MASK) | (               __t        & TYPE_MASK))
+#define SET_NUMB(__e, __v) __e = ((__e & TYPE_MASK) | ( ((uintptr_t  )__v << 4)  & PNTR_MASK))
+#define SET_SYMB(__e, __v) __e = ((__e & TYPE_MASK) | ((*(uintptr_t *)__v << 8)  & PNTR_MASK))
+#define SET_DATA(__e, __v) __e = ((__e & TYPE_MASK) | (  (uintptr_t  )__v        & PNTR_MASK))
 
-#define GET_TYPE(__e)      ((cell_type_t)  (__e &  TYPE_MASK             )      )
-#define GET_NUMB(__e)      ((uint64_t   ) ((__e & ~TYPE_MASK             ) >> 4))
-#define GET_SYMB(__e)      (((char *    )  &__e                            +  1))
-#define GET_DATA(__e)      ((uint64_t   )  (__e & ~TYPE_MASK             )      )
-#define GET_PNTR(__T, __e) ((__T        )  (__e & ~TYPE_MASK & ~RCNT_MASK)      )
+#define GET_TYPE(__e)      ((cell_type_t)  (__e & TYPE_MASK)      )
+#define GET_NUMB(__e)      ((uint64_t   ) ((__e & PNTR_MASK) >> 4))
+#define GET_SYMB(__e)      (((char *    )  &__e              +  1))
+#define GET_DATA(__e)      ((uint64_t   )  (__e & PNTR_MASK)      )
+#define GET_PNTR(__T, __e) ((__T        )  (__e & PNTR_MASK)      )
 
 #define IS_NULL(__c) (GET_TYPE(__c->car) == T_NIL)
 #define IS_NUMB(__c) (GET_TYPE(__c->car) == T_NUMBER)
@@ -48,10 +48,6 @@ typedef struct _cell_t
 }
 * cell_t;
 
-#define FOREACH(__c, __e)                               \
-  for (cell_t __e = __c; GET_TYPE(__e->cdr) == T_LIST;  \
-       __e = GET_PNTR(cell_t, __e->cdr))
-
 /*
  * Interpreter statistics.
  */
@@ -59,24 +55,8 @@ typedef struct _cell_t
 void lisp_stats_print(FILE * fp);
 bool lisp_stats_balanced_allocs();
 
-/*
- * Function types.
- */
-
-#define FUNCTION_TABLE_LEN 96
-#define FUNCTION_TABLE_LVL 5
-
-typedef cell_t (* function_t)(const cell_t cell);
-
-typedef struct _function_entry_t
-{
-  function_t  fun;
-  struct _function_entry_t *  table;
-}
-function_entry_t;
-
-function_t lisp_function_lookup(const char * const sym);
-bool lisp_function_register(const char * const sym, function_t fun);
+size_t lisp_stats_get_alloc();
+size_t lisp_stats_get_free();
 
 /*
  * Consumer type.
@@ -98,15 +78,16 @@ size_t lisp_len(const cell_t cell);
  */
 
 bool   lisp_equl(const cell_t a, const cell_t b);
-bool   lisp_eval(const cell_t a, cell_t * const r);
 cell_t lisp_cons(const cell_t a, const cell_t b);
 cell_t lisp_conc(const cell_t a, const cell_t b);
+cell_t lisp_eval(const cell_t cell);
 
 /*
  * Helper functions.
  */
 
 cell_t lisp_make_nil();
+cell_t lisp_make_true();
 cell_t lisp_make_number(const uint64_t num);
 cell_t lisp_make_string(const char * const str);
 cell_t lisp_make_symbol(const char * const sym);

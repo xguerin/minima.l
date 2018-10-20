@@ -13,18 +13,12 @@ syntax_error()
 }
 
 void
-lisp_consumer(const cell_t cell)
+lisp_repl_consumer(const cell_t cell)
 {
-  cell_t result = NULL;
-  if (lisp_eval(cell, &result)) {
-    fprintf(stdout, "-> ");
-    lisp_print(stdout, result);
-    lisp_free(1, result);
-  }
-  else {
-    fprintf(stdout, "! eval  error\n");
-  }
-  lisp_free(1, cell);
+  cell_t result = lisp_eval(cell);
+  fprintf(stdout, "[%ld, %ld]-> ", lisp_stats_get_alloc(), lisp_stats_get_free());
+  lisp_print(stdout, result);
+  lisp_free(1, result);
   show_prompt = true;
 }
 
@@ -34,7 +28,7 @@ main(const int argc, char ** const argv)
   char * line = NULL;
   size_t linecap = 0;
   ssize_t linelen;
-  lexer_t lexer = lexer_create(lisp_consumer);
+  lexer_t lexer = lexer_create(lisp_repl_consumer);
   /*
    * Run the parser loop.
    */

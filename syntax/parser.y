@@ -40,7 +40,7 @@ list(A) ::= POPEN items(B) PCLOSE.
   lisp_free(1, B);
 }
 
-list(A) ::= POPEN items(B) DOT item(C) PCLOSE.
+list(A) ::= POPEN items(B) DOT quote(C) PCLOSE.
 {
   A = lisp_cons(B, C);
   lisp_free(2, B, C);
@@ -87,7 +87,9 @@ item(A) ::= STRING(B).
 
 item(A) ::= SYMBOL(B).
 {
-  A = lisp_make_symbol((char *)B);
+  A = strcmp(B, "T") == 0 ?
+    lisp_make_true() :
+    lisp_make_symbol((char *)B);
   free(B);
 }
 

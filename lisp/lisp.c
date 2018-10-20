@@ -1,4 +1,5 @@
 #include "lisp.h"
+#include "symbols.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,19 @@ lisp_stats_balanced_allocs()
   return stats.n_alloc == stats.n_free;
 }
 
-#define ALLOCATE(__p) {                                          \
+size_t
+lisp_stats_get_alloc()
+{
+  return stats.n_alloc;
+}
+
+size_t
+lisp_stats_get_free()
+{
+  return stats.n_free;
+}
+
+#define ALLOCATE(__p) {                                       \
   posix_memalign((void **)&__p, 16, sizeof(struct _cell_t));  \
   memset(__p, 0, sizeof(struct _cell_t));                     \
   stats.n_alloc += 1;                                         \
@@ -38,79 +51,6 @@ lisp_stats_balanced_allocs()
 #define FREE(__p) {   \
   free(__p);          \
   stats.n_free += 1;  \
-}
-
-/*
- * Function types.
- */
-
-static function_entry_t function_table = { NULL, NULL };
-
-function_t
-lisp_function_lookup(const char * const sym)
-{
-  size_t len = strlen(sym);
-  /*
-   * FIXME For the moment, restrict to the fast lookup table.
-   */
-  if (len > FUNCTION_TABLE_LVL) {
-    return false;
-  }
-  /*
-   * Get the function pointer.
-   */
-  function_entry_t * entry = &function_table;
-  for (size_t i = 0; i < len; i += 1) {
-    /*
-     * Abort if their is not allocation.
-     */
-    if (entry->table == NULL) {
-      return NULL;
-    }
-    /*
-     * Grab the next entry.
-     */
-    entry = &entry->table[(size_t)sym[i] - 32];
-  }
-  /*
-   * Found the entry, return the function (may be NULL).
-   */
-  return entry->fun;
-}
-
-bool
-lisp_function_register(const char * const sym, function_t fun)
-{
-  size_t len = strlen(sym);
-  /*
-   * FIXME For the moment, restrict to the fast lookup table.
-   */
-  if (len > FUNCTION_TABLE_LVL) {
-    return false;
-  }
-  /*
-   * Get the function entry.
-   */
-  function_entry_t * entry = &function_table;
-  for (size_t i = 0; i < len; i += 1) {
-    /*
-     * Allocate the new level.
-     */
-    if (entry->table == NULL) {
-      posix_memalign((void **)&entry->table, 8, FUNCTION_TABLE_LEN *
-                     sizeof(function_entry_t));
-      memset(entry->table, 0, FUNCTION_TABLE_LEN * sizeof(function_entry_t));
-    }
-    /*
-     * Grab the new entry.
-     */
-    entry = &entry->table[(size_t)sym[i] - 32];
-  }
-  /*
-   * Register the function.
-   */
-  entry->fun = fun;
-  return true;
 }
 
 /*
@@ -123,6 +63,7 @@ slot_dup(const uintptr_t slot)
   uintptr_t result = slot;
   switch (GET_TYPE(slot)) {
     case T_NIL:
+    case T_TRUE:
     case T_NUMBER:
     case T_SYMBOL_INLINE:
       break;
@@ -170,9 +111,13 @@ lisp_cdr(const cell_t cell)
 size_t
 lisp_len(const cell_t cell)
 {
-  size_t result = 1;
+  size_t result = IS_NULL(cell) ? 0 : 1;
   if (IS_LIST(cell)) {
-    result += lisp_len(GET_PNTR(cell_t, cell->cdr));
+    cell_t p = GET_PNTR(cell_t, cell->car);
+    while (GET_TYPE(p->cdr) == T_LIST) {
+      result += 1;
+      p = GET_PNTR(cell_t, p->cdr);
+    }
   }
   return result;
 }
@@ -189,6 +134,7 @@ slot_equl(const uintptr_t a, const uintptr_t b)
   }
   switch (GET_TYPE(a)) {
     case T_NIL:
+    case T_TRUE:
       return true;
     case T_NUMBER:
       return GET_NUMB(a) == GET_NUMB(b);
@@ -208,83 +154,6 @@ lisp_equl(const cell_t a, const cell_t b)
   return slot_equl(a->car, b->car) && slot_equl(a->cdr, b->cdr);
 }
 
-static bool
-lisp_eval_list(const cell_t cell, cell_t * const r)
-{
-  cell_t car = lisp_car(cell);
-  cell_t cdr = lisp_cdr(cell);
-  /*
-   * Process CAR.
-   */
-  switch (GET_TYPE(car->car)) {
-    case T_SYMBOL: {
-      char * sym = GET_PNTR(char *, car->car);
-      function_t fun = lisp_function_lookup(sym);
-      if (fun == NULL) {
-        *r = lisp_make_nil();
-        break;
-      }
-      *r = fun(cdr);
-      break;
-    }
-    case T_SYMBOL_INLINE: {
-      char * sym = GET_SYMB(car->car);
-      function_t fun = lisp_function_lookup(sym);
-      if (fun == NULL) {
-        *r = lisp_make_nil();
-        break;
-      }
-      *r = fun(cdr);
-      break;
-    }
-    default:
-      *r = lisp_make_nil();
-      break;
-  }
-  /*
-   * Clean-up;
-   */
-  lisp_free(2, car, cdr);
-  return true;
-}
-
-bool
-lisp_eval(const cell_t a, cell_t * const r)
-{
-  switch (GET_TYPE(a->car)) {
-    case T_NIL:
-    case T_NUMBER:
-    case T_STRING: {
-      *r = lisp_dup(a);
-      break;
-    }
-    case T_SYMBOL: {
-      char * sym = GET_PNTR(char *, a->car);
-      function_t fun = lisp_function_lookup(sym);
-      if (fun == NULL) {
-        *r = lisp_make_nil();
-        break;
-      }
-      *r = lisp_make_number((uint64_t)fun);
-      break;
-    }
-    case T_SYMBOL_INLINE: {
-      char * sym = GET_SYMB(a->car);
-      function_t fun = lisp_function_lookup(sym);
-      if (fun == NULL) {
-        *r = lisp_make_nil();
-        break;
-      }
-      *r = lisp_make_number((uint64_t)fun);
-      break;
-    }
-    case T_LIST: {
-      return lisp_eval_list(a, r);
-    }
-  }
-  return true;
-}
-
 cell_t
 lisp_cons(const cell_t a, const cell_t b)
 {
@@ -302,7 +171,8 @@ cell_t
 lisp_conc(const cell_t a, const cell_t b)
 {
   if (!IS_LIST(a)) {
-    return lisp_make_nil();
+    lisp_free(1, a);
+    return b;
   }
   cell_t p = GET_PNTR(cell_t, a->car);
   while (GET_TYPE(p->cdr) == T_LIST) {
@@ -311,6 +181,116 @@ lisp_conc(const cell_t a, const cell_t b)
   p->cdr = b->car;
   FREE(b);
   return a;
+}
+
+static cell_t
+lisp_eval_args(const cell_t cell)
+{
+  /*
+   * Return NIL if NIL.
+   */
+  if (GET_TYPE(cell->car) != T_LIST) {
+    return cell;
+  }
+  /*
+   * Get CAR and CDR.
+   */
+  cell_t car = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  /*
+   * Eval CAR and CDR, and CONS the result.
+   */
+  cell_t rar = lisp_eval(car);
+  cell_t rdr = lisp_eval_args(cdr);
+  cell_t res = lisp_cons(rar, rdr);
+  /*
+   * Clean-up and return the CONSed result.
+   */
+  lisp_free(3, cell, rar, rdr);
+  return res;
+}
+
+static cell_t
+lisp_eval_list(const cell_t cell)
+{
+  cell_t res = NULL;
+  cell_t car = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  /*
+   * Process CAR.
+   */
+  char * sym = NULL;
+  switch (GET_TYPE(car->car)) {
+    case T_SYMBOL:
+      sym = GET_PNTR(char *, car->car);
+      break;
+    case T_SYMBOL_INLINE:
+      sym = GET_SYMB(car->car);
+      break;
+    default: break;
+  }
+  /*
+   * Call the function.
+   */
+  uintptr_t fun = 0;
+  if (sym == NULL || (fun = lisp_symbol_lookup(sym)) == 0) {
+    res = lisp_make_nil();
+    lisp_free(1, cdr);
+  }
+  /*
+   * Find a better way to handle this.
+   */
+  else {
+    if (IS_EVAL(fun)) {
+      cdr = lisp_eval_args(cdr);
+    }
+    if (IS_FUNC(fun)) {
+      res = GET_PNTR(function_t, fun)(cdr);
+    }
+    /*
+     * FIXME Add support for lambda evaluation.
+     */
+    else {
+      res = lisp_make_nil();
+      lisp_free(1, cdr);
+    }
+  }
+  /*
+   * Clean-up;
+   */
+  lisp_free(2, car, cell);
+  return res;
+}
+
+cell_t
+lisp_eval(const cell_t cell)
+{
+  switch (GET_TYPE(cell->car)) {
+    case T_NIL:
+    case T_TRUE:
+    case T_NUMBER:
+    case T_STRING: {
+      return cell;
+    }
+    case T_SYMBOL: {
+      char * sym = GET_PNTR(char *, cell->car);
+      lisp_free(1, cell);
+      uintptr_t fun = lisp_symbol_lookup(sym);
+      if (fun == 0) return lisp_make_nil();
+      return lisp_make_number(fun);
+      break;
+    }
+    case T_SYMBOL_INLINE: {
+      char * sym = GET_SYMB(cell->car);
+      lisp_free(1, cell);
+      uintptr_t fun = lisp_symbol_lookup(sym);
+      if (fun == 0) return lisp_make_nil();
+      return lisp_make_number(fun);
+    }
+    case T_LIST: {
+      return lisp_eval_list(cell);
+    }
+  }
 }
 
 /*
@@ -322,6 +302,15 @@ lisp_make_nil()
 {
   cell_t R = NULL;
   ALLOCATE(R);
+  return R;
+}
+
+cell_t
+lisp_make_true()
+{
+  cell_t R = NULL;
+  ALLOCATE(R);
+  SET_TYPE(R->car, T_TRUE);
   return R;
 }
 
@@ -419,83 +408,4 @@ lisp_free(const size_t n, ...)
    * Clean-up.
    */
   va_end(args);
-}
-
-static void lisp_print_cell(FILE * const fp, const cell_t cell);
-static void lisp_print_list(FILE * const fp, const cell_t cell);
-
-static void lisp_print_list(FILE * const fp, const cell_t cell)
-{
-  /*
-   * Process CAR.
-   */
-  switch (GET_TYPE(cell->car)) {
-    case T_NUMBER: {
-      fprintf(fp, "%lld", GET_NUMB(cell->car));
-      break;
-    }
-    case T_STRING: {
-      fprintf(fp, "\"%s\"", GET_PNTR(char *, cell->car));
-      break;
-    }
-    case T_SYMBOL: {
-      fprintf(fp, "%s", GET_PNTR(char *, cell->car));
-      break;
-    }
-    case T_SYMBOL_INLINE: {
-      fprintf(fp, "%s", GET_SYMB(cell->car));
-      break;
-    }
-    case T_LIST: {
-      fputc('(', fp);
-      lisp_print_cell(fp, GET_PNTR(cell_t, cell->car));
-      fputc(')', fp);
-      break;
-    }
-    case T_NIL : {
-      printf("NIL");
-      break;
-    }
-  }
-  /*
-   * Process CDR.
-   */
-  switch (GET_TYPE(cell->cdr)) {
-    case T_NUMBER: {
-      fprintf(fp, " . %lld", GET_NUMB(cell->cdr));
-      break;
-    }
-    case T_STRING: {
-      fprintf(fp, " . \"%s\"", GET_PNTR(char *, cell->cdr));
-      break;
-    }
-    case T_SYMBOL: {
-      fprintf(fp, " . %s", GET_PNTR(char *, cell->cdr));
-      break;
-    }
-    case T_SYMBOL_INLINE: {
-      fprintf(fp, " . %s", GET_SYMB(cell->cdr));
-      break;
-    }
-    case T_LIST: {
-      fprintf(fp, " ");
-      lisp_print_list(fp, GET_PNTR(cell_t, cell->cdr));
-      break;
-    }
-    case T_NIL : {
-      break;
-    }
-  }
-}
-
-static void lisp_print_cell(FILE * const fp, const cell_t cell)
-{
-  lisp_print_list(fp, cell);
-}
-
-void
-lisp_print(FILE * const fp, const cell_t cell)
-{
-  lisp_print_cell(fp, cell);
-  printf("\n");
 }
