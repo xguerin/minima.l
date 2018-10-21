@@ -1,5 +1,6 @@
 #include "primitives.h"
 #include <lisp/lexer.h>
+#include <lisp/slab.h>
 
 void
 syntax_error() { }
@@ -44,8 +45,7 @@ basic_tests()
    * Clean-up.
    */
   lisp_destroy(lexer);
-  lisp_stats_print(stdout);
-  ASSERT_TRUE(lisp_stats_balanced_allocs());
+  ASSERT_EQUAL(slab.n_alloc, slab.n_free);
   OK;
 }
 
@@ -116,8 +116,7 @@ car_cdr_tests()
    * Clean-up.
    */
   lisp_destroy(lexer);
-  lisp_stats_print(stdout);
-  ASSERT_TRUE(lisp_stats_balanced_allocs());
+  ASSERT_EQUAL(slab.n_alloc, slab.n_free);
   OK;
 }
 
@@ -182,8 +181,7 @@ conc_cons_tests()
    * Clean-up.
    */
   lisp_destroy(lexer);
-  lisp_stats_print(stdout);
-  ASSERT_TRUE(lisp_stats_balanced_allocs());
+  ASSERT_EQUAL(slab.n_alloc, slab.n_free);
   OK;
 }
 

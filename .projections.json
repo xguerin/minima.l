@@ -1,34 +1,14 @@
 {
-  "functions/*.c": {
-    "alternate": "functions/{}.h",
-    "type": "functions_source"
-  },
-  "functions/*.h": {
-    "alternate": "functions/{}.c",
-    "type": "functions_header"
-  },
   "lisp/*.c": {
     "alternate": "lisp/{}.h",
     "type": "lisp_source"
   },
+  "lisp/*.rl": {
+    "alternate": "lisp/{}.h",
+    "type": "lisp_parser"
+  },
   "lisp/*.h": {
     "alternate": "lisp/{}.c",
     "type": "lisp_header"
-  },
-  "symbols/*.c": {
-    "alternate": "symbols/{}.h",
-    "type": "symbols_source"
-  },
-  "symbols/*.h": {
-    "alternate": "symbols/{}.c",
-    "type": "symbols_header"
-  },
-  "syntax/*.c": {
-    "alternate": "syntax/{}.h",
-    "type": "syntax_source"
-  },
-  "syntax/*.h": {
-    "alternate": "syntax/{}.rl",
-    "type": "syntax_header"
   }
 }

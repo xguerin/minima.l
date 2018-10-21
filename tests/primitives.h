@@ -25,7 +25,7 @@
 #define ASSERT_TRUE(__a)                          \
 {                                                 \
   int __l = __LINE__;                             \
-  if (!__a) {                                     \
+  if (!(__a)) {                                   \
     printf("line %d: " #__a " is false\n", __l);  \
     return false;                                 \
   }                                               \

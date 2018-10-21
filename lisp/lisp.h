@@ -51,16 +51,6 @@ typedef struct _cell_t
 * cell_t;
 
 /*
- * Interpreter statistics.
- */
-
-void lisp_stats_print(FILE * fp);
-bool lisp_stats_balanced_allocs();
-
-size_t lisp_stats_get_alloc();
-size_t lisp_stats_get_free();
-
-/*
  * Consumer type.
  */
 
@@ -96,5 +86,17 @@ cell_t lisp_make_symbol(const char * const sym);
 cell_t lisp_make_list(const cell_t cell);
 cell_t lisp_make_slot(const uintptr_t slot);
 
-void lisp_free(const size_t n, ...);
 void lisp_print(FILE * const fp, const cell_t cell);
+
+/*
+ * Debug.
+ */
+
+#ifdef NDEBUG
+#define TRACE(__c)
+#else
+#define TRACE(__c) {                           \
+  printf("! %s:%d: ", __FUNCTION__, __LINE__); \
+  lisp_print(stdout, __c);                     \
+}
+#endif

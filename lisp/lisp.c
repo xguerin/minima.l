@@ -1,63 +1,11 @@
 #include "functions.h"
 #include "lisp.h"
+#include "slab.h"
 #include "symbols.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define TRACE(__c) {                                \
-  printf("%s:%d: ", __PRETTY_FUNCTION__, __LINE__); \
-  lisp_print(stdout, car);                          \
-}
-
-/*
- * Statistics.
- */
-
-typedef struct _stats_t
-{
-  size_t  n_alloc;
-  size_t  n_free;
-}
-stats_t;
-
-static stats_t stats = { 0 };
-
-void
-lisp_stats_print(FILE * fp)
-{
-  fprintf(fp, "[STATS] alloc:%ld/free:%ld\n", stats.n_alloc, stats.n_free);
-}
-
-bool
-lisp_stats_balanced_allocs()
-{
-  return stats.n_alloc == stats.n_free;
-}
-
-size_t
-lisp_stats_get_alloc()
-{
-  return stats.n_alloc;
-}
-
-size_t
-lisp_stats_get_free()
-{
-  return stats.n_free;
-}
-
-#define ALLOCATE(__p) {                                       \
-  posix_memalign((void **)&__p, 16, sizeof(struct _cell_t));  \
-  memset(__p, 0, sizeof(struct _cell_t));                     \
-  stats.n_alloc += 1;                                         \
-}
-
-#define FREE(__p) {   \
-  free(__p);          \
-  stats.n_free += 1;  \
-}
 
 /*
  * Basic functions.
@@ -87,8 +35,7 @@ slot_dup(const uintptr_t slot)
 cell_t
 lisp_dup(const cell_t cell)
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
+  cell_t R = lisp_allocate();
   R->car = slot_dup(cell->car);
   R->cdr = slot_dup(cell->cdr);
   return R;
@@ -185,13 +132,14 @@ lisp_conc(const cell_t a, const cell_t b)
     p = GET_PNTR(cell_t, p->cdr);
   }
   p->cdr = b->car;
-  FREE(b);
+  lisp_deallocate(b);
   return a;
 }
 
 static cell_t
 lisp_eval_args(const cell_t cell)
 {
+  TRACE(cell);
   /*
    * Return NIL if NIL.
    */
@@ -219,6 +167,9 @@ lisp_eval_args(const cell_t cell)
 static cell_t
 lisp_eval_list(const cell_t cell)
 {
+  TRACE(cell);
+  /*
+   */
   cell_t res = NULL;
   cell_t car = lisp_car(cell);
   cell_t cdr = lisp_cdr(cell);
@@ -262,6 +213,9 @@ lisp_eval_list(const cell_t cell)
 cell_t
 lisp_eval(const cell_t cell)
 {
+  TRACE(cell);
+  /*
+   */
   switch (GET_TYPE(cell->car)) {
     case T_NIL:
     case T_TRUE:
@@ -271,14 +225,15 @@ lisp_eval(const cell_t cell)
     }
     case T_SYMBOL: {
       char * sym = GET_PNTR(char *, cell->car);
+      cell_t res = lisp_symbol_lookup(sym);
       lisp_free(1, cell);
-      return lisp_symbol_lookup(sym);
-      break;
+      return res;
     }
     case T_SYMBOL_INLINE: {
       char * sym = GET_SYMB(cell->car);
+      cell_t res = lisp_symbol_lookup(sym);
       lisp_free(1, cell);
-      return lisp_symbol_lookup(sym);
+      return res;
     }
     case T_LIST: {
       return lisp_eval_list(cell);
@@ -293,16 +248,13 @@ lisp_eval(const cell_t cell)
 cell_t
 lisp_make_nil()
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
-  return R;
+  return lisp_allocate();
 }
 
 cell_t
 lisp_make_true()
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
+  cell_t R = lisp_allocate();
   SET_TYPE(R->car, T_TRUE);
   return R;
 }
@@ -310,8 +262,7 @@ lisp_make_true()
 cell_t
 lisp_make_number(const uint64_t num)
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
+  cell_t R = lisp_allocate();
   SET_TYPE(R->car, T_NUMBER);
   SET_NUMB(R->car, num);
   return R;
@@ -320,8 +271,7 @@ lisp_make_number(const uint64_t num)
 cell_t
 lisp_make_string(const char * const str)
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
+  cell_t R = lisp_allocate();
   SET_TYPE(R->car, T_STRING);
   SET_DATA(R->car, strdup(str));
   return R;
@@ -330,8 +280,7 @@ lisp_make_string(const char * const str)
 cell_t
 lisp_make_symbol(const char * const sym)
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
+  cell_t R = lisp_allocate();
   /*
    * Make the symbol inline if possible.
    */
@@ -349,9 +298,8 @@ lisp_make_symbol(const char * const sym)
 cell_t
 lisp_make_list(const cell_t cell)
 {
-  cell_t R = NULL;
+  cell_t R = lisp_allocate();
   cell_t N = lisp_dup(cell);
-  ALLOCATE(R);
   SET_TYPE(R->car, T_LIST);
   SET_DATA(R->car, N);
   return R;
@@ -360,45 +308,9 @@ lisp_make_list(const cell_t cell)
 cell_t
 lisp_make_slot(const uintptr_t slot)
 {
-  cell_t R = NULL;
-  ALLOCATE(R);
+  cell_t R = lisp_allocate();
   R->car = slot_dup(slot);
   return R;
 }
 
-static void
-lisp_free_entry(const uintptr_t entry)
-{
-  switch (GET_TYPE(entry)) {
-    case T_LIST: {
-      lisp_free(1, GET_PNTR(cell_t, entry));
-      break;
-    }
-    case T_STRING:
-    case T_SYMBOL: {
-      free(GET_PNTR(char *, entry));
-      break;
-    }
-    default: break;
-  }
-}
 
-void
-lisp_free(const size_t n, ...)
-{
-  va_list args;
-  va_start(args, n);
-  /*
-   * Deleting the items.
-   */
-  for (size_t i = 0; i < n; i += 1) {
-    cell_t cell = va_arg(args, cell_t);
-    lisp_free_entry(cell->car);
-    lisp_free_entry(cell->cdr);
-    FREE(cell);
-  }
-  /*
-   * Clean-up.
-   */
-  va_end(args);
-}

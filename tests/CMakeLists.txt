@@ -1,5 +1,5 @@
 include_directories(${CMAKE_SOURCE_DIR})
-set(TESTS syntax)
+set(TESTS slab syntax)
 
 foreach(TEST ${TESTS})
   add_executable(minimal_test_${TEST} ${TEST}.c)

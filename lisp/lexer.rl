@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "slab.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -115,6 +116,7 @@ main := |*
 lexer_t
 lisp_create(const lisp_consumer_t consumer)
 {
+  lisp_slab_allocate();
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
   lexer->consumer = consumer;
@@ -128,6 +130,7 @@ lisp_destroy(const lexer_t lexer)
 {
   ParseFree(lexer->parser, free);
   free(lexer);
+  lisp_slab_destroy();
 }
 
 void
