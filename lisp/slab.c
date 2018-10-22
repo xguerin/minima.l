@@ -94,7 +94,7 @@ lisp_deallocate(const cell_t __p) {
  */
 
 void
-lisp_free_entry(const uintptr_t entry)
+slot_free(const uintptr_t entry)
 {
   switch (GET_TYPE(entry)) {
     case T_LIST: {
@@ -113,8 +113,8 @@ lisp_free_entry(const uintptr_t entry)
 void
 lisp_replace(const cell_t cell, const cell_t car)
 {
-  lisp_free_entry(cell->car);
-  lisp_free_entry(car->cdr);
+  slot_free(cell->car);
+  slot_free(car->cdr);
   cell->car = car->car;
   lisp_deallocate(car);
 }
@@ -129,8 +129,8 @@ lisp_free(const size_t n, ...)
    */
   for (size_t i = 0; i < n; i += 1) {
     cell_t cell = va_arg(args, cell_t);
-    lisp_free_entry(cell->car);
-    lisp_free_entry(cell->cdr);
+    slot_free(cell->car);
+    slot_free(cell->cdr);
     lisp_deallocate(cell);
   }
   /*

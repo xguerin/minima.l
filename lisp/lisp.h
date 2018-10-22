@@ -58,9 +58,10 @@ typedef struct _cell_t
   cell_t __p = GET_PNTR(cell_t, __c->car);  \
   for (;;)
 
-#define NEXT(__p)                           \
+#define NEXT(__p) {                         \
   if (GET_TYPE(__p->cdr) != T_LIST) break;  \
-  __p = GET_PNTR(cell_t, __p->cdr)
+  __p = GET_PNTR(cell_t, __p->cdr);         \
+}
 
 /*
  * Consumer type.
@@ -92,6 +93,7 @@ cell_t lisp_cdr(const cell_t cell);
 bool   lisp_equl(const cell_t a, const cell_t b);
 cell_t lisp_cons(const cell_t a, const cell_t b);
 cell_t lisp_conc(const cell_t a, const cell_t b);
+cell_t lisp_setq(const cell_t a, const cell_t b);
 cell_t lisp_eval(const cell_t cell);
 
 /*

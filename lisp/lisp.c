@@ -130,6 +130,7 @@ lisp_cons(const cell_t a, const cell_t b)
   while (GET_TYPE(p->cdr) == T_LIST) {
     p = GET_PNTR(cell_t, p->cdr);
   }
+  slot_free(p->cdr);
   p->cdr = slot_dup(b->car);
   cell_t result = lisp_make_list(n);
   lisp_free(1, n);
@@ -143,13 +144,36 @@ lisp_conc(const cell_t a, const cell_t b)
     lisp_free(1, a);
     return b;
   }
-  cell_t p = GET_PNTR(cell_t, a->car);
-  while (GET_TYPE(p->cdr) == T_LIST) {
-    p = GET_PNTR(cell_t, p->cdr);
-  }
+  FOREACH(a, p) NEXT(p);
+  slot_free(p->cdr);
   p->cdr = b->car;
   lisp_deallocate(b);
   return a;
+}
+
+cell_t
+lisp_setq(const cell_t a, const cell_t b)
+{
+  cell_t con = lisp_cons(a, b);
+  /*
+   * Check if the symbol exists and replace it. We use a zero-copy algorithm
+   * here for obvious performance reasons.
+   */
+  FOREACH(globals, p) {
+    cell_t car = GET_PNTR(cell_t, p->car);
+    if (strcmp(lisp_get_sym(car), lisp_get_sym(a)) == 0) {
+      lisp_replace(p, con);
+      return b;
+    }
+    NEXT(p);
+  }
+  /*
+   * The symbol does not exist, so append it.
+   */
+  cell_t lst = lisp_make_list(con);
+  globals = lisp_conc(globals, lst);
+  lisp_free(1, con);
+  return b;
 }
 
 static cell_t
@@ -208,7 +232,7 @@ lisp_eval_list(const cell_t cell)
    */
   if (GET_TYPE(car->car) != T_NUMBER) {
       res = lisp_make_nil();
-      lisp_free(2, cell, car, cdr);
+      lisp_free(3, cell, car, cdr);
       return res;
   }
   uintptr_t fun = GET_NUMB(car->car);

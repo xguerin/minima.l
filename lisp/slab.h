@@ -45,4 +45,6 @@ cell_t lisp_allocate();
 void lisp_deallocate(const cell_t cell);
 
 void lisp_replace(const cell_t cell, const cell_t car);
+
+void slot_free(const uintptr_t slot);
 void lisp_free(const size_t n, ...);

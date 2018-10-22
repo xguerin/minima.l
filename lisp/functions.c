@@ -86,32 +86,13 @@ lisp_function_setq(const cell_t cell)
     return lisp_make_nil();
   }
   /*
-   * Get the value.
+   * Call SETQ.
    */
   cell_t cdr = lisp_cdr(cell);
   cell_t val = lisp_car(cdr);
-  cell_t con = lisp_cons(sym, val);
-  lisp_free(2, cell, cdr);
-  /*
-   * Check if the symbol exists and replace it. We use a zero-copy algorithm
-   * here for obvious performance reasons.
-   */
-  FOREACH(globals, p) {
-    cell_t car = GET_PNTR(cell_t, p->car);
-    if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
-      lisp_replace(p, con);
-      lisp_free(1, sym);
-      return val;
-    }
-    NEXT(p);
-  }
-  /*
-   * The symbol does not exist, so append it.
-   */
-  cell_t lst = lisp_make_list(con);
-  globals = lisp_conc(globals, lst);
-  lisp_free(2, sym, con);
-  return val;
+  cell_t res = lisp_setq(sym, val);
+  lisp_free(3, cell, sym, cdr);
+  return res;
 }
 
 /*
