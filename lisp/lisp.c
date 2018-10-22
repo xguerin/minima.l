@@ -177,6 +177,17 @@ lisp_setq(const cell_t a, const cell_t b)
 }
 
 static cell_t
+lisp_eval_lambda(const cell_t fun, const cell_t args)
+{
+  cell_t vars = lisp_car(fun);
+  cell_t body = lisp_cdr(fun);
+  lisp_print(stdout, vars);
+  lisp_print(stdout, body);
+  LISP_FREE(fun, vars, body, args);
+  return lisp_make_nil();
+}
+
+static cell_t
 lisp_eval_args(const cell_t cell)
 {
   TRACE(cell);
@@ -228,26 +239,36 @@ lisp_eval_list(const cell_t cell)
       return res;
   }
   /*
-   * Process the result. FIXME Add support for lambda evaluation.
+   * Process the result.
    */
-  if (GET_TYPE(car->car) != T_NUMBER) {
+  switch (GET_TYPE(car->car)) {
+    /*
+     * Call the function pointer. NOTE: Can cause SIGSEV.
+     */
+    case T_NUMBER: {
+      uintptr_t fun = GET_NUMB(car->car);
+      if (IS_EVAL(fun)) cdr = lisp_eval_args(cdr);
+      res = GET_PNTR(function_t, fun)(cdr);
+      LISP_FREE(car, cell);
+      return res;
+    }
+    /*
+     * Evaluate the lambda.
+     */
+    case T_LIST: {
+      res = lisp_eval_lambda(car, cdr);
+      LISP_FREE(cell);
+      return res;
+    }
+    /*
+     * For any other type, default to NIL.
+     */
+    default: {
       res = lisp_make_nil();
       LISP_FREE(cell, car, cdr);
       return res;
+    }
   }
-  uintptr_t fun = GET_NUMB(car->car);
-  /*
-   * Call the function. May SIGSEV.
-   */
-  if (IS_EVAL(fun)) {
-    cdr = lisp_eval_args(cdr);
-  }
-  res = GET_PNTR(function_t, fun)(cdr);
-  /*
-   * Clean-up;
-   */
-  LISP_FREE(car, cell);
-  return res;
 }
 
 cell_t

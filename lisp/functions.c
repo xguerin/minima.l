@@ -140,24 +140,54 @@ lisp_function_islst(const cell_t cell)
  */
 
 static cell_t
-lisp_function_inc(const cell_t cell)
+lisp_function_add(const cell_t cell)
 {
-  cell_t val = lisp_car(cell);
-  cell_t res = GET_TYPE(val->car) != T_NUMBER ?
-    lisp_make_nil() :
-    lisp_make_number(GET_NUMB(val->car) + 1);
-  LISP_FREE(val, cell);
+  cell_t vl0 = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_car(cdr);
+  cell_t res = IS_NUMB(vl0) && IS_NUMB(vl1) ?
+    lisp_make_number(GET_NUMB(vl0->car) + GET_NUMB(vl1->car)) :
+    lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
   return res;
 }
 
 static cell_t
-lisp_function_dec(const cell_t cell)
+lisp_function_sub(const cell_t cell)
 {
-  cell_t val = lisp_car(cell);
-  cell_t res = GET_TYPE(val->car) != T_NUMBER ?
-    lisp_make_nil() :
-    lisp_make_number(GET_NUMB(val->car) - 1);
-  LISP_FREE(val, cell);
+  cell_t vl0 = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_car(cdr);
+  cell_t res = IS_NUMB(vl0) && IS_NUMB(vl1) ?
+    lisp_make_number(GET_NUMB(vl0->car) - GET_NUMB(vl1->car)) :
+    lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
+static cell_t
+lisp_function_mul(const cell_t cell)
+{
+  cell_t vl0 = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_car(cdr);
+  cell_t res = IS_NUMB(vl0) && IS_NUMB(vl1) ?
+    lisp_make_number(GET_NUMB(vl0->car) * GET_NUMB(vl1->car)) :
+    lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
+static cell_t
+lisp_function_div(const cell_t cell)
+{
+  cell_t vl0 = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_car(cdr);
+  cell_t res = IS_NUMB(vl0) && IS_NUMB(vl1) ?
+    lisp_make_number(GET_NUMB(vl0->car) / GET_NUMB(vl1->car)) :
+    lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
   return res;
 }
 
@@ -180,8 +210,10 @@ static def_t functions[] = {
   { "conc" , lisp_function_conc  },
   { "cons" , lisp_function_cons  },
   { "setq" , lisp_function_setq  },
-  { "inc"  , lisp_function_inc   },
-  { "dec"  , lisp_function_dec   },
+  { "+"    , lisp_function_add   },
+  { "-"    , lisp_function_sub   },
+  { "*"    , lisp_function_mul   },
+  { "/"    , lisp_function_div   },
   { "num?" , lisp_function_isnum },
   { "str?" , lisp_function_isstr },
   { "sym?" , lisp_function_issym },
