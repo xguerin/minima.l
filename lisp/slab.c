@@ -93,7 +93,7 @@ lisp_deallocate(const cell_t __p) {
  * Allocation functions.
  */
 
-static void
+void
 lisp_free_entry(const uintptr_t entry)
 {
   switch (GET_TYPE(entry)) {
@@ -108,6 +108,15 @@ lisp_free_entry(const uintptr_t entry)
     }
     default: break;
   }
+}
+
+void
+lisp_replace(const cell_t cell, const cell_t car)
+{
+  lisp_free_entry(cell->car);
+  lisp_free_entry(car->cdr);
+  cell->car = car->car;
+  lisp_deallocate(car);
 }
 
 void

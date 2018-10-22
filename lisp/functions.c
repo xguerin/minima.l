@@ -1,6 +1,6 @@
 #include "functions.h"
 #include "slab.h"
-#include "symbols.h"
+#include <string.h>
 
 /*
  * QUOTE.
@@ -16,7 +16,7 @@ lisp_function_quote(const cell_t cell)
  * EVAL.
  */
 
-cell_t
+static cell_t
 lisp_function_eval(const cell_t cell)
 {
   cell_t car = lisp_car(cell);
@@ -28,7 +28,7 @@ lisp_function_eval(const cell_t cell)
  * CAR/CDR.
  */
 
-cell_t
+static cell_t
 lisp_function_car(const cell_t cell)
 {
   cell_t result = lisp_car(cell);
@@ -36,7 +36,7 @@ lisp_function_car(const cell_t cell)
   return result;
 }
 
-cell_t
+static cell_t
 lisp_function_cdr(const cell_t cell)
 {
   cell_t result = lisp_cdr(cell);
@@ -48,7 +48,7 @@ lisp_function_cdr(const cell_t cell)
  * CONS/CONC.
  */
 
-cell_t
+static cell_t
 lisp_function_conc(const cell_t cell)
 {
   cell_t fst = lisp_car(cell);
@@ -59,7 +59,7 @@ lisp_function_conc(const cell_t cell)
   return res;
 }
 
-cell_t
+static cell_t
 lisp_function_cons(const cell_t cell)
 {
   cell_t fst = lisp_car(cell);
@@ -71,8 +71,51 @@ lisp_function_cons(const cell_t cell)
 }
 
 /*
+ * SETQ.
+ */
+
+static cell_t
+lisp_function_setq(const cell_t cell)
+{
+  cell_t sym = lisp_car(cell);
+  /*
+   * Check if the first argument is a symbol.
+   */
+  if (GET_TYPE(sym->car) != T_SYMBOL && GET_TYPE(sym->car) != T_SYMBOL_INLINE) {
+    lisp_free(2, sym, cell);
+    return lisp_make_nil();
+  }
+  /*
+   * Get the value.
+   */
+  cell_t cdr = lisp_cdr(cell);
+  cell_t val = lisp_car(cdr);
+  cell_t con = lisp_cons(sym, val);
+  lisp_free(2, cell, cdr);
+  /*
+   * Check if the symbol exists and replace it. We use a zero-copy algorithm
+   * here for obvious performance reasons.
+   */
+  FOREACH(globals, p) {
+    cell_t car = GET_PNTR(cell_t, p->car);
+    if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
+      lisp_replace(p, con);
+      lisp_free(1, sym);
+      return val;
+    }
+    NEXT(p);
+  }
+  /*
+   * The symbol does not exist, so append it.
+   */
+  cell_t lst = lisp_make_list(con);
+  globals = lisp_conc(globals, lst);
+  lisp_free(2, sym, con);
+  return val;
+}
+
+/*
  * Tester functions.
- * (fun? 'any)
  */
 
 static cell_t
@@ -137,25 +180,50 @@ lisp_function_dec(const cell_t cell)
   return res;
 }
 
-#define MAKE_SYMBOL(__f) (lisp_make_number((uintptr_t)__f))
+/*
+ * Set-up function.
+ */
+
+typedef struct _def_t
+{
+  const char * name;
+  function_t   fun;
+}
+def_t;
+
+static def_t functions[] = {
+  { "quote", lisp_function_quote },
+  { "eval" , lisp_function_eval  },
+  { "car"  , lisp_function_car   },
+  { "cdr"  , lisp_function_cdr   },
+  { "conc" , lisp_function_conc  },
+  { "cons" , lisp_function_cons  },
+  { "setq" , lisp_function_setq  },
+  { "inc"  , lisp_function_inc   },
+  { "dec"  , lisp_function_dec   },
+  { "num?" , lisp_function_isnum },
+  { "str?" , lisp_function_isstr },
+  { "sym?" , lisp_function_issym },
+  { "lst?" , lisp_function_islst },
+};
+
+#define FUNCTION_COUNT (sizeof(functions) / sizeof(def_t))
 
 void
 lisp_function_register_all()
 {
-  lisp_symbol_register("quote", MAKE_SYMBOL(lisp_function_quote));
-  lisp_symbol_register("eval" , MAKE_SYMBOL(lisp_function_eval ));
-
-  lisp_symbol_register("car"  , MAKE_SYMBOL(lisp_function_car  ));
-  lisp_symbol_register("cdr"  , MAKE_SYMBOL(lisp_function_cdr  ));
-
-  lisp_symbol_register("conc" , MAKE_SYMBOL(lisp_function_conc ));
-  lisp_symbol_register("cons" , MAKE_SYMBOL(lisp_function_cons ));
-
-  lisp_symbol_register("inc"  , MAKE_SYMBOL(lisp_function_inc  ));
-  lisp_symbol_register("dec"  , MAKE_SYMBOL(lisp_function_dec  ));
-
-  lisp_symbol_register("num?" , MAKE_SYMBOL(lisp_function_isnum));
-  lisp_symbol_register("str?" , MAKE_SYMBOL(lisp_function_isstr));
-  lisp_symbol_register("sym?" , MAKE_SYMBOL(lisp_function_issym));
-  lisp_symbol_register("lst?" , MAKE_SYMBOL(lisp_function_islst));
+  /*
+   * Create the global symbol list.
+   */
+  globals = lisp_make_nil();
+  /*
+   * Create all the symbols.
+   */
+  for (size_t i = 0; i < FUNCTION_COUNT; i += 1) {
+    cell_t a = lisp_make_symbol(functions[i].name);
+    cell_t b = lisp_make_number((uintptr_t)functions[i].fun);
+    cell_t c = lisp_cons(a, b);
+    cell_t d = lisp_make_list(c);
+    globals = lisp_conc(globals, d);
+  }
 }

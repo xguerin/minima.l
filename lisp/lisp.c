@@ -1,11 +1,41 @@
 #include "functions.h"
 #include "lisp.h"
 #include "slab.h"
-#include "symbols.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/*
+ * Symbol management.
+ */
+
+cell_t globals;
+
+char *
+lisp_get_sym(const cell_t cell)
+{
+  if (GET_TYPE(cell->car) == T_SYMBOL) {
+    return GET_PNTR(char *, cell->car);
+  }
+  if (GET_TYPE(cell->car) == T_SYMBOL_INLINE) {
+    return GET_SYMB(cell->car);
+  }
+  return NULL;
+}
+
+cell_t
+lisp_lookup(const cell_t sym)
+{
+  FOREACH(globals, p) {
+    cell_t car = GET_PNTR(cell_t, p->car);
+    if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
+      return lisp_cdr(p);
+    }
+    NEXT(p);
+  }
+  return lisp_make_nil();
+}
 
 /*
  * Basic functions.
@@ -59,20 +89,6 @@ lisp_cdr(const cell_t cell)
   }
   cell_t L = GET_PNTR(cell_t, cell->car);
   return lisp_make_slot(L->cdr);
-}
-
-size_t
-lisp_len(const cell_t cell)
-{
-  size_t result = IS_NULL(cell) ? 0 : 1;
-  if (IS_LIST(cell)) {
-    cell_t p = GET_PNTR(cell_t, cell->car);
-    while (GET_TYPE(p->cdr) == T_LIST) {
-      result += 1;
-      p = GET_PNTR(cell_t, p->cdr);
-    }
-  }
-  return result;
 }
 
 /*
@@ -223,15 +239,9 @@ lisp_eval(const cell_t cell)
     case T_STRING: {
       return cell;
     }
-    case T_SYMBOL: {
-      char * sym = GET_PNTR(char *, cell->car);
-      cell_t res = lisp_symbol_lookup(sym);
-      lisp_free(1, cell);
-      return res;
-    }
+    case T_SYMBOL:
     case T_SYMBOL_INLINE: {
-      char * sym = GET_SYMB(cell->car);
-      cell_t res = lisp_symbol_lookup(sym);
+      cell_t res = lisp_lookup(cell);
       lisp_free(1, cell);
       return res;
     }
@@ -312,5 +322,3 @@ lisp_make_slot(const uintptr_t slot)
   R->car = slot_dup(slot);
   return R;
 }
-
-

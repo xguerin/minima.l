@@ -1,6 +1,6 @@
 # Tasks
 
 * [X] Slab allocator for cells
-* [ ] Indirect tries for symbols
+* [X] Association lists for symbols
 * [ ] Lambdas
 * [ ] Closures

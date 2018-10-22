@@ -117,6 +117,7 @@ lexer_t
 lisp_create(const lisp_consumer_t consumer)
 {
   lisp_slab_allocate();
+  globals = lisp_make_nil();
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
   lexer->consumer = consumer;
@@ -130,6 +131,7 @@ lisp_destroy(const lexer_t lexer)
 {
   ParseFree(lexer->parser, free);
   free(lexer);
+  lisp_free(1, globals);
   lisp_slab_destroy();
 }
 

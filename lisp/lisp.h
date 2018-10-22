@@ -51,10 +51,31 @@ typedef struct _cell_t
 * cell_t;
 
 /*
+ * Helper macros.
+ */
+
+#define FOREACH(__c, __p)                   \
+  cell_t __p = GET_PNTR(cell_t, __c->car);  \
+  for (;;)
+
+#define NEXT(__p)                           \
+  if (GET_TYPE(__p->cdr) != T_LIST) break;  \
+  __p = GET_PNTR(cell_t, __p->cdr)
+
+/*
  * Consumer type.
  */
 
 typedef void (* lisp_consumer_t)(const cell_t);
+
+/*
+ * Symbol management.
+ */
+
+extern cell_t globals;
+
+char * lisp_get_sym(const cell_t cell);
+cell_t lisp_lookup(const cell_t sym);
 
 /*
  * Lisp basic functions.
@@ -63,7 +84,6 @@ typedef void (* lisp_consumer_t)(const cell_t);
 cell_t lisp_dup(const cell_t cell);
 cell_t lisp_car(const cell_t cell);
 cell_t lisp_cdr(const cell_t cell);
-size_t lisp_len(const cell_t cell);
 
 /*
  * Internal list construction functions. CONS is pure, CONC is destructive.
@@ -92,11 +112,11 @@ void lisp_print(FILE * const fp, const cell_t cell);
  * Debug.
  */
 
-#ifdef NDEBUG
-#define TRACE(__c)
-#else
+#ifdef LISP_DEBUG
 #define TRACE(__c) {                           \
   printf("! %s:%d: ", __FUNCTION__, __LINE__); \
   lisp_print(stdout, __c);                     \
 }
+#else
+#define TRACE(__c)
 #endif
