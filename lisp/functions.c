@@ -20,7 +20,7 @@ static cell_t
 lisp_function_eval(const cell_t cell)
 {
   cell_t car = lisp_car(cell);
-  lisp_free(1, cell);
+  LISP_FREE(cell);
   return lisp_eval(car);
 }
 
@@ -32,7 +32,7 @@ static cell_t
 lisp_function_car(const cell_t cell)
 {
   cell_t result = lisp_car(cell);
-  lisp_free(1, cell);
+  LISP_FREE(cell);
   return result;
 }
 
@@ -40,7 +40,7 @@ static cell_t
 lisp_function_cdr(const cell_t cell)
 {
   cell_t result = lisp_cdr(cell);
-  lisp_free(1, cell);
+  LISP_FREE(cell);
   return result;
 }
 
@@ -55,7 +55,7 @@ lisp_function_conc(const cell_t cell)
   cell_t cdr = lisp_cdr(cell);
   cell_t snd = lisp_car(cdr);
   cell_t res = lisp_conc(fst, snd);
-  lisp_free(2, cell, cdr);
+  LISP_FREE(cell, cdr);
   return res;
 }
 
@@ -66,7 +66,7 @@ lisp_function_cons(const cell_t cell)
   cell_t cdr = lisp_cdr(cell);
   cell_t snd = lisp_car(cdr);
   cell_t res = lisp_cons(fst, snd);
-  lisp_free(4, cell, fst, cdr, snd);
+  LISP_FREE(cell, fst, cdr, snd);
   return res;
 }
 
@@ -82,7 +82,7 @@ lisp_function_setq(const cell_t cell)
    * Check if the first argument is a symbol.
    */
   if (GET_TYPE(sym->car) != T_SYMBOL && GET_TYPE(sym->car) != T_SYMBOL_INLINE) {
-    lisp_free(2, sym, cell);
+    LISP_FREE(sym, cell);
     return lisp_make_nil();
   }
   /*
@@ -91,7 +91,7 @@ lisp_function_setq(const cell_t cell)
   cell_t cdr = lisp_cdr(cell);
   cell_t val = lisp_car(cdr);
   cell_t res = lisp_setq(sym, val);
-  lisp_free(3, cell, sym, cdr);
+  LISP_FREE(cell, sym, cdr);
   return res;
 }
 
@@ -104,7 +104,7 @@ lisp_function_isnum(const cell_t cell)
 {
   cell_t car = lisp_car(cell);
   cell_t res = IS_NUMB(car) ? lisp_make_true() : lisp_make_nil();
-  lisp_free(2, cell, car);
+  LISP_FREE(cell, car);
   return res;
 }
 
@@ -113,7 +113,7 @@ lisp_function_isstr(const cell_t cell)
 {
   cell_t car = lisp_car(cell);
   cell_t res = IS_STRN(car) ? lisp_make_true() : lisp_make_nil();
-  lisp_free(2, cell, car);
+  LISP_FREE(cell, car);
   return res;
 }
 
@@ -122,7 +122,7 @@ lisp_function_issym(const cell_t cell)
 {
   cell_t car = lisp_car(cell);
   cell_t res = IS_SYMB(car) ? lisp_make_true() : lisp_make_nil();
-  lisp_free(2, cell, car);
+  LISP_FREE(cell, car);
   return res;
 }
 
@@ -131,7 +131,7 @@ lisp_function_islst(const cell_t cell)
 {
   cell_t car = lisp_car(cell);
   cell_t res = IS_LIST(car) ? lisp_make_true() : lisp_make_nil();
-  lisp_free(2, cell, car);
+  LISP_FREE(cell, car);
   return res;
 }
 
@@ -146,7 +146,7 @@ lisp_function_inc(const cell_t cell)
   cell_t res = GET_TYPE(val->car) != T_NUMBER ?
     lisp_make_nil() :
     lisp_make_number(GET_NUMB(val->car) + 1);
-  lisp_free(2, val, cell);
+  LISP_FREE(val, cell);
   return res;
 }
 
@@ -157,7 +157,7 @@ lisp_function_dec(const cell_t cell)
   cell_t res = GET_TYPE(val->car) != T_NUMBER ?
     lisp_make_nil() :
     lisp_make_number(GET_NUMB(val->car) - 1);
-  lisp_free(2, val, cell);
+  LISP_FREE(val, cell);
   return res;
 }
 

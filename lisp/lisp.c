@@ -133,7 +133,7 @@ lisp_cons(const cell_t a, const cell_t b)
   slot_free(p->cdr);
   p->cdr = slot_dup(b->car);
   cell_t result = lisp_make_list(n);
-  lisp_free(1, n);
+  LISP_FREE(n);
   return result;
 }
 
@@ -141,7 +141,7 @@ cell_t
 lisp_conc(const cell_t a, const cell_t b)
 {
   if (!IS_LIST(a)) {
-    lisp_free(1, a);
+    LISP_FREE(a);
     return b;
   }
   FOREACH(a, p) NEXT(p);
@@ -172,7 +172,7 @@ lisp_setq(const cell_t a, const cell_t b)
    */
   cell_t lst = lisp_make_list(con);
   globals = lisp_conc(globals, lst);
-  lisp_free(1, con);
+  LISP_FREE(con);
   return b;
 }
 
@@ -200,7 +200,7 @@ lisp_eval_args(const cell_t cell)
   /*
    * Clean-up and return the CONSed result.
    */
-  lisp_free(3, cell, rar, rdr);
+  LISP_FREE(cell, rar, rdr);
   return res;
 }
 
@@ -224,7 +224,7 @@ lisp_eval_list(const cell_t cell)
       break;
     default:
       res = lisp_dup(cell);
-      lisp_free(3, cell, car, cdr);
+      LISP_FREE(cell, car, cdr);
       return res;
   }
   /*
@@ -232,7 +232,7 @@ lisp_eval_list(const cell_t cell)
    */
   if (GET_TYPE(car->car) != T_NUMBER) {
       res = lisp_make_nil();
-      lisp_free(3, cell, car, cdr);
+      LISP_FREE(cell, car, cdr);
       return res;
   }
   uintptr_t fun = GET_NUMB(car->car);
@@ -246,7 +246,7 @@ lisp_eval_list(const cell_t cell)
   /*
    * Clean-up;
    */
-  lisp_free(2, car, cell);
+  LISP_FREE(car, cell);
   return res;
 }
 
@@ -266,7 +266,7 @@ lisp_eval(const cell_t cell)
     case T_SYMBOL:
     case T_SYMBOL_INLINE: {
       cell_t res = lisp_lookup(cell);
-      lisp_free(1, cell);
+      LISP_FREE(cell);
       return res;
     }
     case T_LIST: {

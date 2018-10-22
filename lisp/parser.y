@@ -37,13 +37,13 @@ list(A) ::= POPEN PCLOSE.
 list(A) ::= POPEN items(B) PCLOSE.
 {
   A = lisp_make_list(B);
-  lisp_free(1, B);
+  LISP_FREE(B);
 }
 
 list(A) ::= POPEN items(B) DOT quote(C) PCLOSE.
 {
   A = lisp_cons(B, C);
-  lisp_free(2, B, C);
+  LISP_FREE(B, C);
 }
 
 items(A) ::= quote(B).
@@ -71,7 +71,7 @@ quote(A) ::= QUOTE item(B).
 {
   cell_t Q = lisp_make_symbol("quote");
   A = lisp_cons(Q, B);
-  lisp_free(2, Q, B);
+  LISP_FREE(Q, B);
 }
 
 item(A) ::= NUMBER(B).

@@ -98,7 +98,7 @@ slot_free(const uintptr_t entry)
 {
   switch (GET_TYPE(entry)) {
     case T_LIST: {
-      lisp_free(1, GET_PNTR(cell_t, entry));
+      LISP_FREE(GET_PNTR(cell_t, entry));
       break;
     }
     case T_STRING:

@@ -19,7 +19,7 @@ lisp_repl_consumer(const cell_t cell)
   cell_t result = lisp_eval(cell);
   fprintf(stdout, "-> ");
   lisp_print(stdout, result);
-  lisp_free(1, result);
+  LISP_FREE(result);
   fprintf(stdout, "! MEM: %ld\n", slab.n_alloc - slab.n_free);
   show_prompt = true;
 }
