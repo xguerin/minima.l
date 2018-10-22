@@ -19,9 +19,11 @@ lisp_function_quote(const cell_t cell)
 static cell_t
 lisp_function_eval(const cell_t cell)
 {
+  cell_t nil = lisp_make_nil();
   cell_t car = lisp_car(cell);
-  LISP_FREE(cell);
-  return lisp_eval(car);
+  cell_t res = lisp_eval(nil, car);
+  LISP_FREE(cell, nil);
+  return res;
 }
 
 /*
@@ -90,9 +92,9 @@ lisp_function_setq(const cell_t cell)
    */
   cell_t cdr = lisp_cdr(cell);
   cell_t val = lisp_car(cdr);
-  cell_t res = lisp_setq(sym, val);
-  LISP_FREE(cell, sym, cdr);
-  return res;
+  GLOBALS = lisp_setq(GLOBALS, sym, val);
+  LISP_FREE(cdr, sym, cell);
+  return val;
 }
 
 /*
@@ -191,6 +193,17 @@ lisp_function_div(const cell_t cell)
   return res;
 }
 
+static cell_t
+lisp_function_equ(const cell_t cell)
+{
+  cell_t vl0 = lisp_car(cell);
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_car(cdr);
+  bool res = lisp_equl(vl0, vl1);
+  LISP_FREE(vl1, cdr, vl0, cell);
+  return res ? lisp_make_true() : lisp_make_nil();
+}
+
 /*
  * Set-up function.
  */
@@ -214,6 +227,7 @@ static def_t functions[] = {
   { "-"    , lisp_function_sub   },
   { "*"    , lisp_function_mul   },
   { "/"    , lisp_function_div   },
+  { "="    , lisp_function_equ   },
   { "num?" , lisp_function_isnum },
   { "str?" , lisp_function_isstr },
   { "sym?" , lisp_function_issym },
@@ -225,18 +239,10 @@ static def_t functions[] = {
 void
 lisp_function_register_all()
 {
-  /*
-   * Create the global symbol list.
-   */
-  globals = lisp_make_nil();
-  /*
-   * Create all the symbols.
-   */
   for (size_t i = 0; i < FUNCTION_COUNT; i += 1) {
     cell_t a = lisp_make_symbol(functions[i].name);
     cell_t b = lisp_make_number((uintptr_t)functions[i].fun);
-    cell_t c = lisp_cons(a, b);
-    cell_t d = lisp_make_list(c);
-    globals = lisp_conc(globals, d);
+    GLOBALS = lisp_setq(GLOBALS, a, b);
+    LISP_FREE(a, b);
   }
 }

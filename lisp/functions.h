@@ -2,7 +2,15 @@
 
 #include "lisp.h"
 
+/*
+ * Functiom type.
+ */
+
 typedef cell_t (* function_t)(const cell_t cell);
+
+/*
+ * Function helpers.
+ */
 
 cell_t lisp_function_quote(const cell_t cell);
 

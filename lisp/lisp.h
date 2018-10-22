@@ -56,7 +56,7 @@ typedef struct _cell_t
 
 #define FOREACH(__c, __p)                   \
   cell_t __p = GET_PNTR(cell_t, __c->car);  \
-  for (;;)
+  if (!IS_NULL(__c)) for (;;)
 
 #define NEXT(__p) {                         \
   if (GET_TYPE(__p->cdr) != T_LIST) break;  \
@@ -73,10 +73,7 @@ typedef void (* lisp_consumer_t)(const cell_t);
  * Symbol management.
  */
 
-extern cell_t globals;
-
-char * lisp_get_sym(const cell_t cell);
-cell_t lisp_lookup(const cell_t sym);
+extern cell_t GLOBALS;
 
 /*
  * Lisp basic functions.
@@ -93,8 +90,13 @@ cell_t lisp_cdr(const cell_t cell);
 bool   lisp_equl(const cell_t a, const cell_t b);
 cell_t lisp_cons(const cell_t a, const cell_t b);
 cell_t lisp_conc(const cell_t a, const cell_t b);
-cell_t lisp_setq(const cell_t a, const cell_t b);
-cell_t lisp_eval(const cell_t cell);
+
+/*
+ * Evaluation and context functions.
+ */
+
+cell_t lisp_setq(const cell_t context, const cell_t sym, const cell_t val);
+cell_t lisp_eval(const cell_t closure, const cell_t cell);
 
 /*
  * Helper functions.

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 static bool show_prompt = true;
+static cell_t nil;
 
 void
 syntax_error()
@@ -16,7 +17,7 @@ syntax_error()
 void
 lisp_repl_consumer(const cell_t cell)
 {
-  cell_t result = lisp_eval(cell);
+  cell_t result = lisp_eval(nil, cell);
   fprintf(stdout, "-> ");
   lisp_print(stdout, result);
   LISP_FREE(result);
@@ -34,6 +35,7 @@ main(const int argc, char ** const argv)
   /*
    * Run the parser loop.
    */
+  nil = lisp_make_nil();
   lisp_function_register_all();
 loop:
   if (show_prompt && lexer->depth == 0) {
@@ -50,6 +52,7 @@ loop:
    * Clean-up.
    */
   printf("\n");
+  LISP_FREE(nil);
   free(line);
   lisp_destroy(lexer);
   return 0;

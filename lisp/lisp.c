@@ -10,9 +10,9 @@
  * Symbol management.
  */
 
-cell_t globals;
+cell_t GLOBALS = NULL;
 
-char *
+static char *
 lisp_get_sym(const cell_t cell)
 {
   if (GET_TYPE(cell->car) == T_SYMBOL) {
@@ -24,15 +24,22 @@ lisp_get_sym(const cell_t cell)
   return NULL;
 }
 
-cell_t
-lisp_lookup(const cell_t sym)
+static cell_t
+lisp_lookup(const cell_t closure, const cell_t sym)
 {
-  FOREACH(globals, p) {
-    cell_t car = GET_PNTR(cell_t, p->car);
+  FOREACH(closure, a) {
+    cell_t car = GET_PNTR(cell_t, a->car);
     if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
-      return lisp_cdr(p);
+      return lisp_cdr(a);
     }
-    NEXT(p);
+    NEXT(a);
+  }
+  FOREACH(GLOBALS, b) {
+    cell_t car = GET_PNTR(cell_t, b->car);
+    if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
+      return lisp_cdr(b);
+    }
+    NEXT(b);
   }
   return lisp_make_nil();
 }
@@ -151,19 +158,23 @@ lisp_conc(const cell_t a, const cell_t b)
   return a;
 }
 
+/*
+ * SETQ takes a context as argument. This is necessary to reuse that function to
+ * alter both GLOBALS and closures. This function returns the updated context.
+ */
 cell_t
-lisp_setq(const cell_t a, const cell_t b)
+lisp_setq(const cell_t context, const cell_t sym, const cell_t val)
 {
-  cell_t con = lisp_cons(a, b);
+  cell_t con = lisp_cons(sym, val);
   /*
    * Check if the symbol exists and replace it. We use a zero-copy algorithm
    * here for obvious performance reasons.
    */
-  FOREACH(globals, p) {
+  FOREACH(context, p) {
     cell_t car = GET_PNTR(cell_t, p->car);
-    if (strcmp(lisp_get_sym(car), lisp_get_sym(a)) == 0) {
+    if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
       lisp_replace(p, con);
-      return b;
+      return context;
     }
     NEXT(p);
   }
@@ -171,9 +182,8 @@ lisp_setq(const cell_t a, const cell_t b)
    * The symbol does not exist, so append it.
    */
   cell_t lst = lisp_make_list(con);
-  globals = lisp_conc(globals, lst);
   LISP_FREE(con);
-  return b;
+  return lisp_conc(context, lst);
 }
 
 static cell_t
@@ -188,7 +198,7 @@ lisp_eval_lambda(const cell_t fun, const cell_t args)
 }
 
 static cell_t
-lisp_eval_args(const cell_t cell)
+lisp_eval_args(const cell_t closure, const cell_t cell)
 {
   TRACE(cell);
   /*
@@ -205,8 +215,8 @@ lisp_eval_args(const cell_t cell)
   /*
    * Eval CAR and CDR, and CONS the result.
    */
-  cell_t rar = lisp_eval(car);
-  cell_t rdr = lisp_eval_args(cdr);
+  cell_t rar = lisp_eval(closure, car);
+  cell_t rdr = lisp_eval_args(closure, cdr);
   cell_t res = lisp_cons(rar, rdr);
   /*
    * Clean-up and return the CONSed result.
@@ -216,7 +226,7 @@ lisp_eval_args(const cell_t cell)
 }
 
 static cell_t
-lisp_eval_list(const cell_t cell)
+lisp_eval_list(const cell_t closure, const cell_t cell)
 {
   TRACE(cell);
   /*
@@ -231,7 +241,7 @@ lisp_eval_list(const cell_t cell)
     case T_SYMBOL:
     case T_SYMBOL_INLINE:
     case T_LIST:
-      car = lisp_eval(car);
+      car = lisp_eval(closure, car);
       break;
     default:
       res = lisp_dup(cell);
@@ -247,7 +257,7 @@ lisp_eval_list(const cell_t cell)
      */
     case T_NUMBER: {
       uintptr_t fun = GET_NUMB(car->car);
-      if (IS_EVAL(fun)) cdr = lisp_eval_args(cdr);
+      if (IS_EVAL(fun)) cdr = lisp_eval_args(closure, cdr);
       res = GET_PNTR(function_t, fun)(cdr);
       LISP_FREE(car, cell);
       return res;
@@ -272,7 +282,7 @@ lisp_eval_list(const cell_t cell)
 }
 
 cell_t
-lisp_eval(const cell_t cell)
+lisp_eval(const cell_t closure, const cell_t cell)
 {
   TRACE(cell);
   /*
@@ -286,12 +296,12 @@ lisp_eval(const cell_t cell)
     }
     case T_SYMBOL:
     case T_SYMBOL_INLINE: {
-      cell_t res = lisp_lookup(cell);
+      cell_t res = lisp_lookup(closure, cell);
       LISP_FREE(cell);
       return res;
     }
     case T_LIST: {
-      return lisp_eval_list(cell);
+      return lisp_eval_list(closure, cell);
     }
   }
 }
