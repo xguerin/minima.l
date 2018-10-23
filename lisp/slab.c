@@ -93,21 +93,40 @@ lisp_deallocate(const cell_t __p) {
  * Allocation functions.
  */
 
+static void
+slot_free_noop(const uintptr_t entry)
+{
+
+}
+
+static void
+slot_free_string(const uintptr_t entry)
+{
+  free(GET_PNTR(char *, entry));
+}
+
+static void
+slot_free_list(const uintptr_t entry)
+{
+  LISP_FREE(GET_PNTR(cell_t, entry));
+}
+
+static void (* slot_free_table[8])(const uintptr_t) =
+{
+  [T_NIL          ] = slot_free_noop,
+  [T_LIST         ] = slot_free_list,
+  [T_NUMBER       ] = slot_free_noop,
+  [T_STRING       ] = slot_free_string,
+  [T_SYMBOL       ] = slot_free_string,
+  [T_SYMBOL_INLINE] = slot_free_noop,
+  [T_TRUE         ] = slot_free_noop,
+  [T_WILDCARD     ] = slot_free_noop,
+};
+
 void
 slot_free(const uintptr_t entry)
 {
-  switch (GET_TYPE(entry)) {
-    case T_LIST: {
-      LISP_FREE(GET_PNTR(cell_t, entry));
-      break;
-    }
-    case T_STRING:
-    case T_SYMBOL: {
-      free(GET_PNTR(char *, entry));
-      break;
-    }
-    default: break;
-  }
+  slot_free_table[GET_TYPE(entry)](entry);
 }
 
 void
@@ -129,9 +148,11 @@ lisp_free(const size_t n, ...)
    */
   for (size_t i = 0; i < n; i += 1) {
     cell_t cell = va_arg(args, cell_t);
-    slot_free(cell->car);
-    slot_free(cell->cdr);
-    lisp_deallocate(cell);
+    if (cell != NIL) {
+      slot_free(cell->car);
+      slot_free(cell->cdr);
+      lisp_deallocate(cell);
+    }
   }
   /*
    * Clean-up.

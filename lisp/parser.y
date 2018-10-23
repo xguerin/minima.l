@@ -31,7 +31,7 @@ root ::= quote(A).
 
 list(A) ::= POPEN PCLOSE.
 {
-  A = lisp_make_nil();
+  A = NIL;
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
@@ -76,7 +76,7 @@ quote(A) ::= QUOTE item(B).
 
 item(A) ::= NUMBER(B).
 {
-  A = lisp_make_number((uint64_t)B);
+  A = lisp_make_number((int64_t)B);
 }
 
 item(A) ::= STRING(B).
@@ -87,10 +87,21 @@ item(A) ::= STRING(B).
 
 item(A) ::= SYMBOL(B).
 {
-  A = strcmp(B, "T") == 0 ?
-    lisp_make_true() :
-    lisp_make_symbol((char *)B);
+  if (strcmp(B, "T") == 0) {
+    A = lisp_make_true();
+  }
+  else if (strcmp(B, "_") == 0) {
+    A = lisp_make_wildcard();
+  }
+  else {
+    A = lisp_make_symbol((char *)B);
+  }
   free(B);
+}
+
+item(A) ::= WILDCARD.
+{
+  A = lisp_make_wildcard();
 }
 
 item(A) ::= list(B).

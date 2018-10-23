@@ -25,7 +25,7 @@ get_string(const char * const s, const char * const e)
   return result;
 }
 
-static uint64_t
+static int64_t
 get_number(const char * const s, const char * const e)
 {
   size_t len = e - s + 1;
@@ -65,7 +65,7 @@ action tok_quote
 
 action tok_number
 {
-  uint64_t value = get_number(ts, te);
+  int64_t value = get_number(ts, te);
   Parse(lexer->parser, NUMBER, (void *)value, NULL);
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer->consumer);
@@ -92,7 +92,7 @@ popen  = '(';
 pclose = ')';
 dot    = '.';
 quote  = '\'';
-number = digit+;
+number = '-'? digit+;
 string = '"' [^"]* '"';
 marks  = [~!@#$%^&*_+\-={}\[\]:;|\\<>?,./];
 symbol = (alpha | marks) (alnum | marks)*;
@@ -118,7 +118,8 @@ lexer_t
 lisp_create(const lisp_consumer_t consumer)
 {
   lisp_slab_allocate();
-  GLOBALS = lisp_make_nil();
+  NIL = lisp_allocate();
+  GLOBALS = NIL;
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
   lexer->consumer = consumer;
@@ -133,6 +134,7 @@ lisp_destroy(const lexer_t lexer)
   ParseFree(lexer->parser, free);
   free(lexer);
   LISP_FREE(GLOBALS);
+  lisp_deallocate(NIL);
   lisp_slab_destroy();
 }
 

@@ -36,6 +36,13 @@ set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 message(STATUS "Build version: " ${VERSION_SHORT})
 
 #
+# Options
+#
+
+option(MNML_ENABLE_DEBUG  "Enable YAML configuration plugin"  ON)
+option(MNML_ENABLE_TESTS  "Build the Google tests suite"      ON)
+
+#
 # Global definitions
 #
 
@@ -47,6 +54,14 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_definitions(-DMNML_VERSION="${VERSION_SHORT}")
+
+#
+# Process options
+#
+
+if(MNML_ENABLE_DEBUG)
+  add_definitions(-DLISP_ENABLE_DEBUG)
+endif()
 
 #
 # Flags preferences
@@ -72,5 +87,7 @@ find_package(Ragel REQUIRED)
 add_subdirectory(lisp)
 add_subdirectory(tools)
 
-enable_testing()
-add_subdirectory(tests)
+if(MNML_ENABLE_DEBUG)
+  enable_testing()
+  add_subdirectory(tests)
+endif()

@@ -11,17 +11,42 @@
  */
 
 cell_t GLOBALS = NULL;
+cell_t NIL = NULL;
+
+static char *
+lisp_get_sym_noop(const cell_t cell)
+{
+  return NULL;
+}
+
+static char *
+lisp_get_sym_pntr(const cell_t cell)
+{
+  return GET_PNTR(char *, cell->car);
+}
+
+static char *
+lisp_get_sym_inline(const cell_t cell)
+{
+  return GET_SYMB(cell->car);
+}
+
+static char * (* lisp_get_sym_table[8])(const cell_t cell) =
+{
+  [T_NIL          ] = lisp_get_sym_noop,
+  [T_LIST         ] = lisp_get_sym_noop,
+  [T_NUMBER       ] = lisp_get_sym_noop,
+  [T_STRING       ] = lisp_get_sym_noop,
+  [T_SYMBOL       ] = lisp_get_sym_pntr,
+  [T_SYMBOL_INLINE] = lisp_get_sym_inline,
+  [T_TRUE         ] = lisp_get_sym_noop,
+  [T_WILDCARD     ] = lisp_get_sym_noop,
+};
 
 static char *
 lisp_get_sym(const cell_t cell)
 {
-  if (GET_TYPE(cell->car) == T_SYMBOL) {
-    return GET_PNTR(char *, cell->car);
-  }
-  if (GET_TYPE(cell->car) == T_SYMBOL_INLINE) {
-    return GET_SYMB(cell->car);
-  }
-  return NULL;
+  return lisp_get_sym_table[GET_TYPE(cell->car)](cell);
 }
 
 static cell_t
@@ -41,7 +66,7 @@ lisp_lookup(const cell_t closure, const cell_t sym)
     }
     NEXT(b);
   }
-  return lisp_make_nil();
+  return NIL;
 }
 
 /*
@@ -49,28 +74,53 @@ lisp_lookup(const cell_t closure, const cell_t sym)
  */
 
 static uintptr_t
-slot_dup(const uintptr_t slot)
+slot_dup_noop(const uintptr_t slot)
+{
+  return slot;
+}
+
+static uintptr_t
+slot_dup_string(const uintptr_t slot)
 {
   uintptr_t result = slot;
-  switch (GET_TYPE(slot)) {
-    case T_NIL:
-    case T_TRUE:
-    case T_NUMBER:
-    case T_SYMBOL_INLINE:
-      break;
-    case T_STRING:
-    case T_SYMBOL:
-      SET_DATA(result, strdup(GET_PNTR(char *, slot)));
-      break;
-    case T_LIST:
-      SET_DATA(result, lisp_dup(GET_PNTR(cell_t, slot)));
-      break;
-  }
+  SET_DATA(result, strdup(GET_PNTR(char *, slot)));
   return result;
 }
 
-cell_t
-lisp_dup(const cell_t cell)
+static uintptr_t
+slot_dup_list(const uintptr_t slot)
+{
+  uintptr_t result = slot;
+  SET_DATA(result, lisp_dup(GET_PNTR(cell_t, slot)));
+  return result;
+}
+
+static uintptr_t (* slot_dup_table[8])(const uintptr_t) =
+{
+  [T_NIL          ] = slot_dup_noop,
+  [T_LIST         ] = slot_dup_list,
+  [T_NUMBER       ] = slot_dup_noop,
+  [T_STRING       ] = slot_dup_string,
+  [T_SYMBOL       ] = slot_dup_string,
+  [T_SYMBOL_INLINE] = slot_dup_noop,
+  [T_TRUE         ] = slot_dup_noop,
+  [T_WILDCARD     ] = slot_dup_noop,
+};
+
+static uintptr_t
+slot_dup(const uintptr_t slot)
+{
+  return slot_dup_table[GET_TYPE(slot)](slot);
+}
+
+static cell_t
+lisp_dup_noop(const cell_t cell)
+{
+  return cell;
+}
+
+static cell_t
+lisp_dup_copy(const cell_t cell)
 {
   cell_t R = lisp_allocate();
   R->car = slot_dup(cell->car);
@@ -78,12 +128,27 @@ lisp_dup(const cell_t cell)
   return R;
 }
 
+static cell_t (* lisp_dup_table[8])(const cell_t cell) =
+{
+  [T_NIL          ] = lisp_dup_noop,
+  [T_LIST         ] = lisp_dup_copy,
+  [T_NUMBER       ] = lisp_dup_copy,
+  [T_STRING       ] = lisp_dup_copy,
+  [T_SYMBOL       ] = lisp_dup_copy,
+  [T_SYMBOL_INLINE] = lisp_dup_copy,
+  [T_TRUE         ] = lisp_dup_copy,
+  [T_WILDCARD     ] = lisp_dup_copy,
+};
+
+cell_t
+lisp_dup(const cell_t cell)
+{
+  return lisp_dup_table[GET_TYPE(cell->car)](cell);
+}
+
 cell_t
 lisp_car(const cell_t cell)
 {
-  if (!IS_LIST(cell)) {
-    return lisp_make_nil();
-  }
   cell_t L = GET_PNTR(cell_t, cell->car);
   return lisp_make_slot(L->car);
 }
@@ -91,9 +156,6 @@ lisp_car(const cell_t cell)
 cell_t
 lisp_cdr(const cell_t cell)
 {
-  if (!IS_LIST(cell)) {
-    return lisp_make_nil();
-  }
   cell_t L = GET_PNTR(cell_t, cell->car);
   return lisp_make_slot(L->cdr);
 }
@@ -103,25 +165,51 @@ lisp_cdr(const cell_t cell)
  */
 
 static bool
+slot_equl_noop(const uintptr_t a, const uintptr_t b)
+{
+  return true;
+}
+
+static bool
+slot_equl_number(const uintptr_t a, const uintptr_t b)
+{
+  return GET_NUMB(a) == GET_NUMB(b);
+}
+
+static bool
+slot_equl_string(const uintptr_t a, const uintptr_t b)
+{
+  return strcmp(GET_PNTR(char *, a), GET_PNTR(char *, b)) == 0;
+}
+
+static bool
+slot_equl_symbol(const uintptr_t a, const uintptr_t b)
+{
+  return strcmp(GET_SYMB(a), GET_SYMB(b)) == 0;
+}
+
+static bool
+slot_equl_list(const uintptr_t a, const uintptr_t b)
+{
+  return lisp_equl(GET_PNTR(cell_t, a), GET_PNTR(cell_t, b));
+}
+
+static bool (* slot_equl_table[8])(const uintptr_t a, const uintptr_t b) =
+{
+  [T_NIL          ] = slot_equl_noop,
+  [T_LIST         ] = slot_equl_list,
+  [T_NUMBER       ] = slot_equl_number,
+  [T_STRING       ] = slot_equl_string,
+  [T_SYMBOL       ] = slot_equl_string,
+  [T_SYMBOL_INLINE] = slot_equl_symbol,
+  [T_TRUE         ] = slot_equl_noop,
+  [T_WILDCARD     ] = slot_equl_noop,
+};
+
+static bool
 slot_equl(const uintptr_t a, const uintptr_t b)
 {
-  if (GET_TYPE(a) != GET_TYPE(b)) {
-    return false;
-  }
-  switch (GET_TYPE(a)) {
-    case T_NIL:
-    case T_TRUE:
-      return true;
-    case T_NUMBER:
-      return GET_NUMB(a) == GET_NUMB(b);
-    case T_STRING:
-    case T_SYMBOL:
-      return strcmp(GET_PNTR(char *, a), GET_PNTR(char *, b)) == 0;
-    case T_SYMBOL_INLINE:
-      return strcmp(GET_SYMB(a), GET_SYMB(b)) == 0;
-    case T_LIST:
-      return lisp_equl(GET_PNTR(cell_t, a), GET_PNTR(cell_t, b));
-  }
+  return GET_TYPE(a) == GET_TYPE(b) && slot_equl_table[GET_TYPE(a)](a, b);
 }
 
 bool
@@ -144,13 +232,16 @@ lisp_cons(const cell_t a, const cell_t b)
   return result;
 }
 
-cell_t
-lisp_conc(const cell_t a, const cell_t b)
+static cell_t
+lisp_conc_free(const cell_t a, const cell_t b)
 {
-  if (!IS_LIST(a)) {
-    LISP_FREE(a);
-    return b;
-  }
+  LISP_FREE(a);
+  return b;
+}
+
+static cell_t
+lisp_conc_list(const cell_t a, const cell_t b)
+{
   FOREACH(a, p) NEXT(p);
   slot_free(p->cdr);
   p->cdr = b->car;
@@ -158,23 +249,36 @@ lisp_conc(const cell_t a, const cell_t b)
   return a;
 }
 
-/*
- * SETQ takes a context as argument. This is necessary to reuse that function to
- * alter both GLOBALS and closures. This function returns the updated context.
- */
+static cell_t (* lisp_conc_table[8])(const cell_t a, const cell_t b) =
+{
+  [T_NIL          ] = lisp_conc_free,
+  [T_LIST         ] = lisp_conc_list,
+  [T_NUMBER       ] = lisp_conc_free,
+  [T_STRING       ] = lisp_conc_free,
+  [T_SYMBOL       ] = lisp_conc_free,
+  [T_SYMBOL_INLINE] = lisp_conc_free,
+  [T_TRUE         ] = lisp_conc_free,
+  [T_WILDCARD     ] = lisp_conc_free,
+};
+
 cell_t
-lisp_setq(const cell_t context, const cell_t sym, const cell_t val)
+lisp_conc(const cell_t a, const cell_t b)
+{
+  return lisp_conc_table[GET_TYPE(a->car)](a, b);
+}
+
+cell_t
+lisp_setq(const cell_t closure, const cell_t sym, const cell_t val)
 {
   cell_t con = lisp_cons(sym, val);
   /*
-   * Check if the symbol exists and replace it. We use a zero-copy algorithm
-   * here for obvious performance reasons.
+   * Check if the symbol exists and replace it using a zero-copy scan.
    */
-  FOREACH(context, p) {
+  FOREACH(closure, p) {
     cell_t car = GET_PNTR(cell_t, p->car);
     if (strcmp(lisp_get_sym(car), lisp_get_sym(sym)) == 0) {
       lisp_replace(p, con);
-      return context;
+      return closure;
     }
     NEXT(p);
   }
@@ -183,138 +287,197 @@ lisp_setq(const cell_t context, const cell_t sym, const cell_t val)
    */
   cell_t lst = lisp_make_list(con);
   LISP_FREE(con);
-  return lisp_conc(context, lst);
+  return lisp_conc(closure, lst);
+}
+
+/*
+ * Argument bindings.
+ */
+
+static cell_t
+lisp_bind(const cell_t closure, const cell_t args, const cell_t vals);
+
+static cell_t
+lisp_bind_noop(const cell_t closure, const cell_t args, const cell_t vals)
+{
+  return closure;
 }
 
 static cell_t
-lisp_eval_lambda(const cell_t fun, const cell_t args)
+lisp_bind_setq(const cell_t closure, const cell_t args, const cell_t vals)
 {
-  cell_t vars = lisp_car(fun);
-  cell_t body = lisp_cdr(fun);
-  lisp_print(stdout, vars);
-  lisp_print(stdout, body);
-  LISP_FREE(fun, vars, body, args);
-  return lisp_make_nil();
+  return lisp_setq(closure, args, vals);
 }
 
 static cell_t
-lisp_eval_args(const cell_t closure, const cell_t cell)
+lisp_bind_list(const cell_t closure, const cell_t args, const cell_t vals)
 {
-  TRACE(cell);
-  /*
-   * Return NIL if NIL.
-   */
-  if (GET_TYPE(cell->car) != T_LIST) {
-    return cell;
-  }
-  /*
-   * Get CAR and CDR.
-   */
+  TRACE_SEXP(closure);
+  cell_t sym = lisp_car(args);
+  cell_t val = lisp_eval(closure, lisp_car(vals));
+  cell_t oth = lisp_cdr(args);
+  cell_t rem = lisp_cdr(vals);
+  cell_t cl0 = lisp_bind(closure, sym, val);
+  TRACE_SEXP(cl0);
+  cell_t cl1 = lisp_bind(cl0, oth, rem);
+  TRACE_SEXP(cl1);
+  LISP_FREE(rem, oth, val, sym);
+  return cl1;
+}
+
+static cell_t
+lisp_bind_free(const cell_t closure, const cell_t args, const cell_t vals)
+{
+  LISP_FREE(closure);
+  return NIL;
+}
+
+static cell_t (* lisp_bind_table[8])(const cell_t closure, const cell_t args,
+                                     const cell_t vals) =
+{
+  [T_NIL          ] = lisp_bind_noop,
+  [T_LIST         ] = lisp_bind_list,
+  [T_NUMBER       ] = lisp_bind_free,
+  [T_STRING       ] = lisp_bind_free,
+  [T_SYMBOL       ] = lisp_bind_setq,
+  [T_SYMBOL_INLINE] = lisp_bind_setq,
+  [T_TRUE         ] = lisp_bind_free,
+  [T_WILDCARD     ] = lisp_bind_noop,
+};
+
+static cell_t
+lisp_bind(const cell_t closure, const cell_t args, const cell_t vals)
+{
+  return lisp_bind_table[GET_TYPE(args->car)](closure, args, vals);
+}
+
+/*
+ * List evaluation.
+ */
+
+static cell_t
+lisp_eval_list_noop(const cell_t closure, const cell_t cell)
+{
+  TRACE_SEXP(cell);
+  return cell;
+}
+
+static cell_t
+lisp_eval_list_number(const cell_t closure, const cell_t cell)
+{
+  TRACE_SEXP(cell);
   cell_t car = lisp_car(cell);
+  uintptr_t fun = GET_NUMB(car->car);
   cell_t cdr = lisp_cdr(cell);
+  cell_t res = GET_PNTR(function_t, fun)(closure, cdr);
+  LISP_FREE(car, cell);
+  return res;
+}
+
+static cell_t
+lisp_eval_list_lambda(const cell_t closure, const cell_t cell)
+{
+  TRACE_SEXP(cell);
   /*
-   * Eval CAR and CDR, and CONS the result.
+   * Grab the lamda and values.
    */
-  cell_t rar = lisp_eval(closure, car);
-  cell_t rdr = lisp_eval_args(closure, cdr);
-  cell_t res = lisp_cons(rar, rdr);
+  cell_t lbda = lisp_car(cell);
+  cell_t vals = lisp_cdr(cell);
+  LISP_FREE(cell);
   /*
-   * Clean-up and return the CONSed result.
+   * Grab the arguments, body of the lambda. TODO add the curried closure.
    */
-  LISP_FREE(cell, rar, rdr);
+  cell_t args = lisp_car(lbda);
+  cell_t cdr0 = lisp_cdr(lbda);
+  cell_t body = lisp_car(cdr0);
+  LISP_FREE(cdr0, lbda);
+  /*
+   * Bind the arguments and the values. TODO bind the curried closure:
+   * 1. Bind arguments with values
+   * 2. Check if there are any reminders
+   * 3. Return a lambda with updated local closure if some are NIL
+   */
+  cell_t clos = lisp_bind(lisp_dup(closure), args, vals);
+  TRACE_SEXP(clos);
+  cell_t rslt = lisp_eval(clos, body);
+  LISP_FREE(clos, args, vals);
+  return rslt;
+}
+
+static cell_t (* lisp_eval_list_table[8])(const cell_t closure, const cell_t cell) =
+{
+  [T_NIL          ] = lisp_eval_list_number,
+  [T_LIST         ] = lisp_eval_list_lambda,
+  [T_NUMBER       ] = lisp_eval_list_number,
+  [T_STRING       ] = lisp_eval_list_noop,
+  [T_SYMBOL       ] = lisp_eval,
+  [T_SYMBOL_INLINE] = lisp_eval,
+  [T_TRUE         ] = lisp_eval_list_noop,
+  [T_WILDCARD     ] = lisp_eval_list_noop,
+};
+
+/*
+ * Generic evaluation.
+ */
+
+static cell_t
+lisp_eval_noop(const cell_t closure, const cell_t cell)
+{
+  TRACE_SEXP(cell);
+  return cell;
+}
+
+static cell_t
+lisp_eval_symbol(const cell_t closure, const cell_t cell)
+{
+  TRACE_SEXP(cell);
+  cell_t res = lisp_lookup(closure, cell);
+  LISP_FREE(cell);
   return res;
 }
 
 static cell_t
 lisp_eval_list(const cell_t closure, const cell_t cell)
 {
-  TRACE(cell);
   /*
+   * Evaluate CAR.
    */
-  cell_t res = NULL;
+  TRACE_SEXP(cell);
   cell_t car = lisp_car(cell);
   cell_t cdr = lisp_cdr(cell);
+  cell_t evl = lisp_eval(closure, car);
+  cell_t new = lisp_cons(evl, cdr);
   /*
-   * Check what the first argument is.
+   * Evaluate the list.
    */
-  switch (GET_TYPE(car->car)) {
-    case T_SYMBOL:
-    case T_SYMBOL_INLINE:
-    case T_LIST:
-      car = lisp_eval(closure, car);
-      break;
-    default:
-      res = lisp_dup(cell);
-      LISP_FREE(cell, car, cdr);
-      return res;
-  }
-  /*
-   * Process the result.
-   */
-  switch (GET_TYPE(car->car)) {
-    /*
-     * Call the function pointer. NOTE: Can cause SIGSEV.
-     */
-    case T_NUMBER: {
-      uintptr_t fun = GET_NUMB(car->car);
-      if (IS_EVAL(fun)) cdr = lisp_eval_args(closure, cdr);
-      res = GET_PNTR(function_t, fun)(cdr);
-      LISP_FREE(car, cell);
-      return res;
-    }
-    /*
-     * Evaluate the lambda.
-     */
-    case T_LIST: {
-      res = lisp_eval_lambda(car, cdr);
-      LISP_FREE(cell);
-      return res;
-    }
-    /*
-     * For any other type, default to NIL.
-     */
-    default: {
-      res = lisp_make_nil();
-      LISP_FREE(cell, car, cdr);
-      return res;
-    }
-  }
+  TRACE_SEXP(new);
+  cell_t res = lisp_eval_list_table[GET_TYPE(evl->car)](closure, new);
+  LISP_FREE(evl, cdr, cell);
+  return res;
 }
+
+static cell_t (* lisp_eval_table[8])(const cell_t closure, const cell_t cell) =
+{
+  [T_NIL          ] = lisp_eval_noop,
+  [T_LIST         ] = lisp_eval_list,
+  [T_NUMBER       ] = lisp_eval_noop,
+  [T_STRING       ] = lisp_eval_noop,
+  [T_SYMBOL       ] = lisp_eval_symbol,
+  [T_SYMBOL_INLINE] = lisp_eval_symbol,
+  [T_TRUE         ] = lisp_eval_noop,
+  [T_WILDCARD     ] = lisp_eval_noop,
+};
 
 cell_t
 lisp_eval(const cell_t closure, const cell_t cell)
 {
-  TRACE(cell);
-  /*
-   */
-  switch (GET_TYPE(cell->car)) {
-    case T_NIL:
-    case T_TRUE:
-    case T_NUMBER:
-    case T_STRING: {
-      return cell;
-    }
-    case T_SYMBOL:
-    case T_SYMBOL_INLINE: {
-      cell_t res = lisp_lookup(closure, cell);
-      LISP_FREE(cell);
-      return res;
-    }
-    case T_LIST: {
-      return lisp_eval_list(closure, cell);
-    }
-  }
+  TRACE_SEXP(cell);
+  return lisp_eval_table[GET_TYPE(cell->car)](closure, cell);
 }
 
 /*
  * Helper functions.
  */
-
-cell_t
-lisp_make_nil()
-{
-  return lisp_allocate();
-}
 
 cell_t
 lisp_make_true()
@@ -325,7 +488,15 @@ lisp_make_true()
 }
 
 cell_t
-lisp_make_number(const uint64_t num)
+lisp_make_wildcard()
+{
+  cell_t R = lisp_allocate();
+  SET_TYPE(R->car, T_WILDCARD);
+  return R;
+}
+
+cell_t
+lisp_make_number(const int64_t num)
 {
   cell_t R = lisp_allocate();
   SET_TYPE(R->car, T_NUMBER);

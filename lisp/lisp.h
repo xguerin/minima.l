@@ -13,12 +13,13 @@ struct _cell_t;
 typedef enum _cell_type_t
 {
   T_NIL           = 0,
-  T_TRUE          = 1,
+  T_LIST          = 1,
   T_NUMBER        = 2,
   T_STRING        = 3,
   T_SYMBOL        = 4,
   T_SYMBOL_INLINE = 5,
-  T_LIST          = 6
+  T_TRUE          = 6,
+  T_WILDCARD      = 7
 }
 cell_type_t;
 
@@ -31,11 +32,11 @@ cell_type_t;
 #define SET_SYMB(__e, __v) __e = ((__e & TYPE_MASK) | ((*(uintptr_t *)__v << 8)  & PNTR_MASK))
 #define SET_DATA(__e, __v) __e = ((__e & TYPE_MASK) | (  (uintptr_t  )__v        & PNTR_MASK))
 
-#define GET_TYPE(__e)      ((cell_type_t)  (__e & TYPE_MASK)      )
-#define GET_NUMB(__e)      ((uint64_t   ) ((__e & PNTR_MASK) >> 4))
-#define GET_SYMB(__e)      (((char *    )  &__e              +  1))
-#define GET_DATA(__e)      ((uint64_t   )  (__e & PNTR_MASK)      )
-#define GET_PNTR(__T, __e) ((__T        )  (__e & PNTR_MASK)      )
+#define GET_TYPE(__e)       ((cell_type_t)  (__e & TYPE_MASK)       )
+#define GET_NUMB(__e)      (((int64_t    ) ((__e & PNTR_MASK)) >> 4))
+#define GET_SYMB(__e)      (((char *     )  &__e               +  1))
+#define GET_DATA(__e)       ((uintptr_t  )  (__e & PNTR_MASK)       )
+#define GET_PNTR(__T, __e)  ((__T        )  (__e & PNTR_MASK)       )
 
 #define IS_NULL(__c) (GET_TYPE(__c->car) == T_NIL)
 #define IS_NUMB(__c) (GET_TYPE(__c->car) == T_NUMBER)
@@ -74,6 +75,7 @@ typedef void (* lisp_consumer_t)(const cell_t);
  */
 
 extern cell_t GLOBALS;
+extern cell_t NIL;
 
 /*
  * Lisp basic functions.
@@ -92,19 +94,19 @@ cell_t lisp_cons(const cell_t a, const cell_t b);
 cell_t lisp_conc(const cell_t a, const cell_t b);
 
 /*
- * Evaluation and context functions.
+ * Evaluation and closure functions.
  */
 
-cell_t lisp_setq(const cell_t context, const cell_t sym, const cell_t val);
+cell_t lisp_setq(const cell_t closure, const cell_t sym, const cell_t val);
 cell_t lisp_eval(const cell_t closure, const cell_t cell);
 
 /*
  * Helper functions.
  */
 
-cell_t lisp_make_nil();
 cell_t lisp_make_true();
-cell_t lisp_make_number(const uint64_t num);
+cell_t lisp_make_wildcard();
+cell_t lisp_make_number(const int64_t num);
 cell_t lisp_make_string(const char * const str);
 cell_t lisp_make_symbol(const char * const sym);
 cell_t lisp_make_list(const cell_t cell);
@@ -116,11 +118,18 @@ void lisp_print(FILE * const fp, const cell_t cell);
  * Debug.
  */
 
-#ifdef LISP_DEBUG
-#define TRACE(__c) {                           \
+#ifdef LISP_ENABLE_DEBUG
+
+#define TRACE(__fmt, ...) fprintf(stdout, __fmt, __VA_ARGS__)
+
+#define TRACE_SEXP(__c) {                      \
   printf("! %s:%d: ", __FUNCTION__, __LINE__); \
   lisp_print(stdout, __c);                     \
 }
+
 #else
-#define TRACE(__c)
+
+#define TRACE(__fmt, ...)
+#define TRACE_SEXP(__c)
+
 #endif
