@@ -16,10 +16,11 @@ syntax_error()
 void
 lisp_repl_consumer(const cell_t cell)
 {
-  cell_t result = lisp_eval(NIL, cell);
+  cell_t nil = lisp_make_nil();
+  cell_t result = lisp_eval(nil, cell);
   fprintf(stdout, "> ");
   lisp_print(stdout, result);
-  LISP_FREE(result);
+  LISP_FREE(result, nil);
 #ifdef LISP_ENABLE_DEBUG
   fprintf(stdout, "D %ld\n", slab.n_alloc - slab.n_free);
 #endif
@@ -52,7 +53,6 @@ loop:
    * Clean-up.
    */
   printf("\n");
-  LISP_FREE(NIL);
   free(line);
   lisp_destroy(lexer);
   return 0;

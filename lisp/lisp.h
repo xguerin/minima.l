@@ -77,7 +77,6 @@ typedef void (* lisp_consumer_t)(const cell_t);
 
 extern cell_t GLOBALS;
 extern cell_t NIL;
-extern cell_t TRUE;
 
 /*
  * Lisp basic functions.
@@ -106,6 +105,8 @@ cell_t lisp_eval(const cell_t closure, const cell_t cell);
  * Helper functions.
  */
 
+cell_t lisp_make_nil();
+cell_t lisp_make_true();
 cell_t lisp_make_wildcard();
 cell_t lisp_make_number(const int64_t num);
 cell_t lisp_make_string(const char * const str);

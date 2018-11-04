@@ -31,7 +31,7 @@ root ::= quote(A).
 
 list(A) ::= POPEN PCLOSE.
 {
-  A = NIL;
+  A = lisp_make_nil();
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
@@ -88,7 +88,7 @@ item(A) ::= STRING(B).
 item(A) ::= SYMBOL(B).
 {
   if (strcmp(B, "T") == 0) {
-    A = TRUE;
+    A = lisp_make_true();
   }
   else if (strcmp(B, "_") == 0) {
     A = lisp_make_wildcard();

@@ -10,9 +10,7 @@
  * Symbol management.
  */
 
-cell_t GLOBALS  = NULL;
-cell_t NIL      = NULL;
-cell_t TRUE     = NULL;
+cell_t GLOBALS = NULL;
 
 static char *
 lisp_get_sym_noop(const cell_t cell)
@@ -67,7 +65,7 @@ lisp_lookup(const cell_t closure, const cell_t sym)
     }
     NEXT(b);
   }
-  return NIL;
+  return lisp_make_nil();
 }
 
 /*
@@ -114,37 +112,13 @@ slot_dup(const uintptr_t slot)
   return slot_dup_table[GET_TYPE(slot)](slot);
 }
 
-static cell_t
-lisp_dup_noop(const cell_t cell)
-{
-  return cell;
-}
-
-static cell_t
-lisp_dup_copy(const cell_t cell)
+cell_t
+lisp_dup(const cell_t cell)
 {
   cell_t R = lisp_allocate();
   R->car = slot_dup(cell->car);
   R->cdr = slot_dup(cell->cdr);
   return R;
-}
-
-static cell_t (* lisp_dup_table[8])(const cell_t cell) =
-{
-  [T_NIL          ] = lisp_dup_noop,
-  [T_LIST         ] = lisp_dup_copy,
-  [T_NUMBER       ] = lisp_dup_copy,
-  [T_STRING       ] = lisp_dup_copy,
-  [T_SYMBOL       ] = lisp_dup_copy,
-  [T_SYMBOL_INLINE] = lisp_dup_copy,
-  [T_TRUE         ] = lisp_dup_copy,
-  [T_WILDCARD     ] = lisp_dup_copy,
-};
-
-cell_t
-lisp_dup(const cell_t cell)
-{
-  return lisp_dup_table[GET_TYPE(cell->car)](cell);
 }
 
 cell_t
@@ -330,7 +304,7 @@ static cell_t
 lisp_bind_free(const cell_t closure, const cell_t args, const cell_t vals)
 {
   LISP_FREE(closure);
-  return NIL;
+  return lisp_make_nil();
 }
 
 static cell_t (* lisp_bind_table[8])(const cell_t closure, const cell_t args,
@@ -479,6 +453,21 @@ lisp_eval(const cell_t closure, const cell_t cell)
 /*
  * Helper functions.
  */
+
+cell_t
+lisp_make_nil()
+{
+  cell_t R = lisp_allocate();
+  return R;
+}
+
+cell_t
+lisp_make_true()
+{
+  cell_t R = lisp_allocate();
+  SET_TYPE(R->car, T_TRUE);
+  return R;
+}
 
 cell_t
 lisp_make_wildcard()

@@ -74,11 +74,11 @@ lisp_function_cons(const cell_t closure, const cell_t cell)
 }
 
 /*
- * DEFN/SETQ.
+ * DEF/SETQ.
  */
 
 static cell_t
-lisp_function_defn(const cell_t closure, const cell_t cell)
+lisp_function_def(const cell_t closure, const cell_t cell)
 {
   cell_t sym = lisp_car(cell);
   cell_t val = lisp_cdr(cell);
@@ -106,7 +106,7 @@ static cell_t
 lisp_function_isnum(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_NUMB(car) ? TRUE : NIL;
+  cell_t res = IS_NUMB(car) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(car, cell);
   return res;
 }
@@ -115,7 +115,7 @@ static cell_t
 lisp_function_isstr(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_STRN(car) ? TRUE : NIL;
+  cell_t res = IS_STRN(car) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(car, cell);
   return res;
 }
@@ -124,7 +124,7 @@ static cell_t
 lisp_function_issym(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_SYMB(car) ? TRUE : NIL;
+  cell_t res = IS_SYMB(car) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(car, cell);
   return res;
 }
@@ -133,7 +133,7 @@ static cell_t
 lisp_function_islst(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_LIST(car) ? TRUE : NIL;
+  cell_t res = IS_LIST(car) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(car, cell);
   return res;
 }
@@ -142,7 +142,7 @@ static cell_t
 lisp_function_isnil(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = car == NIL ? TRUE : NIL;
+  cell_t res = IS_NULL(car) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(car, cell);
   return res;
 }
@@ -157,7 +157,7 @@ lisp_function_and(const cell_t closure, const cell_t cell)
   cell_t vl0 = lisp_eval(closure, lisp_car(cell));
   cell_t cdr = lisp_cdr(cell);
   cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
-  cell_t res = vl0 == TRUE && vl1 == TRUE ? TRUE : NIL;
+  cell_t res = IS_TRUE(vl0) && IS_TRUE(vl1) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(cell, vl0, cdr, vl1);
   return res;
 }
@@ -168,7 +168,7 @@ lisp_function_or(const cell_t closure, const cell_t cell)
   cell_t vl0 = lisp_eval(closure, lisp_car(cell));
   cell_t cdr = lisp_cdr(cell);
   cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
-  cell_t res = vl0 == TRUE || vl1 == TRUE ? TRUE : NIL;
+  cell_t res = IS_TRUE(vl0) || IS_TRUE(vl1) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(cell, vl0, cdr, vl1);
   return res;
 }
@@ -177,7 +177,7 @@ static cell_t
 lisp_function_not(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_NULL(car) ? TRUE : NIL;
+  cell_t res = IS_NULL(car) ? lisp_make_true() : lisp_make_nil();
   LISP_FREE(car, cell);
   return res;
 }
@@ -238,7 +238,7 @@ lisp_function_equ(const cell_t closure, const cell_t cell)
   cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
   bool res = lisp_equl(vl0, vl1);
   LISP_FREE(vl1, cdr, vl0, cell);
-  return res ? TRUE : NIL;
+  return res ? lisp_make_true() : lisp_make_nil();
 }
 
 /*
@@ -282,7 +282,24 @@ lisp_function_ith(const cell_t closure, const cell_t cell)
    */
   cell_type_t type = GET_TYPE(cnd->car);
   LISP_FREE(cd0, cnd, cell);
-  return lisp_function_ite_table[type](closure, thn, NIL);
+  return lisp_function_ite_table[type](closure, thn, lisp_make_nil());
+}
+
+static cell_t
+lisp_function_int(const cell_t closure, const cell_t cell)
+{
+  cell_t res = lisp_eval(closure, lisp_car(cell));
+  TRACE_SEXP(res);
+  cell_t cnd = IS_TRUE(res) ? lisp_make_nil() : lisp_make_true();
+  TRACE_SEXP(cnd);
+  cell_t cd0 = lisp_cdr(cell);
+  cell_t thn = lisp_car(cd0);
+  /*
+   * Execute the right branch depending on the result.
+   */
+  cell_type_t type = GET_TYPE(cnd->car);
+  LISP_FREE(cd0, res, cnd, cell);
+  return lisp_function_ite_table[type](closure, thn, lisp_make_nil());
 }
 
 static cell_t
@@ -319,13 +336,14 @@ static def_t functions[] = {
   { "/"    , lisp_function_div   },
   { "="    , lisp_function_equ   },
   { "?"    , lisp_function_ith   },
+  { "?!"   , lisp_function_int   },
   { "?:"   , lisp_function_ite   },
   { "and"  , lisp_function_and   },
   { "car"  , lisp_function_car   },
   { "cdr"  , lisp_function_cdr   },
   { "conc" , lisp_function_conc  },
   { "cons" , lisp_function_cons  },
-  { "defn" , lisp_function_defn  },
+  { "def"  , lisp_function_def   },
   { "eval" , lisp_function_eval  },
   { "lst?" , lisp_function_islst },
   { "nil?" , lisp_function_isnil },
