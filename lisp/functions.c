@@ -138,9 +138,40 @@ lisp_function_islst(const cell_t closure, const cell_t cell)
   return res;
 }
 
+static cell_t
+lisp_function_isnil(const cell_t closure, const cell_t cell)
+{
+  cell_t car = lisp_eval(closure, lisp_car(cell));
+  cell_t res = car == NIL ? TRUE : NIL;
+  LISP_FREE(car, cell);
+  return res;
+}
+
 /*
  * Logic functions.
  */
+
+static cell_t
+lisp_function_and(const cell_t closure, const cell_t cell)
+{
+  cell_t vl0 = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  cell_t res = vl0 == TRUE && vl1 == TRUE ? TRUE : NIL;
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
+static cell_t
+lisp_function_or(const cell_t closure, const cell_t cell)
+{
+  cell_t vl0 = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  cell_t res = vl0 == TRUE || vl1 == TRUE ? TRUE : NIL;
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
 
 static cell_t
 lisp_function_not(const cell_t closure, const cell_t cell)
@@ -289,6 +320,7 @@ static def_t functions[] = {
   { "="    , lisp_function_equ   },
   { "?"    , lisp_function_ith   },
   { "?:"   , lisp_function_ite   },
+  { "and"  , lisp_function_and   },
   { "car"  , lisp_function_car   },
   { "cdr"  , lisp_function_cdr   },
   { "conc" , lisp_function_conc  },
@@ -296,8 +328,10 @@ static def_t functions[] = {
   { "defn" , lisp_function_defn  },
   { "eval" , lisp_function_eval  },
   { "lst?" , lisp_function_islst },
+  { "nil?" , lisp_function_isnil },
   { "not"  , lisp_function_not   },
   { "num?" , lisp_function_isnum },
+  { "or"   , lisp_function_or    },
   { "quote", lisp_function_quote },
   { "setq" , lisp_function_setq  },
   { "str?" , lisp_function_isstr },
