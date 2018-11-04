@@ -39,6 +39,7 @@ cell_type_t;
 #define GET_PNTR(__T, __e)  ((__T        )  (__e & PNTR_MASK)       )
 
 #define IS_NULL(__c) (GET_TYPE(__c->car) == T_NIL)
+#define IS_TRUE(__c) (GET_TYPE(__c->car) == T_TRUE)
 #define IS_NUMB(__c) (GET_TYPE(__c->car) == T_NUMBER)
 #define IS_STRN(__c) (GET_TYPE(__c->car) == T_STRING)
 #define IS_SYMB(__c) (GET_TYPE(__c->car) == T_SYMBOL || GET_TYPE(__c->car) == T_SYMBOL_INLINE)
@@ -76,6 +77,7 @@ typedef void (* lisp_consumer_t)(const cell_t);
 
 extern cell_t GLOBALS;
 extern cell_t NIL;
+extern cell_t TRUE;
 
 /*
  * Lisp basic functions.
@@ -104,7 +106,6 @@ cell_t lisp_eval(const cell_t closure, const cell_t cell);
  * Helper functions.
  */
 
-cell_t lisp_make_true();
 cell_t lisp_make_wildcard();
 cell_t lisp_make_number(const int64_t num);
 cell_t lisp_make_string(const char * const str);

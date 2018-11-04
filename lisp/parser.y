@@ -88,7 +88,7 @@ item(A) ::= STRING(B).
 item(A) ::= SYMBOL(B).
 {
   if (strcmp(B, "T") == 0) {
-    A = lisp_make_true();
+    A = TRUE;
   }
   else if (strcmp(B, "_") == 0) {
     A = lisp_make_wildcard();

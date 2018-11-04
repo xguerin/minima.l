@@ -148,7 +148,7 @@ lisp_free(const size_t n, ...)
    */
   for (size_t i = 0; i < n; i += 1) {
     cell_t cell = va_arg(args, cell_t);
-    if (cell != NIL) {
+    if (cell != NIL && cell != TRUE) {
       slot_free(cell->car);
       slot_free(cell->cdr);
       lisp_deallocate(cell);

@@ -119,6 +119,8 @@ lisp_create(const lisp_consumer_t consumer)
 {
   lisp_slab_allocate();
   NIL = lisp_allocate();
+  TRUE = lisp_allocate();
+  SET_TYPE(TRUE->car, T_TRUE);
   GLOBALS = NIL;
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
@@ -135,6 +137,7 @@ lisp_destroy(const lexer_t lexer)
   free(lexer);
   LISP_FREE(GLOBALS);
   lisp_deallocate(NIL);
+  lisp_deallocate(TRUE);
   lisp_slab_destroy();
 }
 

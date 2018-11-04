@@ -106,7 +106,7 @@ static cell_t
 lisp_function_isnum(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_NUMB(car) ? lisp_make_true() : NIL;
+  cell_t res = IS_NUMB(car) ? TRUE : NIL;
   LISP_FREE(car, cell);
   return res;
 }
@@ -115,7 +115,7 @@ static cell_t
 lisp_function_isstr(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_STRN(car) ? lisp_make_true() : NIL;
+  cell_t res = IS_STRN(car) ? TRUE : NIL;
   LISP_FREE(car, cell);
   return res;
 }
@@ -124,7 +124,7 @@ static cell_t
 lisp_function_issym(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_SYMB(car) ? lisp_make_true() : NIL;
+  cell_t res = IS_SYMB(car) ? TRUE : NIL;
   LISP_FREE(car, cell);
   return res;
 }
@@ -133,7 +133,7 @@ static cell_t
 lisp_function_islst(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_LIST(car) ? lisp_make_true() : NIL;
+  cell_t res = IS_LIST(car) ? TRUE : NIL;
   LISP_FREE(car, cell);
   return res;
 }
@@ -146,7 +146,7 @@ static cell_t
 lisp_function_not(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
-  cell_t res = IS_NULL(car) ? lisp_make_true() : NIL;
+  cell_t res = IS_NULL(car) ? TRUE : NIL;
   LISP_FREE(car, cell);
   return res;
 }
@@ -207,7 +207,7 @@ lisp_function_equ(const cell_t closure, const cell_t cell)
   cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
   bool res = lisp_equl(vl0, vl1);
   LISP_FREE(vl1, cdr, vl0, cell);
-  return res ? lisp_make_true() : NIL;
+  return res ? TRUE : NIL;
 }
 
 /*

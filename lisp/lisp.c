@@ -10,8 +10,9 @@
  * Symbol management.
  */
 
-cell_t GLOBALS = NULL;
-cell_t NIL = NULL;
+cell_t GLOBALS  = NULL;
+cell_t NIL      = NULL;
+cell_t TRUE     = NULL;
 
 static char *
 lisp_get_sym_noop(const cell_t cell)
@@ -478,14 +479,6 @@ lisp_eval(const cell_t closure, const cell_t cell)
 /*
  * Helper functions.
  */
-
-cell_t
-lisp_make_true()
-{
-  cell_t R = lisp_allocate();
-  SET_TYPE(R->car, T_TRUE);
-  return R;
-}
 
 cell_t
 lisp_make_wildcard()
