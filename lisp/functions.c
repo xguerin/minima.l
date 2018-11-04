@@ -74,8 +74,18 @@ lisp_function_cons(const cell_t closure, const cell_t cell)
 }
 
 /*
- * SETQ.
+ * DEFN/SETQ.
  */
+
+static cell_t
+lisp_function_defn(const cell_t closure, const cell_t cell)
+{
+  cell_t sym = lisp_car(cell);
+  cell_t val = lisp_cdr(cell);
+  GLOBALS = lisp_setq(GLOBALS, sym, val);
+  LISP_FREE(sym, cell);
+  return val;
+}
 
 static cell_t
 lisp_function_setq(const cell_t closure, const cell_t cell)
@@ -205,6 +215,7 @@ static def_t functions[] = {
   { "cdr"  , lisp_function_cdr   },
   { "conc" , lisp_function_conc  },
   { "cons" , lisp_function_cons  },
+  { "defn" , lisp_function_defn  },
   { "setq" , lisp_function_setq  },
   { "+"    , lisp_function_add   },
   { "-"    , lisp_function_sub   },
