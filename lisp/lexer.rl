@@ -94,7 +94,7 @@ dot    = '.';
 quote  = '\'';
 number = '-'? digit+;
 string = '"' [^"]* '"';
-marks  = [~!@#$%^&*_+\-={}\[\]:;|\\<>?,./];
+marks  = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
 symbol = (alpha | marks) (alnum | marks)*;
 comment = '#' [^\n]*;
 
