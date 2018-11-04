@@ -139,6 +139,19 @@ lisp_function_islst(const cell_t closure, const cell_t cell)
 }
 
 /*
+ * Logic functions.
+ */
+
+static cell_t
+lisp_function_not(const cell_t closure, const cell_t cell)
+{
+  cell_t car = lisp_eval(closure, lisp_car(cell));
+  cell_t res = IS_NULL(car) ? lisp_make_true() : NIL;
+  LISP_FREE(car, cell);
+  return res;
+}
+
+/*
  * Arithmetic functions.
  */
 
@@ -198,6 +211,66 @@ lisp_function_equ(const cell_t closure, const cell_t cell)
 }
 
 /*
+ * Conditionals.
+ */
+
+static cell_t
+lisp_function_ite_then(const cell_t closure, const cell_t thn, const cell_t els)
+{
+  LISP_FREE(els);
+  return lisp_eval(closure, thn);
+}
+
+static cell_t
+lisp_function_ite_else(const cell_t closure, const cell_t thn, const cell_t els)
+{
+  LISP_FREE(thn);
+  return lisp_eval(closure, els);
+}
+
+static cell_t (* lisp_function_ite_table[8])(const cell_t, const cell_t, const cell_t) =
+{
+  [T_NIL          ] = lisp_function_ite_else,
+  [T_LIST         ] = lisp_function_ite_else,
+  [T_NUMBER       ] = lisp_function_ite_else,
+  [T_STRING       ] = lisp_function_ite_else,
+  [T_SYMBOL       ] = lisp_function_ite_else,
+  [T_SYMBOL_INLINE] = lisp_function_ite_else,
+  [T_TRUE         ] = lisp_function_ite_then,
+  [T_WILDCARD     ] = lisp_function_ite_else,
+};
+
+static cell_t
+lisp_function_ith(const cell_t closure, const cell_t cell)
+{
+  cell_t cnd = lisp_eval(closure, lisp_car(cell));
+  cell_t cd0 = lisp_cdr(cell);
+  cell_t thn = lisp_car(cd0);
+  /*
+   * Execute the right branch depending on the result.
+   */
+  cell_type_t type = GET_TYPE(cnd->car);
+  LISP_FREE(cd0, cnd, cell);
+  return lisp_function_ite_table[type](closure, thn, NIL);
+}
+
+static cell_t
+lisp_function_ite(const cell_t closure, const cell_t cell)
+{
+  cell_t cnd = lisp_eval(closure, lisp_car(cell));
+  cell_t cd0 = lisp_cdr(cell);
+  cell_t thn = lisp_car(cd0);
+  cell_t cd1 = lisp_cdr(cd0);
+  cell_t els = lisp_car(cd1);
+  /*
+   * Execute the right branch depending on the result.
+   */
+  cell_type_t type = GET_TYPE(cnd->car);
+  LISP_FREE(cd1, cd0, cnd, cell);
+  return lisp_function_ite_table[type](closure, thn, els);
+}
+
+/*
  * Set-up function.
  */
 
@@ -209,23 +282,26 @@ typedef struct _def_t
 def_t;
 
 static def_t functions[] = {
-  { "quote", lisp_function_quote },
-  { "eval" , lisp_function_eval  },
+  { "*"    , lisp_function_mul   },
+  { "+"    , lisp_function_add   },
+  { "-"    , lisp_function_sub   },
+  { "/"    , lisp_function_div   },
+  { "="    , lisp_function_equ   },
+  { "?"    , lisp_function_ith   },
+  { "?:"   , lisp_function_ite   },
   { "car"  , lisp_function_car   },
   { "cdr"  , lisp_function_cdr   },
   { "conc" , lisp_function_conc  },
   { "cons" , lisp_function_cons  },
   { "defn" , lisp_function_defn  },
-  { "setq" , lisp_function_setq  },
-  { "+"    , lisp_function_add   },
-  { "-"    , lisp_function_sub   },
-  { "*"    , lisp_function_mul   },
-  { "/"    , lisp_function_div   },
-  { "="    , lisp_function_equ   },
+  { "eval" , lisp_function_eval  },
+  { "lst?" , lisp_function_islst },
+  { "not"  , lisp_function_not   },
   { "num?" , lisp_function_isnum },
+  { "quote", lisp_function_quote },
+  { "setq" , lisp_function_setq  },
   { "str?" , lisp_function_isstr },
   { "sym?" , lisp_function_issym },
-  { "lst?" , lisp_function_islst },
 };
 
 #define FUNCTION_COUNT (sizeof(functions) / sizeof(def_t))
