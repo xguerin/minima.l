@@ -25,6 +25,12 @@ lisp_function_eval(const cell_t closure, const cell_t cell)
   return res;
 }
 
+static cell_t
+lisp_function_prog(const cell_t closure, const cell_t cell)
+{
+  return lisp_prog(closure, cell, lisp_make_nil());
+}
+
 /*
  * CAR/CDR.
  */
@@ -360,6 +366,7 @@ static def_t functions[] = {
   { "not"  , lisp_function_not   },
   { "num?" , lisp_function_isnum },
   { "or"   , lisp_function_or    },
+  { "prog" , lisp_function_prog  },
   { "quote", lisp_function_quote },
   { "setq" , lisp_function_setq  },
   { "str?" , lisp_function_isstr },
