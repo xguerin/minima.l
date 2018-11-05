@@ -256,6 +256,54 @@ lisp_function_equ(const cell_t closure, const cell_t cell)
   return res ? lisp_make_true() : lisp_make_nil();
 }
 
+static cell_t
+lisp_function_gt(const cell_t closure, const cell_t cell)
+{
+  cell_t vl0 = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  cell_t res = GET_NUMB(vl0->car) > GET_NUMB(vl1->car) ?
+    lisp_make_true() : lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
+static cell_t
+lisp_function_lt(const cell_t closure, const cell_t cell)
+{
+  cell_t vl0 = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  cell_t res = GET_NUMB(vl0->car) < GET_NUMB(vl1->car) ?
+    lisp_make_true() : lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
+static cell_t
+lisp_function_ge(const cell_t closure, const cell_t cell)
+{
+  cell_t vl0 = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  cell_t res = GET_NUMB(vl0->car) >= GET_NUMB(vl1->car) ?
+    lisp_make_true() : lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
+static cell_t
+lisp_function_le(const cell_t closure, const cell_t cell)
+{
+  cell_t vl0 = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  cell_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  cell_t res = GET_NUMB(vl0->car) <= GET_NUMB(vl1->car) ?
+    lisp_make_true() : lisp_make_nil();
+  LISP_FREE(cell, vl0, cdr, vl1);
+  return res;
+}
+
 /*
  * Conditionals.
  */
@@ -350,6 +398,10 @@ static def_t functions[] = {
   { "-"    , lisp_function_sub   },
   { "/"    , lisp_function_div   },
   { "="    , lisp_function_equ   },
+  { ">"    , lisp_function_gt    },
+  { "<"    , lisp_function_lt    },
+  { ">="   , lisp_function_ge    },
+  { "<="   , lisp_function_le    },
   { "?"    , lisp_function_ith   },
   { "?!"   , lisp_function_int   },
   { "?:"   , lisp_function_ite   },
