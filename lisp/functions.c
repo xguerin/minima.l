@@ -103,6 +103,15 @@ lisp_function_setq(const cell_t closure, const cell_t cell)
  */
 
 static cell_t
+lisp_function_isatm(const cell_t closure, const cell_t cell)
+{
+  cell_t car = lisp_eval(closure, lisp_car(cell));
+  cell_t res = IS_LIST(car) ? lisp_make_nil() : lisp_make_true();
+  LISP_FREE(car, cell);
+  return res;
+}
+
+static cell_t
 lisp_function_isnum(const cell_t closure, const cell_t cell)
 {
   cell_t car = lisp_eval(closure, lisp_car(cell));
@@ -339,6 +348,7 @@ static def_t functions[] = {
   { "?!"   , lisp_function_int   },
   { "?:"   , lisp_function_ite   },
   { "and"  , lisp_function_and   },
+  { "atm?" , lisp_function_isatm },
   { "car"  , lisp_function_car   },
   { "cdr"  , lisp_function_cdr   },
   { "conc" , lisp_function_conc  },
