@@ -121,18 +121,67 @@ lisp_dup(const cell_t cell)
   return R;
 }
 
-cell_t
-lisp_car(const cell_t cell)
+static cell_t
+lisp_car_list(const cell_t cell)
 {
   cell_t L = GET_PNTR(cell_t, cell->car);
   return lisp_make_slot(L->car);
 }
 
+static cell_t
+lisp_car_noop(const cell_t cell)
+{
+  return lisp_make_nil();
+}
+
+static cell_t (* lisp_car_table[8])(const cell_t cell) =
+{
+  [T_NIL          ] = lisp_car_noop,
+  [T_LIST         ] = lisp_car_list,
+  [T_NUMBER       ] = lisp_car_noop,
+  [T_STRING       ] = lisp_car_noop,
+  [T_SYMBOL       ] = lisp_car_noop,
+  [T_SYMBOL_INLINE] = lisp_car_noop,
+  [T_TRUE         ] = lisp_car_noop,
+  [T_WILDCARD     ] = lisp_car_noop,
+};
+
 cell_t
-lisp_cdr(const cell_t cell)
+lisp_car(const cell_t cell)
+{
+  return lisp_car_table[GET_TYPE(cell->car)](cell);
+}
+
+static cell_t
+lisp_cdr_list(const cell_t cell)
 {
   cell_t L = GET_PNTR(cell_t, cell->car);
   return lisp_make_slot(L->cdr);
+}
+
+static cell_t
+lisp_cdr_noop(const cell_t cell)
+{
+  return lisp_make_nil();
+}
+
+static cell_t (* lisp_cdr_table[8])(const cell_t cell) =
+{
+  [T_NIL          ] = lisp_cdr_noop,
+  [T_LIST         ] = lisp_cdr_list,
+  [T_NUMBER       ] = lisp_cdr_noop,
+  [T_STRING       ] = lisp_cdr_noop,
+  [T_SYMBOL       ] = lisp_cdr_noop,
+  [T_SYMBOL_INLINE] = lisp_cdr_noop,
+  [T_TRUE         ] = lisp_cdr_noop,
+  [T_WILDCARD     ] = lisp_cdr_noop,
+};
+
+
+cell_t
+lisp_cdr(const cell_t cell)
+{
+  return lisp_cdr_table[GET_TYPE(cell->car)](cell);
 }
 
 /*
@@ -270,9 +319,6 @@ lisp_setq(const cell_t closure, const cell_t sym, const cell_t val)
  */
 
 static cell_t
-lisp_bind(const cell_t closure, const cell_t args, const cell_t vals);
-
-static cell_t
 lisp_bind_noop(const cell_t closure, const cell_t args, const cell_t vals)
 {
   return closure;
@@ -293,9 +339,7 @@ lisp_bind_list(const cell_t closure, const cell_t args, const cell_t vals)
   cell_t oth = lisp_cdr(args);
   cell_t rem = lisp_cdr(vals);
   cell_t cl0 = lisp_bind(closure, sym, val);
-  TRACE_SEXP(cl0);
   cell_t cl1 = lisp_bind(cl0, oth, rem);
-  TRACE_SEXP(cl1);
   LISP_FREE(rem, oth, val, sym);
   return cl1;
 }
@@ -320,10 +364,65 @@ static cell_t (* lisp_bind_table[8])(const cell_t closure, const cell_t args,
   [T_WILDCARD     ] = lisp_bind_noop,
 };
 
-static cell_t
+cell_t
 lisp_bind(const cell_t closure, const cell_t args, const cell_t vals)
 {
-  return lisp_bind_table[GET_TYPE(args->car)](closure, args, vals);
+  cell_t res = lisp_bind_table[GET_TYPE(args->car)](closure, args, vals);
+  TRACE_SEXP(res);
+  return res;
+}
+
+/*
+ * Body evaluation.
+ */
+
+static cell_t
+lisp_eval_list_body(const cell_t closure, const cell_t cell, const cell_t result);
+
+static cell_t
+lisp_eval_list_body_list(const cell_t closure, const cell_t cell,
+                         const cell_t result)
+{
+  TRACE_SEXP(cell);
+  /*
+   * Get CAR/CDR.
+   */
+  cell_t res = lisp_eval(closure, lisp_car(cell));
+  cell_t cdr = lisp_cdr(cell);
+  /*
+   */
+  LISP_FREE(result, cell);
+  return lisp_eval_list_body(closure, cdr, res);
+}
+
+static cell_t
+lisp_eval_list_body_noop(const cell_t closure, const cell_t cell,
+                         const cell_t result)
+{
+  TRACE_SEXP(cell);
+  LISP_FREE(cell);
+  return result;
+}
+
+static cell_t (* lisp_eval_list_body_table[8])(const cell_t closure,
+                                               const cell_t cell,
+                                               const cell_t result) =
+{
+  [T_NIL          ] = lisp_eval_list_body_noop,
+  [T_LIST         ] = lisp_eval_list_body_list,
+  [T_NUMBER       ] = lisp_eval_list_body_noop,
+  [T_STRING       ] = lisp_eval_list_body_noop,
+  [T_SYMBOL       ] = lisp_eval_list_body_noop,
+  [T_SYMBOL_INLINE] = lisp_eval_list_body_noop,
+  [T_TRUE         ] = lisp_eval_list_body_noop,
+  [T_WILDCARD     ] = lisp_eval_list_body_noop,
+};
+
+static cell_t
+lisp_eval_list_body(const cell_t closure, const cell_t cell, const cell_t result)
+{
+  TRACE_SEXP(cell);
+  return lisp_eval_list_body_table[GET_TYPE(cell->car)](closure, cell, result);
 }
 
 /*
@@ -363,9 +462,8 @@ lisp_eval_list_lambda(const cell_t closure, const cell_t cell)
    * Grab the arguments, body of the lambda. TODO add the curried closure.
    */
   cell_t args = lisp_car(lbda);
-  cell_t cdr0 = lisp_cdr(lbda);
-  cell_t body = lisp_car(cdr0);
-  LISP_FREE(cdr0, lbda);
+  cell_t body = lisp_cdr(lbda);
+  LISP_FREE(lbda);
   /*
    * Bind the arguments and the values. TODO bind the curried closure:
    * 1. Bind arguments with values
@@ -373,8 +471,7 @@ lisp_eval_list_lambda(const cell_t closure, const cell_t cell)
    * 3. Return a lambda with updated local closure if some are NIL
    */
   cell_t clos = lisp_bind(lisp_dup(closure), args, vals);
-  TRACE_SEXP(clos);
-  cell_t rslt = lisp_eval(clos, body);
+  cell_t rslt = lisp_eval_list_body(clos, body, lisp_make_nil());
   LISP_FREE(clos, args, vals);
   return rslt;
 }

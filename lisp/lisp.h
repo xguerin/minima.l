@@ -98,8 +98,9 @@ cell_t lisp_conc(const cell_t a, const cell_t b);
  * Evaluation and closure functions.
  */
 
-cell_t lisp_setq(const cell_t closure, const cell_t sym, const cell_t val);
+cell_t lisp_bind(const cell_t closure, const cell_t args, const cell_t vals);
 cell_t lisp_eval(const cell_t closure, const cell_t cell);
+cell_t lisp_setq(const cell_t closure, const cell_t sym, const cell_t val);
 
 /*
  * Helper functions.
