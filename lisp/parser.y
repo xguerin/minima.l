@@ -1,10 +1,10 @@
 %extra_argument { lisp_consumer_t consumer }
 
 %token_type { void * }
-%type list  { cell_t }
-%type items { cell_t }
-%type quote { cell_t }
-%type item  { cell_t }
+%type list  { atom_t }
+%type items { atom_t }
+%type quote { atom_t }
+%type item  { atom_t }
 
 %include
 {
@@ -31,35 +31,31 @@ root ::= quote(A).
 
 list(A) ::= POPEN PCLOSE.
 {
-  A = lisp_make_nil();
+  A = UP(NIL);
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
 {
-  A = lisp_make_list(B);
-  LISP_FREE(B);
+  A = B;
 }
 
 list(A) ::= POPEN items(B) DOT quote(C) PCLOSE.
 {
-  A = lisp_cons(B, C);
+  A = lisp_conc(B, C);
   LISP_FREE(B, C);
 }
 
 items(A) ::= quote(B).
 {
-  A = B;
+  A = lisp_cons(B, NIL);
+  LISP_FREE(B);
 }
 
 items(A) ::= items(B) quote(C).
 {
-  cell_t p = B;
-  while (GET_TYPE(p->cdr) == T_LIST) {
-    p = GET_PNTR(cell_t, p->cdr);
-  }
-  SET_TYPE(p->cdr, T_LIST);
-  SET_DATA(p->cdr, C);
-  A = B;
+  atom_t D = lisp_cons(C, NIL);
+  A = lisp_conc(B, D);
+  LISP_FREE(B, C, D);
 }
 
 quote(A) ::= item(B).
@@ -69,7 +65,7 @@ quote(A) ::= item(B).
 
 quote(A) ::= QUOTE item(B).
 {
-  cell_t Q = lisp_make_symbol("quote");
+  atom_t Q = lisp_make_symbol(strdup("quote"));
   A = lisp_cons(Q, B);
   LISP_FREE(Q, B);
 }
@@ -81,27 +77,27 @@ item(A) ::= NUMBER(B).
 
 item(A) ::= STRING(B).
 {
-  A = lisp_make_string((char *)B);
-  free(B);
+  A = lisp_make_string((const char *)B);
 }
 
 item(A) ::= SYMBOL(B).
 {
-  if (strcmp(B, "T") == 0) {
-    A = lisp_make_true();
-  }
-  else if (strcmp(B, "_") == 0) {
-    A = lisp_make_wildcard();
-  }
-  else {
-    A = lisp_make_symbol((char *)B);
-  }
-  free(B);
+  A = lisp_make_symbol((char *)B);
 }
 
-item(A) ::= WILDCARD.
+item(A) ::= C_NIL.
 {
-  A = lisp_make_wildcard();
+  A = UP(NIL);
+}
+
+item(A) ::= C_TRUE.
+{
+  A = UP(TRUE);
+}
+
+item(A) ::= C_WILDCARD.
+{
+  A = UP(WILDCARD);
 }
 
 item(A) ::= list(B).

@@ -5,6 +5,28 @@
 #include <string.h>
 #include <sys/mman.h>
 
+#define IN_USE (-2U)
+#define END_MK (-1U)
+
+/*
+ * Reference count functions.
+ */
+
+atom_t
+lisp_incref(const atom_t atom, const char * const name)
+{
+  TRACE_REFS(atom->refs, atom->refs + 1, atom, name);
+  atom->refs += 1;
+  return atom;
+}
+
+atom_t lisp_decref(const atom_t atom, const char * const name)
+{
+  TRACE_REFS(atom->refs, atom->refs - 1, atom, name);
+  atom->refs -= 1;
+  return atom;
+}
+
 /*
  * Slab functions.
  */
@@ -19,38 +41,40 @@ lisp_slab_allocate()
   /*
    * Allocate the slab (32GB).
    */
-  void * a = mmap(NULL, SLAB_SIZE, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
+  slab.entries = (atom_t)mmap(NULL, SLAB_SIZE, PROT_NONE,
+                              MAP_ANON | MAP_PRIVATE, -1, 0);
+  TRACE("0x%lx", (uintptr_t)slab.entries);
   /*
    * Allocate the first page.
    */
-  slab.entries = (entry_t)mmap(a, PAGE_SIZE, PROT_READ | PROT_WRITE,
-                               MAP_ANON | MAP_PRIVATE, -1, 0);
+  int res = mprotect(slab.entries, PAGE_SIZE, PROT_READ | PROT_WRITE);
+  if (res != 0) abort();
   /*
    * Initialize the relative addressing.
    */
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
-    const size_t next = i + 1;
-    slab.entries[i].next = next == CELL_COUNT ? -1ULL : next;
+    slab.entries[i].next = i + 1;
   }
+  slab.entries[CELL_COUNT - 1].next = END_MK;
 }
 
 void
 lisp_slab_expand()
 {
-  const size_t size = slab.n_pages * PAGE_SIZE;
+  const size_t size = (slab.n_pages << 1) * PAGE_SIZE;
+  TRACE("0x%lx", (uintptr_t)slab.entries);
   /*
-   * Allocate the first page.
+   * Commit twice the amount of memory.
    */
-  entry_t entries = (entry_t)mmap(slab.entries, size, PROT_READ | PROT_WRITE,
-                                  MAP_ANON | MAP_PRIVATE , -1, size);
-  if (entries == NULL) abort();
+  int res = mprotect(slab.entries, size, PROT_READ | PROT_WRITE);
+  if (res != 0) abort();
   /*
    * Initialize the relative addressing.
    */
-  for (size_t i = 0; i < CELL_COUNT; i += 1) {
-    const size_t next = i + 1;
-    entries[i].next = next == CELL_COUNT ? -1ULL : CELL_COUNT + next;
+  for (size_t i = CELL_COUNT; i < 2 * CELL_COUNT; i += 1) {
+    slab.entries[i].next = i + 1;
   }
+  slab.entries[2 * CELL_COUNT - 1].next = END_MK;
   /*
    * Update state.
    */
@@ -68,23 +92,37 @@ lisp_slab_destroy()
  * Functions.
  */
 
-cell_t
+atom_t
 lisp_allocate() {
-  if (slab.first == -1ULL) {
+  /*
+   * Expand if necessary.
+   */
+  if (slab.first == END_MK) {
     lisp_slab_expand();
   }
+  /*
+   * Mark the slot as used.
+   */
   size_t next = slab.first;
-  slab.first = slab.entries[next].next;
-  cell_t __p = &slab.entries[next].cell;
-  memset(__p, 0, sizeof(struct _cell_t));
+  atom_t entry = &slab.entries[next];
+  slab.first = entry->next;
+  TRACE("%ld->%ld 0x%lx", next, slab.first, (uintptr_t)entry);
+  /*
+   * Prepare the new atom.
+   */
+  memset(entry, 0, sizeof(struct _atom));
+  entry->next = IN_USE;
   slab.n_alloc += 1;
-  return __p;
+  return entry;
 }
 
 void
-lisp_deallocate(const cell_t __p) {
-  size_t n = ((uintptr_t)__p - (uintptr_t)slab.entries) / sizeof(struct _cell_t);
-  slab.entries[n].next = slab.first;
+lisp_deallocate(const atom_t __p) {
+  size_t n = ((uintptr_t)__p - (uintptr_t)slab.entries) / sizeof(struct _atom);
+  atom_t entry = &slab.entries[n];
+  TRACE("%ld", n);
+  memset(entry, 0xA, sizeof(struct _atom));
+  entry->next = slab.first;
   slab.first = n;
   slab.n_free += 1;
 }
@@ -94,48 +132,50 @@ lisp_deallocate(const cell_t __p) {
  */
 
 static void
-slot_free_noop(const uintptr_t entry)
-{
+atom_free(const atom_t atom);
 
+static void
+atom_free_atom(const atom_t atom)
+{
+  lisp_deallocate(atom);
 }
 
 static void
-slot_free_string(const uintptr_t entry)
+atom_free_string(const atom_t atom)
 {
-  free(GET_PNTR(char *, entry));
+  free((void *)atom->string);
+  lisp_deallocate(atom);
 }
 
 static void
-slot_free_list(const uintptr_t entry)
+atom_free_pair(const atom_t atom)
 {
-  LISP_FREE(GET_PNTR(cell_t, entry));
+  atom_t car = atom->pair.car;
+  atom_t cdr = atom->pair.cdr;
+  lisp_deallocate(atom);
+  atom_free(cdr);
+  atom_free(car);
 }
 
-static void (* slot_free_table[8])(const uintptr_t) =
+static void (* atom_free_table[ATOM_TYPES])(const atom_t atom) =
 {
-  [T_NIL          ] = slot_free_noop,
-  [T_LIST         ] = slot_free_list,
-  [T_NUMBER       ] = slot_free_noop,
-  [T_STRING       ] = slot_free_string,
-  [T_SYMBOL       ] = slot_free_string,
-  [T_SYMBOL_INLINE] = slot_free_noop,
-  [T_TRUE         ] = slot_free_noop,
-  [T_WILDCARD     ] = slot_free_noop,
+  [T_NIL     ] = atom_free_atom,
+  [T_TRUE    ] = atom_free_atom,
+  [T_NUMBER  ] = atom_free_atom,
+  [T_PAIR    ] = atom_free_pair,
+  [T_STRING  ] = atom_free_string,
+  [T_SYMBOL  ] = atom_free_string,
+  [T_WILDCARD] = atom_free_atom,
 };
 
-void
-slot_free(const uintptr_t entry)
+static void
+atom_free(const atom_t atom)
 {
-  slot_free_table[GET_TYPE(entry)](entry);
-}
-
-void
-lisp_replace(const cell_t cell, const cell_t car)
-{
-  slot_free(cell->car);
-  slot_free(car->cdr);
-  cell->car = car->car;
-  lisp_deallocate(car);
+  DOWN(atom);
+  if (atom->refs == 0) {
+    TRACE_SEXP(atom);
+    atom_free_table[atom->type](atom);
+  }
 }
 
 void
@@ -147,13 +187,30 @@ lisp_free(const size_t n, ...)
    * Deleting the items.
    */
   for (size_t i = 0; i < n; i += 1) {
-    cell_t cell = va_arg(args, cell_t);
-    slot_free(cell->car);
-    slot_free(cell->cdr);
-    lisp_deallocate(cell);
+    atom_t atom = va_arg(args, atom_t);
+    atom_free(atom);
   }
   /*
    * Clean-up.
    */
   va_end(args);
 }
+
+/*
+ * Debug functions.
+ */
+
+#ifdef LISP_ENABLE_DEBUG
+
+void
+lisp_collect()
+{
+  for (size_t i = 0; i < CELL_COUNT; i += 1) {
+    atom_t entry = &slab.entries[i];
+    if (entry->next == IN_USE) {
+      TRACE_SLOT(i, entry);
+    }
+  }
+}
+
+#endif

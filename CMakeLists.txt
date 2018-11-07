@@ -54,6 +54,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_definitions(-DMNML_VERSION="${VERSION_SHORT}")
+add_definitions(-D_GNU_SOURCE)
 
 #
 # Process options
@@ -67,7 +68,7 @@ endif()
 # Flags preferences
 #
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wno-address-of-packed-member")
 
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")

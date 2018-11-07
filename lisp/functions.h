@@ -6,7 +6,7 @@
  * Functiom type.
  */
 
-typedef cell_t (* function_t)(const cell_t closure, const cell_t cell);
+typedef atom_t (* function_t)(const atom_t closure, const atom_t cell);
 
 /*
  * Function helpers.

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 
 #include "parser.h"
 #include "parser.c"
@@ -18,11 +19,7 @@ static char *
 get_string(const char * const s, const char * const e)
 {
   size_t len = e - s;
-  char * result = NULL;
-  posix_memalign((void **)&result, 16, len + 1);
-  memset(result, 0, len + 1);
-  strncpy(result, s, len);
-  return result;
+  return strndup(s, len);
 }
 
 static int64_t
@@ -80,6 +77,30 @@ action tok_string
   }
 }
 
+action tok_nil
+{ 
+  Parse(lexer->parser, C_NIL, 0, NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
+
+action tok_true
+{ 
+  Parse(lexer->parser, C_TRUE, 0, NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
+
+action tok_wildcard
+{ 
+  Parse(lexer->parser, C_WILDCARD, 0, NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
+
 action tok_symbol
 { 
   Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
@@ -105,6 +126,9 @@ main := |*
   quote  => tok_quote;
   number => tok_number;
   string => tok_string;
+  "NIL"  => tok_nil;
+  'T'    => tok_true;
+  '_'    => tok_wildcard;
   symbol => tok_symbol;
   comment;
   space;
@@ -114,25 +138,66 @@ main := |*
 
 %% write data;
 
+typedef struct _region
+{
+  size_t size;
+  uint8_t data[];
+}
+* region_t;
+
+static void *
+local_malloc(const size_t size)
+{
+  void * data = mmap(NULL, size + sizeof(struct _region),
+                     PROT_READ | PROT_WRITE,
+                     MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+  TRACE_LEXER("allocate region for %luB at 0x%lx", size, (uintptr_t)data);
+  memset(data, 0, size);
+  region_t region = (region_t)data;
+  region->size = size;
+  return region->data;
+}
+
+static void
+local_free(void * const addr)
+{
+  region_t region = (region_t)(addr - sizeof(struct _region));
+  TRACE_LEXER("free 0x%lx", (uintptr_t)region);
+  munmap(region, region->size);
+}
+
 lexer_t
 lisp_create(const lisp_consumer_t consumer)
 {
   lisp_slab_allocate();
-  GLOBALS = lisp_make_nil();
+  /*
+   * Create the constants.
+   */
+  lisp_make_nil();
+  lisp_make_true();
+  lisp_make_wildcard();
+  /*
+   * Create the GLOBALS and the lexer.
+   */
+  GLOBALS = UP(NIL);
+  /*
+   */
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
   lexer->consumer = consumer;
   lexer->depth = 0;
-  lexer->parser = ParseAlloc(malloc);
+  lexer->parser = ParseAlloc(local_malloc);
   return lexer;
 }
 
 void
 lisp_destroy(const lexer_t lexer)
 {
-  ParseFree(lexer->parser, free);
+  ParseFree(lexer->parser, local_free);
   free(lexer);
-  LISP_FREE(GLOBALS);
+  LISP_FREE(GLOBALS, NIL, TRUE, WILDCARD);
+  TRACE("D %ld", slab.n_alloc - slab.n_free);
+  LISP_COLLECT();
   lisp_slab_destroy();
 }
 

@@ -15,13 +15,14 @@ alloc_free_test()
    * Allocate the slab allocator.
    */
   lisp_slab_allocate();
-  cell_t cells[16];
+  atom_t cells[16];
   /*
    * Allocate 16 cells.
    */
   ASSERT_EQUAL(slab.first, 0);
   for (size_t i = 0; i < 16; i += 1) {
     cells[i] = lisp_allocate();
+    cells[i]->refs = 1;
   }
   /*
    * Free 16 cells.
@@ -53,18 +54,19 @@ alloc_full_test()
    * Allocate the slab allocator.
    */
   lisp_slab_allocate();
-  cell_t cells[CELL_COUNT];
+  atom_t cells[CELL_COUNT];
   /*
    * Allocate all cells.
    */
   ASSERT_EQUAL(slab.first, 0);
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
     cells[i] = lisp_allocate();
+    cells[i]->refs = 1;
   }
   /*
    * Free all cells.
    */
-  ASSERT_EQUAL(slab.first, -1ULL);
+  ASSERT_EQUAL(slab.first, -1U);
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
     lisp_free(1, cells[i]);
     ASSERT_EQUAL(slab.first, i);
@@ -73,9 +75,9 @@ alloc_full_test()
    * Tests.
    */
   ASSERT_EQUAL(slab.first, CELL_COUNT - 1);
-  for (size_t i = slab.first; i != -1ULL;) {
+  for (size_t i = slab.first; i != -1U;) {
     i = slab.entries[i].next;
-    ASSERT_TRUE(i == -1ULL || i >= 0 && i < CELL_COUNT);
+    ASSERT_TRUE(i == -1U || i >= 0 && i < CELL_COUNT);
   }
   /*
    * Free the slab allocator.
@@ -92,18 +94,19 @@ alloc_xpnd_test()
    */
   lisp_slab_allocate();
   const size_t count = 2 * CELL_COUNT;
-  cell_t cells[count];
+  atom_t cells[count];
   /*
    * Allocate all cells.
    */
   ASSERT_EQUAL(slab.first, 0);
   for (size_t i = 0; i < count; i += 1) {
     cells[i] = lisp_allocate();
+    cells[i]->refs = 1;
   }
   /*
    * Free all cells.
    */
-  ASSERT_EQUAL(slab.first, -1ULL);
+  ASSERT_EQUAL(slab.first, -1U);
   for (size_t i = 0; i < count; i += 1) {
     lisp_free(1, cells[i]);
     ASSERT_EQUAL(slab.first, i);
@@ -112,9 +115,9 @@ alloc_xpnd_test()
    * Tests.
    */
   ASSERT_EQUAL(slab.first, count - 1);
-  for (size_t i = slab.first; i != -1ULL;) {
+  for (size_t i = slab.first; i != -1U;) {
     i = slab.entries[i].next;
-    ASSERT_TRUE(i == -1ULL || i >= 0 && i < CELL_COUNT);
+    ASSERT_TRUE(i == -1U || i >= 0 && i < CELL_COUNT);
   }
   /*
    * Free the slab allocator.

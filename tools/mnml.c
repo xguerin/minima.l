@@ -16,25 +16,22 @@ syntax_error()
 }
 
 static void
-lisp_repl_consumer(const cell_t cell)
+lisp_repl_consumer(const atom_t cell)
 {
-  cell_t nil = lisp_make_nil();
-  cell_t result = lisp_eval(nil, cell);
+  atom_t result = lisp_eval(NIL, cell);
+  TRACE_SEXP(result);
   fprintf(stdout, "> ");
   lisp_print(stdout, result);
-  LISP_FREE(result, nil);
-#ifdef LISP_ENABLE_DEBUG
-  fprintf(stdout, "D %ld\n", slab.n_alloc - slab.n_free);
-#endif
+  LISP_FREE(result);
+  TRACE("D %ld", slab.n_alloc - slab.n_free);
   show_prompt = true;
 }
 
 static void
-lisp_file_consumer(const cell_t cell)
+lisp_file_consumer(const atom_t cell)
 {
-  cell_t nil = lisp_make_nil();
-  cell_t result = lisp_eval(nil, cell);
-  LISP_FREE(result, nil);
+  atom_t result = lisp_eval(NIL, cell);
+  LISP_FREE(result);
 }
 
 void
