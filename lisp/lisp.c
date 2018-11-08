@@ -302,6 +302,69 @@ lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
 }
 
 /*
+ * Prog creation. The list of the evaluations is returned.
+ */
+
+atom_t
+lisp_list(const atom_t closure, const atom_t cell)
+{
+  TRACE_SEXP(cell);
+  /*
+   */
+  if (likely(IS_PAIR(cell))) {
+    /*
+     * Get CAR/CDR.
+     */
+    atom_t car = lisp_car(cell);
+    atom_t cdr = lisp_cdr(cell);
+    X(cell);
+    /*
+     * Recursively get the result.
+     */
+    atom_t res = lisp_list(closure, cdr);
+    atom_t evl = lisp_eval(closure, car);
+    atom_t con = lisp_cons(evl, res);
+    X(evl); X(res);
+    return con;
+  }
+  /*
+   */
+  return cell;
+}
+
+/*
+ * Prog stream. The result of each evaluation are chained.
+ */
+
+atom_t
+lisp_pipe(const atom_t closure, const atom_t cell, const atom_t result)
+{
+  TRACE_SEXP(cell);
+  /*
+   */
+  if (likely(IS_PAIR(cell))) {
+    /*
+     * Get CAR/CDR.
+     */
+    atom_t car = lisp_car(cell);
+    atom_t cdr = lisp_cdr(cell);
+    X(cell);
+    atom_t lsp = lisp_cons(result, NIL);
+    X(result);
+    atom_t env = lisp_cons(car, lsp);
+    X(car); X(lsp);
+    /*
+     */
+    atom_t res = lisp_eval(closure, env);
+    return lisp_pipe(closure, cdr, res);
+  }
+  /*
+   */
+  X(cell);
+  return result;
+}
+
+/*
  * List evaluation.
  */
 
@@ -309,6 +372,7 @@ static atom_t
 lisp_eval_pair(const atom_t closure, const atom_t cell)
 {
   atom_t ret;
+  TRACE_SEXP(cell);
   /*
    */
   switch (cell->pair.car->type) {
@@ -372,6 +436,7 @@ atom_t
 lisp_eval(const atom_t closure, const atom_t cell)
 {
   atom_t ret;
+  TRACE_SEXP(cell);
   /*
    */
   switch (cell->type) {

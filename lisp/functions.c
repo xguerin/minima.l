@@ -30,6 +30,18 @@ lisp_function_prog(const atom_t closure, const atom_t cell)
   return lisp_prog(closure, cell, UP(NIL));
 }
 
+static atom_t
+lisp_function_pipe(const atom_t closure, const atom_t cell)
+{
+  return lisp_pipe(closure, cell, UP(NIL));
+}
+
+static atom_t
+lisp_function_list(const atom_t closure, const atom_t cell)
+{
+  return lisp_list(closure, cell);
+}
+
 /*
  * CAR/CDR.
  */
@@ -341,13 +353,14 @@ static def_t functions[] = {
   { "+"    , lisp_function_add  , true },
   { "-"    , lisp_function_sub  , true },
   { "/"    , lisp_function_div  , true },
+  { "::"   , lisp_function_list , true },
+  { "<"    , lisp_function_lt   , true },
+  { "<="   , lisp_function_le   , true },
   { "="    , lisp_function_equ  , true },
   { ">"    , lisp_function_gt   , true },
-  { "<"    , lisp_function_lt   , true },
   { ">="   , lisp_function_ge   , true },
-  { "<="   , lisp_function_le   , true },
-  { "?"    , lisp_function_ith  , true },
   { "?!"   , lisp_function_int  , true },
+  { "?"    , lisp_function_ith  , true },
   { "?:"   , lisp_function_ite  , true },
   { "and"  , lisp_function_and  , true },
   { "atm?" , lisp_function_isatm, true },
@@ -367,6 +380,7 @@ static def_t functions[] = {
   { "setq" , lisp_function_setq , true },
   { "str?" , lisp_function_isstr, true },
   { "sym?" , lisp_function_issym, true },
+  { "|"    , lisp_function_pipe , true },
 };
 
 #define FUNCTION_COUNT (sizeof(functions) / sizeof(def_t))
