@@ -85,6 +85,11 @@ item(A) ::= SYMBOL(B).
   A = lisp_make_symbol((char *)B);
 }
 
+item(A) ::= INLINE(B).
+{
+  A = lisp_make_inline((uint64_t)B);
+}
+
 item(A) ::= C_NIL.
 {
   A = UP(NIL);

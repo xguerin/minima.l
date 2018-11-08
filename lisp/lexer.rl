@@ -31,6 +31,15 @@ get_number(const char * const s, const char * const e)
   return strtoll(val, NULL, 10);
 }
 
+static int64_t
+get_inline(const char * const s, const char * const e)
+{
+  union { uint64_t tag; char val[8]; } u = { 0 };
+  size_t len = e - s;
+  strncpy(u.val, s, len);
+  return u.tag;
+}
+
 %%{
 
 machine minimal;
@@ -103,7 +112,12 @@ action tok_wildcard
 
 action tok_symbol
 { 
-  Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
+  if (te - ts > 7) {
+    Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
+  }
+  else {
+    Parse(lexer->parser, INLINE, (void *)get_inline(ts, te), NULL);
+  }
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer->consumer);
   }

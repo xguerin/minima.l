@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
 /*
  * Symbol management.
  */
@@ -15,23 +18,53 @@ atom_t NIL = NULL;
 atom_t TRUE = NULL;
 atom_t WILDCARD = NULL;
 
+static bool
+lisp_lookup_match(const atom_t a, const atom_t b)
+{
+  if (likely(a->type == T_INLINE && b->type == T_INLINE))
+  {
+    return a->tag == b->tag;
+  }
+  if (a->type == T_INLINE && b->type == T_SYMBOL)
+  {
+    return strcmp(a->symbol, b->string) == 0;
+  }
+  if (a->type == T_SYMBOL && b->type == T_INLINE)
+  {
+    return strcmp(a->string, b->symbol) == 0;
+  }
+  /*
+   * Default case, SYM/SYM.
+   */
+  return strcmp(a->string, b->string) == 0;
+}
+
 static atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
 {
+  /*
+   * Look-up in the closure.
+   */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (strcmp(car->pair.car->string, sym->string) == 0) {
+    if (lisp_lookup_match(car->pair.car, sym)) {
       return UP(car->pair.cdr);
     }
     NEXT(a);
   }
+  /*
+   * Look-up in globals.
+   */
   FOREACH(GLOBALS, b) {
     atom_t car = b->car;
-    if (strcmp(car->pair.car->string, sym->string) == 0) {
+    if (lisp_lookup_match(car->pair.car, sym)) {
       return UP(car->pair.cdr);
     }
     NEXT(b);
   }
+  /*
+   * Nothing found.
+   */
   return UP(NIL);
 }
 
@@ -64,6 +97,12 @@ atom_dup_symbol(const atom_t atom)
 }
 
 static atom_t
+atom_dup_inline(const atom_t atom)
+{
+  return lisp_make_inline(atom->tag);
+}
+
+static atom_t
 atom_dup_pair(const atom_t atom)
 {
   atom_t car = lisp_dup(atom->pair.car);
@@ -81,6 +120,7 @@ static atom_t (* atom_dup_table[ATOM_TYPES])(const atom_t atom) =
   [T_PAIR    ] = atom_dup_pair,
   [T_STRING  ] = atom_dup_string,
   [T_SYMBOL  ] = atom_dup_symbol,
+  [T_INLINE  ] = atom_dup_inline,
   [T_WILDCARD] = atom_dup_const,
 };
 
@@ -112,6 +152,7 @@ static atom_t (* lisp_car_table[ATOM_TYPES])(const atom_t cell) =
   [T_PAIR    ] = lisp_car_pair,
   [T_STRING  ] = lisp_car_atom,
   [T_SYMBOL  ] = lisp_car_atom,
+  [T_INLINE  ] = lisp_car_atom,
   [T_WILDCARD] = lisp_car_atom,
 };
 
@@ -141,6 +182,7 @@ static atom_t (* lisp_cdr_table[ATOM_TYPES])(const atom_t cell) =
   [T_PAIR    ] = lisp_cdr_pair,
   [T_STRING  ] = lisp_cdr_atom,
   [T_SYMBOL  ] = lisp_cdr_atom,
+  [T_INLINE  ] = lisp_cdr_atom,
   [T_WILDCARD] = lisp_cdr_atom,
 };
 
@@ -173,6 +215,12 @@ atom_equl_string(const atom_t a, const atom_t b)
 }
 
 static bool
+atom_equl_inline(const atom_t a, const atom_t b)
+{
+  return a->tag == b->tag;
+}
+
+static bool
 atom_equl_pair(const atom_t a, const atom_t b)
 {
   return lisp_equl(a->pair.car, b->pair.car) &&
@@ -187,6 +235,7 @@ static bool (* atom_equl_table[8])(const atom_t a, const atom_t b) =
   [T_PAIR    ] = atom_equl_pair,
   [T_STRING  ] = atom_equl_string,
   [T_SYMBOL  ] = atom_equl_string,
+  [T_INLINE  ] = atom_equl_inline,
   [T_WILDCARD] = atom_equl_noop,
 };
 
@@ -229,11 +278,12 @@ lisp_conc_pair(const atom_t car, const atom_t cdr)
 static atom_t (* lisp_conc_table[ATOM_TYPES])(const atom_t a, const atom_t b) =
 {
   [T_NIL     ] = lisp_conc_atom,
+  [T_TRUE    ] = lisp_conc_atom,
   [T_NUMBER  ] = lisp_conc_atom,
   [T_PAIR    ] = lisp_conc_pair,
   [T_STRING  ] = lisp_conc_atom,
   [T_SYMBOL  ] = lisp_conc_atom,
-  [T_TRUE    ] = lisp_conc_atom,
+  [T_INLINE  ] = lisp_conc_atom,
   [T_WILDCARD] = lisp_conc_atom,
 };
 
@@ -254,14 +304,14 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
   /*
    * Check if the symbol exists and replace it using a zero-copy scan.
    */
-  FOREACH(closure, p) {
-    atom_t car = p->car;
-    if (strcmp(car->pair.car->string, sym->string) == 0) {
+  FOREACH(closure, a) {
+    atom_t car = a->car;
+    if (lisp_lookup_match(car->pair.car, sym)) {
       LISP_FREE(sym, car->pair.cdr);
       car->pair.cdr = val;
       return closure;
     }
-    NEXT(p);
+    NEXT(a);
   }
   /*
    * The symbol does not exist, so append it.
@@ -332,6 +382,7 @@ static lisp_binder_t lisp_bind_table[ATOM_TYPES] =
   [T_PAIR    ] = lisp_bind_pair,
   [T_STRING  ] = lisp_bind_noop,
   [T_SYMBOL  ] = lisp_bind_setq,
+  [T_INLINE  ] = lisp_bind_setq,
   [T_WILDCARD] = lisp_bind_noop,
 };
 
@@ -378,6 +429,7 @@ static atom_t (* lisp_prog_table[ATOM_TYPES])(const atom_t closure,
   [T_PAIR    ] = lisp_prog_list,
   [T_STRING  ] = lisp_prog_noop,
   [T_SYMBOL  ] = lisp_prog_noop,
+  [T_INLINE  ] = lisp_prog_noop,
   [T_WILDCARD] = lisp_prog_noop,
 };
 
@@ -456,6 +508,7 @@ static atom_t (* lisp_eval_list_table[ATOM_TYPES])(const atom_t closure,
   [T_PAIR    ] = lisp_eval_list_lambda,
   [T_STRING  ] = lisp_eval_list_noop,
   [T_SYMBOL  ] = lisp_eval_list_symbol,
+  [T_INLINE  ] = lisp_eval_list_symbol,
   [T_WILDCARD] = lisp_eval_list_noop,
 };
 
@@ -508,6 +561,7 @@ static atom_t (* lisp_eval_table[ATOM_TYPES])(const atom_t closure,
   [T_PAIR    ] = lisp_eval_list,
   [T_STRING  ] = lisp_eval_noop,
   [T_SYMBOL  ] = lisp_eval_symbol,
+  [T_INLINE  ] = lisp_eval_symbol,
   [T_WILDCARD] = lisp_eval_noop,
 };
 
@@ -550,6 +604,17 @@ lisp_make_wildcard()
   R->refs = 1;
   TRACE_SEXP(R);
   WILDCARD = R;
+}
+
+atom_t
+lisp_make_inline(const uint64_t tag)
+{
+  atom_t R = lisp_allocate();
+  R->type = T_INLINE;
+  R->refs = 1;
+  R->tag = tag;
+  TRACE_SEXP(R);
+  return R;
 }
 
 atom_t

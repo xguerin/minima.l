@@ -33,6 +33,13 @@ lisp_consumer(const atom_t cell)
 }
 
 bool
+type_tests()
+{
+  ASSERT_EQUAL(sizeof(struct _atom), 32);
+  OK;
+}
+
+bool
 basic_tests()
 {
   lexer_t lexer;
@@ -211,7 +218,7 @@ conc_cons_tests()
   tmp3 = lisp_conc(tmp1, lisp_result);
   lisp_parse(lexer, "(1 . 2)");
   ASSERT_TRUE(lisp_equl(tmp1, lisp_result));
-  LISP_FREE(tmp1, tmp2, lisp_result);
+  LISP_FREE(tmp1, tmp2, tmp3, lisp_result);
   /*
    */
   lisp_destroy(lexer);
@@ -227,7 +234,7 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_parse(lexer, "(2)");
   tmp2 = lisp_conc(tmp1, lisp_result);
-  LISP_FREE(tmp1, lisp_result);
+  LISP_FREE(tmp1, tmp2, lisp_result);
   /*
    */
   lisp_destroy(lexer);
@@ -243,7 +250,7 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_parse(lexer, "(2)");
   tmp2 = lisp_conc(tmp1, lisp_result);
-  LISP_FREE(tmp1, lisp_result);
+  LISP_FREE(tmp1, tmp2, lisp_result);
   /*
    */
   lisp_destroy(lexer);
@@ -307,6 +314,7 @@ conc_cons_tests()
 int
 main(const int argc, char ** const argv)
 {
+  TEST(type_tests);
   TEST(basic_tests);
   TEST(car_cdr_tests);
   TEST(conc_cons_tests);

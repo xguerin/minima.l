@@ -165,6 +165,7 @@ static void (* atom_free_table[ATOM_TYPES])(const atom_t atom) =
   [T_PAIR    ] = atom_free_pair,
   [T_STRING  ] = atom_free_string,
   [T_SYMBOL  ] = atom_free_string,
+  [T_INLINE  ] = atom_free_atom,
   [T_WILDCARD] = atom_free_atom,
 };
 
