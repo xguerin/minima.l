@@ -12,6 +12,8 @@
  * Reference count functions.
  */
 
+#ifdef LISP_ENABLE_DEBUG
+
 atom_t
 lisp_incref(const atom_t atom, const char * const name)
 {
@@ -27,6 +29,8 @@ atom_t lisp_decref(const atom_t atom, const char * const name)
   return atom;
 }
 
+#endif
+
 /*
  * Slab functions.
  */
@@ -37,7 +41,7 @@ void
 lisp_slab_allocate()
 {
   memset(&slab, 0, sizeof(slab_t));
-  slab.n_pages = 1;
+  slab.n_pages = 16;
   /*
    * Allocate the slab (32GB).
    */
@@ -47,7 +51,8 @@ lisp_slab_allocate()
   /*
    * Allocate the first page.
    */
-  int res = mprotect(slab.entries, PAGE_SIZE, PROT_READ | PROT_WRITE);
+  const size_t size = (slab.n_pages << 1) * PAGE_SIZE;
+  int res = mprotect(slab.entries, size, PROT_READ | PROT_WRITE);
   if (res != 0) abort();
   /*
    * Initialize the relative addressing.
@@ -97,7 +102,7 @@ lisp_allocate() {
   /*
    * Expand if necessary.
    */
-  if (slab.first == END_MK) {
+  if (unlikely(slab.first == END_MK)) {
     lisp_slab_expand();
   }
   /*
@@ -110,7 +115,9 @@ lisp_allocate() {
   /*
    * Prepare the new atom.
    */
+#ifdef LISP_ENABLE_DEBUG
   memset(entry, 0, sizeof(struct _atom));
+#endif
   entry->next = IN_USE;
   slab.n_alloc += 1;
   return entry;
@@ -121,7 +128,9 @@ lisp_deallocate(const atom_t __p) {
   size_t n = ((uintptr_t)__p - (uintptr_t)slab.entries) / sizeof(struct _atom);
   atom_t entry = &slab.entries[n];
   TRACE("%ld", n);
+#ifdef LISP_ENABLE_DEBUG
   memset(entry, 0xA, sizeof(struct _atom));
+#endif
   entry->next = slab.first;
   slab.first = n;
   slab.n_free += 1;
@@ -130,9 +139,6 @@ lisp_deallocate(const atom_t __p) {
 /*
  * Allocation functions.
  */
-
-static void
-atom_free(const atom_t atom);
 
 static void
 atom_free_atom(const atom_t atom)
@@ -152,9 +158,8 @@ atom_free_pair(const atom_t atom)
 {
   atom_t car = atom->pair.car;
   atom_t cdr = atom->pair.cdr;
+  X(cdr); X(car);
   lisp_deallocate(atom);
-  atom_free(cdr);
-  atom_free(car);
 }
 
 static void (* atom_free_table[ATOM_TYPES])(const atom_t atom) =
@@ -169,32 +174,11 @@ static void (* atom_free_table[ATOM_TYPES])(const atom_t atom) =
   [T_WILDCARD] = atom_free_atom,
 };
 
-static void
-atom_free(const atom_t atom)
-{
-  DOWN(atom);
-  if (atom->refs == 0) {
-    TRACE_SEXP(atom);
-    atom_free_table[atom->type](atom);
-  }
-}
-
 void
-lisp_free(const size_t n, ...)
+lisp_free(const atom_t atom)
 {
-  va_list args;
-  va_start(args, n);
-  /*
-   * Deleting the items.
-   */
-  for (size_t i = 0; i < n; i += 1) {
-    atom_t atom = va_arg(args, atom_t);
-    atom_free(atom);
-  }
-  /*
-   * Clean-up.
-   */
-  va_end(args);
+  TRACE_SEXP(atom);
+  atom_free_table[atom->type](atom);
 }
 
 /*

@@ -31,11 +31,20 @@ extern slab_t slab;
  * Reference count function.
  */
 
+#ifdef LISP_ENABLE_DEBUG
+
 atom_t lisp_incref(const atom_t, const char * const name);
 atom_t lisp_decref(const atom_t, const char * const name);
 
 #define UP(__c)   lisp_incref(__c, #__c)
 #define DOWN(__c) lisp_decref(__c, #__c)
+
+#else
+
+#define UP(__c)   ((__c)->refs++, (__c))
+#define DOWN(__c) ((__c)->refs--, (__c))
+
+#endif
 
 /*
  * Slab functions.
@@ -47,19 +56,14 @@ void lisp_slab_destroy();
 atom_t lisp_allocate();
 void lisp_deallocate(const atom_t cell);
 
-void lisp_free(const size_t n, ...);
+#define X(__a) {                  \
+  DOWN(__a);                      \
+  if (unlikely(__a->refs == 0)) { \
+    lisp_free(__a);               \
+  }                               \
+}
 
-/*
- * Helpers.
- */
-
-#define PP_NARG(...)  PP_NARG_(__VA_ARGS__,PP_RSEQ_N())
-#define PP_NARG_(...) PP_ARG_N(__VA_ARGS__)
-#define PP_ARG_N(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
-#define PP_RSEQ_N() 8,7,6,5,4,3,2,1,0
-
-#define LISP_FREE(...)  \
-  lisp_free(PP_NARG(__VA_ARGS__), __VA_ARGS__)
+void lisp_free(const atom_t atom);
 
 /*
  * Debug functions.

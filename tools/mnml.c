@@ -22,7 +22,7 @@ lisp_repl_consumer(const atom_t cell)
   TRACE_SEXP(result);
   fprintf(stdout, "> ");
   lisp_print(stdout, result);
-  LISP_FREE(result);
+  X(result);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   show_prompt = true;
 }
@@ -31,7 +31,7 @@ static void
 lisp_file_consumer(const atom_t cell)
 {
   atom_t result = lisp_eval(NIL, cell);
-  LISP_FREE(result);
+  X(result);
 }
 
 void

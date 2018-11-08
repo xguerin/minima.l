@@ -209,7 +209,7 @@ lisp_destroy(const lexer_t lexer)
 {
   ParseFree(lexer->parser, local_free);
   free(lexer);
-  LISP_FREE(GLOBALS, NIL, TRUE, WILDCARD);
+  X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   lisp_slab_destroy();

@@ -20,7 +20,7 @@ static atom_t
 lisp_function_eval(const atom_t closure, const atom_t cell)
 {
   atom_t car = lisp_eval(closure, lisp_car(cell));
-  LISP_FREE(cell);
+  X(cell);
   return lisp_eval(closure, car);
 }
 
@@ -38,8 +38,9 @@ static atom_t
 lisp_function_car(const atom_t closure, const atom_t cell)
 {
   atom_t arg = lisp_eval(closure, lisp_car(cell));
+  X(cell);
   atom_t res = lisp_car(arg);
-  LISP_FREE(arg, cell);
+  X(arg);
   return res;
 }
 
@@ -47,8 +48,9 @@ static atom_t
 lisp_function_cdr(const atom_t closure, const atom_t cell)
 {
   atom_t arg = lisp_eval(closure, lisp_car(cell));
+  X(cell);
   atom_t res = lisp_cdr(arg);
-  LISP_FREE(arg, cell);
+  X(arg);
   return res;
 }
 
@@ -61,9 +63,11 @@ lisp_function_conc(const atom_t closure, const atom_t cell)
 {
   atom_t fst = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
+  X(cell);
   atom_t snd = lisp_eval(closure, lisp_car(cdr));
+  X(cdr);
   atom_t res = lisp_conc(fst, snd);
-  LISP_FREE(snd, cdr, cell);
+  X(snd);
   return res;
 }
 
@@ -72,9 +76,11 @@ lisp_function_cons(const atom_t closure, const atom_t cell)
 {
   atom_t fst = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
+  X(cell);
   atom_t snd = lisp_eval(closure, lisp_car(cdr));
+  X(cdr);
   atom_t res = lisp_cons(fst, snd);
-  LISP_FREE(snd, cdr, fst, cell);
+  X(fst); X(snd);
   return res;
 }
 
@@ -88,7 +94,7 @@ lisp_function_def(const atom_t closure, const atom_t cell)
   atom_t sym = lisp_car(cell);
   atom_t val = lisp_cdr(cell);
   GLOBALS = lisp_setq(GLOBALS, sym, UP(val));
-  LISP_FREE(cell);
+  X(cell);
   return val;
 }
 
@@ -97,9 +103,10 @@ lisp_function_setq(const atom_t closure, const atom_t cell)
 {
   atom_t sym = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
+  X(cell);
   atom_t val = lisp_eval(closure, lisp_car(cdr));
+  X(cdr);
   GLOBALS = lisp_setq(GLOBALS, sym, UP(val));
-  LISP_FREE(cdr, cell);
   return val;
 }
 
@@ -112,15 +119,16 @@ static atom_t                                                   \
 lisp_function_is ## _n(const atom_t closure, const atom_t cell) \
 {                                                               \
   atom_t car = lisp_eval(closure, lisp_car(cell));              \
+  X(cell);                                                      \
   atom_t res = _o(car) ? TRUE : NIL;                            \
-  LISP_FREE(car, cell);                                         \
+  X(car);                                                       \
   return UP(res);                                               \
 }
 
 PREDICATE_GEN(atm, !IS_PAIR);
 PREDICATE_GEN(num, IS_NUMB);
 PREDICATE_GEN(str, IS_STRN);
-PREDICATE_GEN(sym, IS_SYMB);
+PREDICATE_GEN(sym, IS_SETQ);
 PREDICATE_GEN(lst, IS_PAIR);
 PREDICATE_GEN(nil, IS_NULL);
 
@@ -134,9 +142,11 @@ lisp_function_ ## _n(const atom_t closure, const atom_t cell) \
 {                                                             \
   atom_t vl0 = lisp_eval(closure, lisp_car(cell));            \
   atom_t cdr = lisp_cdr(cell);                                \
+  X(cell);                                                    \
   atom_t vl1 = lisp_eval(closure, lisp_car(cdr));             \
+  X(cdr);                                                     \
   atom_t res = IS_TRUE(vl0) _o IS_TRUE(vl1) ? TRUE : NIL;     \
-  LISP_FREE(vl1, cdr, vl0, cell);                             \
+  X(vl0); X(vl1);                                             \
   return UP(res);                                             \
 }
 
@@ -147,8 +157,9 @@ static atom_t
 lisp_function_not(const atom_t closure, const atom_t cell)
 {
   atom_t car = lisp_eval(closure, lisp_car(cell));
+  X(cell);
   atom_t res = IS_NULL(car) ? TRUE : NIL;
-  LISP_FREE(car, cell);
+  X(car);
   return UP(res);
 }
 
@@ -162,9 +173,11 @@ lisp_function_ ## _n(const atom_t closure, const atom_t cell) \
 {                                                             \
   atom_t vl0 = lisp_eval(closure, lisp_car(cell));            \
   atom_t cdr = lisp_cdr(cell);                                \
+  X(cell);                                                    \
   atom_t vl1 = lisp_eval(closure, lisp_car(cdr));             \
+  X(cdr);                                                     \
   atom_t res = lisp_make_number(vl0->number _o vl1->number);  \
-  LISP_FREE(vl1, cdr, vl0, cell);                             \
+  X(vl0); X(vl1);                                             \
   return res;                                                 \
 }
 
@@ -182,9 +195,11 @@ lisp_function_equ(const atom_t closure, const atom_t cell)
 {
   atom_t vl0 = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
+  X(cell);
   atom_t vl1 = lisp_eval(closure, lisp_car(cdr));
+  X(cdr);
   atom_t res = lisp_equl(vl0, vl1) ? TRUE : NIL;
-  LISP_FREE(vl1, cdr, vl0, cell);
+  X(vl0); X(vl1);
   return UP(res);
 }
 
@@ -198,9 +213,11 @@ lisp_function_ ## _n(const atom_t closure, const atom_t cell)   \
 {                                                               \
   atom_t vl0 = lisp_eval(closure, lisp_car(cell));              \
   atom_t cdr = lisp_cdr(cell);                                  \
+  X(cell);                                                      \
   atom_t vl1 = lisp_eval(closure, lisp_car(cdr));               \
+  X(cdr);                                                       \
   atom_t res = vl0->number _o vl1->number ? TRUE : NIL;         \
-  LISP_FREE(vl1, cdr, vl0, cell);                               \
+  X(vl0); X(vl1);                                               \
   return UP(res);                                               \
 }
 
@@ -213,77 +230,99 @@ BINARY_COMPARE_GEN(le, <=);
  * Conditionals.
  */
 
-typedef atom_t (* ite_case_t)(const atom_t, const atom_t, const atom_t);
-
-static atom_t
-lisp_function_ite_then(const atom_t closure, const atom_t thn, const atom_t els)
-{
-  LISP_FREE(els);
-  return lisp_eval(closure, thn);
-}
-
-static atom_t
-lisp_function_ite_else(const atom_t closure, const atom_t thn, const atom_t els)
-{
-  LISP_FREE(thn);
-  return lisp_eval(closure, els);
-}
-
-static ite_case_t lisp_function_ite_table[ATOM_TYPES] =
-{
-  [T_NIL     ] = lisp_function_ite_else,
-  [T_PAIR    ] = lisp_function_ite_else,
-  [T_NUMBER  ] = lisp_function_ite_else,
-  [T_STRING  ] = lisp_function_ite_else,
-  [T_SYMBOL  ] = lisp_function_ite_else,
-  [T_TRUE    ] = lisp_function_ite_then,
-  [T_WILDCARD] = lisp_function_ite_else,
-};
-
 static atom_t
 lisp_function_ith(const atom_t closure, const atom_t cell)
 {
-  atom_t cnd = lisp_eval(closure, lisp_car(cell));
-  atom_t cd0 = lisp_cdr(cell);
-  atom_t thn = lisp_car(cd0);
   /*
-   * Execute the right branch depending on the result.
+   * Evaluate the condition expression.
    */
+  atom_t cnd = lisp_eval(closure, lisp_car(cell));
   atom_type_t type = cnd->type;
-  LISP_FREE(cd0, cnd, cell);
-  return lisp_function_ite_table[type](closure, thn, UP(NIL));
+  X(cnd);
+  /*
+   * Get the THEN branch.
+   */
+  atom_t cd0 = lisp_cdr(cell);
+  X(cell);
+  atom_t thn = lisp_car(cd0);
+  X(cd0);
+  /*
+   * Execute the THEN branch.
+   */
+  if (type == T_TRUE) {
+    return lisp_eval(closure, thn);
+  }
+  /*
+   * Clean-up.
+   */
+  X(thn);
+  return UP(NIL);
 }
 
 static atom_t
 lisp_function_int(const atom_t closure, const atom_t cell)
 {
+  /*
+   * Evaluate the condition expression.
+   */
   atom_t res = lisp_eval(closure, lisp_car(cell));
   atom_t cnd = IS_TRUE(res) ? NIL : TRUE;
-  atom_t cd0 = lisp_cdr(cell);
-  atom_t thn = lisp_car(cd0);
-  /*
-   * Execute the right branch depending on the result.
-   */
   atom_type_t type = cnd->type;
-  LISP_FREE(cd0, res, cell);
-  return lisp_function_ite_table[type](closure, thn, UP(NIL));
+  X(res);
+  /*
+   * Get the THEN branch.
+   */
+  atom_t cd0 = lisp_cdr(cell);
+  X(cell);
+  atom_t thn = lisp_car(cd0);
+  X(cd0);
+  /*
+   * Execute the THEN branch.
+   */
+  if (type == T_NIL) {
+    return lisp_eval(closure, thn);
+  }
+  /*
+   * Clean-up.
+   */
+  X(thn);
+  return UP(NIL);
 }
 
 static atom_t
 lisp_function_ite(const atom_t closure, const atom_t cell)
 {
-  atom_t cnd = lisp_eval(closure, lisp_car(cell));
-  atom_t cd0 = lisp_cdr(cell);
-  atom_t thn = lisp_car(cd0);
-  atom_t cd1 = lisp_cdr(cd0);
-  atom_t els = lisp_car(cd1);
   /*
-   * Execute the right branch depending on the result.
+   * Evaluate the condition expression.
    */
+  atom_t cnd = lisp_eval(closure, lisp_car(cell));
   atom_type_t type = cnd->type;
-  LISP_FREE(cd1, cd0, cnd, cell);
-  return lisp_function_ite_table[type](closure, thn, els);
+  X(cnd);
+  atom_t cd0 = lisp_cdr(cell);
+  X(cell);
+  /*
+   * Evaluate the THEN branch if TRUE.
+   */
+  if (type == T_TRUE) {
+    atom_t thn = lisp_car(cd0);
+    X(cd0);
+    return lisp_eval(closure, thn);
+  }
+  /*
+   * Or evaluate the ELSE branch.
+   */
+  else {
+    atom_t cd1 = lisp_cdr(cd0);
+    X(cd0);
+    atom_t els = lisp_car(cd1);
+    X(cd1);
+    return lisp_eval(closure, els);
+  }
 }
+
+/*
+ * Debug functions.
+ */
 
 /*
  * Set-up function.

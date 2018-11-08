@@ -5,6 +5,13 @@
 #include <stdio.h>
 
 /*
+ * Optimization macros.
+ */
+
+#define likely(x)   __builtin_expect(!!(x), 1)
+#define unlikely(x) __builtin_expect(!!(x), 0)
+
+/*
  * Lisp types.
  */
 
@@ -52,7 +59,9 @@ __attribute__((packed)) * atom_t;
 #define IS_NUMB(__a) ((__a)->type == T_NUMBER)
 #define IS_PAIR(__a) ((__a)->type == T_PAIR)
 #define IS_STRN(__a) ((__a)->type == T_STRING)
-#define IS_SYMB(__a) ((__a)->type == T_SYMBOL || (__a->type == T_INLINE))
+#define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
+#define IS_INLN(__a) ((__a)->type == T_INLINE)
+#define IS_SETQ(__a) (IS_SYMB(__a) || IS_INLN(__a))
 
 /*
  * Helper macros.

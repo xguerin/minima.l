@@ -42,20 +42,20 @@ list(A) ::= POPEN items(B) PCLOSE.
 list(A) ::= POPEN items(B) DOT quote(C) PCLOSE.
 {
   A = lisp_conc(B, C);
-  LISP_FREE(B, C);
+  X(B); X(C);
 }
 
 items(A) ::= quote(B).
 {
   A = lisp_cons(B, NIL);
-  LISP_FREE(B);
+  X(B);
 }
 
 items(A) ::= items(B) quote(C).
 {
   atom_t D = lisp_cons(C, NIL);
   A = lisp_conc(B, D);
-  LISP_FREE(B, C, D);
+  X(B); X(C); X(D);
 }
 
 quote(A) ::= item(B).
@@ -67,7 +67,7 @@ quote(A) ::= QUOTE item(B).
 {
   atom_t Q = lisp_make_symbol(strdup("quote"));
   A = lisp_cons(Q, B);
-  LISP_FREE(Q, B);
+  X(Q); X(B);
 }
 
 item(A) ::= NUMBER(B).

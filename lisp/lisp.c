@@ -6,9 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-
 /*
  * Symbol management.
  */
@@ -21,15 +18,15 @@ atom_t WILDCARD = NULL;
 static bool
 lisp_lookup_match(const atom_t a, const atom_t b)
 {
-  if (likely(a->type == T_INLINE && b->type == T_INLINE))
+  if (likely(IS_INLN(a) && IS_INLN(b)))
   {
     return a->tag == b->tag;
   }
-  if (a->type == T_INLINE && b->type == T_SYMBOL)
+  if (IS_INLN(a) && IS_SYMB(b))
   {
     return strcmp(a->symbol, b->string) == 0;
   }
-  if (a->type == T_SYMBOL && b->type == T_INLINE)
+  if (IS_SYMB(a) && IS_INLN(b))
   {
     return strcmp(a->string, b->symbol) == 0;
   }
@@ -72,124 +69,60 @@ lisp_lookup(const atom_t closure, const atom_t sym)
  * Basic functions.
  */
 
-static atom_t
-atom_dup_const(const atom_t atom)
-{
-  return UP(atom);
-}
-
-static atom_t
-atom_dup_number(const atom_t atom)
-{
-  return lisp_make_number(atom->number);
-}
-
-static atom_t
-atom_dup_string(const atom_t atom)
-{
-  return lisp_make_string(strdup(atom->string));
-}
-
-static atom_t
-atom_dup_symbol(const atom_t atom)
-{
-  return lisp_make_symbol(strdup(atom->string));
-}
-
-static atom_t
-atom_dup_inline(const atom_t atom)
-{
-  return lisp_make_inline(atom->tag);
-}
-
-static atom_t
-atom_dup_pair(const atom_t atom)
-{
-  atom_t car = lisp_dup(atom->pair.car);
-  atom_t cdr = lisp_dup(atom->pair.cdr);
-  atom_t res = lisp_cons(car, cdr);
-  LISP_FREE(car, cdr);
-  return res;
-}
-
-static atom_t (* atom_dup_table[ATOM_TYPES])(const atom_t atom) =
-{
-  [T_NIL     ] = atom_dup_const,
-  [T_TRUE    ] = atom_dup_const,
-  [T_NUMBER  ] = atom_dup_number,
-  [T_PAIR    ] = atom_dup_pair,
-  [T_STRING  ] = atom_dup_string,
-  [T_SYMBOL  ] = atom_dup_symbol,
-  [T_INLINE  ] = atom_dup_inline,
-  [T_WILDCARD] = atom_dup_const,
-};
-
 atom_t
 lisp_dup(const atom_t atom)
 {
-  atom_t res = atom_dup_table[atom->type](atom);
+  atom_t res;
+  /*
+   */
+  switch (atom->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_WILDCARD:
+      res = UP(atom);
+      break;
+    case T_NUMBER:
+      res = lisp_make_number(atom->number);
+      break;
+    case T_PAIR: {
+      atom_t car = lisp_dup(atom->pair.car);
+      atom_t cdr = lisp_dup(atom->pair.cdr);
+      res = lisp_cons(car, cdr);
+      X(car); X(cdr);
+      break;
+    }
+    case T_STRING:
+      res = lisp_make_string(strdup(atom->string));
+      break;
+    case T_SYMBOL:
+      res = lisp_make_symbol(strdup(atom->string));
+      break;
+    case T_INLINE:
+      res = lisp_make_inline(atom->tag);
+      break;
+  }
+  /*
+   */
   TRACE_SEXP(res);
   return res;
 }
 
-static atom_t
-lisp_car_atom(const atom_t cell)
-{
-  return UP(NIL);
-}
-
-static atom_t
-lisp_car_pair(const atom_t cell)
-{
-  return UP(cell->pair.car);
-}
-
-static atom_t (* lisp_car_table[ATOM_TYPES])(const atom_t cell) =
-{
-  [T_NIL     ] = lisp_car_atom,
-  [T_TRUE    ] = lisp_car_atom,
-  [T_NUMBER  ] = lisp_car_atom,
-  [T_PAIR    ] = lisp_car_pair,
-  [T_STRING  ] = lisp_car_atom,
-  [T_SYMBOL  ] = lisp_car_atom,
-  [T_INLINE  ] = lisp_car_atom,
-  [T_WILDCARD] = lisp_car_atom,
-};
-
 atom_t
 lisp_car(const atom_t cell)
 {
-  return lisp_car_table[cell->type](cell);
-}
-
-static atom_t
-lisp_cdr_atom(const atom_t cell)
-{
+  if (likely(IS_PAIR(cell))) {
+    return UP(cell->pair.car);
+  }
   return UP(NIL);
 }
-
-static atom_t
-lisp_cdr_pair(const atom_t cell)
-{
-  return UP(cell->pair.cdr);
-}
-
-static atom_t (* lisp_cdr_table[ATOM_TYPES])(const atom_t cell) =
-{
-  [T_NIL     ] = lisp_cdr_atom,
-  [T_TRUE    ] = lisp_cdr_atom,
-  [T_NUMBER  ] = lisp_cdr_atom,
-  [T_PAIR    ] = lisp_cdr_pair,
-  [T_STRING  ] = lisp_cdr_atom,
-  [T_SYMBOL  ] = lisp_cdr_atom,
-  [T_INLINE  ] = lisp_cdr_atom,
-  [T_WILDCARD] = lisp_cdr_atom,
-};
 
 atom_t
 lisp_cdr(const atom_t cell)
 {
-  return lisp_cdr_table[cell->type](cell);
+  if (likely(IS_PAIR(cell))) {
+    return UP(cell->pair.cdr);
+  }
+  return UP(NIL);
 }
 
 /*
@@ -197,52 +130,30 @@ lisp_cdr(const atom_t cell)
  */
 
 static bool
-atom_equl_noop(const atom_t a, const atom_t b)
+atom_equl(const atom_t a, const atom_t b)
 {
-  return true;
+  switch (a->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_WILDCARD:
+      return true;
+    case T_NUMBER:
+      return a->number == b->number;
+    case T_PAIR:
+      return lisp_equl(a->pair.car, b->pair.car) &&
+        lisp_equl(a->pair.car, b->pair.car);
+    case T_STRING:
+    case T_SYMBOL:
+      return strcmp(a->string, b->string) == 0;
+    case T_INLINE:
+      return a->tag == b->tag;
+  }
 }
-
-static bool
-atom_equl_number(const atom_t a, const atom_t b)
-{
-  return a->number == b->number;
-}
-
-static bool
-atom_equl_string(const atom_t a, const atom_t b)
-{
-  return strcmp(a->string, b->string) == 0;
-}
-
-static bool
-atom_equl_inline(const atom_t a, const atom_t b)
-{
-  return a->tag == b->tag;
-}
-
-static bool
-atom_equl_pair(const atom_t a, const atom_t b)
-{
-  return lisp_equl(a->pair.car, b->pair.car) &&
-    lisp_equl(a->pair.car, b->pair.car);
-}
-
-static bool (* atom_equl_table[8])(const atom_t a, const atom_t b) =
-{
-  [T_NIL     ] = atom_equl_noop,
-  [T_TRUE    ] = atom_equl_noop,
-  [T_NUMBER  ] = atom_equl_number,
-  [T_PAIR    ] = atom_equl_pair,
-  [T_STRING  ] = atom_equl_string,
-  [T_SYMBOL  ] = atom_equl_string,
-  [T_INLINE  ] = atom_equl_inline,
-  [T_WILDCARD] = atom_equl_noop,
-};
 
 bool
 lisp_equl(const atom_t a, const atom_t b)
 {
-  return a->type == b->type && atom_equl_table[a->type](a, b);
+  return a->type == b->type && atom_equl(a, b);
 }
 
 atom_t
@@ -257,40 +168,25 @@ lisp_cons(const atom_t car, const atom_t cdr)
   return R;
 }
 
-static atom_t
-lisp_conc_atom(const atom_t car, const atom_t cdr)
-{
-  atom_t R = UP(cdr);
-  TRACE_SEXP(R);
-  return R;
-}
-
-static atom_t
-lisp_conc_pair(const atom_t car, const atom_t cdr)
-{
-  FOREACH(car, p) NEXT(p);
-  LISP_FREE(p->cdr);
-  p->cdr = UP(cdr);
-  TRACE_SEXP(car);
-  return UP(car);
-}
-
-static atom_t (* lisp_conc_table[ATOM_TYPES])(const atom_t a, const atom_t b) =
-{
-  [T_NIL     ] = lisp_conc_atom,
-  [T_TRUE    ] = lisp_conc_atom,
-  [T_NUMBER  ] = lisp_conc_atom,
-  [T_PAIR    ] = lisp_conc_pair,
-  [T_STRING  ] = lisp_conc_atom,
-  [T_SYMBOL  ] = lisp_conc_atom,
-  [T_INLINE  ] = lisp_conc_atom,
-  [T_WILDCARD] = lisp_conc_atom,
-};
-
 atom_t
 lisp_conc(const atom_t car, const atom_t cdr)
 {
-  return lisp_conc_table[car->type](car, cdr);
+  atom_t R;
+  /*
+   */
+  if (likely(IS_PAIR(car))) {
+    FOREACH(car, p) NEXT(p);
+    X(p->cdr);
+    p->cdr = UP(cdr);
+    R = UP(car);
+  }
+  else {
+    R = UP(cdr);
+  }
+  /*
+   */
+  TRACE_SEXP(R);
+  return R;
 }
 
 /*
@@ -307,7 +203,7 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
   FOREACH(closure, a) {
     atom_t car = a->car;
     if (lisp_lookup_match(car->pair.car, sym)) {
-      LISP_FREE(sym, car->pair.cdr);
+      X(sym); X(car->pair.cdr);
       car->pair.cdr = val;
       return closure;
     }
@@ -317,9 +213,13 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
    * The symbol does not exist, so append it.
    */
   atom_t con = lisp_cons(sym, val);
+  X(sym); X(val);
   atom_t lst = lisp_cons(con, NIL);
+  X(con);
   atom_t res = lisp_conc(closure, lst);
-  LISP_FREE(closure, sym, val, lst, con);
+  X(lst); X(closure);
+  /*
+   */
   TRACE_SEXP(res);
   return res;
 }
@@ -328,116 +228,77 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
  * Argument bindings. RC rules: all arguments are consumed.
  */
 
-typedef atom_t (* lisp_binder_t)(const atom_t, const atom_t, const atom_t);
-
-static atom_t
-lisp_bind_noop(const atom_t closure, const atom_t args, const atom_t vals)
-{
-  LISP_FREE(args, vals);
-  return closure;
-}
-
-static atom_t
-lisp_bind_setq(const atom_t closure, const atom_t args, const atom_t vals)
-{
-  TRACE_SEXP(closure);
-  atom_t ret = lisp_setq(closure, args, vals);
-  TRACE_SEXP(closure);
-  TRACE_SEXP(ret);
-  return ret;
-}
-
-static atom_t
-lisp_bind_pair(const atom_t closure, const atom_t args, const atom_t vals)
-{
-  TRACE_SEXP(closure);
-  /*
-   * Grab the CARs, evaluate the value and bind them.
-   */
-  atom_t sym = lisp_car(args);
-  atom_t val = lisp_eval(closure, lisp_car(vals));
-  atom_t cl0 = lisp_bind(closure, sym, val);
-  TRACE_SEXP(closure);
-  TRACE_SEXP(cl0);
-  /*
-   * Grab the CDRs and recursively bind them.
-   */
-  atom_t oth = lisp_cdr(args);
-  atom_t rem = lisp_cdr(vals);
-  atom_t res = lisp_bind(cl0, oth, rem);
-  TRACE_SEXP(cl0);
-  TRACE_SEXP(res);
-  /*
-   */
-  LISP_FREE(args, vals);
-  TRACE_SEXP(res);
-  return res;
-}
-
-static lisp_binder_t lisp_bind_table[ATOM_TYPES] =
-{
-  [T_NIL     ] = lisp_bind_noop,
-  [T_TRUE    ] = lisp_bind_noop,
-  [T_NUMBER  ] = lisp_bind_noop,
-  [T_PAIR    ] = lisp_bind_pair,
-  [T_STRING  ] = lisp_bind_noop,
-  [T_SYMBOL  ] = lisp_bind_setq,
-  [T_INLINE  ] = lisp_bind_setq,
-  [T_WILDCARD] = lisp_bind_noop,
-};
-
 atom_t
 lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
 {
-  return lisp_bind_table[args->type](closure, args, vals);
+  atom_t ret;
+  /*
+   */
+  switch (args->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_NUMBER:
+    case T_STRING:
+    case T_WILDCARD: {
+      X(args); X(vals);
+      ret = closure;
+      break;
+    }
+    case T_PAIR: {
+      /*
+       * Grab the CARs, evaluate the value and bind them.
+       */
+      atom_t sym = lisp_car(args);
+      atom_t val = lisp_eval(closure, lisp_car(vals));
+      atom_t cl0 = lisp_bind(closure, sym, val);
+      /*
+       * Grab the CDRs and recursively bind them.
+       */
+      atom_t oth = lisp_cdr(args);
+      atom_t rem = lisp_cdr(vals);
+      X(args); X(vals);
+      /*
+      */
+      ret = lisp_bind(cl0, oth, rem);
+      break;
+    }
+    case T_SYMBOL:
+    case T_INLINE: {
+      ret = lisp_setq(closure, args, vals);
+      break;
+    }
+  }
+  /*
+   */
+  TRACE_SEXP(ret);
+  return ret;
 }
 
 /*
  * Prog evaluation. The result of the last evaluation is returned.
  */
 
-static atom_t
-lisp_prog_noop(const atom_t closure, const atom_t cell, const atom_t result)
-{
-  TRACE_SEXP(cell);
-  LISP_FREE(cell);
-  return result;
-}
-
-static atom_t
-lisp_prog_list(const atom_t closure, const atom_t cell, const atom_t result)
-{
-  TRACE_SEXP(cell);
-  /*
-   * Get CAR/CDR.
-   */
-  atom_t res = lisp_eval(closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  /*
-   */
-  LISP_FREE(cell, result);
-  return lisp_prog(closure, cdr, res);
-}
-
-static atom_t (* lisp_prog_table[ATOM_TYPES])(const atom_t closure,
-                                              const atom_t cell,
-                                              const atom_t result) =
-{
-  [T_NIL     ] = lisp_prog_noop,
-  [T_TRUE    ] = lisp_prog_noop,
-  [T_NUMBER  ] = lisp_prog_noop,
-  [T_PAIR    ] = lisp_prog_list,
-  [T_STRING  ] = lisp_prog_noop,
-  [T_SYMBOL  ] = lisp_prog_noop,
-  [T_INLINE  ] = lisp_prog_noop,
-  [T_WILDCARD] = lisp_prog_noop,
-};
-
 atom_t
 lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
 {
   TRACE_SEXP(cell);
-  return lisp_prog_table[cell->type](closure, cell, result);
+  /*
+   */
+  if (likely(IS_PAIR(cell))) {
+    /*
+     * Get CAR/CDR.
+     */
+    atom_t res = lisp_eval(closure, lisp_car(cell));
+    atom_t cdr = lisp_cdr(cell);
+    /*
+     */
+    X(cell); X(result);
+    return lisp_prog(closure, cdr, res);
+  }
+  /*
+   */
+  X(cell);
+  return result;
 }
 
 /*
@@ -445,131 +306,112 @@ lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
  */
 
 static atom_t
-lisp_eval_list_noop(const atom_t closure, const atom_t cell)
+lisp_eval_pair(const atom_t closure, const atom_t cell)
 {
-  TRACE_SEXP(cell);
-  return cell;
-}
-
-static atom_t
-lisp_eval_list_number(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  uintptr_t fun = car->number;
-  LISP_FREE(car, cell);
-  return ((function_t)car->number)(closure, cdr);
-}
-
-static atom_t
-lisp_eval_list_lambda(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  /*
-   * Grab lambda and values.
-   */
-  atom_t lbda = lisp_car(cell);
-  atom_t vals = lisp_cdr(cell);
-  /*
-   * Grab the arguments, body of the lambda. TODO add the curried closure.
-   */
-  atom_t args = lisp_car(lbda);
-  atom_t body = lisp_cdr(lbda);
-  /*
-   * Bind the arguments and the values. TODO bind the curried closure:
-   * 1. Bind arguments with values
-   * 2. Check if there are any reminders
-   * 3. Return a lambda with updated local closure if some are NIL
-   */
-  atom_t newl = lisp_dup(closure);
-  atom_t clos = lisp_bind(newl, args, vals);
-  TRACE_SEXP(clos);
+  atom_t ret;
   /*
    */
-  atom_t rslt = lisp_prog(clos, body, UP(NIL));
-  LISP_FREE(clos, cell, lbda);
-  return rslt;
+  switch (cell->pair.car->type) {
+    case T_NIL:
+    case T_NUMBER: {
+      atom_t cdr = lisp_cdr(cell);
+      function_t fun = (function_t)cell->pair.car->number;
+      X(cell);
+      ret = fun(closure, cdr);
+      break;
+    }
+    case T_TRUE:
+    case T_STRING:
+    case T_WILDCARD: {
+      ret = cell;
+      break;
+    }
+    case T_PAIR: {
+      /*
+       * Grab lambda and values.
+       */
+      atom_t lbda = lisp_car(cell);
+      atom_t vals = lisp_cdr(cell);
+      /*
+       * Grab the arguments, body of the lambda. TODO add the curried closure.
+       */
+      atom_t args = lisp_car(lbda);
+      atom_t body = lisp_cdr(lbda);
+      X(cell); X(lbda);
+      /*
+       * Bind the arguments and the values. TODO bind the curried closure:
+       * 1. Bind arguments with values
+       * 2. Check if there are any reminders
+       * 3. Return a lambda with updated local closure if some are NIL
+       */
+      atom_t newl = lisp_dup(closure);
+      atom_t clos = lisp_bind(newl, args, vals);
+      ret = lisp_prog(clos, body, UP(NIL));
+      /*
+      */
+      X(clos);
+      break;
+    }
+    case T_SYMBOL:
+    case T_INLINE: {
+      ret = lisp_eval(closure, cell);
+      break;
+    }
+  }
+  /*
+   */
+  TRACE_SEXP(ret);
+  return ret;
 }
-
-static atom_t
-lisp_eval_list_symbol(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  return lisp_eval(closure, cell);
-}
-
-static atom_t (* lisp_eval_list_table[ATOM_TYPES])(const atom_t closure,
-                                                   const atom_t cell) =
-{
-  [T_NIL     ] = lisp_eval_list_number,
-  [T_TRUE    ] = lisp_eval_list_noop,
-  [T_NUMBER  ] = lisp_eval_list_number,
-  [T_PAIR    ] = lisp_eval_list_lambda,
-  [T_STRING  ] = lisp_eval_list_noop,
-  [T_SYMBOL  ] = lisp_eval_list_symbol,
-  [T_INLINE  ] = lisp_eval_list_symbol,
-  [T_WILDCARD] = lisp_eval_list_noop,
-};
 
 /*
  * Generic evaluation.
  */
 
-static atom_t
-lisp_eval_noop(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  /*
-   * Equivalent to DUP + FREE.
-   */
-  return cell;
-}
-
-static atom_t
-lisp_eval_symbol(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  atom_t res = lisp_lookup(closure, cell);
-  LISP_FREE(cell);
-  return res;
-}
-
-static atom_t
-lisp_eval_list(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  /*
-   * Evaluate CAR.
-   */
-  atom_t car = lisp_eval(closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  atom_t new = lisp_cons(car, cdr);
-  /*
-   * Evaluate the list.
-   */
-  LISP_FREE(car, cdr, cell);
-  return lisp_eval_list_table[car->type](closure, new);
-}
-
-static atom_t (* lisp_eval_table[ATOM_TYPES])(const atom_t closure,
-                                              const atom_t cell) =
-{
-  [T_NIL     ] = lisp_eval_noop,
-  [T_TRUE    ] = lisp_eval_noop,
-  [T_NUMBER  ] = lisp_eval_noop,
-  [T_PAIR    ] = lisp_eval_list,
-  [T_STRING  ] = lisp_eval_noop,
-  [T_SYMBOL  ] = lisp_eval_symbol,
-  [T_INLINE  ] = lisp_eval_symbol,
-  [T_WILDCARD] = lisp_eval_noop,
-};
-
 atom_t
 lisp_eval(const atom_t closure, const atom_t cell)
 {
-  TRACE_SEXP(cell);
-  return lisp_eval_table[cell->type](closure, cell);
+  atom_t ret;
+  /*
+   */
+  switch (cell->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_NUMBER:
+    case T_STRING:
+    case T_WILDCARD: {
+      ret = cell;
+      break;
+    }
+    case T_PAIR: {
+      /*
+       * Evaluate CAR.
+       */
+      atom_t car = lisp_eval(closure, lisp_car(cell));
+      atom_t cdr = lisp_cdr(cell);
+      X(cell);
+      /*
+       * Build the new value.
+       */
+      atom_t new = lisp_cons(car, cdr);
+      X(car); X(cdr);
+      /*
+       * Evaluate the list.
+       */
+      ret = lisp_eval_pair(closure, new);
+      break;
+    }
+    case T_SYMBOL:
+    case T_INLINE: {
+      ret = lisp_lookup(closure, cell);
+      X(cell);
+      break;
+    }
+  }
+  /*
+   */
+  TRACE_SEXP(ret);
+  return ret;
 }
 
 /*

@@ -29,7 +29,7 @@ alloc_free_test()
    */
   ASSERT_EQUAL(slab.first, 16);
   for (size_t i = 0; i < 16; i += 1) {
-    lisp_free(1, cells[i]);
+    X(cells[i]);
     ASSERT_EQUAL(slab.first, i);
   }
   /*
@@ -68,7 +68,7 @@ alloc_full_test()
    */
   ASSERT_EQUAL(slab.first, -1U);
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
-    lisp_free(1, cells[i]);
+    X(cells[i]);
     ASSERT_EQUAL(slab.first, i);
   }
   /*
@@ -108,7 +108,7 @@ alloc_xpnd_test()
    */
   ASSERT_EQUAL(slab.first, -1U);
   for (size_t i = 0; i < count; i += 1) {
-    lisp_free(1, cells[i]);
+    X(cells[i]);
     ASSERT_EQUAL(slab.first, i);
   }
   /*
