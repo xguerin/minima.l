@@ -396,12 +396,15 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        */
       atom_t lbda = lisp_car(cell);
       atom_t vals = lisp_cdr(cell);
+      X(cell);
       /*
        * Grab the arguments, body of the lambda. TODO add the curried closure.
        */
       atom_t args = lisp_car(lbda);
-      atom_t body = lisp_cdr(lbda);
-      X(cell); X(lbda);
+      atom_t cdr0 = lisp_cdr(lbda);
+      X(lbda);
+      atom_t body = lisp_car(cdr0);
+      X(cdr0);
       /*
        * Bind the arguments and the values. TODO bind the curried closure:
        * 1. Bind arguments with values
@@ -409,11 +412,11 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        * 3. Return a lambda with updated local closure if some are NIL
        */
       atom_t newl = lisp_dup(closure);
-      atom_t clos = lisp_bind(newl, args, vals);
-      ret = lisp_prog(clos, body, UP(NIL));
+      atom_t newc = lisp_bind(newl, args, vals);
+      ret = lisp_eval(newc, body);
       /*
       */
-      X(clos);
+      X(newc);
       break;
     }
     case T_SYMBOL:
