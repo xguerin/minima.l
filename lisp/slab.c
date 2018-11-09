@@ -145,6 +145,16 @@ lisp_free(const atom_t atom)
 {
   TRACE_SEXP(atom);
   /*
+   * Most likely this is a pair.
+   */
+  if (likely(IS_PAIR(atom))) {
+    X(atom->pair.cdr);
+    X(atom->pair.car);
+    lisp_deallocate(atom);
+    return;
+  }
+  /*
+   * Process atoms.
    */
   switch (atom->type) {
     case T_NIL:
@@ -154,15 +164,12 @@ lisp_free(const atom_t atom)
     case T_INLINE:
       lisp_deallocate(atom);
       break;
-    case T_PAIR:
-      X(atom->pair.car);
-      X(atom->pair.cdr);
-      lisp_deallocate(atom);
-      break;
     case T_STRING:
     case T_SYMBOL:
       free((void *)atom->string);
       lisp_deallocate(atom);
+      break;
+    default:
       break;
   }
 }
