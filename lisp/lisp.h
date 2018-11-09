@@ -144,25 +144,24 @@ void lisp_print(FILE * const fp, const atom_t cell);
 
 #ifdef LISP_ENABLE_DEBUG
 
-#define TRACE(__fmt, ...) {                                             \
-  printf("! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__);  \
-}
+#define TRACE(__fmt, ...) \
+  fprintf(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #ifdef __MACH__
 
 #define HEADER_SEXP(__c)  \
-  printf("! %s:%d: [%llu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
+  fprintf(stderr, "! %s:%d: [%llu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
 
 #else
 
 #define HEADER_SEXP(__c)  \
-  printf("! %s:%d: [%lu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
+  fprintf(stderr, "! %s:%d: [%lu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
 
 #endif
 
 #define TRACE_SEXP(__c) {   \
   HEADER_SEXP(__c);         \
-  lisp_print(stdout, __c);  \
+  lisp_print(stderr, __c);  \
 }
 
 #else

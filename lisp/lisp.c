@@ -223,6 +223,9 @@ atom_t
 lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
 {
   atom_t ret;
+  TRACE_SEXP(closure);
+  TRACE_SEXP(args);
+  TRACE_SEXP(vals);
   /*
    */
   switch (args->type) {
@@ -264,10 +267,6 @@ lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
   TRACE_SEXP(ret);
   return ret;
 }
-
-/*
- * Prog creation. The list of the evaluations is returned.
- */
 
 /*
  * List evaluation.

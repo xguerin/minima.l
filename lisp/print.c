@@ -109,5 +109,5 @@ void
 lisp_print(FILE * const fp, const atom_t atom)
 {
   lisp_print_atom(fp, atom, true);
-  printf("\n");
+  fprintf(fp, "\n");
 }
