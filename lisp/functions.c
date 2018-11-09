@@ -390,7 +390,9 @@ lisp_function_register_all()
 {
   for (size_t i = 0; i < FUNCTION_COUNT; i += 1) {
     if (functions[i].enabled) {
-      atom_t sym = lisp_make_symbol(strdup(functions[i].name));
+      union { uint64_t tag; char symbol[8]; } u = { 0 };
+      strcpy(u.symbol, functions[i].name);
+      atom_t sym = lisp_make_inline(u.tag);
       atom_t val = lisp_make_number((uintptr_t)functions[i].fun);
       GLOBALS = lisp_setq(GLOBALS, sym, val);
     }
