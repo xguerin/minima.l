@@ -76,6 +76,11 @@ item(A) ::= NUMBER(B).
   A = lisp_make_number((int64_t)B);
 }
 
+item(A) ::= CHAR(B).
+{
+  A = lisp_make_char((char)B);
+}
+
 item(A) ::= STRING(B).
 {
   A = lisp_make_string((const char *)B);

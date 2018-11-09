@@ -13,6 +13,7 @@ atom_equ(const atom_t a, const atom_t b)
     case T_TRUE:
     case T_WILDCARD:
       return true;
+    case T_CHAR:
     case T_NUMBER:
       return a->number == b->number;
     case T_PAIR:

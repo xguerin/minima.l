@@ -16,6 +16,15 @@ lisp_print_atom(FILE * const fp, const atom_t atom, const bool alter)
     case T_TRUE:
       fprintf(fp, "T");
       break;
+    case T_CHAR:
+      if ((char)atom->number == '\'') {
+        fprintf(fp, "'\\''");
+      }
+      else {
+        fprintf(fp, "'%c'", (int)atom->number);
+      }
+      break;
+
     case T_PAIR:
       if (alter) fprintf(fp, "(");
       /*

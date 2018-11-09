@@ -57,6 +57,19 @@ action tok_number
   }
 }
 
+action tok_char
+{
+  const char * start = ts + 1, * end = te - 1;
+  size_t len = end - start;
+  uint64_t val = len == 1 ? *start : *(start + 1);
+  /*
+   */
+  Parse(lexer->parser, CHAR, (void *)val, NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
+
 action tok_string
 {
   const char * start = ts + 1, * end = te - 1;
@@ -106,15 +119,16 @@ action tok_symbol
   }
 }
 
-popen  = '(';
-pclose = ')';
-dot    = '.';
-quote  = '\'';
-number = '-'? digit+;
-string = '"' [^"]* '"';
-marks  = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
-symchr = (alpha | marks);
-symbol = symchr{1,16};
+popen   = '(';
+pclose  = ')';
+dot     = '.';
+quote   = '\'';
+number  = '-'? digit+;
+char    = '\'' ([^'] | '\\' '\'')+ '\'';
+string  = '"' ([^"] | '\\' '"')+ '"';
+marks   = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
+symchr  = (alpha | marks);
+symbol  = symchr{1,16};
 comment = '#' [^\n]*;
 
 main := |*
@@ -123,6 +137,7 @@ main := |*
   dot    => tok_dot;
   quote  => tok_quote;
   number => tok_number;
+  char   => tok_char;
   string => tok_string;
   "NIL"  => tok_nil;
   'T'    => tok_true;

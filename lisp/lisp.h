@@ -20,6 +20,7 @@ typedef enum _atom_type
 {
   T_NIL,
   T_TRUE,
+  T_CHAR,
   T_NUMBER,
   T_PAIR,
   T_STRING,
@@ -28,7 +29,7 @@ typedef enum _atom_type
 }
 atom_type_t;
 
-#define ATOM_TYPES 7
+#define ATOM_TYPES 8
 
 struct _atom;
 
@@ -139,6 +140,7 @@ void lisp_make_wildcard();
 
 atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_inline(const uint64_t tag);
+atom_t lisp_make_char(const char c);
 atom_t lisp_make_string(const char * const str);
 atom_t lisp_make_symbol(const symbol_t sym);
 
