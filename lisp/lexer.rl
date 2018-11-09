@@ -1,4 +1,3 @@
-#include "functions.h"
 #include "lexer.h"
 #include "slab.h"
 #include <assert.h>

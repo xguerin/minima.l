@@ -9,5 +9,5 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-const-variable")
 LEMON(parser SYNTAX_SOURCE)
 RAGEL(lexer ${SYNTAX_SOURCE} SOURCES)
 
-add_library(minimal_lisp STATIC ${SOURCES})
-set_property(TARGET minimal_lisp PROPERTY C_STANDARD 99)
+add_library(minimal SHARED ${SOURCES})
+set_property(TARGET minimal PROPERTY C_STANDARD 99)

@@ -1,4 +1,3 @@
-#include <lisp/functions.h>
 #include <lisp/lexer.h>
 #include <lisp/slab.h>
 #include <stdio.h>
@@ -9,7 +8,7 @@ static bool show_prompt = true;
 typedef void (* stage_t)(const lexer_t lexer);
 
 void
-syntax_error()
+syntax_error_handler()
 {
   fprintf(stdout, "! syntax error\n");
   show_prompt = true;
@@ -57,8 +56,8 @@ stage_newline(const lexer_t lexer)
 }
 
 static void
-process(const lisp_consumer_t cons, FILE * const file,
-        const stage_t pre, const stage_t post)
+process(const lisp_consumer_t cons, FILE * const file, const stage_t pre,
+        const stage_t post)
 {
   char * line = NULL;
   size_t linecap = 0;
@@ -67,7 +66,7 @@ process(const lisp_consumer_t cons, FILE * const file,
    * Create the parser and register all functions.
    */
   lexer_t lexer = lisp_create(cons);
-  lisp_function_register_all();
+  lisp_set_syntax_error_handler(syntax_error_handler);
   /*
    * Process input lines.
    */

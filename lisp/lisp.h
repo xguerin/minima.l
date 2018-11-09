@@ -64,6 +64,15 @@ __attribute__((packed)) * atom_t;
 #define IS_SETQ(__a) (IS_SYMB(__a) || IS_INLN(__a))
 
 /*
+ * Function type.
+ */
+
+typedef void (* error_handler_t)();
+typedef atom_t (* function_t)(const atom_t closure, const atom_t cell);
+
+void lisp_set_syntax_error_handler(const error_handler_t handler);
+
+/*
  * Helper macros.
  */
 

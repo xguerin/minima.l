@@ -1,10 +1,29 @@
-#include "functions.h"
 #include "lisp.h"
+#include "plugin.h"
 #include "slab.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/*
+ * Syntax error handler.
+ */
+
+error_handler_t syntax_error_handler = NULL;
+
+void syntax_error()
+{
+  if (syntax_error_handler != NULL) {
+    syntax_error_handler();
+  }
+}
+
+void
+lisp_set_syntax_error_handler(const error_handler_t handler)
+{
+  syntax_error_handler = handler;
+}
 
 /*
  * Symbol management.
@@ -60,9 +79,10 @@ lisp_lookup(const atom_t closure, const atom_t sym)
     NEXT(b);
   }
   /*
-   * Nothing found.
+   * Nothing found, try to load as a plugin.
    */
-  return UP(NIL);
+  const char * n = sym->type == T_INLINE ? sym->symbol : sym->string;
+  return lisp_plugin_load(n);
 }
 
 /*

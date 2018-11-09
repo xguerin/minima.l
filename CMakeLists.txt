@@ -85,6 +85,7 @@ find_package(Ragel REQUIRED)
 # Subdirectories
 #
 
+add_subdirectory(functions)
 add_subdirectory(lisp)
 add_subdirectory(tools)
 

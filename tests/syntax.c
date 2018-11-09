@@ -3,7 +3,7 @@
 #include <lisp/slab.h>
 
 void
-syntax_error() { }
+syntax_error_handler() { }
 
 /*
  * Basic tests.
@@ -314,6 +314,13 @@ conc_cons_tests()
 int
 main(const int argc, char ** const argv)
 {
+  /*
+   * Set error handler.
+   */
+  lisp_set_syntax_error_handler(syntax_error_handler);
+  /*
+   * Run tests.
+   */
   TEST(type_tests);
   TEST(basic_tests);
   TEST(car_cdr_tests);
