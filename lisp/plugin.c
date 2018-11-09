@@ -7,7 +7,7 @@
 #include <string.h>
 
 static atom_t
-scan_and_load(char * const paths, const char * const sym)
+lisp_symbol_load(char * const paths, const char * const sym)
 {
   char * p = paths, * n = NULL, * entry = NULL;
   while (p != NULL) {
@@ -38,7 +38,6 @@ scan_and_load(char * const paths, const char * const sym)
         /*
          * Load the file.
          */
-        TRACE_PLUGIN(path);
         void * handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
         if (handle == NULL) {
           continue;
@@ -52,12 +51,12 @@ scan_and_load(char * const paths, const char * const sym)
          * Check if the symbol is the one we are looking for.
          */
         const char * pname = get_name();
-        TRACE_PLUGIN(pname);
         if (strcmp(pname, sym) == 0) {
           atom_t (* get_atom)() = dlsym(handle, "lisp_plugin_register");
+          atom_t res = get_atom == NULL ? UP(NIL) : get_atom();
           closedir(dir);
           free(entry);
-          return get_atom();
+          return res;
         }
         /*
          * Close the file.
@@ -87,6 +86,5 @@ lisp_plugin_load(const char * const sym)
   }
   /*
    */
-  TRACE_PLUGIN(paths);
-  return scan_and_load(paths, sym);
+  return lisp_symbol_load(paths, sym);
 }

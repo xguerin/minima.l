@@ -149,33 +149,6 @@ lisp_cdr(const atom_t cell)
  * Internal list construction functions.
  */
 
-static bool
-atom_equl(const atom_t a, const atom_t b)
-{
-  switch (a->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_WILDCARD:
-      return true;
-    case T_NUMBER:
-      return a->number == b->number;
-    case T_PAIR:
-      return lisp_equl(a->pair.car, b->pair.car) &&
-        lisp_equl(a->pair.car, b->pair.car);
-    case T_STRING:
-    case T_SYMBOL:
-      return strcmp(a->string, b->string) == 0;
-    case T_INLINE:
-      return a->tag == b->tag;
-  }
-}
-
-bool
-lisp_equl(const atom_t a, const atom_t b)
-{
-  return a->type == b->type && atom_equl(a, b);
-}
-
 atom_t
 lisp_cons(const atom_t car, const atom_t cdr)
 {
@@ -234,10 +207,8 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
    */
   atom_t con = lisp_cons(sym, val);
   X(sym); X(val);
-  atom_t lst = lisp_cons(con, NIL);
-  X(con);
-  atom_t res = lisp_conc(closure, lst);
-  X(lst); X(closure);
+  atom_t res = lisp_cons(con, closure);
+  X(con); X(closure);
   /*
    */
   TRACE_SEXP(res);
@@ -295,94 +266,8 @@ lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
 }
 
 /*
- * Prog evaluation. The result of the last evaluation is returned.
- */
-
-atom_t
-lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
-{
-  TRACE_SEXP(cell);
-  /*
-   */
-  if (likely(IS_PAIR(cell))) {
-    /*
-     * Get CAR/CDR.
-     */
-    atom_t res = lisp_eval(closure, lisp_car(cell));
-    atom_t cdr = lisp_cdr(cell);
-    /*
-     */
-    X(cell); X(result);
-    return lisp_prog(closure, cdr, res);
-  }
-  /*
-   */
-  X(cell);
-  return result;
-}
-
-/*
  * Prog creation. The list of the evaluations is returned.
  */
-
-atom_t
-lisp_list(const atom_t closure, const atom_t cell)
-{
-  TRACE_SEXP(cell);
-  /*
-   */
-  if (likely(IS_PAIR(cell))) {
-    /*
-     * Get CAR/CDR.
-     */
-    atom_t car = lisp_car(cell);
-    atom_t cdr = lisp_cdr(cell);
-    X(cell);
-    /*
-     * Recursively get the result.
-     */
-    atom_t res = lisp_list(closure, cdr);
-    atom_t evl = lisp_eval(closure, car);
-    atom_t con = lisp_cons(evl, res);
-    X(evl); X(res);
-    return con;
-  }
-  /*
-   */
-  return cell;
-}
-
-/*
- * Prog stream. The result of each evaluation are chained.
- */
-
-atom_t
-lisp_pipe(const atom_t closure, const atom_t cell, const atom_t result)
-{
-  TRACE_SEXP(cell);
-  /*
-   */
-  if (likely(IS_PAIR(cell))) {
-    /*
-     * Get CAR/CDR.
-     */
-    atom_t car = lisp_car(cell);
-    atom_t cdr = lisp_cdr(cell);
-    X(cell);
-    atom_t lsp = lisp_cons(result, NIL);
-    X(result);
-    atom_t env = lisp_cons(car, lsp);
-    X(car); X(lsp);
-    /*
-     */
-    atom_t res = lisp_eval(closure, env);
-    return lisp_pipe(closure, cdr, res);
-  }
-  /*
-   */
-  X(cell);
-  return result;
-}
 
 /*
  * List evaluation.

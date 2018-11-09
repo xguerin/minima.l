@@ -112,7 +112,6 @@ atom_t lisp_cdr(const atom_t cell);
  * Internal list construction functions. CONS is pure, CONC is destructive.
  */
 
-bool   lisp_equl(const atom_t a, const atom_t b);
 atom_t lisp_cons(const atom_t a, const atom_t b);
 atom_t lisp_conc(const atom_t a, const atom_t b);
 
@@ -121,9 +120,6 @@ atom_t lisp_conc(const atom_t a, const atom_t b);
  */
 
 atom_t lisp_bind(const atom_t closure, const atom_t args, const atom_t vals);
-atom_t lisp_prog(const atom_t closure, const atom_t cell, const atom_t rslt);
-atom_t lisp_pipe(const atom_t closure, const atom_t cell, const atom_t rslt);
-atom_t lisp_list(const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const atom_t closure, const atom_t cell);
 atom_t lisp_setq(const atom_t closure, const atom_t sym, const atom_t val);
 
