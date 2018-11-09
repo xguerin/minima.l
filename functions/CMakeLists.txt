@@ -7,4 +7,8 @@ foreach(SOURCE ${SOURCES})
   add_library(minimal_function_${TAG} SHARED ${SOURCE})
   target_link_libraries(minimal_function_${TAG} minimal)
   set_property(TARGET minimal_function_${TAG} PROPERTY C_STANDARD 99)
+  #
+  if(MNML_HAS_IPO)
+    set_property(TARGET minimal_function_${TAG} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  endif()
 endforeach()

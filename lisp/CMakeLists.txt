@@ -11,3 +11,7 @@ RAGEL(lexer ${SYNTAX_SOURCE} SOURCES)
 
 add_library(minimal SHARED ${SOURCES})
 set_property(TARGET minimal PROPERTY C_STANDARD 99)
+
+if(MNML_HAS_IPO)
+  set_property(TARGET minimal PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()

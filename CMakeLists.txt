@@ -3,7 +3,9 @@
 #
 
 project("minima.l" C)
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.9)
+
+include(CheckIPOSupported)
 
 include(cmake/GetGitRevisionDescription.cmake)
 include(cmake/Lemon.cmake)
@@ -45,6 +47,8 @@ option(MNML_ENABLE_TESTS  "Build the Google tests suite"      ON)
 #
 # Global definitions
 #
+
+check_ipo_supported(RESULT MNML_HAS_IPO LANGUAGES C)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
