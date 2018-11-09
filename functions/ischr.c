@@ -3,5 +3,5 @@
 #include <lisp/slab.h>
 #include <string.h>
 
-PREDICATE_GEN(atm, !IS_PAIR);
-LISP_REGISTER(isatm, atm?)
+PREDICATE_GEN(chr, IS_CHAR);
+LISP_REGISTER(ischr, chr?)

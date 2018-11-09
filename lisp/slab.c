@@ -156,21 +156,7 @@ lisp_free(const atom_t atom)
   /*
    * Process atoms.
    */
-  switch (atom->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_WILDCARD:
-    case T_NUMBER:
-    case T_SYMBOL:
-      lisp_deallocate(atom);
-      break;
-    case T_STRING:
-      free((void *)atom->string);
-      lisp_deallocate(atom);
-      break;
-    default:
-      break;
-  }
+  lisp_deallocate(atom);
 }
 
 /*

@@ -83,7 +83,16 @@ item(A) ::= CHAR(B).
 
 item(A) ::= STRING(B).
 {
-  A = lisp_make_string((const char *)B);
+  atom_t res = UP(NIL);
+  char * str = B;
+  size_t len = strlen(str);
+  for (size_t i = 0; i < len; i += 1) {
+    atom_t c = lisp_make_char(str[len - i - 1]);
+    atom_t n = lisp_cons(c, res);
+    X(c); X(res);
+    res = n;
+  }
+  A = res;
 }
 
 item(A) ::= SYMBOL(B).

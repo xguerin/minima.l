@@ -23,13 +23,12 @@ typedef enum _atom_type
   T_CHAR,
   T_NUMBER,
   T_PAIR,
-  T_STRING,
   T_SYMBOL,
   T_WILDCARD
 }
 atom_type_t;
 
-#define ATOM_TYPES 8
+#define ATOM_TYPES 7
 
 struct _atom;
 
@@ -55,20 +54,19 @@ typedef struct _atom
   uint64_t        refs;
   union {
     int64_t       number;
-    const char *  string;
     union _symbol symbol;
     struct _pair  pair;
   };
 }
 __attribute__((packed)) * atom_t;
 
-#define IS_NULL(__a) ((__a)       ==   NIL     )
-#define IS_TRUE(__a) ((__a)       ==   TRUE    )
+#define IS_NULL(__a) ((__a)       ==   NIL)
+#define IS_TRUE(__a) ((__a)       ==   TRUE)
 #define IS_WILD(__a) ((__a)       ==   WILDCARD)
-#define IS_NUMB(__a) ((__a)->type == T_NUMBER  )
-#define IS_PAIR(__a) ((__a)->type == T_PAIR    )
-#define IS_STRN(__a) ((__a)->type == T_STRING  )
-#define IS_SYMB(__a) ((__a)->type == T_SYMBOL  )
+#define IS_CHAR(__a) ((__a)->type == T_CHAR)
+#define IS_NUMB(__a) ((__a)->type == T_NUMBER)
+#define IS_PAIR(__a) ((__a)->type == T_PAIR)
+#define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
 
 /*
  * Function type.
@@ -141,7 +139,6 @@ void lisp_make_wildcard();
 atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_inline(const uint64_t tag);
 atom_t lisp_make_char(const char c);
-atom_t lisp_make_string(const char * const str);
 atom_t lisp_make_symbol(const symbol_t sym);
 
 void lisp_print(FILE * const fp, const atom_t cell);

@@ -93,9 +93,6 @@ lisp_dup(const atom_t atom)
       X(car); X(cdr);
       break;
     }
-    case T_STRING:
-      res = lisp_make_string(strdup(atom->string));
-      break;
     case T_SYMBOL:
       res = lisp_make_symbol(&atom->symbol);
       break;
@@ -212,7 +209,6 @@ lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
     case T_TRUE:
     case T_CHAR:
     case T_NUMBER:
-    case T_STRING:
     case T_WILDCARD: {
       X(args); X(vals);
       ret = closure;
@@ -269,7 +265,6 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
     }
     case T_TRUE:
     case T_CHAR:
-    case T_STRING:
     case T_WILDCARD: {
       ret = cell;
       break;
@@ -330,7 +325,6 @@ lisp_eval(const atom_t closure, const atom_t cell)
     case T_TRUE:
     case T_CHAR:
     case T_NUMBER:
-    case T_STRING:
     case T_WILDCARD: {
       ret = cell;
       break;
@@ -417,17 +411,6 @@ lisp_make_char(const char c)
   R->type = T_CHAR;
   R->refs = 1;
   R->number = c;
-  TRACE_SEXP(R);
-  return R;
-}
-
-atom_t
-lisp_make_string(const char * const str)
-{
-  atom_t R = lisp_allocate();
-  R->type = T_STRING;
-  R->refs = 1;
-  R->string = str;
   TRACE_SEXP(R);
   return R;
 }

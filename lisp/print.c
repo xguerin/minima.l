@@ -54,9 +54,6 @@ lisp_print_atom(FILE * const fp, const atom_t atom, const bool alter)
       fprintf(fp, "%ld", atom->number);
 #endif
       break;
-    case T_STRING:
-      fprintf(fp, "\"%s\"", atom->string);
-      break;
     case T_SYMBOL: {
       char bsym[17] = { 0 };
       strncpy(bsym, atom->symbol.val, 16);
