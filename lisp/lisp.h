@@ -41,8 +41,9 @@ typedef struct _pair
 
 typedef union _symbol
 {
-  char    val[16];
-  __m128i tag;
+  char      val[16];
+  uint64_t  word[2];
+  __m128i   tag;
 }
 __attribute__((packed)) * symbol_t;
 
@@ -60,12 +61,13 @@ typedef struct _atom
 }
 __attribute__((packed)) * atom_t;
 
-#define IS_NULL(__a) ((__a)->type == T_NIL)
-#define IS_TRUE(__a) ((__a)->type == T_TRUE)
-#define IS_NUMB(__a) ((__a)->type == T_NUMBER)
-#define IS_PAIR(__a) ((__a)->type == T_PAIR)
-#define IS_STRN(__a) ((__a)->type == T_STRING)
-#define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
+#define IS_NULL(__a) ((__a)       ==   NIL     )
+#define IS_TRUE(__a) ((__a)       ==   TRUE    )
+#define IS_WILD(__a) ((__a)       ==   WILDCARD)
+#define IS_NUMB(__a) ((__a)->type == T_NUMBER  )
+#define IS_PAIR(__a) ((__a)->type == T_PAIR    )
+#define IS_STRN(__a) ((__a)->type == T_STRING  )
+#define IS_SYMB(__a) ((__a)->type == T_SYMBOL  )
 
 /*
  * Function type.
@@ -148,7 +150,8 @@ void lisp_print(FILE * const fp, const atom_t cell);
 
 #define MAKE_SYMBOL(__v, __s, __n)              \
   symbol_t __v = alloca(sizeof(union _symbol)); \
-  memset(__v->val, 0, 16);                      \
+  __v->word[0] = 0;                             \
+  __v->word[1] = 0;                             \
   strncpy(__v->val, __s, __n);
 
 static inline bool
