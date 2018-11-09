@@ -109,14 +109,17 @@ action tok_wildcard
   }
 }
 
+action tok_inline
+{ 
+  Parse(lexer->parser, INLINE, (void *)get_inline(ts, te), NULL);
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
+
 action tok_symbol
 { 
-  if (te - ts > 7) {
-    Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
-  }
-  else {
-    Parse(lexer->parser, INLINE, (void *)get_inline(ts, te), NULL);
-  }
+  Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer->consumer);
   }
@@ -129,7 +132,9 @@ quote  = '\'';
 number = '-'? digit+;
 string = '"' [^"]* '"';
 marks  = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
-symbol = (alpha | marks) (alnum | marks)*;
+symchar = (alpha | marks);
+inline = symchar{1,7};
+symbol = symchar{8,};
 comment = '#' [^\n]*;
 
 main := |*
@@ -142,6 +147,7 @@ main := |*
   "NIL"  => tok_nil;
   'T'    => tok_true;
   '_'    => tok_wildcard;
+  inline => tok_inline;
   symbol => tok_symbol;
   comment;
   space;
