@@ -140,45 +140,31 @@ lisp_deallocate(const atom_t __p) {
  * Allocation functions.
  */
 
-static void
-atom_free_atom(const atom_t atom)
-{
-  lisp_deallocate(atom);
-}
-
-static void
-atom_free_string(const atom_t atom)
-{
-  free((void *)atom->string);
-  lisp_deallocate(atom);
-}
-
-static void
-atom_free_pair(const atom_t atom)
-{
-  atom_t car = atom->pair.car;
-  atom_t cdr = atom->pair.cdr;
-  X(cdr); X(car);
-  lisp_deallocate(atom);
-}
-
-static void (* atom_free_table[ATOM_TYPES])(const atom_t atom) =
-{
-  [T_NIL     ] = atom_free_atom,
-  [T_TRUE    ] = atom_free_atom,
-  [T_NUMBER  ] = atom_free_atom,
-  [T_PAIR    ] = atom_free_pair,
-  [T_STRING  ] = atom_free_string,
-  [T_SYMBOL  ] = atom_free_string,
-  [T_INLINE  ] = atom_free_atom,
-  [T_WILDCARD] = atom_free_atom,
-};
-
 void
 lisp_free(const atom_t atom)
 {
   TRACE_SEXP(atom);
-  atom_free_table[atom->type](atom);
+  /*
+   */
+  switch (atom->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_WILDCARD:
+    case T_NUMBER:
+    case T_INLINE:
+      lisp_deallocate(atom);
+      break;
+    case T_PAIR:
+      X(atom->pair.car);
+      X(atom->pair.cdr);
+      lisp_deallocate(atom);
+      break;
+    case T_STRING:
+    case T_SYMBOL:
+      free((void *)atom->string);
+      lisp_deallocate(atom);
+      break;
+  }
 }
 
 /*
