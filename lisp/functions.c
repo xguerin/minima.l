@@ -272,36 +272,6 @@ lisp_function_ith(const atom_t closure, const atom_t cell)
 }
 
 static atom_t
-lisp_function_int(const atom_t closure, const atom_t cell)
-{
-  /*
-   * Evaluate the condition expression.
-   */
-  atom_t res = lisp_eval(closure, lisp_car(cell));
-  atom_t cnd = IS_TRUE(res) ? NIL : TRUE;
-  atom_type_t type = cnd->type;
-  X(res);
-  /*
-   * Get the THEN branch.
-   */
-  atom_t cd0 = lisp_cdr(cell);
-  X(cell);
-  atom_t thn = lisp_car(cd0);
-  X(cd0);
-  /*
-   * Execute the THEN branch.
-   */
-  if (type == T_NIL) {
-    return lisp_eval(closure, thn);
-  }
-  /*
-   * Clean-up.
-   */
-  X(thn);
-  return UP(NIL);
-}
-
-static atom_t
 lisp_function_ite(const atom_t closure, const atom_t cell)
 {
   /*
@@ -359,7 +329,6 @@ static def_t functions[] = {
   { "="    , lisp_function_equ  , true },
   { ">"    , lisp_function_gt   , true },
   { ">="   , lisp_function_ge   , true },
-  { "?!"   , lisp_function_int  , true },
   { "?"    , lisp_function_ith  , true },
   { "?:"   , lisp_function_ite  , true },
   { "and"  , lisp_function_and  , true },
@@ -376,8 +345,8 @@ static def_t functions[] = {
   { "num?" , lisp_function_isnum, true },
   { "or"   , lisp_function_or   , true },
   { "quote", lisp_function_quote, true },
-  { "seq"  , lisp_function_prog , true },
-  { "set"  , lisp_function_setq , true },
+  { "prog" , lisp_function_prog , true },
+  { "setq" , lisp_function_setq , true },
   { "str?" , lisp_function_isstr, true },
   { "sym?" , lisp_function_issym, true },
   { "|"    , lisp_function_pipe , true },
