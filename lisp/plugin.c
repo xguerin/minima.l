@@ -7,8 +7,17 @@
 #include <string.h>
 
 static atom_t
-lisp_symbol_load(char * const paths, const char * const sym)
+lisp_symbol_load(char * const paths, const atom_t sym)
 {
+  TRACE_SEXP(sym);
+  /*
+   * Extract the symbol name.
+   */
+  char bsym[17] = { 0 };
+  strncpy(bsym, sym->symbol.val, 16);
+  /*
+   * Scan libraries in the path.
+   */
   char * p = paths, * n = NULL, * entry = NULL;
   while (p != NULL) {
     n = strstr(p, ":");
@@ -29,7 +38,11 @@ lisp_symbol_load(char * const paths, const char * const sym)
         /*
          * Build the full path.
          */
+#ifdef __MACH__
         size_t plen = strlen(entry) + de->d_namlen + 2;
+#else
+        size_t plen = strlen(entry) + strlen(de->d_name) + 2;
+#endif
         char * path = alloca(plen);
         memset(path, 0, plen);
         strcpy(path, entry);
@@ -51,7 +64,7 @@ lisp_symbol_load(char * const paths, const char * const sym)
          * Check if the symbol is the one we are looking for.
          */
         const char * pname = get_name();
-        if (strcmp(pname, sym) == 0) {
+        if (strcmp(pname, bsym) == 0) {
           atom_t (* get_atom)() = dlsym(handle, "lisp_plugin_register");
           atom_t res = get_atom == NULL ? UP(NIL) : get_atom();
           closedir(dir);
@@ -75,8 +88,9 @@ lisp_symbol_load(char * const paths, const char * const sym)
 }
 
 atom_t
-lisp_plugin_load(const char * const sym)
+lisp_plugin_load(const atom_t sym)
 {
+  TRACE_SEXP(sym);
   /*
    * Load the environment variable.
    */

@@ -29,41 +29,21 @@ lisp_set_syntax_error_handler(const error_handler_t handler)
  * Symbol management.
  */
 
-atom_t GLOBALS = NULL;
-atom_t NIL = NULL;
-atom_t TRUE = NULL;
+atom_t GLOBALS  = NULL;
+atom_t NIL      = NULL;
+atom_t TRUE     = NULL;
 atom_t WILDCARD = NULL;
-
-static bool
-lisp_lookup_match(const atom_t a, const atom_t b)
-{
-  if (likely(IS_INLN(a) && IS_INLN(b)))
-  {
-    return a->tag == b->tag;
-  }
-  if (IS_INLN(a) && IS_SYMB(b))
-  {
-    return strcmp(a->symbol, b->string) == 0;
-  }
-  if (IS_SYMB(a) && IS_INLN(b))
-  {
-    return strcmp(a->string, b->symbol) == 0;
-  }
-  /*
-   * Default case, SYM/SYM.
-   */
-  return strcmp(a->string, b->string) == 0;
-}
 
 static atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
 {
+  TRACE_SEXP(sym);
   /*
    * Look-up in the closure.
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (lisp_lookup_match(car->pair.car, sym)) {
+    if (lisp_symbol_match(car->pair.car, sym)) {
       return UP(car->pair.cdr);
     }
     NEXT(a);
@@ -73,7 +53,7 @@ lisp_lookup(const atom_t closure, const atom_t sym)
    */
   FOREACH(GLOBALS, b) {
     atom_t car = b->car;
-    if (lisp_lookup_match(car->pair.car, sym)) {
+    if (lisp_symbol_match(car->pair.car, sym)) {
       return UP(car->pair.cdr);
     }
     NEXT(b);
@@ -81,8 +61,7 @@ lisp_lookup(const atom_t closure, const atom_t sym)
   /*
    * Nothing found, try to load as a plugin.
    */
-  const char * n = sym->type == T_INLINE ? sym->symbol : sym->string;
-  return lisp_plugin_load(n);
+  return lisp_plugin_load(sym);
 }
 
 /*
@@ -115,10 +94,7 @@ lisp_dup(const atom_t atom)
       res = lisp_make_string(strdup(atom->string));
       break;
     case T_SYMBOL:
-      res = lisp_make_symbol(strdup(atom->string));
-      break;
-    case T_INLINE:
-      res = lisp_make_inline(atom->tag);
+      res = lisp_make_symbol(&atom->symbol);
       break;
   }
   /*
@@ -195,7 +171,7 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (lisp_lookup_match(car->pair.car, sym)) {
+    if (lisp_symbol_match(car->pair.car, sym)) {
       X(sym); X(car->pair.cdr);
       car->pair.cdr = val;
       return closure;
@@ -256,8 +232,7 @@ lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
       ret = lisp_bind(cl0, oth, rem);
       break;
     }
-    case T_SYMBOL:
-    case T_INLINE: {
+    case T_SYMBOL: {
       ret = lisp_setq(closure, args, vals);
       break;
     }
@@ -323,8 +298,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
       X(newc);
       break;
     }
-    case T_SYMBOL:
-    case T_INLINE: {
+    case T_SYMBOL: {
       ret = lisp_eval(closure, cell);
       break;
     }
@@ -373,8 +347,7 @@ lisp_eval(const atom_t closure, const atom_t cell)
       ret = lisp_eval_pair(closure, new);
       break;
     }
-    case T_SYMBOL:
-    case T_INLINE: {
+    case T_SYMBOL: {
       ret = lisp_lookup(closure, cell);
       X(cell);
       break;
@@ -421,17 +394,6 @@ lisp_make_wildcard()
 }
 
 atom_t
-lisp_make_inline(const uint64_t tag)
-{
-  atom_t R = lisp_allocate();
-  R->type = T_INLINE;
-  R->refs = 1;
-  R->tag = tag;
-  TRACE_SEXP(R);
-  return R;
-}
-
-atom_t
 lisp_make_number(const int64_t num)
 {
   atom_t R = lisp_allocate();
@@ -454,12 +416,12 @@ lisp_make_string(const char * const str)
 }
 
 atom_t
-lisp_make_symbol(const char * const sym)
+lisp_make_symbol(const symbol_t sym)
 {
   atom_t R = lisp_allocate();
   R->type = T_SYMBOL;
   R->refs = 1;
-  R->string = sym;
+  R->symbol = *sym;
   TRACE_SEXP(R);
   return R;
 }

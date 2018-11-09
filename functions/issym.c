@@ -3,5 +3,5 @@
 #include <lisp/slab.h>
 #include <string.h>
 
-PREDICATE_GEN(sym, IS_SETQ);
+PREDICATE_GEN(sym, IS_SYMB);
 LISP_REGISTER(issym, sym?)

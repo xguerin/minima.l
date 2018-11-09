@@ -65,7 +65,8 @@ quote(A) ::= item(B).
 
 quote(A) ::= QUOTE item(B).
 {
-  atom_t Q = lisp_make_symbol(strdup("quote"));
+  MAKE_SYMBOL(quote, "quote", 5);
+  atom_t Q = lisp_make_symbol(quote);
   A = lisp_cons(Q, B);
   X(Q); X(B);
 }
@@ -82,12 +83,7 @@ item(A) ::= STRING(B).
 
 item(A) ::= SYMBOL(B).
 {
-  A = lisp_make_symbol((char *)B);
-}
-
-item(A) ::= INLINE(B).
-{
-  A = lisp_make_inline((uint64_t)B);
+  A = lisp_make_symbol((symbol_t)B);
 }
 
 item(A) ::= C_NIL.

@@ -69,6 +69,7 @@ endif()
 #
 
 set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wno-address-of-packed-member")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
 
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")

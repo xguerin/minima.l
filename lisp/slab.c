@@ -161,11 +161,10 @@ lisp_free(const atom_t atom)
     case T_TRUE:
     case T_WILDCARD:
     case T_NUMBER:
-    case T_INLINE:
+    case T_SYMBOL:
       lisp_deallocate(atom);
       break;
     case T_STRING:
-    case T_SYMBOL:
       free((void *)atom->string);
       lisp_deallocate(atom);
       break;

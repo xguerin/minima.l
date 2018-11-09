@@ -11,9 +11,8 @@ lisp_plugin_name()                                                  \
 atom_t                                                              \
 lisp_plugin_register()                                              \
 {                                                                   \
-  union { uint64_t tag; char symbol[8]; } u = { 0 };                \
-  strcpy(u.symbol, #__n);                                           \
-  atom_t sym = lisp_make_inline(u.tag);                             \
+  MAKE_SYMBOL(inp, #__n, sizeof(#__n));                             \
+  atom_t sym = lisp_make_symbol(inp);                               \
   atom_t val = lisp_make_number((uintptr_t)lisp_function_ ## __s);  \
   atom_t res = UP(val);                                             \
   GLOBALS = lisp_setq(GLOBALS, sym, val);                           \

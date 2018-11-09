@@ -1,4 +1,5 @@
 #include "primitives.h"
+#include "utils.h"
 #include <lisp/lexer.h>
 #include <lisp/slab.h>
 
@@ -164,7 +165,7 @@ car_cdr_tests()
   ASSERT_TRUE(IS_NUMB(car) && car->number == 1);
   ASSERT_TRUE(IS_PAIR(cdr));
   lisp_parse(lexer, "(2)");
-  ASSERT_TRUE(lisp_equl(cdr, lisp_result));
+  ASSERT_TRUE(lisp_equ(cdr, lisp_result));
   X(car); X(cdr); X(lisp_result);
   /*
    */
@@ -183,10 +184,10 @@ car_cdr_tests()
   ASSERT_TRUE(IS_PAIR(car));
   ASSERT_TRUE(IS_PAIR(cdr));
   lisp_parse(lexer, "(1 2)");
-  ASSERT_TRUE(lisp_equl(car, lisp_result));
+  ASSERT_TRUE(lisp_equ(car, lisp_result));
   X(lisp_result);
   lisp_parse(lexer, "(2)");
-  ASSERT_TRUE(lisp_equl(cdr, lisp_result));
+  ASSERT_TRUE(lisp_equ(cdr, lisp_result));
   X(car); X(cdr); X(lisp_result);
   /*
    */
@@ -217,7 +218,7 @@ conc_cons_tests()
   tmp2 = lisp_result;
   tmp3 = lisp_conc(tmp1, lisp_result);
   lisp_parse(lexer, "(1 . 2)");
-  ASSERT_TRUE(lisp_equl(tmp1, lisp_result));
+  ASSERT_TRUE(lisp_equ(tmp1, lisp_result));
   X(tmp1); X(tmp2); X(tmp3); X(lisp_result);
   /*
    */

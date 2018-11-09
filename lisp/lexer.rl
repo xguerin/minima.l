@@ -14,31 +14,6 @@
 #define ts  lexer->ts
 #define te  lexer->te
 
-static char *
-get_string(const char * const s, const char * const e)
-{
-  size_t len = e - s;
-  return strndup(s, len);
-}
-
-static int64_t
-get_number(const char * const s, const char * const e)
-{
-  size_t len = e - s + 1;
-  char * val = (char *)alloca(len);
-  strncpy(val, s, len);
-  return strtoll(val, NULL, 10);
-}
-
-static int64_t
-get_inline(const char * const s, const char * const e)
-{
-  union { uint64_t tag; char val[8]; } u = { 0 };
-  size_t len = e - s;
-  strncpy(u.val, s, len);
-  return u.tag;
-}
-
 %%{
 
 machine minimal;
@@ -70,7 +45,12 @@ action tok_quote
 
 action tok_number
 {
-  int64_t value = get_number(ts, te);
+  size_t len = te - ts + 1;
+  char * val = (char *)alloca(len);
+  strncpy(val, ts, len);
+  int64_t value = strtoll(val, NULL, 10);
+  /*
+   */
   Parse(lexer->parser, NUMBER, (void *)value, NULL);
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer->consumer);
@@ -79,7 +59,12 @@ action tok_number
 
 action tok_string
 {
-  Parse(lexer->parser, STRING, get_string(ts+1, te-1), NULL);
+  const char * start = ts + 1, * end = te - 1;
+  size_t len = end - start;
+  char * val = strndup(start, len);
+  /*
+   */
+  Parse(lexer->parser, STRING, val, NULL);
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer->consumer);
   }
@@ -109,17 +94,13 @@ action tok_wildcard
   }
 }
 
-action tok_inline
-{ 
-  Parse(lexer->parser, INLINE, (void *)get_inline(ts, te), NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
-}
-
 action tok_symbol
 { 
-  Parse(lexer->parser, SYMBOL, get_string(ts, te), NULL);
+  size_t len = te - ts;
+  MAKE_SYMBOL(sym, ts, len);
+  /*
+   */
+  Parse(lexer->parser, SYMBOL, sym, NULL);
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer->consumer);
   }
@@ -132,9 +113,8 @@ quote  = '\'';
 number = '-'? digit+;
 string = '"' [^"]* '"';
 marks  = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
-symchar = (alpha | marks);
-inline = symchar{1,7};
-symbol = symchar{8,};
+symchr = (alpha | marks);
+symbol = symchr{1,16};
 comment = '#' [^\n]*;
 
 main := |*
@@ -147,7 +127,6 @@ main := |*
   "NIL"  => tok_nil;
   'T'    => tok_true;
   '_'    => tok_wildcard;
-  inline => tok_inline;
   symbol => tok_symbol;
   comment;
   space;

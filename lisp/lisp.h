@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <smmintrin.h>
 
 /*
  * Optimization macros.
@@ -23,12 +24,11 @@ typedef enum _atom_type
   T_PAIR,
   T_STRING,
   T_SYMBOL,
-  T_INLINE,
   T_WILDCARD
 }
 atom_type_t;
 
-#define ATOM_TYPES 8
+#define ATOM_TYPES 7
 
 struct _atom;
 
@@ -39,6 +39,13 @@ typedef struct _pair
 }
 * pair_t;
 
+typedef union _symbol
+{
+  char    val[16];
+  __m128i tag;
+}
+__attribute__((packed)) * symbol_t;
+
 typedef struct _atom
 {
   uint32_t        next;
@@ -47,8 +54,7 @@ typedef struct _atom
   union {
     int64_t       number;
     const char *  string;
-    char          symbol[8];
-    uint64_t      tag;
+    union _symbol symbol;
     struct _pair  pair;
   };
 }
@@ -60,8 +66,6 @@ __attribute__((packed)) * atom_t;
 #define IS_PAIR(__a) ((__a)->type == T_PAIR)
 #define IS_STRN(__a) ((__a)->type == T_STRING)
 #define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
-#define IS_INLN(__a) ((__a)->type == T_INLINE)
-#define IS_SETQ(__a) (IS_SYMB(__a) || IS_INLN(__a))
 
 /*
  * Function type.
@@ -104,9 +108,9 @@ extern atom_t WILDCARD;
  * Lisp basic functions.
  */
 
-atom_t lisp_dup(const atom_t cell);
 atom_t lisp_car(const atom_t cell);
 atom_t lisp_cdr(const atom_t cell);
+atom_t lisp_dup(const atom_t cell);
 
 /*
  * Internal list construction functions. CONS is pure, CONC is destructive.
@@ -134,9 +138,25 @@ void lisp_make_wildcard();
 atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_inline(const uint64_t tag);
 atom_t lisp_make_string(const char * const str);
-atom_t lisp_make_symbol(const char * const sym);
+atom_t lisp_make_symbol(const symbol_t sym);
 
 void lisp_print(FILE * const fp, const atom_t cell);
+
+/*
+ * Symbol matching.
+ */
+
+#define MAKE_SYMBOL(__v, __s, __n)              \
+  symbol_t __v = alloca(sizeof(union _symbol)); \
+  memset(__v->val, 0, 16);                      \
+  strncpy(__v->val, __s, __n);
+
+static inline bool
+lisp_symbol_match(const atom_t a, const atom_t b)
+{
+  register __m128i res = _mm_xor_si128(a->symbol.tag, b->symbol.tag);
+  return _mm_test_all_zeros(res, res);
+}
 
 /*
  * Debug.
