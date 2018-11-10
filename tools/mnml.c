@@ -9,31 +9,45 @@ typedef void (* stage_t)(const atom_t);
 void
 run(const stage_t pre, const stage_t post)
 {
-  bool keep_running = true;
   atom_t input, result;
-  while (keep_running) {
+  for (;;) {
     pre(NIL);
     input = lisp_read(NIL, NIL);
-    keep_running = !IS_NULL(input);
+    if (input == NIL) {
+      X(input);
+      break;
+    }
     result = lisp_eval(NIL, input);
     post(result);
     X(result);
   }
 }
 
-void stage_prompt(const atom_t cell)
+void
+repl_parse_error_handler()
 {
+  write(1, "^ parse error\n", 14);
   write(1, ": ", 2);
 }
 
-void stage_newline(const atom_t cell)
+void
+stage_prompt(const atom_t cell)
+{
+  if (CDR(CAR(ICHAN)) == NIL) {
+    write(1, ": ", 2);
+  }
+}
+
+void
+stage_newline(const atom_t cell)
 {
   write(1, "> " , 2);
   lisp_prin(NIL, cell);
   write(1, "\n", 1);
 }
 
-void stage_noop(const atom_t cell)
+void
+stage_noop(const atom_t cell)
 {
 
 }
@@ -45,6 +59,7 @@ main(const int argc, char ** const argv)
   /*
    */
   if (argc == 1) {
+    lisp_set_parse_error_handler(repl_parse_error_handler);
     run(stage_prompt, stage_newline);
   }
   else {

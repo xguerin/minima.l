@@ -102,6 +102,7 @@ typedef void (* lisp_consumer_t)(const atom_t);
 
 extern atom_t GLOBALS;
 extern atom_t ICHAN;
+extern atom_t OCHAN;
 extern atom_t NIL;
 extern atom_t TRUE;
 extern atom_t WILDCARD;
@@ -109,6 +110,11 @@ extern atom_t WILDCARD;
 /*
  * Interpreter life cycle.
  */
+
+typedef void (* error_handler_t)();
+
+void lisp_set_parse_error_handler(const error_handler_t h);
+void lisp_set_syntax_error_handler(const error_handler_t h);
 
 void lisp_init();
 void lisp_fini();
@@ -137,7 +143,7 @@ atom_t lisp_setq(const atom_t closure, const atom_t sym, const atom_t val);
 
 atom_t lisp_read(const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const atom_t closure, const atom_t cell);
-atom_t lisp_prin(const atom_t closure, const atom_t cell);
+void   lisp_prin(const atom_t closure, const atom_t cell);
 
 /*
  * Helper functions.

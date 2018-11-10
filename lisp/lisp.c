@@ -11,7 +11,34 @@
  * Syntax error handler.
  */
 
-void syntax_error() { }
+error_handler_t lisp_parse_error_handler = NULL;
+error_handler_t lisp_syntax_error_handler = NULL;
+
+void parse_error()
+{
+  if (lisp_parse_error_handler != NULL) {
+    lisp_parse_error_handler();
+  }
+}
+
+void syntax_error()
+{
+  if (lisp_syntax_error_handler != NULL) {
+    lisp_syntax_error_handler();
+  }
+}
+
+void
+lisp_set_parse_error_handler(const error_handler_t h)
+{
+  lisp_parse_error_handler = h;
+}
+
+void
+lisp_set_syntax_error_handler(const error_handler_t h)
+{
+  lisp_syntax_error_handler = h;
+}
 
 /*
  * Global symbols.
@@ -471,7 +498,7 @@ lisp_eval(const atom_t closure, const atom_t cell)
  * Print function.
  */
 
-atom_t
+void
 lisp_prin(const atom_t closure, const atom_t cell)
 {
   int fd = CAR(CAR(OCHAN))->number;
@@ -484,15 +511,11 @@ lisp_prin(const atom_t closure, const atom_t cell)
     case T_TRUE:
       write(fd, "T", 1);
       break;
-    case T_CHAR:
-      if ((char)cell->number == '\'') {
-        write(fd, "\'", 1);
-      }
-      else {
-        const char c = (char)cell->number;
-        write(fd, &c, 1);
-      }
+    case T_CHAR: {
+      const char c = (char)cell->number;
+      write(fd, &c, 1);
       break;
+    }
     case T_PAIR: {
       lisp_prin(closure, CAR(cell));
       lisp_prin(closure, CDR(cell));
@@ -515,9 +538,6 @@ lisp_prin(const atom_t closure, const atom_t cell)
       write(fd, "_", 3);
       break;
   }
-  /*
-   */
-  return cell;
 }
 
 /*

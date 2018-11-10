@@ -18,15 +18,20 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
     case T_TRUE:
       fprintf(fp, "T");
       break;
-    case T_CHAR:
-      if ((char)atom->number == '\'') {
-        fprintf(fp, "'\\''");
-      }
-      else {
-        fprintf(fp, "'%c'", (int)atom->number);
+    case T_CHAR: {
+      const char c = (char)atom->number;
+      switch (c) {
+        case '\\':
+          fprintf(fp, "@\\");
+          break;
+        case '\n':
+          fprintf(fp, "@\\n");
+          break;
+        default:
+          fprintf(fp, "@%c", c);
       }
       break;
-
+    }
     case T_PAIR:
       if (alter) fprintf(fp, "(");
       /*

@@ -14,6 +14,8 @@
 #define ts  lexer->ts
 #define te  lexer->te
 
+extern void parse_error();
+
 %%{
 
 machine minimal;
@@ -43,11 +45,18 @@ action tok_quote
   Parse(lexer->parser, QUOTE, 0, NULL);
 }
 
+action err_quote
+{
+  parse_error();
+  fhold; fgoto purge;
+}
+
 action tok_number
 {
-  size_t len = te - ts + 1;
+  const char * start = *ts == '\'' ? ts + 1 : ts;
+  size_t len = te - start + 1;
   char * val = (char *)alloca(len);
-  strncpy(val, ts, len);
+  strncpy(val, start, len);
   int64_t value = strtoll(val, NULL, 10);
   /*
    */
@@ -59,9 +68,21 @@ action tok_number
 
 action tok_char
 {
-  const char * start = ts + 1, * end = te - 1;
-  size_t len = end - start;
-  uint64_t val = len == 1 ? *start : *(start + 1);
+  const char * start = *ts == '\'' ? ts + 2 : ts + 1;
+  size_t len = te - start;
+  uint64_t val = *start;
+  /*
+   */
+  if (len == 2) {
+    switch (*(start + 1)) {
+      case 'n' :
+        val = '\n';
+        break;
+      default:
+        val = *(start + 1);
+        break;
+    }
+  }
   /*
    */
   Parse(lexer->parser, CHAR, (void *)val, NULL);
@@ -72,7 +93,8 @@ action tok_char
 
 action tok_string
 {
-  const char * start = ts + 1, * end = te - 1;
+  const char * start = *ts == '\'' ? ts + 2 : ts + 1;
+  const char * end = te - 1;
   size_t len = end - start;
   char * val = strndup(start, len);
   /*
@@ -109,8 +131,9 @@ action tok_wildcard
 
 action tok_symbol
 { 
-  size_t len = te - ts;
-  MAKE_SYMBOL(sym, ts, len);
+  const char * start = *ts == '\'' ? ts + 1 : ts;
+  size_t len = te - start;
+  MAKE_SYMBOL(sym, start, len);
   /*
    */
   Parse(lexer->parser, SYMBOL, sym, NULL);
@@ -124,18 +147,22 @@ pclose  = ')';
 dot     = '.';
 quote   = '\'';
 number  = '-'? digit+;
-char    = '\'' ([^'] | '\\' '\'') '\'';
-string  = '"' ([^"] | '\\' '"')* '"';
-marks   = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
+char    = '@' . print;
+string  = '"' . ([^"] | '\\' '"')* . '"';
+marks   = [~!$%^&*_+\-={}\[\]:;|\\<>?,./];
 symchr  = (alpha | marks);
 symbol  = symchr{1,16};
-comment = '#' [^\n]*;
+comment = '#' . [^\n]*;
+
+purge := any* %{ fgoto main; };
 
 main := |*
+  # 
+  # Default rules.
+  # 
   popen  => tok_popen;
   pclose => tok_pclose;
   dot    => tok_dot;
-  quote  => tok_quote;
   number => tok_number;
   char   => tok_char;
   string => tok_string;
@@ -143,6 +170,20 @@ main := |*
   'T'    => tok_true;
   '_'    => tok_wildcard;
   symbol => tok_symbol;
+  #
+  # Quoted rules.
+  #
+  (quote >tok_quote) . popen  $!err_quote => tok_popen;
+  (quote >tok_quote) . number $!err_quote => tok_number;
+  (quote >tok_quote) . char   $!err_quote => tok_char;
+  (quote >tok_quote) . string $!err_quote => tok_string;
+  (quote >tok_quote) . "NIL"  $!err_quote => tok_nil;
+  (quote >tok_quote) . 'T'    $!err_quote => tok_true;
+  (quote >tok_quote) . '_'    $!err_quote => tok_wildcard;
+  (quote >tok_quote) . symbol $!err_quote => tok_symbol;
+  #
+  # Garbage.
+  #
   comment;
   space;
 *|;
