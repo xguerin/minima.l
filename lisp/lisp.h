@@ -70,6 +70,7 @@ __attribute__((packed)) * atom_t;
 #define IS_NUMB(__a) ((__a)->type == T_NUMBER)
 #define IS_PAIR(__a) ((__a)->type == T_PAIR)
 #define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
+#define IS_ATOM(__a) (!IS_PAIR(__a) && !IS_NULL(__a))
 
 /*
  * Function type.
@@ -140,6 +141,7 @@ atom_t lisp_conc(const atom_t a, const atom_t b);
 
 atom_t lisp_bind(const atom_t closure, const atom_t args, const atom_t vals);
 atom_t lisp_setq(const atom_t closure, const atom_t sym, const atom_t val);
+atom_t lisp_prog(const atom_t closure, const atom_t cell, const atom_t rslt);
 
 atom_t lisp_read(const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const atom_t closure, const atom_t cell);
@@ -157,6 +159,22 @@ atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_inline(const uint64_t tag);
 atom_t lisp_make_char(const char c);
 atom_t lisp_make_symbol(const symbol_t sym);
+
+#define PUSH_IO_CONTEXT(__c, __d) { \
+  atom_t n = lisp_make_number(__d); \
+  atom_t l = lisp_cons(n, NIL);     \
+  atom_t o = __c;                   \
+  __c = lisp_cons(l, o);            \
+  X(o); X(l); X(n);                 \
+  TRACE_SEXP(__c);                  \
+}
+
+#define POP_IO_CONTEXT(__c) { \
+  atom_t old = __c;           \
+  __c = UP(CDR(__c));         \
+  X(old);                     \
+  TRACE_SEXP(__c);            \
+}
 
 /*
  * Symbol matching.

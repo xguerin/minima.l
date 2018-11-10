@@ -12,7 +12,7 @@ lisp_prin_all(const atom_t closure, const atom_t cell, const atom_t result)
   }
   /*
    */
-  atom_t car = lisp_car(cell);
+  atom_t car = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   lisp_prin(closure, car);
   X(cell); X(result);

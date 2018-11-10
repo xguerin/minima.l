@@ -82,20 +82,8 @@ lisp_init()
    * Create the GLOBALS.
    */
   GLOBALS = UP(NIL);
-  /*
-   * Create the input channel.
-   */
-  atom_t in = lisp_make_number(0);
-  atom_t il = lisp_cons(in, NIL);
-  ICHAN = lisp_cons(il, NIL);
-  X(il); X(in);
-  /*
-   * Create the output channel.
-   */
-  atom_t out = lisp_make_number(1);
-  atom_t oul = lisp_cons(out, NIL);
-  OCHAN = lisp_cons(oul, NIL);
-  X(oul); X(out);
+  ICHAN = UP(NIL);
+  OCHAN = UP(NIL);
   /*
    * Create the lexer.
    */
@@ -266,7 +254,11 @@ lisp_read_pop()
 atom_t
 lisp_read(const atom_t closure, const atom_t cell)
 {
+  TRACE_SEXP(ICHAN);
+  /*
+   */
   atom_t chn = CAR(ICHAN);
+  X(cell);
   /*
    * Check if there is any value in the channel's buffer.
    */
@@ -324,6 +316,33 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
    */
   TRACE_SEXP(res);
   return res;
+}
+
+/*
+ * PROG.
+ */
+
+atom_t
+lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
+{
+  TRACE_SEXP(cell);
+  /*
+   */
+  if (likely(IS_PAIR(cell))) {
+    /*
+     * Get CAR/CDR.
+     */
+    atom_t res = lisp_eval(closure, lisp_car(cell));
+    atom_t cdr = lisp_cdr(cell);
+    /*
+     */
+    X(cell); X(result);
+    return lisp_prog(closure, cdr, res);
+  }
+  /*
+   */
+  X(cell);
+  return result;
 }
 
 /*
@@ -415,10 +434,8 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        * Grab the arguments, body of the lambda. TODO add the curried closure.
        */
       atom_t args = lisp_car(lbda);
-      atom_t cdr0 = lisp_cdr(lbda);
+      atom_t body = lisp_cdr(lbda);
       X(lbda);
-      atom_t body = lisp_car(cdr0);
-      X(cdr0);
       /*
        * Bind the arguments and the values. TODO bind the curried closure:
        * 1. Bind arguments with values
@@ -427,7 +444,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        */
       atom_t newl = lisp_dup(closure);
       atom_t newc = lisp_bind(newl, args, vals);
-      ret = lisp_eval(newc, body);
+      ret = lisp_prog(newc, body, UP(NIL));
       /*
       */
       X(newc);
@@ -498,10 +515,11 @@ lisp_eval(const atom_t closure, const atom_t cell)
  * Print function.
  */
 
-void
-lisp_prin(const atom_t closure, const atom_t cell)
+static void lisp_prin_pair(const int, const atom_t, const atom_t);
+
+static void
+lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
 {
-  int fd = CAR(CAR(OCHAN))->number;
   /*
    */
   switch (cell->type) {
@@ -517,8 +535,9 @@ lisp_prin(const atom_t closure, const atom_t cell)
       break;
     }
     case T_PAIR: {
-      lisp_prin(closure, CAR(cell));
-      lisp_prin(closure, CDR(cell));
+      write(fd, "(", 1);
+      lisp_prin_pair(fd, closure, cell);
+      write(fd, ")", 1);
       break;
     case T_NUMBER: {
       char buffer[24] = { 0 };
@@ -538,6 +557,27 @@ lisp_prin(const atom_t closure, const atom_t cell)
       write(fd, "_", 3);
       break;
   }
+}
+
+static void
+lisp_prin_pair(const int fd, const atom_t closure, const atom_t cell)
+{
+  lisp_prin_atom(fd, closure, CAR(cell));
+  if (IS_PAIR(CDR(cell))) {
+    write(fd, " ", 1);
+    lisp_prin_pair(fd, closure, CDR(cell));
+  }
+  if (IS_ATOM(CDR(cell))) {
+    write(fd, " . ", 3);
+    lisp_prin_atom(fd, closure, CDR(cell));
+  }
+}
+
+void
+lisp_prin(const atom_t closure, const atom_t cell)
+{
+  int fd = CAR(CAR(OCHAN))->number;
+  return lisp_prin_atom(fd, closure, cell);
 }
 
 /*

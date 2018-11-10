@@ -7,16 +7,17 @@
 typedef void (* stage_t)(const atom_t);
 
 void
-run(const stage_t pre, const stage_t post)
+run(const stage_t pread, const stage_t peval, const stage_t post)
 {
   atom_t input, result;
   for (;;) {
-    pre(NIL);
-    input = lisp_read(NIL, NIL);
+    pread(NIL);
+    input = lisp_read(NIL, UP(NIL));
     if (input == NIL) {
       X(input);
       break;
     }
+    peval(input);
     result = lisp_eval(NIL, input);
     post(result);
     X(result);
@@ -52,6 +53,18 @@ stage_noop(const atom_t cell)
 
 }
 
+void
+stage_push_io(const atom_t cell)
+{
+  PUSH_IO_CONTEXT(ICHAN, 0);
+}
+
+void
+stage_pop_io(const atom_t cell)
+{
+  POP_IO_CONTEXT(ICHAN);
+}
+
 int
 main(const int argc, char ** const argv)
 {
@@ -60,25 +73,22 @@ main(const int argc, char ** const argv)
    */
   if (argc == 1) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    run(stage_prompt, stage_newline);
+    PUSH_IO_CONTEXT(ICHAN, 0);
+    PUSH_IO_CONTEXT(OCHAN, 1);
+    run(stage_prompt, stage_noop, stage_newline);
+    POP_IO_CONTEXT(ICHAN);
+    POP_IO_CONTEXT(OCHAN);
   }
   else {
     int fd = open(argv[1], O_RDONLY);
-    if (fd < 0) return __LINE__;
-    /*
-     * Push the new input context.
-     */
-    atom_t n0 = lisp_make_number(fd);
-    atom_t in = lisp_cons(n0, NIL);
-    X(n0);
-    atom_t old = ICHAN;
-    ICHAN = lisp_cons(in, old);
-    X(old); X(in);
-    TRACE_SEXP(ICHAN);
-    /*
-     */
-    run(stage_noop, stage_noop);
-    close(fd);
+    if (fd >= 0) {
+      PUSH_IO_CONTEXT(ICHAN, fd);
+      PUSH_IO_CONTEXT(OCHAN, 1);
+      run(stage_noop, stage_push_io, stage_pop_io);
+      POP_IO_CONTEXT(ICHAN);
+      POP_IO_CONTEXT(OCHAN);
+      close(fd);
+    }
   }
   /*
    */
