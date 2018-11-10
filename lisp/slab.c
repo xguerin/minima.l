@@ -148,8 +148,8 @@ lisp_free(const atom_t atom)
    * Most likely this is a pair.
    */
   if (likely(IS_PAIR(atom))) {
-    X(atom->pair.cdr);
-    X(atom->pair.car);
+    X(CAR(atom));
+    X(CDR(atom));
     lisp_deallocate(atom);
     return;
   }

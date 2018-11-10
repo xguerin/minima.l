@@ -27,7 +27,7 @@ void lisp_destroy(const lexer_t lexer);
 /*
  * Lexer parse.
  */
-void lisp_parse(const lexer_t lexer, const char * const str);
+void lisp_parse(const lexer_t lexer, const char * const str, const size_t len);
 
 /*
  * Debug macros.

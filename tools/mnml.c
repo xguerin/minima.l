@@ -1,112 +1,72 @@
 #include <lisp/lexer.h>
 #include <lisp/slab.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-static bool show_prompt = true;
-
-typedef void (* stage_t)(const lexer_t lexer);
+typedef void (* stage_t)(const atom_t);
 
 void
-syntax_error_handler()
+run(const stage_t pre, const stage_t post)
 {
-  fprintf(stdout, "! syntax error\n");
-  show_prompt = true;
-}
-
-static void
-lisp_repl_consumer(const atom_t cell)
-{
-  atom_t result = lisp_eval(NIL, cell);
-  TRACE_SEXP(result);
-  fprintf(stdout, "> ");
-  lisp_print(stdout, result);
-  X(result);
-  TRACE("D %ld", slab.n_alloc - slab.n_free);
-  show_prompt = true;
-}
-
-static void
-lisp_file_consumer(const atom_t cell)
-{
-  atom_t result = lisp_eval(NIL, cell);
-  X(result);
-}
-
-void
-stage_prompt(const lexer_t lexer)
-{
-  if (show_prompt && lexer->depth == 0) {
-    fprintf(stdout, ": ");
-    fflush(stdout);
-    show_prompt = false;
+  bool keep_running = true;
+  atom_t input, result;
+  while (keep_running) {
+    pre(NIL);
+    input = lisp_read(NIL, NIL);
+    keep_running = !IS_NULL(input);
+    result = lisp_eval(NIL, input);
+    post(result);
+    X(result);
   }
 }
 
-void
-stage_noop(const lexer_t lexer)
+void stage_prompt(const atom_t cell)
 {
-
+  write(1, ": ", 2);
 }
 
-void
-stage_newline(const lexer_t lexer)
+void stage_newline(const atom_t cell)
 {
-  fprintf(stdout, "\n");
+  write(1, "> " , 2);
+  lisp_prin(NIL, cell);
+  write(1, "\n", 1);
 }
 
-static void
-process(const lisp_consumer_t cons, FILE * const file, const stage_t pre,
-        const stage_t post)
+void stage_noop(const atom_t cell)
 {
-  char * line = NULL;
-  size_t linecap = 0;
-  ssize_t linelen;
-  /*
-   * Create the parser and register all functions.
-   */
-  lexer_t lexer = lisp_create(cons);
-  lisp_set_syntax_error_handler(syntax_error_handler);
-  /*
-   * Process input lines.
-   */
-B:pre(lexer);
-  linelen = getline(&line, &linecap, file);
-  if (linelen > 0) {
-    lisp_parse(lexer, line);
-    goto B;
-  }
-  /*
-   * Clean-up.
-   */
-  free(line);
-  post(lexer);
-  lisp_destroy(lexer);
+
 }
 
 int
 main(const int argc, char ** const argv)
 {
+  lisp_init();
   /*
-   * REPL mode.
    */
-  if (argc == 1)  {
-    process(lisp_repl_consumer, stdin, stage_prompt, stage_newline);
+  if (argc == 1) {
+    run(stage_prompt, stage_newline);
   }
-  /*
-   * FILE processing mode.
-   */
   else {
-    FILE * file = fopen(argv[1], "r");
-    if (file == NULL) {
-      fprintf(stdout, "Cannot open file: \"%s\"\n", argv[1]);
-      return __LINE__;
-    }
+    int fd = open(argv[1], O_RDONLY);
+    if (fd < 0) return __LINE__;
     /*
-     * Run the parser.
+     * Push the new input context.
      */
-    process(lisp_file_consumer, file, stage_noop, stage_noop);
-    fclose(file);
+    atom_t n0 = lisp_make_number(fd);
+    atom_t in = lisp_cons(n0, NIL);
+    X(n0);
+    atom_t old = ICHAN;
+    ICHAN = lisp_cons(in, old);
+    X(old); X(in);
+    TRACE_SEXP(ICHAN);
+    /*
+     */
+    run(stage_noop, stage_noop);
+    close(fd);
   }
+  /*
+   */
+  lisp_fini();
   return 0;
 }

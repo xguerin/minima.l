@@ -91,12 +91,12 @@ void lisp_free(const atom_t atom);
 
 #define TRACE_REFS(__f, __t, __c, __n) {  \
   HEADER_REFS(__f, __t, __n);             \
-  lisp_print(stderr, __c);                \
+  lisp_debug(stderr, __c);                \
 }
 
 #define TRACE_SLOT(__i, __c) {  \
   HEADER_SLOT(__i);             \
-  lisp_print(stderr, __c);      \
+  lisp_debug(stderr, __c);      \
 }
 
 void lisp_collect();

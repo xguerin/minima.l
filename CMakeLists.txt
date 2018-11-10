@@ -60,6 +60,7 @@ endif()
 
 add_definitions(-DMNML_VERSION="${VERSION_SHORT}")
 add_definitions(-D_GNU_SOURCE)
+add_definitions(-DYYNOERRORRECOVERY)
 
 #
 # Process options

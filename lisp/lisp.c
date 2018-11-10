@@ -1,3 +1,4 @@
+#include "lexer.h"
 #include "lisp.h"
 #include "plugin.h"
 #include "slab.h"
@@ -10,29 +11,84 @@
  * Syntax error handler.
  */
 
-error_handler_t syntax_error_handler = NULL;
+void syntax_error() { }
 
-void syntax_error()
+/*
+ * Global symbols.
+ */
+
+atom_t GLOBALS  = NULL;
+atom_t ICHAN    = NULL;
+atom_t OCHAN    = NULL;
+atom_t NIL      = NULL;
+atom_t TRUE     = NULL;
+atom_t WILDCARD = NULL;
+
+/*
+ * Interpreter life cycle.
+ */
+
+static lexer_t LEXER = NULL;
+
+static void
+lisp_consumer(const atom_t cell)
 {
-  if (syntax_error_handler != NULL) {
-    syntax_error_handler();
-  }
+  atom_t chn = CAR(ICHAN);
+  atom_t new = lisp_cons(cell, NIL);
+  atom_t old = CDR(chn);
+  CDR(chn) = lisp_conc(old, new);
+  X(old); X(new); X(cell);
+  TRACE_SEXP(ICHAN);
 }
 
 void
-lisp_set_syntax_error_handler(const error_handler_t handler)
+lisp_init()
 {
-  syntax_error_handler = handler;
+  lisp_slab_allocate();
+  /*
+   * Create the constants.
+   */
+  lisp_make_nil();
+  lisp_make_true();
+  lisp_make_wildcard();
+  /*
+   * Create the GLOBALS.
+   */
+  GLOBALS = UP(NIL);
+  /*
+   * Create the input channel.
+   */
+  atom_t in = lisp_make_number(0);
+  atom_t il = lisp_cons(in, NIL);
+  ICHAN = lisp_cons(il, NIL);
+  X(il); X(in);
+  /*
+   * Create the output channel.
+   */
+  atom_t out = lisp_make_number(1);
+  atom_t oul = lisp_cons(out, NIL);
+  OCHAN = lisp_cons(oul, NIL);
+  X(oul); X(out);
+  /*
+   * Create the lexer.
+   */
+  LEXER = lisp_create(lisp_consumer);
+}
+
+void
+lisp_fini()
+{
+  lisp_destroy(LEXER);
+  LEXER = NULL;
+  X(OCHAN); X(ICHAN); X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
+  TRACE("D %ld", slab.n_alloc - slab.n_free);
+  LISP_COLLECT();
+  lisp_slab_destroy();
 }
 
 /*
  * Symbol management.
  */
-
-atom_t GLOBALS  = NULL;
-atom_t NIL      = NULL;
-atom_t TRUE     = NULL;
-atom_t WILDCARD = NULL;
 
 static atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
@@ -43,8 +99,8 @@ lisp_lookup(const atom_t closure, const atom_t sym)
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (lisp_symbol_match(car->pair.car, sym)) {
-      return UP(car->pair.cdr);
+    if (lisp_symbol_match(CAR(car), sym)) {
+      return UP(CDR(car));
     }
     NEXT(a);
   }
@@ -53,8 +109,8 @@ lisp_lookup(const atom_t closure, const atom_t sym)
    */
   FOREACH(GLOBALS, b) {
     atom_t car = b->car;
-    if (lisp_symbol_match(car->pair.car, sym)) {
-      return UP(car->pair.cdr);
+    if (lisp_symbol_match(CAR(car), sym)) {
+      return UP(CDR(car));
     }
     NEXT(b);
   }
@@ -87,8 +143,8 @@ lisp_dup(const atom_t atom)
       res = lisp_make_number(atom->number);
       break;
     case T_PAIR: {
-      atom_t car = lisp_dup(atom->pair.car);
-      atom_t cdr = lisp_dup(atom->pair.cdr);
+      atom_t car = lisp_dup(CAR(atom));
+      atom_t cdr = lisp_dup(CDR(atom));
       res = lisp_cons(car, cdr);
       X(car); X(cdr);
       break;
@@ -107,7 +163,7 @@ atom_t
 lisp_car(const atom_t cell)
 {
   if (likely(IS_PAIR(cell))) {
-    return UP(cell->pair.car);
+    return UP(CAR(cell));
   }
   return UP(NIL);
 }
@@ -116,7 +172,7 @@ atom_t
 lisp_cdr(const atom_t cell)
 {
   if (likely(IS_PAIR(cell))) {
-    return UP(cell->pair.cdr);
+    return UP(CDR(cell));
   }
   return UP(NIL);
 }
@@ -131,8 +187,8 @@ lisp_cons(const atom_t car, const atom_t cdr)
   atom_t R = lisp_allocate();
   R->type = T_PAIR;
   R->refs = 1;
-  R->pair.car = UP(car);
-  R->pair.cdr = UP(cdr);
+  CAR(R) = UP(car);
+  CDR(R) = UP(cdr);
   TRACE_SEXP(R);
   return R;
 }
@@ -159,6 +215,58 @@ lisp_conc(const atom_t car, const atom_t cdr)
 }
 
 /*
+ * Lisp READ.
+ */
+
+#define RBUFLEN 1024
+
+static atom_t
+lisp_read_pop()
+{
+  /*
+   * ((CHN0 V1 V2) (CHN1 V1 V2) ...).
+   */
+  atom_t chn = CAR(ICHAN);
+  atom_t vls = CDR(chn);
+  atom_t res = UP(CAR(vls));
+  CDR(chn) = UP(CDR(vls));
+  X(vls);
+  TRACE_SEXP(ICHAN);
+  TRACE_SEXP(res);
+  return res;
+}
+
+atom_t
+lisp_read(const atom_t closure, const atom_t cell)
+{
+  atom_t chn = CAR(ICHAN);
+  /*
+   * Check if there is any value in the channel's buffer.
+   */
+  if (CDR(chn) != NIL) {
+    return lisp_read_pop();
+  }
+  /*
+   * Read from the file descriptor.
+   */
+  int fd = CAR(chn)->number;
+  /*
+   */
+  do {
+    char buffer[RBUFLEN] = { 0 };
+    ssize_t len = read(fd, buffer, RBUFLEN);
+    if (len <= 0) break;
+    lisp_parse(LEXER, buffer, len);
+  }
+  while (CDR(CAR(ICHAN)) == NIL || LEXER->depth != 0);
+  /*
+   * Grab the result and return it.
+   */
+  atom_t res = CDR(chn) != NIL ? lisp_read_pop(): UP(NIL);
+  return res;
+}
+
+/*
  * SETQ. Arguments closure, sym, and vals are consumed.
  */
 
@@ -171,9 +279,9 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (lisp_symbol_match(car->pair.car, sym)) {
-      X(sym); X(car->pair.cdr);
-      car->pair.cdr = val;
+    if (lisp_symbol_match(CAR(car), sym)) {
+      X(sym); X(CDR(car));
+      CDR(car) = val;
       return closure;
     }
     NEXT(a);
@@ -254,11 +362,11 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
   TRACE_SEXP(cell);
   /*
    */
-  switch (cell->pair.car->type) {
+  switch (CAR(cell)->type) {
     case T_NIL:
     case T_NUMBER: {
       atom_t cdr = lisp_cdr(cell);
-      function_t fun = (function_t)cell->pair.car->number;
+      function_t fun = (function_t)CAR(cell)->number;
       X(cell);
       ret = fun(closure, cdr);
       break;
@@ -357,6 +465,59 @@ lisp_eval(const atom_t closure, const atom_t cell)
    */
   TRACE_SEXP(ret);
   return ret;
+}
+
+/*
+ * Print function.
+ */
+
+atom_t
+lisp_prin(const atom_t closure, const atom_t cell)
+{
+  int fd = CAR(CAR(OCHAN))->number;
+  /*
+   */
+  switch (cell->type) {
+    case T_NIL:
+      write(fd, "NIL", 3);
+      break;
+    case T_TRUE:
+      write(fd, "T", 1);
+      break;
+    case T_CHAR:
+      if ((char)cell->number == '\'') {
+        write(fd, "\'", 1);
+      }
+      else {
+        const char c = (char)cell->number;
+        write(fd, &c, 1);
+      }
+      break;
+    case T_PAIR: {
+      lisp_prin(closure, CAR(cell));
+      lisp_prin(closure, CDR(cell));
+      break;
+    case T_NUMBER: {
+      char buffer[24] = { 0 };
+#ifdef __MACH__
+      sprintf(buffer, "%lld", cell->number);
+#else
+      sprintf(buffer, "%ld", cell->number);
+#endif
+      write(fd, buffer, strlen(buffer));
+      break;
+    }
+    case T_SYMBOL:
+      write(fd, cell->symbol.val, strnlen(cell->symbol.val, 16));
+      break;
+    }
+    case T_WILDCARD:
+      write(fd, "_", 3);
+      break;
+  }
+  /*
+   */
+  return cell;
 }
 
 /*

@@ -60,6 +60,9 @@ typedef struct _atom
 }
 __attribute__((packed)) * atom_t;
 
+#define CAR(__a) ((__a)->pair.car)
+#define CDR(__a) ((__a)->pair.cdr)
+
 #define IS_NULL(__a) ((__a)       ==   NIL)
 #define IS_TRUE(__a) ((__a)       ==   TRUE)
 #define IS_WILD(__a) ((__a)       ==   WILDCARD)
@@ -72,10 +75,7 @@ __attribute__((packed)) * atom_t;
  * Function type.
  */
 
-typedef void (* error_handler_t)();
 typedef atom_t (* function_t)(const atom_t closure, const atom_t cell);
-
-void lisp_set_syntax_error_handler(const error_handler_t handler);
 
 /*
  * Helper macros.
@@ -101,9 +101,17 @@ typedef void (* lisp_consumer_t)(const atom_t);
  */
 
 extern atom_t GLOBALS;
+extern atom_t ICHAN;
 extern atom_t NIL;
 extern atom_t TRUE;
 extern atom_t WILDCARD;
+
+/*
+ * Interpreter life cycle.
+ */
+
+void lisp_init();
+void lisp_fini();
 
 /*
  * Lisp basic functions.
@@ -125,8 +133,11 @@ atom_t lisp_conc(const atom_t a, const atom_t b);
  */
 
 atom_t lisp_bind(const atom_t closure, const atom_t args, const atom_t vals);
-atom_t lisp_eval(const atom_t closure, const atom_t cell);
 atom_t lisp_setq(const atom_t closure, const atom_t sym, const atom_t val);
+
+atom_t lisp_read(const atom_t closure, const atom_t cell);
+atom_t lisp_eval(const atom_t closure, const atom_t cell);
+atom_t lisp_prin(const atom_t closure, const atom_t cell);
 
 /*
  * Helper functions.
@@ -140,8 +151,6 @@ atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_inline(const uint64_t tag);
 atom_t lisp_make_char(const char c);
 atom_t lisp_make_symbol(const symbol_t sym);
-
-void lisp_print(FILE * const fp, const atom_t cell);
 
 /*
  * Symbol matching.
@@ -183,8 +192,10 @@ lisp_symbol_match(const atom_t a, const atom_t b)
 
 #define TRACE_SEXP(__c) {   \
   HEADER_SEXP(__c);         \
-  lisp_print(stderr, __c);  \
+  lisp_debug(stderr, __c);  \
 }
+
+void lisp_debug(FILE * fp, const atom_t atom);
 
 #else
 

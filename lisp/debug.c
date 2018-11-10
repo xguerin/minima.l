@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef LISP_ENABLE_DEBUG
+
 /*
- * Print function.
+ * Debug function.
  */
 
 static void
-lisp_print_atom(FILE * const fp, const atom_t atom, const bool alter)
+lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
 {
   switch (atom->type) {
     case T_NIL:
@@ -30,18 +32,18 @@ lisp_print_atom(FILE * const fp, const atom_t atom, const bool alter)
       /*
        * Print CAR.
        */
-      lisp_print_atom(fp, atom->pair.car, true);
+      lisp_debug_atom(fp, CAR(atom), true);
       /*
        * Print CDR.
        */
-      if (atom->pair.cdr->type != T_NIL) {
-        if (atom->pair.cdr->type == T_PAIR) {
+      if (CDR(atom) != NIL) {
+        if (IS_PAIR(CDR(atom))) {
           fprintf(fp, " ");
         }
         else {
           fprintf(fp, " . ");
         }
-        lisp_print_atom(fp, atom->pair.cdr, false);
+        lisp_debug_atom(fp, CDR(atom), false);
       }
       /*
       */
@@ -67,8 +69,10 @@ lisp_print_atom(FILE * const fp, const atom_t atom, const bool alter)
 }
 
 void
-lisp_print(FILE * const fp, const atom_t atom)
+lisp_debug(FILE * const fp, const atom_t atom)
 {
-  lisp_print_atom(fp, atom, true);
+  lisp_debug_atom(fp, atom, true);
   fprintf(fp, "\n");
 }
+
+#endif

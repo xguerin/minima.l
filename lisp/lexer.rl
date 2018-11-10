@@ -125,7 +125,7 @@ dot     = '.';
 quote   = '\'';
 number  = '-'? digit+;
 char    = '\'' ([^'] | '\\' '\'') '\'';
-string  = '"' ([^"] | '\\' '"')+ '"';
+string  = '"' ([^"] | '\\' '"')* '"';
 marks   = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
 symchr  = (alpha | marks);
 symbol  = symchr{1,16};
@@ -182,19 +182,6 @@ local_free(void * const addr)
 lexer_t
 lisp_create(const lisp_consumer_t consumer)
 {
-  lisp_slab_allocate();
-  /*
-   * Create the constants.
-   */
-  lisp_make_nil();
-  lisp_make_true();
-  lisp_make_wildcard();
-  /*
-   * Create the GLOBALS and the lexer.
-   */
-  GLOBALS = UP(NIL);
-  /*
-   */
   lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
   %% write init;
   lexer->consumer = consumer;
@@ -208,17 +195,13 @@ lisp_destroy(const lexer_t lexer)
 {
   ParseFree(lexer->parser, local_free);
   free(lexer);
-  X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
-  TRACE("D %ld", slab.n_alloc - slab.n_free);
-  LISP_COLLECT();
-  lisp_slab_destroy();
 }
 
 void
-lisp_parse(const lexer_t lexer, const char * const str)
+lisp_parse(const lexer_t lexer, const char * const str, const size_t len)
 {
   const char* p = str;
-  const char* pe = str + strlen(str);
+  const char* pe = str + len;
   const char* eof = pe;
   %% write exec;
 }
