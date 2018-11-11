@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <string.h>
+#include <unistd.h>
 
 atom_t
 lisp_function_out(const atom_t closure, const atom_t cell)
@@ -40,6 +41,7 @@ lisp_function_out(const atom_t closure, const atom_t cell)
    * Pop the context and return the value.
    */
   POP_IO_CONTEXT(OCHAN);
+  close(fd);
   return res;
 }
 
