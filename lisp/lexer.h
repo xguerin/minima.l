@@ -36,7 +36,7 @@ void lisp_parse(const lexer_t lexer, const char * const str, const size_t len);
 #ifdef LISP_ENABLE_DEBUG
 
 #define TRACE_LEXER(__s, ...) \
-  fprintf(stderr, "! %s:%d: " __s "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
+  FPRINTF(stderr, "! %s:%d: " __s "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #else
 

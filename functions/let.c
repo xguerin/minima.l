@@ -12,6 +12,7 @@ lisp_let_bind(const atom_t closure, const atom_t cell)
    */
   if (unlikely(!IS_PAIR(cell))) {
     X(cell);
+    TRACE_SEXP(closure);
     return closure;
   }
   /*
@@ -25,7 +26,7 @@ lisp_let_bind(const atom_t closure, const atom_t cell)
    */
   if (likely(IS_PAIR(car))) {
     atom_t arg = lisp_car(car);
-    atom_t val = lisp_cdr(car);
+    atom_t val = lisp_eval(closure, lisp_cdr(car));
     X(car);
     atom_t newc = lisp_bind(closure, arg, val);
     return lisp_let_bind(newc, cdr);
@@ -33,6 +34,7 @@ lisp_let_bind(const atom_t closure, const atom_t cell)
   /*
    */
   X(car); X(cdr);
+  TRACE_SEXP(closure);
   return closure;
 }
 
@@ -51,6 +53,7 @@ lisp_let(const atom_t closure, const atom_t cell)
   /*
    * Recursively apply the bind list.
    */
+  TRACE_SEXP(closure);
   atom_t newl = lisp_dup(closure);
   atom_t newc = lisp_let_bind(newl, bind);
   TRACE_SEXP(newc);

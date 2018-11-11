@@ -28,7 +28,9 @@ void
 repl_parse_error_handler()
 {
   write(1, "^ parse error\n", 14);
-  write(1, ": ", 2);
+  if (CDR(CAR(ICHAN)) == NIL) {
+    write(1, ": ", 2);
+  }
 }
 
 void

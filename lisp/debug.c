@@ -21,14 +21,17 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
     case T_CHAR: {
       const char c = (char)atom->number;
       switch (c) {
+        case '\'':
+          fprintf(fp, "'\''");
+          break;
         case '\\':
-          fprintf(fp, "@\\");
+          fprintf(fp, "'\\'");
           break;
         case '\n':
-          fprintf(fp, "@\\n");
+          fprintf(fp, "'\\n'");
           break;
         default:
-          fprintf(fp, "@%c", c);
+          fprintf(fp, "'%c'", c);
       }
       break;
     }
@@ -76,8 +79,10 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
 void
 lisp_debug(FILE * const fp, const atom_t atom)
 {
-  lisp_debug_atom(fp, atom, true);
-  fprintf(fp, "\n");
+  if (getenv("MNML_VERBOSE_DEBUG")) {
+    lisp_debug_atom(fp, atom, true);
+    fprintf(fp, "\n");
+  }
 }
 
 #endif

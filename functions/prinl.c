@@ -7,20 +7,16 @@
 static atom_t
 lisp_prinl_all(const atom_t closure, const atom_t cell, const atom_t result)
 {
+  if (unlikely(IS_NULL(cell))) {
+    X(cell);
+    return result;
+  }
   /*
    */
   atom_t car = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   lisp_prin(closure, car);
   X(cell); X(result);
-  /*
-   */
-  if (IS_NULL(cdr)) {
-    X(cdr);
-    return car;
-  }
-  /*
-   */
   return lisp_prinl_all(closure, cdr, car);
 }
 

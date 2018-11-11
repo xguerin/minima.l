@@ -20,6 +20,18 @@ extern void parse_error();
 
 machine minimal;
 
+action err_quote
+{
+  parse_error();
+  fhold; fgoto purge;
+}
+
+action err_symbol
+{
+  parse_error();
+  fhold; fgoto purge;
+}
+
 action tok_popen
 {
   Parse(lexer->parser, POPEN, 0, NULL);
@@ -45,12 +57,6 @@ action tok_quote
   Parse(lexer->parser, QUOTE, 0, NULL);
 }
 
-action err_quote
-{
-  parse_error();
-  fhold; fgoto purge;
-}
-
 action tok_number
 {
   const char * start = *ts == '\'' ? ts + 1 : ts;
@@ -68,8 +74,8 @@ action tok_number
 
 action tok_char
 {
-  const char * start = *ts == '\'' ? ts + 2 : ts + 1;
-  size_t len = te - start;
+  const char * start = ts + 1, * end = te - 1;
+  size_t len = end - start;
   uint64_t val = *start;
   /*
    */
@@ -147,11 +153,10 @@ pclose  = ')';
 dot     = '.';
 quote   = '\'';
 number  = '-'? digit+;
-char    = '@' . print;
+char    = '\'' . (print - '\\' | '\\' . '\\') . '\'';
 string  = '"' . ([^"] | '\\' '"')* . '"';
-marks   = [~!$%^&*_+\-={}\[\]:;|\\<>?,./];
-symchr  = (alpha | marks);
-symbol  = symchr{1,16};
+marks   = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
+symbol  = (alpha | marks) . (alnum | marks){,15} $!err_symbol;
 comment = '#' . [^\n]*;
 
 purge := any* %{ fgoto main; };
@@ -175,7 +180,6 @@ main := |*
   #
   (quote >tok_quote) . popen  $!err_quote => tok_popen;
   (quote >tok_quote) . number $!err_quote => tok_number;
-  (quote >tok_quote) . char   $!err_quote => tok_char;
   (quote >tok_quote) . string $!err_quote => tok_string;
   (quote >tok_quote) . "NIL"  $!err_quote => tok_nil;
   (quote >tok_quote) . 'T'    $!err_quote => tok_true;

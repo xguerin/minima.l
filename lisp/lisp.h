@@ -199,18 +199,21 @@ lisp_symbol_match(const atom_t a, const atom_t b)
 
 #ifdef LISP_ENABLE_DEBUG
 
+#define FPRINTF \
+  if (getenv("MNML_VERBOSE_DEBUG")) fprintf
+
 #define TRACE(__fmt, ...) \
-  fprintf(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
+  FPRINTF(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #ifdef __MACH__
 
 #define HEADER_SEXP(__c)  \
-  fprintf(stderr, "! %s:%d: [%llu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
+  FPRINTF(stderr, "! %s:%d: [%llu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
 
 #else
 
 #define HEADER_SEXP(__c)  \
-  fprintf(stderr, "! %s:%d: [%lu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
+  FPRINTF(stderr, "! %s:%d: [%lu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
 
 #endif
 
