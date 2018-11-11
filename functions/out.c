@@ -7,7 +7,7 @@
 #include <string.h>
 
 atom_t
-lisp_function_in(const atom_t closure, const atom_t cell)
+lisp_function_out(const atom_t closure, const atom_t cell)
 {
   /*
    * Get CAR/CDR.
@@ -26,7 +26,7 @@ lisp_function_in(const atom_t closure, const atom_t cell)
   /*
    * Open the file.
    */
-  int fd = open(buffer, O_RDONLY);
+  int fd = open(buffer, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
   if (fd < 0) {
     X(prg);
     return UP(NIL);
@@ -34,13 +34,13 @@ lisp_function_in(const atom_t closure, const atom_t cell)
   /*
    * Push the context.
    */
-  PUSH_IO_CONTEXT(ICHAN, fd);
+  PUSH_IO_CONTEXT(OCHAN, fd);
   atom_t res = lisp_eval(closure, prg);
   /*
    * Pop the context and return the value.
    */
-  POP_IO_CONTEXT(ICHAN);
+  POP_IO_CONTEXT(OCHAN);
   return res;
 }
 
-LISP_REGISTER(in, in)
+LISP_REGISTER(out, out)
