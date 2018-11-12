@@ -21,27 +21,32 @@ lisp_function_in(const atom_t closure, const atom_t cell)
   /*
    * Construct the file name.
    */
+  int fd = 0;
   char buffer[PATH_MAX + 1];
-  lisp_make_string(car, buffer, 0);
+  size_t len = lisp_make_string(car, buffer, 0);
   X(car);
   /*
-   * Open the file.
+   * If the file name's length > 0, open the file with that name.
    */
-  int fd = open(buffer, O_RDONLY);
-  if (fd < 0) {
-    X(prg);
-    return UP(NIL);
+  if (len > 0) {
+    fd = open(buffer, O_RDONLY);
+    if (fd < 0) {
+      X(prg);
+      return UP(NIL);
+    }
   }
   /*
-   * Push the context.
+   * Push the context, eval the prog, pop the context.
    */
   PUSH_IO_CONTEXT(ICHAN, fd);
   atom_t res = lisp_eval(closure, prg);
-  /*
-   * Pop the context and return the value.
-   */
   POP_IO_CONTEXT(ICHAN);
-  close(fd);
+  /*
+   * Close the FD if necessary and return the value.
+   */
+  if (len > 0) {
+    close(fd);
+  }
   return res;
 }
 

@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <limits.h>
 
-void
+size_t
 lisp_make_string(const atom_t cell, char * const buffer, const size_t idx)
 {
   /*
@@ -10,11 +10,12 @@ lisp_make_string(const atom_t cell, char * const buffer, const size_t idx)
    */
   if (IS_NULL(cell) || idx == PATH_MAX) {
     *buffer = '\0';
-    return;
+    return idx;
   }
   /*
    * Process the chars.
    */
-  lisp_make_string(CDR(cell), buffer + 1, idx + 1);
+  size_t res = lisp_make_string(CDR(cell), buffer + 1, idx + 1);
   *buffer = CAR(cell)->number;
+  return res;
 }
