@@ -108,6 +108,8 @@ extern atom_t NIL;
 extern atom_t TRUE;
 extern atom_t WILDCARD;
 
+atom_t lisp_lookup(const atom_t closure, const atom_t sym);
+
 /*
  * Interpreter life cycle.
  */

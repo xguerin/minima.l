@@ -74,6 +74,8 @@ endif()
 # Flags preferences
 #
 
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
 set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter -Wno-address-of-packed-member")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
 
@@ -93,6 +95,7 @@ find_package(Ragel REQUIRED)
 #
 
 add_subdirectory(functions)
+add_subdirectory(lib)
 add_subdirectory(lisp)
 add_subdirectory(tools)
 

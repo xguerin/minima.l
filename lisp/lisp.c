@@ -105,7 +105,7 @@ lisp_fini()
  * Symbol management.
  */
 
-static atom_t
+atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
 {
   TRACE_SEXP(sym);
@@ -515,8 +515,6 @@ lisp_eval(const atom_t closure, const atom_t cell)
  * Print function.
  */
 
-static void lisp_prin_pair(const int, const atom_t, const atom_t);
-
 static void
 lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
 {
@@ -535,9 +533,10 @@ lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
       break;
     }
     case T_PAIR: {
-      write(fd, "(", 1);
-      lisp_prin_pair(fd, closure, cell);
-      write(fd, ")", 1);
+      lisp_prin_atom(fd, closure, CAR(cell));
+      if (!IS_NULL(CDR(cell))) {
+        lisp_prin_atom(fd, closure, CDR(cell));
+      }
       break;
     case T_NUMBER: {
       char buffer[24] = { 0 };
@@ -554,22 +553,8 @@ lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
       break;
     }
     case T_WILDCARD:
-      write(fd, "_", 3);
+      write(fd, "_", 1);
       break;
-  }
-}
-
-static void
-lisp_prin_pair(const int fd, const atom_t closure, const atom_t cell)
-{
-  lisp_prin_atom(fd, closure, CAR(cell));
-  if (IS_PAIR(CDR(cell))) {
-    write(fd, " ", 1);
-    lisp_prin_pair(fd, closure, CDR(cell));
-  }
-  if (IS_ATOM(CDR(cell))) {
-    write(fd, " . ", 3);
-    lisp_prin_atom(fd, closure, CDR(cell));
   }
 }
 

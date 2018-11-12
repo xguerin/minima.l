@@ -7,6 +7,19 @@
 #include <string.h>
 #include <unistd.h>
 
+static const char * lisp_expand_path(const char * path)
+{
+  static char buffer[PATH_MAX];
+  if (strncmp(path, "@lib", 4) == 0) {
+    memset(buffer, 0, PATH_MAX);
+    strcpy(buffer, lisp_prefix());
+    strcat(buffer, "/lisp");
+    strcat(buffer, &path[4]);
+    return buffer;
+  }
+  return path;
+}
+
 atom_t
 lisp_function_load(const atom_t closure, const atom_t cell)
 {
@@ -22,9 +35,13 @@ lisp_function_load(const atom_t closure, const atom_t cell)
   lisp_make_string(car, buffer, 0);
   X(car);
   /*
+   * Expand the path.
+   */
+  const char * path = lisp_expand_path(buffer);
+  /*
    * Open the file.
    */
-  int fd = open(buffer, O_RDONLY);
+  int fd = open(path, O_RDONLY);
   if (fd < 0) {
     return UP(NIL);
   }

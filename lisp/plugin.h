@@ -7,6 +7,7 @@
  * Plugin management.
  */
 
+const char * lisp_prefix();
 atom_t lisp_plugin_load(const atom_t sym);
 
 /*

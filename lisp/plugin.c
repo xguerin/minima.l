@@ -3,11 +3,52 @@
 #include "slab.h"
 #include <dlfcn.h>
 #include <dirent.h>
+#include <libgen.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
-static atom_t
-lisp_symbol_load(char * const paths, const atom_t sym)
+static const char *
+lisp_library_prefix()
+{
+  static bool is_set = false;
+  static char buffer[PATH_MAX + 4] = { 0 };
+  if (!is_set) {
+    const char * prefix = lisp_prefix();
+    strcpy(buffer, prefix);
+    strcat(buffer, "/lib");
+    is_set = true;
+  }
+  return buffer;
+}
+
+const char *
+lisp_prefix()
+{
+  static bool is_set = false;
+  static char buffer[PATH_MAX] = { 0 };
+  Dl_info libInfo;
+  /*
+   * Compute this library path.
+   */
+  if (!is_set && dladdr(&lisp_prefix, &libInfo) != 0) {
+#if defined(__OpenBSD__)
+    strlcpy(buffer, libInfo.dli_fname, 4096);
+#else
+    strcpy(buffer, libInfo.dli_fname);
+#endif
+    const char * dname = dirname(dirname(buffer));
+    strcpy(buffer, dname);
+    is_set = true;
+  }
+  /*
+   * Return the result.
+   */
+  return buffer;
+}
+
+static void *
+lisp_find_plugin(const char * const paths, const atom_t sym)
 {
   TRACE_SEXP(sym);
   /*
@@ -18,7 +59,7 @@ lisp_symbol_load(char * const paths, const atom_t sym)
   /*
    * Scan libraries in the path.
    */
-  char * p = paths, * n = NULL, * entry = NULL;
+  const char * p = paths, * n = NULL, * entry = NULL;
   while (p != NULL) {
     n = strstr(p, ":");
     entry = n == NULL ? strdup(p) : strndup(p, p - n);
@@ -65,11 +106,9 @@ lisp_symbol_load(char * const paths, const atom_t sym)
          */
         const char * pname = get_name();
         if (strcmp(pname, bsym) == 0) {
-          atom_t (* get_atom)() = dlsym(handle, "lisp_plugin_register");
-          atom_t res = get_atom == NULL ? UP(NIL) : get_atom();
           closedir(dir);
-          free(entry);
-          return res;
+          free((void *)entry);
+          return handle;
         }
         /*
          * Close the file.
@@ -81,10 +120,10 @@ lisp_symbol_load(char * const paths, const atom_t sym)
      * Close the directory.
      */
     closedir(dir);
-    free(entry);
+    free((void *)entry);
     p = n;
   }
-  return UP(NIL);
+  return NULL;
 }
 
 atom_t
@@ -94,11 +133,25 @@ lisp_plugin_load(const atom_t sym)
   /*
    * Load the environment variable.
    */
-  char * paths = getenv("MNML_PLUGIN_PATH");
+  const char * paths = getenv("MNML_PLUGIN_PATH");
   if (paths == NULL) {
+    paths = lisp_library_prefix();
+  }
+  TRACE("looking into %s", paths);
+  /*
+   * Find the plugin for the symbol.
+   */
+  void * handle = lisp_find_plugin(paths, sym);
+  if (handle == NULL) {
     return UP(NIL);
   }
   /*
+   * Grab the function.
    */
-  return lisp_symbol_load(paths, sym);
+  atom_t (* get_atom)() = dlsym(handle, "lisp_plugin_register");
+  if (get_atom == NULL) {
+    dlclose(handle);
+    return UP(NIL);
+  }
+  return get_atom();
 }

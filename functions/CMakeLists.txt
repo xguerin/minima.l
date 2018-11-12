@@ -11,4 +11,6 @@ foreach(SOURCE ${SOURCES})
   if(MNML_HAS_IPO)
     set_property(TARGET minimal_function_${TAG} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
+  #
+  install(TARGETS minimal_function_${TAG} LIBRARY DESTINATION lib)
 endforeach()
