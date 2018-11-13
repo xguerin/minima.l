@@ -350,21 +350,21 @@ lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
  */
 
 atom_t
-lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
+lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
 {
   atom_t ret;
   TRACE_SEXP(closure);
-  TRACE_SEXP(args);
-  TRACE_SEXP(vals);
+  TRACE_SEXP(arg);
+  TRACE_SEXP(val);
   /*
    */
-  switch (args->type) {
+  switch (arg->type) {
     case T_NIL:
     case T_TRUE:
     case T_CHAR:
     case T_NUMBER:
     case T_WILDCARD: {
-      X(args); X(vals);
+      X(arg); X(val);
       ret = closure;
       break;
     }
@@ -372,22 +372,22 @@ lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
       /*
        * Grab the CARs, evaluate the value and bind them.
        */
-      atom_t sym = lisp_car(args);
-      atom_t val = lisp_eval(closure, lisp_car(vals));
-      atom_t cl0 = lisp_bind(closure, sym, val);
+      atom_t sym = lisp_car(arg);
+      atom_t vl0 = lisp_car(val);
+      atom_t cl0 = lisp_bind(closure, sym, vl0);
       /*
        * Grab the CDRs and recursively bind them.
        */
-      atom_t oth = lisp_cdr(args);
-      atom_t rem = lisp_cdr(vals);
-      X(args); X(vals);
+      atom_t oth = lisp_cdr(arg);
+      atom_t rem = lisp_cdr(val);
+      X(arg); X(val);
       /*
       */
       ret = lisp_bind(cl0, oth, rem);
       break;
     }
     case T_SYMBOL: {
-      ret = lisp_setq(closure, args, vals);
+      ret = lisp_setq(closure, arg, val);
       break;
     }
   }
@@ -395,6 +395,30 @@ lisp_bind(const atom_t closure, const atom_t args, const atom_t vals)
    */
   TRACE_SEXP(ret);
   return ret;
+}
+
+static atom_t
+lisp_bind_all(const atom_t closure, const atom_t args, const atom_t vals)
+{
+  if (args == NIL) {
+    X(args); X(vals);
+    return closure;
+  }
+  /*
+   * Grab the CARs, evaluate the value and bind them.
+   */
+  atom_t sym = lisp_car(args);
+  atom_t val = lisp_eval(closure, lisp_car(vals));
+  atom_t cl0 = lisp_bind(closure, sym, val);
+  /*
+   * Grab the CDRs and recursively bind them.
+   */
+  atom_t oth = lisp_cdr(args);
+  atom_t rem = lisp_cdr(vals);
+  X(args); X(vals);
+  /*
+  */
+  return lisp_bind_all(cl0, oth, rem);
 }
 
 /*
@@ -443,7 +467,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        * 3. Return a lambda with updated local closure if some are NIL
        */
       atom_t newl = lisp_dup(closure);
-      atom_t newc = lisp_bind(newl, args, vals);
+      atom_t newc = lisp_bind_all(newl, args, vals);
       ret = lisp_prog(newc, body, UP(NIL));
       /*
       */
