@@ -6,7 +6,7 @@
 static bool
 atom_match(const atom_t a, const atom_t b)
 {
-  if (IS_WILD(a) || IS_SYMB(a)) {
+  if (IS_WILD(a)) {
     return true;
   }
   if (a->type != b->type) {
@@ -18,6 +18,8 @@ atom_match(const atom_t a, const atom_t b)
       return a->number == b->number;
     case T_PAIR:
       return atom_match(CAR(a), CAR(b)) && atom_match(CDR(a), CDR(b));
+    case T_SYMBOL:
+      return lisp_symbol_match(a, b);
     default:
       return true;
   }
@@ -49,14 +51,8 @@ lisp_match(const atom_t closure, const atom_t cell, const atom_t match)
    * Match the cell with CAR.
    */
   if (atom_match(args, cell)) {
-    X(cdr);
-    /*
-     */
-    atom_t newl = lisp_dup(closure);
-    atom_t newc = lisp_bind(newl, args, cell);
-    atom_t rslt = lisp_eval(newc, prog);
-    X(newc);
-    return rslt;
+    X(args); X(cdr); X(cell);
+    return lisp_eval(closure, prog);
   }
   /*
    */
