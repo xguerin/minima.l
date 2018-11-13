@@ -9,6 +9,7 @@
 %include
 {
 #include "lisp.h"
+#include "utils.h"
 #include <stdlib.h>
 
 extern void syntax_error();
@@ -92,7 +93,7 @@ item(A) ::= STRING(B).
     X(c); X(res);
     res = n;
   }
-  A = res;
+  A = lisp_process_escapes(res, false, UP(NIL));
 }
 
 item(A) ::= SYMBOL(B).

@@ -84,6 +84,9 @@ action tok_char
       case 'n' :
         val = '\n';
         break;
+      case 't' :
+        val = '\t';
+        break;
       default:
         val = *(start + 1);
         break;
