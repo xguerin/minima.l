@@ -45,6 +45,7 @@ lisp_set_syntax_error_handler(const error_handler_t h)
  */
 
 atom_t GLOBALS  = NULL;
+atom_t PLUGINS  = NULL;
 atom_t ICHAN    = NULL;
 atom_t OCHAN    = NULL;
 atom_t NIL      = NULL;
@@ -82,8 +83,9 @@ lisp_init()
    * Create the GLOBALS.
    */
   GLOBALS = UP(NIL);
-  ICHAN = UP(NIL);
-  OCHAN = UP(NIL);
+  PLUGINS = UP(NIL);
+  ICHAN   = UP(NIL);
+  OCHAN   = UP(NIL);
   /*
    * Create the lexer.
    */
@@ -93,9 +95,10 @@ lisp_init()
 void
 lisp_fini()
 {
+  lisp_plugin_cleanup();
   lisp_destroy(LEXER);
   LEXER = NULL;
-  X(OCHAN); X(ICHAN); X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
+  X(OCHAN); X(ICHAN); X(PLUGINS); X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   lisp_slab_destroy();
@@ -271,11 +274,16 @@ lisp_read(const atom_t closure, const atom_t cell)
   int fd = CAR(chn)->number;
   /*
    */
+  ssize_t len = 0;
+  size_t rem = 0;
+  char buffer[RBUFLEN] = { 0 };
   do {
-    char buffer[RBUFLEN] = { 0 };
-    ssize_t len = read(fd, buffer, RBUFLEN);
+    len = read(fd, buffer + rem, RBUFLEN - rem);
+    rem = lisp_parse(LEXER, buffer, rem + len, rem + len < RBUFLEN);
+    if (rem > 0) {
+      memmove(buffer, buffer + len - rem, rem);
+    }
     if (len <= 0) break;
-    lisp_parse(LEXER, buffer, len);
   }
   while (CDR(CAR(ICHAN)) == NIL || LEXER->depth != 0);
   /*
@@ -539,8 +547,35 @@ lisp_eval(const atom_t closure, const atom_t cell)
  * Print function.
  */
 
+static void lisp_prin_atom(const int fd, const atom_t closure,
+                           const atom_t cell, const bool s);
+
 static void
-lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
+lisp_prin_pair(const int fd, const atom_t closure, const atom_t cell,
+               const bool s)
+{
+  /*
+   * Print CAR.
+   */
+  lisp_prin_atom(fd, closure, CAR(cell), s);
+  /*
+   * Print CDR.
+   */
+  if (!IS_NULL(CDR(cell))) {
+    if (IS_PAIR(CDR(cell))) {
+      if (s) write(fd, " ", 1);
+      lisp_prin_pair(fd, closure, CDR(cell), s);
+    }
+    else {
+      if (s) write(fd, " . ", 3);
+      lisp_prin_atom(fd, closure, CDR(cell), s);
+    }
+  }
+}
+
+static void
+lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell,
+               const bool s)
 {
   /*
    */
@@ -553,14 +588,30 @@ lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
       break;
     case T_CHAR: {
       const char c = (char)cell->number;
-      write(fd, &c, 1);
+      if (s) {
+        write(fd, "'", 1);
+        switch (c) {
+          case '\n':
+            write(fd, "\\n", 2);
+            break;
+          case '\t':
+            write(fd, "\\t", 2);
+            break;
+          default:
+            write(fd, &c, 1);
+            break;
+        }
+        write(fd, "'", 1);
+      }
+      else {
+        write(fd, &c, 1);
+      }
       break;
     }
     case T_PAIR: {
-      lisp_prin_atom(fd, closure, CAR(cell));
-      if (!IS_NULL(CDR(cell))) {
-        lisp_prin_atom(fd, closure, CDR(cell));
-      }
+      if (s) write(fd, "(", 1);
+      lisp_prin_pair(fd, closure, cell, s);
+      if (s) write(fd, ")", 1);
       break;
     case T_NUMBER: {
       char buffer[24] = { 0 };
@@ -583,10 +634,10 @@ lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell)
 }
 
 void
-lisp_prin(const atom_t closure, const atom_t cell)
+lisp_prin(const atom_t closure, const atom_t cell, const bool s)
 {
   int fd = CAR(CAR(OCHAN))->number;
-  return lisp_prin_atom(fd, closure, cell);
+  return lisp_prin_atom(fd, closure, cell, s);
 }
 
 /*

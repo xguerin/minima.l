@@ -102,6 +102,7 @@ typedef void (* lisp_consumer_t)(const atom_t);
  */
 
 extern atom_t GLOBALS;
+extern atom_t PLUGINS;
 extern atom_t ICHAN;
 extern atom_t OCHAN;
 extern atom_t NIL;
@@ -147,7 +148,7 @@ atom_t lisp_prog(const atom_t closure, const atom_t cell, const atom_t rslt);
 
 atom_t lisp_read(const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const atom_t closure, const atom_t cell);
-void   lisp_prin(const atom_t closure, const atom_t cell);
+void   lisp_prin(const atom_t closure, const atom_t cell, const bool s);
 
 /*
  * Helper functions.
@@ -182,8 +183,14 @@ atom_t lisp_make_symbol(const symbol_t sym);
  * Symbol matching.
  */
 
-#define MAKE_SYMBOL(__v, __s, __n)              \
+#define MAKE_SYMBOL_STATIC(__v, __s, __n)       \
   symbol_t __v = alloca(sizeof(union _symbol)); \
+  __v->word[0] = 0;                             \
+  __v->word[1] = 0;                             \
+  strncpy(__v->val, __s, __n);
+
+#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)      \
+  symbol_t __v = malloc(sizeof(union _symbol)); \
   __v->word[0] = 0;                             \
   __v->word[1] = 0;                             \
   strncpy(__v->val, __s, __n);

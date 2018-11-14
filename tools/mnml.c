@@ -45,7 +45,7 @@ void
 stage_newline(const atom_t cell)
 {
   write(1, "> " , 2);
-  lisp_prin(NIL, cell);
+  lisp_prin(NIL, cell, true);
   write(1, "\n", 1);
 }
 

@@ -9,6 +9,7 @@
 
 const char * lisp_prefix();
 atom_t lisp_plugin_load(const atom_t sym);
+void lisp_plugin_cleanup();
 
 /*
  * Helpful macros.
@@ -25,7 +26,7 @@ lisp_plugin_name()                                                  \
 atom_t                                                              \
 lisp_plugin_register()                                              \
 {                                                                   \
-  MAKE_SYMBOL(inp, #__n, sizeof(#__n));                             \
+  MAKE_SYMBOL_STATIC(inp, #__n, sizeof(#__n));                      \
   atom_t sym = lisp_make_symbol(inp);                               \
   atom_t val = lisp_make_number((uintptr_t)lisp_function_ ## __s);  \
   atom_t res = UP(val);                                             \

@@ -12,7 +12,7 @@ lisp_function_conc(const atom_t closure, const atom_t cell)
   atom_t snd = lisp_eval(closure, lisp_car(cdr));
   X(cdr);
   atom_t res = lisp_conc(fst, snd);
-  X(snd);
+  X(fst); X(snd);
   return res;
 }
 

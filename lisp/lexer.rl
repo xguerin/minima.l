@@ -142,7 +142,7 @@ action tok_symbol
 { 
   const char * start = *ts == '\'' ? ts + 1 : ts;
   size_t len = te - start;
-  MAKE_SYMBOL(sym, start, len);
+  MAKE_SYMBOL_DYNAMIC(sym, start, len);
   /*
    */
   Parse(lexer->parser, SYMBOL, sym, NULL);
@@ -234,6 +234,7 @@ lisp_create(const lisp_consumer_t consumer)
   %% write init;
   lexer->consumer = consumer;
   lexer->depth = 0;
+  lexer->rem = 0;
   lexer->parser = ParseAlloc(local_malloc);
   return lexer;
 }
@@ -245,11 +246,22 @@ lisp_destroy(const lexer_t lexer)
   free(lexer);
 }
 
-void
-lisp_parse(const lexer_t lexer, const char * const str, const size_t len)
+size_t
+lisp_parse(const lexer_t lexer, const char * const str,
+           const size_t len, const bool end)
 {
-  const char* p = str;
+  const char* p = str + lexer->rem;
   const char* pe = str + len;
-  const char* eof = pe;
+  const char* eof = end ? pe : 0;
   %% write exec;
+  /*
+   * Update the local state when there is a prefix to save.
+   */
+  lexer->rem = 0;
+  if (ts != 0) {
+    lexer->rem = pe - ts;
+    te = str + (te - ts);
+    ts = str;
+  }
+  return lexer->rem;
 }

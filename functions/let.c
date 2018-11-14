@@ -46,10 +46,8 @@ lisp_let(const atom_t closure, const atom_t cell)
    * Get the bind list and the prog.
    */
   atom_t bind = lisp_car(cell);
-  atom_t cdr0 = lisp_cdr(cell);
+  atom_t prog = lisp_cdr(cell);
   X(cell);
-  atom_t prog = lisp_car(cdr0);
-  X(cdr0);
   /*
    * Recursively apply the bind list.
    */
@@ -60,7 +58,7 @@ lisp_let(const atom_t closure, const atom_t cell)
   /*
    * Evaluate the prog with the new bind list.
    */
-  atom_t res = lisp_eval(newc, prog);
+  atom_t res = lisp_prog(newc, prog, UP(NIL));
   X(newc);
   return res;
 }

@@ -153,5 +153,22 @@ lisp_plugin_load(const atom_t sym)
     dlclose(handle);
     return UP(NIL);
   }
+  /*
+   * Append the plugin and call the register function.
+   */
+  atom_t hnd = lisp_make_number((uint64_t)handle);
+  PLUGINS = lisp_setq(PLUGINS, UP(sym), hnd);
   return get_atom();
+}
+
+void
+lisp_plugin_cleanup()
+{
+  TRACE_SEXP(PLUGINS);
+  FOREACH(PLUGINS, p) {
+    atom_t car = p->car;
+    atom_t hnd = CAR(CDR(car));
+    dlclose((void *)hnd);
+    NEXT(p);
+  }
 }
