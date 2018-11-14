@@ -402,17 +402,19 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
 }
 
 static atom_t
-lisp_bind_all(const atom_t closure, const atom_t env,
-              const atom_t args, const atom_t vals)
+lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
+               const atom_t vals, atom_t * const rest)
 {
   TRACE_SEXP(closure);
   TRACE_SEXP(env);
   TRACE_SEXP(args);
   TRACE_SEXP(vals);
   /*
+   * Return if we run out of arguments or values.
    */
-  if (args == NIL) {
-    X(args); X(vals);
+  if (IS_NULL(args) || IS_NULL(vals)) {
+    *rest = args;
+    X(vals);
     return env;
   }
   /*
@@ -429,7 +431,7 @@ lisp_bind_all(const atom_t closure, const atom_t env,
   X(args); X(vals);
   /*
   */
-  atom_t res = lisp_bind_all(closure, cl0, oth, rem);
+  atom_t res = lisp_bind_args(closure, cl0, oth, rem, rest);
   TRACE_SEXP(res);
   return res;
 }
@@ -484,11 +486,25 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        */
       atom_t newl = lisp_dup(lcls);
       X(lcls);
-      atom_t newc = lisp_bind_all(closure, newl, args, vals);
-      ret = lisp_prog(newc, body, UP(NIL));
+      atom_t rest;
+      atom_t newc = lisp_bind_args(closure, newl, args, vals, &rest);
+      /*
+       * Partial application:
+       * 1. Have lisp_bind_all return a list of unbound arguments
+       * 2. If that list is NIL, evaluate the function
+       * 3. Otherwise, build a new function with the remaining arguments
+       */
+      if (IS_NULL(rest)) {
+        ret = lisp_prog(newc, body, UP(NIL));
+        X(rest); X(newc);
+      }
+      else {
+        atom_t con = lisp_cons(newc, body);
+        ret = lisp_cons(rest, con);
+        X(con); X(rest); X(newc); X(body);
+      }
       /*
        */
-      X(newc);
       break;
     }
     case T_SYMBOL: {
