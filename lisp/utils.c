@@ -2,6 +2,7 @@
 #include "slab.h"
 #include "utils.h"
 #include <limits.h>
+#include <time.h>
 
 size_t
 lisp_make_string(const atom_t cell, char * const buffer, const size_t idx)
@@ -73,4 +74,12 @@ lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
    */
   X(car);
   return lisp_process_escapes(cdr, nesc, nxt);
+}
+
+uint64_t
+lisp_timestamp()
+{
+  struct timespec ts = { 0 };
+  clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+  return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
