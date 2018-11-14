@@ -246,8 +246,8 @@ lisp_destroy(const lexer_t lexer)
   free(lexer);
 }
 
-size_t
-lisp_parse(const lexer_t lexer, const char * const str,
+void
+lisp_parse(const lexer_t lexer, char * const str,
            const size_t len, const bool end)
 {
   const char* p = str + lexer->rem;
@@ -260,8 +260,8 @@ lisp_parse(const lexer_t lexer, const char * const str,
   lexer->rem = 0;
   if (ts != 0) {
     lexer->rem = pe - ts;
+    memmove(str, ts, lexer->rem);
     te = str + (te - ts);
     ts = str;
   }
-  return lexer->rem;
 }

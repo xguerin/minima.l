@@ -275,14 +275,10 @@ lisp_read(const atom_t closure, const atom_t cell)
   /*
    */
   ssize_t len = 0;
-  size_t rem = 0;
   char buffer[RBUFLEN] = { 0 };
   do {
-    len = read(fd, buffer + rem, RBUFLEN - rem);
-    rem = lisp_parse(LEXER, buffer, rem + len, rem + len < RBUFLEN);
-    if (rem > 0) {
-      memmove(buffer, buffer + len - rem, rem);
-    }
+    len = read(fd, buffer + LEXER->rem, RBUFLEN - LEXER->rem);
+    lisp_parse(LEXER, buffer, LEXER->rem + len, LEXER->rem + len < RBUFLEN);
     if (len <= 0) break;
   }
   while (CDR(CAR(ICHAN)) == NIL || LEXER->depth != 0);

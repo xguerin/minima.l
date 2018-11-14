@@ -3,7 +3,7 @@
 #include <lisp/lexer.h>
 #include <lisp/slab.h>
 
-#define INPUT(__s) __s, strlen(__s)
+#define INPUT(__s) (char *)__s, strlen(__s)
 
 /*
  * Basic tests.
