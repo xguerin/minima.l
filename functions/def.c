@@ -16,6 +16,16 @@ lisp_function_def(const atom_t closure, const atom_t cell)
   atom_t prog = lisp_cdr(cdr0);
   X(cdr0);
   /*
+   * Check if there is a docstring in the declaration.
+   */
+  atom_t doc = lisp_car(prog);
+  if (IS_PAIR(doc) && IS_CHAR(CAR(doc))) {
+    atom_t nxt = lisp_cdr(prog);
+    X(prog);
+    prog = nxt;
+  }
+  X(doc);
+  /*
    * Append a dummy closure.
    */
   atom_t con0 = lisp_cons(NIL, prog);
