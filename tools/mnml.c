@@ -6,17 +6,21 @@
 
 typedef void (* stage_t)(const atom_t);
 
+static bool keep_running = true;
+
+static void
+signal_handler(const int sigid)
+{
+  keep_running = false;
+}
+
 void
 run(const stage_t pread, const stage_t peval, const stage_t post)
 {
   atom_t input, result;
-  for (;;) {
+  while (keep_running) {
     pread(NIL);
     input = lisp_read(NIL, UP(NIL));
-    if (input == NIL) {
-      X(input);
-      break;
-    }
     peval(input);
     result = lisp_eval(NIL, input);
     post(result);
@@ -70,7 +74,12 @@ stage_pop_io(const atom_t cell)
 int
 main(const int argc, char ** const argv)
 {
+  int status = 0;
   lisp_init();
+  /*
+   */
+  signal(SIGQUIT, signal_handler);
+  signal(SIGTERM, signal_handler);
   /*
    */
   if (argc == 1) {
@@ -95,5 +104,6 @@ main(const int argc, char ** const argv)
   /*
    */
   lisp_fini();
-  return 0;
+  status = slab.n_alloc - slab.n_free;
+  return status;
 }

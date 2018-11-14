@@ -28,7 +28,7 @@ syn keyword MinimalFuncs + - * / \\ = <> < <= > >= and or not
 syn keyword MinimalFuncs prog atm? nil? lst? num? chr? sym?
 syn keyword MinimalFuncs car cdr conc cons def eval let list load
 syn keyword MinimalFuncs in out prin prinl print printl read
-syn keyword MinimalFuncs quote setq sym
+syn keyword MinimalFuncs exit quote setq sym
 syn keyword MinimalFuncs foldr foldl map map2 zip filter rev
 
 syn keyword MinimalDebug trace closure
@@ -51,7 +51,7 @@ set lispwords+=prog,match,?,?:,?!,+,-,*,/,\\,=,<>,<,<=,>,>=
 set lispwords+=atm?,lst?,num?,chr?,nil?,sym?
 set lispwords+=car,cdr,conc,cons,def,eval,let,list,load
 set lispwords+=in,line,out,prin,prinl,print,printl,read
-set lispwords+=quote,setq
+set lispwords+=exit,quote,setq
 set lispwords+=foldr,foldl,map,map2,zip,filter,rev
 
 let b:current_syntax = "minimal"
