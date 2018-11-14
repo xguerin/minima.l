@@ -402,18 +402,25 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
 }
 
 static atom_t
-lisp_bind_all(const atom_t closure, const atom_t args, const atom_t vals)
+lisp_bind_all(const atom_t closure, const atom_t env,
+              const atom_t args, const atom_t vals)
 {
+  TRACE_SEXP(closure);
+  TRACE_SEXP(env);
+  TRACE_SEXP(args);
+  TRACE_SEXP(vals);
+  /*
+   */
   if (args == NIL) {
     X(args); X(vals);
-    return closure;
+    return env;
   }
   /*
    * Grab the CARs, evaluate the value and bind them.
    */
   atom_t sym = lisp_car(args);
   atom_t val = lisp_eval(closure, lisp_car(vals));
-  atom_t cl0 = lisp_bind(closure, sym, val);
+  atom_t cl0 = lisp_bind(env, sym, val);
   /*
    * Grab the CDRs and recursively bind them.
    */
@@ -422,7 +429,9 @@ lisp_bind_all(const atom_t closure, const atom_t args, const atom_t vals)
   X(args); X(vals);
   /*
   */
-  return lisp_bind_all(cl0, oth, rem);
+  atom_t res = lisp_bind_all(closure, cl0, oth, rem);
+  TRACE_SEXP(res);
+  return res;
 }
 
 /*
@@ -459,22 +468,26 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
       atom_t vals = lisp_cdr(cell);
       X(cell);
       /*
-       * Grab the arguments, body of the lambda. TODO add the curried closure.
+       * Grab the arguments, the closure and the body of the lambda.
        */
       atom_t args = lisp_car(lbda);
-      atom_t body = lisp_cdr(lbda);
+      atom_t cdr0 = lisp_cdr(lbda);
       X(lbda);
+      atom_t lcls = lisp_car(cdr0);
+      atom_t body = lisp_cdr(cdr0);
+      X(cdr0);
       /*
-       * Bind the arguments and the values. TODO bind the curried closure:
-       * 1. Bind arguments with values
-       * 2. Check if there are any reminders
-       * 3. Return a lambda with updated local closure if some are NIL
+       * Bind the arguments and the values. The closure embedded in the lambda
+       * is used as the run environemnt and augmented with the arguments'
+       * values. The call-site closure is used for the evaluation of the
+       * arguments.
        */
-      atom_t newl = lisp_dup(closure);
-      atom_t newc = lisp_bind_all(newl, args, vals);
+      atom_t newl = lisp_dup(lcls);
+      X(lcls);
+      atom_t newc = lisp_bind_all(closure, newl, args, vals);
       ret = lisp_prog(newc, body, UP(NIL));
       /*
-      */
+       */
       X(newc);
       break;
     }

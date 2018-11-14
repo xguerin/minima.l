@@ -1,6 +1,6 @@
-(def cadr  (x) (|> '(() x) cdr car))
+(def cadr  (x) (|> (\ () x) cdr car))
 
-(def caddr (x) (|> '(() x) cdr cdr car))
+(def caddr (x) (|> (\ () x) cdr cdr car))
 
 (def foldl (fun acc lst)
   (?: (lst? lst)
@@ -34,17 +34,17 @@
 
 (def filter (fun lst)
   (foldr
-    '((e acc) (?: (fun e) acc (cons e acc)))
+    (\ (e acc) (?: (fun e) acc (cons e acc)))
     lst NIL))
 
 (def flatten (lst)
   (?! (nil? lst)
       (?: (lst? lst)
-          (foldr '((lst acc) (conc (flatten lst) acc)) lst NIL)
+          (foldr (\ (lst acc) (conc (flatten lst) acc)) lst NIL)
           (list lst))))
 
 (def rev (lst)
-  (foldl '((acc e) (cons e acc)) NIL lst))
+  (foldl (\ (acc e) (cons e acc)) NIL lst))
 
 (def len (lst)
-  (foldl '((acc _) (+ acc 1)) 0 lst))
+  (foldl (\ (acc _) (+ acc 1)) 0 lst))
