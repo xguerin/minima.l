@@ -1,7 +1,7 @@
 #include "primitives.h"
 #include "utils.h"
-#include <lisp/lexer.h>
-#include <lisp/slab.h>
+#include <mnml/lexer.h>
+#include <mnml/slab.h>
 
 #define INPUT(__s) (char *)__s, strlen(__s)
 

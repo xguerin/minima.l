@@ -1,5 +1,5 @@
 #include "primitives.h"
-#include <lisp/slab.h>
+#include <mnml/slab.h>
 
 void
 syntax_error() { }

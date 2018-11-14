@@ -94,10 +94,12 @@ find_package(Ragel REQUIRED)
 # Subdirectories
 #
 
-add_subdirectory(functions)
-add_subdirectory(lib)
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
+add_subdirectory(bin)
 add_subdirectory(lisp)
-add_subdirectory(tools)
+add_subdirectory(plugins)
+add_subdirectory(src)
 
 if(MNML_ENABLE_DEBUG)
   enable_testing()
