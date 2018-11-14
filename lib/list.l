@@ -1,3 +1,7 @@
+(def cadr  (x) (|> '(() x) cdr car))
+
+(def caddr (x) (|> '(() x) cdr cdr car))
+
 (def foldl (fun acc lst)
   (?: (lst? lst)
       (?: (nil? lst)
