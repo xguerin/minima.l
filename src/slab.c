@@ -1,3 +1,4 @@
+#include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/slab.h>
 #include <stdarg.h>

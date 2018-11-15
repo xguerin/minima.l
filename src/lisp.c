@@ -1,3 +1,4 @@
+#include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>

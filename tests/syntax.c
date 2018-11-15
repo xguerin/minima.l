@@ -1,5 +1,6 @@
 #include "primitives.h"
 #include "utils.h"
+#include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/slab.h>
 

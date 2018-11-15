@@ -1,82 +1,7 @@
 #pragma once
 
+#include "types.h"
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <smmintrin.h>
-
-/*
- * Optimization macros.
- */
-
-#define likely(x)   __builtin_expect(!!(x), 1)
-#define unlikely(x) __builtin_expect(!!(x), 0)
-
-/*
- * Lisp types.
- */
-
-typedef enum _atom_type
-{
-  T_NIL,
-  T_TRUE,
-  T_CHAR,
-  T_NUMBER,
-  T_PAIR,
-  T_SYMBOL,
-  T_WILDCARD
-}
-atom_type_t;
-
-#define ATOM_TYPES 7
-
-struct _atom;
-
-typedef struct _pair
-{
-  struct _atom * car;
-  struct _atom * cdr;
-}
-* pair_t;
-
-typedef union _symbol
-{
-  char      val[16];
-  uint64_t  word[2];
-  __m128i   tag;
-}
-__attribute__((packed)) * symbol_t;
-
-typedef struct _atom
-{
-  uint32_t        next;
-  atom_type_t     type :32;
-  uint64_t        refs;
-  union {
-    int64_t       number;
-    union _symbol symbol;
-    struct _pair  pair;
-  };
-}
-__attribute__((packed)) * atom_t;
-
-#define CAR(__a) ((__a)->pair.car)
-#define CDR(__a) ((__a)->pair.cdr)
-
-#define IS_NULL(__a) ((__a)       ==   NIL)
-#define IS_TRUE(__a) ((__a)       ==   TRUE)
-#define IS_WILD(__a) ((__a)       ==   WILDCARD)
-#define IS_CHAR(__a) ((__a)->type == T_CHAR)
-#define IS_NUMB(__a) ((__a)->type == T_NUMBER)
-#define IS_PAIR(__a) ((__a)->type == T_PAIR)
-#define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
-#define IS_ATOM(__a) (!IS_PAIR(__a) && !IS_NULL(__a))
-
-/*
- * Function type.
- */
-
-typedef atom_t (* function_t)(const atom_t closure, const atom_t cell);
 
 /*
  * Helper macros.
@@ -169,14 +94,12 @@ atom_t lisp_make_symbol(const symbol_t sym);
   atom_t o = __c;                   \
   __c = lisp_cons(l, o);            \
   X(o); X(l); X(n);                 \
-  TRACE_SEXP(__c);                  \
 }
 
 #define POP_IO_CONTEXT(__c) { \
   atom_t old = __c;           \
   __c = UP(CDR(__c));         \
   X(old);                     \
-  TRACE_SEXP(__c);            \
 }
 
 /*
@@ -201,41 +124,3 @@ lisp_symbol_match(const atom_t a, const atom_t b)
   register __m128i res = _mm_xor_si128(a->symbol.tag, b->symbol.tag);
   return _mm_test_all_zeros(res, res);
 }
-
-/*
- * Debug.
- */
-
-#ifdef LISP_ENABLE_DEBUG
-
-#define FPRINTF \
-  if (getenv("MNML_VERBOSE_DEBUG")) fprintf
-
-#define TRACE(__fmt, ...) \
-  FPRINTF(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
-
-#ifdef __MACH__
-
-#define HEADER_SEXP(__c)  \
-  FPRINTF(stderr, "! %s:%d: [%llu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
-
-#else
-
-#define HEADER_SEXP(__c)  \
-  FPRINTF(stderr, "! %s:%d: [%lu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
-
-#endif
-
-#define TRACE_SEXP(__c) {   \
-  HEADER_SEXP(__c);         \
-  lisp_debug(stderr, __c);  \
-}
-
-void lisp_debug(FILE * fp, const atom_t atom);
-
-#else
-
-#define TRACE(__fmt, ...)
-#define TRACE_SEXP(__c)
-
-#endif
