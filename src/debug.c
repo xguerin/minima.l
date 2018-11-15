@@ -80,7 +80,7 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
 void
 lisp_debug(FILE * const fp, const atom_t atom)
 {
-  if (getenv("MNML_VERBOSE_DEBUG")) {
+  if (getenv("MNML_DEBUG")) {
     lisp_debug_atom(fp, atom, true);
     fprintf(fp, "\n");
   }

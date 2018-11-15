@@ -90,13 +90,29 @@ void lisp_free(const atom_t atom);
 #endif
 
 #define TRACE_REFS(__f, __t, __c, __n) {  \
-  HEADER_REFS(__f, __t, __n);             \
-  lisp_debug(stderr, __c);                \
+  if (getenv("MNML_VERBOSE_RC")) {        \
+    HEADER_REFS(__f, __t, __n);           \
+    lisp_debug(stderr, __c);              \
+  }                                       \
 }
 
-#define TRACE_SLOT(__i, __c) {  \
-  HEADER_SLOT(__i);             \
-  lisp_debug(stderr, __c);      \
+#define TRACE_SLOT(__i, __c) {        \
+  if (getenv("MNML_VERBOSE_SLOT")) {  \
+    HEADER_SLOT(__i);                 \
+    lisp_debug(stderr, __c);          \
+  }                                   \
+}
+
+#define TRACE_SLAB(__fmt, ...) {      \
+  if (getenv("MNML_VERBOSE_SLAB")) {  \
+    TRACE(__fmt, __VA_ARGS__);        \
+  }                                   \
+}
+
+#define TRACE_SLAB_SEXP(__c) {        \
+  if (getenv("MNML_VERBOSE_SLAB")) {  \
+    TRACE_SEXP(__c);                  \
+  }                                   \
 }
 
 void lisp_collect();
@@ -106,6 +122,8 @@ void lisp_collect();
 
 #define TRACE_REFS(__f, __t, __c, __n)
 #define TRACE_SLOT(__i, __c)
+#define TRACE_SLAB(__fmt, ...)
+
 #define LISP_COLLECT()
 
 #endif

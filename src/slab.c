@@ -48,7 +48,7 @@ lisp_slab_allocate()
    */
   slab.entries = (atom_t)mmap(NULL, SLAB_SIZE, PROT_NONE,
                               MAP_ANON | MAP_PRIVATE, -1, 0);
-  TRACE("0x%lx", (uintptr_t)slab.entries);
+  TRACE_SLAB("0x%lx", (uintptr_t)slab.entries);
   /*
    * Allocate the first page.
    */
@@ -68,7 +68,7 @@ void
 lisp_slab_expand()
 {
   const size_t size = (slab.n_pages << 1) * PAGE_SIZE;
-  TRACE("0x%lx", (uintptr_t)slab.entries);
+  TRACE_SLAB("0x%lx", (uintptr_t)slab.entries);
   /*
    * Commit twice the amount of memory.
    */
@@ -112,7 +112,7 @@ lisp_allocate() {
   size_t next = slab.first;
   atom_t entry = &slab.entries[next];
   slab.first = entry->next;
-  TRACE("%ld->%ld 0x%lx", next, slab.first, (uintptr_t)entry);
+  TRACE_SLAB("%ld->%ld 0x%lx", next, slab.first, (uintptr_t)entry);
   /*
    * Prepare the new atom.
    */
@@ -128,7 +128,7 @@ void
 lisp_deallocate(const atom_t __p) {
   size_t n = ((uintptr_t)__p - (uintptr_t)slab.entries) / sizeof(struct _atom);
   atom_t entry = &slab.entries[n];
-  TRACE("%ld", n);
+  TRACE_SLAB("%ld", n);
 #ifdef LISP_ENABLE_DEBUG
   memset(entry, 0xA, sizeof(struct _atom));
 #endif
@@ -144,7 +144,7 @@ lisp_deallocate(const atom_t __p) {
 void
 lisp_free(const atom_t atom)
 {
-  TRACE_SEXP(atom);
+  TRACE_SLAB_SEXP(atom);
   /*
    * Most likely this is a pair.
    */

@@ -6,7 +6,7 @@
 #ifdef LISP_ENABLE_DEBUG
 
 #define FPRINTF \
-  if (getenv("MNML_VERBOSE_DEBUG")) fprintf
+  if (getenv("MNML_DEBUG")) fprintf
 
 #define TRACE(__fmt, ...) \
   FPRINTF(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
