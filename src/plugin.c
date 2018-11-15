@@ -26,25 +26,26 @@ const char *
 lisp_prefix()
 {
   static bool is_set = false;
-  static char buffer[PATH_MAX] = { 0 };
+  static char prefix[PATH_MAX] = { 0 };
   Dl_info libInfo;
   /*
    * Compute this library path.
    */
   if (!is_set && dladdr(&lisp_prefix, &libInfo) != 0) {
+    char buffer[PATH_MAX] = { 0 };
 #if defined(__OpenBSD__)
     strlcpy(buffer, libInfo.dli_fname, 4096);
 #else
     strcpy(buffer, libInfo.dli_fname);
 #endif
     const char * dname = dirname(dirname(buffer));
-    strcpy(buffer, dname);
+    strcpy(prefix, dname);
     is_set = true;
   }
   /*
    * Return the result.
    */
-  return buffer;
+  return prefix;
 }
 
 static void *

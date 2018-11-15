@@ -1,6 +1,7 @@
 #include <mnml/lexer.h>
 #include <mnml/slab.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
