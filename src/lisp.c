@@ -281,7 +281,7 @@ lisp_read(const atom_t closure, const atom_t cell)
     lisp_parse(LEXER, buffer, LEXER->rem + len, LEXER->rem + len < RBUFLEN);
     if (len <= 0) break;
   }
-  while (CDR(CAR(ICHAN)) == NIL || LEXER->depth != 0);
+  while (CDR(CAR(ICHAN)) == NIL || LEXER->depth != 0 || LEXER->rem > 0);
   /*
    * Grab the result and return it.
    */
