@@ -57,8 +57,6 @@ atom_t WILDCARD = NULL;
  * Interpreter life cycle.
  */
 
-static lexer_t LEXER = NULL;
-
 static void
 lisp_consumer(const atom_t cell)
 {
@@ -87,18 +85,12 @@ lisp_init()
   PLUGINS = UP(NIL);
   ICHAN   = UP(NIL);
   OCHAN   = UP(NIL);
-  /*
-   * Create the lexer.
-   */
-  LEXER = lisp_create(lisp_consumer);
 }
 
 void
 lisp_fini()
 {
   lisp_plugin_cleanup();
-  lisp_destroy(LEXER);
-  LEXER = NULL;
   X(OCHAN); X(ICHAN); X(PLUGINS); X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
@@ -272,22 +264,24 @@ lisp_read(const atom_t closure, const atom_t cell)
   /*
    * Read from the file descriptor.
    */
+  lexer_t lexer;
+  lisp_create(lisp_consumer, &lexer);
   int fd = CAR(chn)->number;
   /*
    */
   ssize_t len = 0;
   char buffer[RBUFLEN] = { 0 };
   do {
-    len = read(fd, buffer + LEXER->rem, RBUFLEN - LEXER->rem);
-    lisp_parse(LEXER, buffer, LEXER->rem + len, LEXER->rem + len < RBUFLEN);
+    len = read(fd, buffer + lexer.rem, RBUFLEN - lexer.rem);
+    lisp_parse(&lexer, buffer, lexer.rem + len, lexer.rem + len < RBUFLEN);
     if (len <= 0) break;
   }
-  while (CDR(CAR(ICHAN)) == NIL || LEXER->depth != 0 || LEXER->rem > 0);
+  while (CDR(CAR(ICHAN)) == NIL || lisp_pending(&lexer));
   /*
    * Grab the result and return it.
    */
-  atom_t res = CDR(chn) != NIL ? lisp_read_pop(): UP(NIL);
-  return res;
+  lisp_destroy(&lexer);
+  return CDR(chn) != NIL ? lisp_read_pop(): UP(NIL);
 }
 
 /*

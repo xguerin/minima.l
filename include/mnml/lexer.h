@@ -17,19 +17,21 @@ typedef struct _lexer
   lisp_consumer_t consumer;
   void *          parser;
 }
-* lexer_t;
+lexer_t;
 
 /*
  * Lexer lifecycle.
  */
-lexer_t lisp_create(const lisp_consumer_t consumer);
-void lisp_destroy(const lexer_t lexer);
+void lisp_create(const lisp_consumer_t consumer, lexer_t * const lexer);
+void lisp_destroy(lexer_t * const lexer);
 
 /*
  * Lexer parse.
  */
-void lisp_parse(const lexer_t lexer, char * const str,
+void lisp_parse(lexer_t * const lexer, char * const str,
                 const size_t len, const bool end);
+
+bool lisp_pending(const lexer_t * const lexer);
 
 /*
  * Debug macros.
