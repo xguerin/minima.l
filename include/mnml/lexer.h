@@ -6,7 +6,7 @@
 /*
  * Lexer type.
  */
-typedef struct _lexer_t
+typedef struct _lexer
 {
   int             cs;
   int             act;

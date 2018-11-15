@@ -14,13 +14,23 @@
 #define ts  lexer->ts
 #define te  lexer->te
 
+#define UNPREFIX(_ts) (*(_ts) == '\'' || *(_ts) == '`' ? (_ts) + 1 : (_ts))
+
 extern void parse_error();
+
+static void
+lisp_consume_token(const lexer_t lexer)
+{
+  if (lexer->depth == 0) {
+    Parse(lexer->parser, 0, 0, lexer->consumer);
+  }
+}
 
 %%{
 
 machine minimal;
 
-action err_quote
+action err_prefix
 {
   parse_error();
   fhold; fgoto purge;
@@ -42,9 +52,7 @@ action tok_pclose
 {
   Parse(lexer->parser, PCLOSE, 0, NULL);
   lexer->depth -= 1;
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_dot
@@ -57,24 +65,27 @@ action tok_quote
   Parse(lexer->parser, QUOTE, 0, NULL);
 }
 
+action tok_backt
+{
+  Parse(lexer->parser, BACKTICK, 0, NULL);
+}
+
 action tok_number
 {
-  const char * start = *ts == '\'' ? ts + 1 : ts;
-  size_t len = te - start + 1;
-  char * val = (char *)alloca(len);
+  const char * start = UNPREFIX(ts);
+  size_t len = te - start;
+  char * val = (char *)alloca(len + 1);
   strncpy(val, start, len);
+  val[len] = 0;
   int64_t value = strtoll(val, NULL, 10);
-  /*
-   */
   Parse(lexer->parser, NUMBER, (void *)value, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_char
 {
-  const char * start = ts + 1, * end = te - 1;
+  const char * start = UNPREFIX(ts) + 1;
+  const char * end = te - 1;
   size_t len = end - start;
   uint64_t val = *start;
   /*
@@ -95,66 +106,53 @@ action tok_char
   /*
    */
   Parse(lexer->parser, CHAR, (void *)val, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_string
 {
-  const char * start = *ts == '\'' ? ts + 2 : ts + 1;
+  const char * start = UNPREFIX(ts) + 1;
   const char * end = te - 1;
   size_t len = end - start;
   char * val = strndup(start, len);
   /*
    */
   Parse(lexer->parser, STRING, val, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_nil
 { 
   Parse(lexer->parser, C_NIL, 0, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_true
 { 
   Parse(lexer->parser, C_TRUE, 0, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_wildcard
 { 
   Parse(lexer->parser, C_WILDCARD, 0, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 action tok_symbol
 { 
-  const char * start = *ts == '\'' ? ts + 1 : ts;
+  const char * start = UNPREFIX(ts);
   size_t len = te - start;
   MAKE_SYMBOL_DYNAMIC(sym, start, len);
-  /*
-   */
   Parse(lexer->parser, SYMBOL, sym, NULL);
-  if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
-  }
+  lisp_consume_token(lexer);
 }
 
 popen   = '(';
 pclose  = ')';
 dot     = '.';
 quote   = '\'';
+backt   = '`';
 number  = '-'? digit+;
 char    = '\'' . (print - '\\' | '\\' . '\\') . '\'';
 string  = '"' . ([^"] | '\\' '"')* . '"';
@@ -181,13 +179,13 @@ main := |*
   #
   # Quoted rules.
   #
-  (quote >tok_quote) . popen  $!err_quote => tok_popen;
-  (quote >tok_quote) . number $!err_quote => tok_number;
-  (quote >tok_quote) . string $!err_quote => tok_string;
-  (quote >tok_quote) . "NIL"  $!err_quote => tok_nil;
-  (quote >tok_quote) . 'T'    $!err_quote => tok_true;
-  (quote >tok_quote) . '_'    $!err_quote => tok_wildcard;
-  (quote >tok_quote) . symbol $!err_quote => tok_symbol;
+  (quote >tok_quote | backt >tok_backt) . popen  $!err_prefix => tok_popen;
+  (quote >tok_quote | backt >tok_backt) . number $!err_prefix => tok_number;
+  (quote >tok_quote | backt >tok_backt) . string $!err_prefix => tok_string;
+  (quote >tok_quote | backt >tok_backt) . "NIL"  $!err_prefix => tok_nil;
+  (quote >tok_quote | backt >tok_backt) . 'T'    $!err_prefix => tok_true;
+  (quote >tok_quote | backt >tok_backt) . '_'    $!err_prefix => tok_wildcard;
+  (quote >tok_quote | backt >tok_backt) . symbol $!err_prefix => tok_symbol;
   #
   # Garbage.
   #
@@ -230,7 +228,7 @@ local_free(void * const addr)
 lexer_t
 lisp_create(const lisp_consumer_t consumer)
 {
-  lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer_t));
+  lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer));
   %% write init;
   lexer->consumer = consumer;
   lexer->depth = 0;

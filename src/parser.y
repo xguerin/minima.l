@@ -3,7 +3,7 @@
 %token_type { void * }
 %type list  { atom_t }
 %type items { atom_t }
-%type quote { atom_t }
+%type prefix { atom_t }
 %type item  { atom_t }
 
 %include
@@ -25,7 +25,7 @@ extern void syntax_error();
   syntax_error();
 }
 
-root ::= quote(A).
+root ::= prefix(A).
 {
   consumer(A);
 }
@@ -40,36 +40,41 @@ list(A) ::= POPEN items(B) PCLOSE.
   A = B;
 }
 
-list(A) ::= POPEN items(B) DOT quote(C) PCLOSE.
+list(A) ::= POPEN items(B) DOT prefix(C) PCLOSE.
 {
   A = lisp_conc(B, C);
   X(B); X(C);
 }
 
-items(A) ::= quote(B).
+items(A) ::= prefix(B).
 {
   A = lisp_cons(B, NIL);
   X(B);
 }
 
-items(A) ::= items(B) quote(C).
+items(A) ::= items(B) prefix(C).
 {
   atom_t D = lisp_cons(C, NIL);
   A = lisp_conc(B, D);
   X(B); X(C); X(D);
 }
 
-quote(A) ::= item(B).
+prefix(A) ::= item(B).
 {
   A = B;
 }
 
-quote(A) ::= QUOTE item(B).
+prefix(A) ::= QUOTE item(B).
 {
   MAKE_SYMBOL_STATIC(quote, "quote", 5);
   atom_t Q = lisp_make_symbol(quote);
   A = lisp_cons(Q, B);
   X(Q); X(B);
+}
+
+prefix(A) ::= BACKTICK item(B).
+{
+  A = lisp_eval(NIL, B);
 }
 
 item(A) ::= NUMBER(B).
