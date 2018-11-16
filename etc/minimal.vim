@@ -23,9 +23,9 @@ syn match  MinimalParentheses /[()\[\]]/
 
 syn keyword MinimalSpecial  NIL T _ @ @@ @@@
 
-syn keyword MinimalFuncs match if
+syn keyword MinimalFuncs match if cond
 syn keyword MinimalFuncs + - * / \\ = <> < <= > >= and or not
-syn keyword MinimalFuncs prog atm? nil? lst? num? chr? sym?
+syn keyword MinimalFuncs prog atm? nil? lst? num? chr? sym? tru?
 syn keyword MinimalFuncs car cdr conc cons def eval let list load
 syn keyword MinimalFuncs in out prin prinl print printl read
 syn keyword MinimalFuncs exit quote setq sym
@@ -47,8 +47,8 @@ hi default link MinimalDebug    Type
 set lisp
 
 set lispwords=
-set lispwords+=prog,match,if,+,-,*,/,\\,=,<>,<,<=,>,>=
-set lispwords+=atm?,lst?,num?,chr?,nil?,sym?
+set lispwords+=prog,match,if,cond,+,-,*,/,\\,=,<>,<,<=,>,>=
+set lispwords+=atm?,lst?,num?,chr?,nil?,sym?,tru?
 set lispwords+=car,cdr,conc,cons,def,eval,let,list,load
 set lispwords+=in,line,out,prin,prinl,print,printl,read
 set lispwords+=exit,quote,setq
