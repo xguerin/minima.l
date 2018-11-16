@@ -53,7 +53,7 @@ lisp_function_pipe(const atom_t closure, const atom_t cell)
   /*
    * Grab CAR/CDR.
    */
-  atom_t car = lisp_eval(closure, lisp_car(cell));
+  atom_t car = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
   atom_t con = lisp_cons(car, NIL);
   X(car); X(cell);
