@@ -7,6 +7,10 @@
 static atom_t
 lisp_pipe(const atom_t closure, const atom_t cell, const atom_t result)
 {
+  TRACE_SEXP(cell);
+  TRACE_SEXP(result);
+  /*
+   */
   if (likely(IS_PAIR(cell))) {
     TRACE_SEXP(cell);
     /*
@@ -30,6 +34,7 @@ lisp_pipe(const atom_t closure, const atom_t cell, const atom_t result)
   /*
    * Evaluate the result.
    */
+  TRACE_SEXP(result);
   if (likely(IS_PAIR(result))) {
     atom_t car = lisp_car(result);
     X(cell); X(result);
@@ -45,7 +50,16 @@ static atom_t
 lisp_function_pipe(const atom_t closure, const atom_t cell)
 {
   TRACE_SEXP(cell);
-  return lisp_pipe(closure, cell, UP(NIL));
+  /*
+   * Grab CAR/CDR.
+   */
+  atom_t car = lisp_eval(closure, lisp_car(cell));
+  atom_t cdr = lisp_cdr(cell);
+  atom_t con = lisp_cons(car, NIL);
+  X(car); X(cell);
+  /*
+   */
+  return lisp_pipe(closure, cdr, con);
 }
 
 LISP_REGISTER(pipe, |>)
