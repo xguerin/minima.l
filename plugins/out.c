@@ -23,7 +23,7 @@ lisp_function_out(const atom_t closure, const atom_t cell)
    */
   int fd = 1;
   char buffer[PATH_MAX + 1];
-  size_t len = lisp_make_string(car, buffer, 0);
+  size_t len = lisp_make_string(car, buffer, PATH_MAX, 0);
   X(car);
   /*
    * If the file name's length > 0, open the file with that name.

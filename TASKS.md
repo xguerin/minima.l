@@ -3,7 +3,7 @@
 * [X] Slab allocator for cells
 * [X] Association lists for symbols
 * [X] Lambdas
-* [ ] Closures
+* [X] Closures
 
 # Notes
 
