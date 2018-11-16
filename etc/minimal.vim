@@ -11,27 +11,82 @@ elseif exists("b:current_syntax")
     finish
 endif
 
-" Minima.l is case sensitive.
+set iskeyword+=?,+,*,/,\\,=,>,<,_,:
+
 syn case match
 
-setl iskeyword+=?,+,*,/,\\,=,>,<,_
-
 syn match  MinimalComment     /#.*$/
-syn match  MinimalNumber      /\v<[-+]?\d+(\.\d+)?>/
+syn match  MinimalNumber      /\v<[-]?\d+(\.\d+)?>/
 syn region MinimalString      start=/"/ skip=/\\\\\|\\"/ end=/"/
 syn match  MinimalParentheses /[()\[\]]/
 
-syn keyword MinimalSpecial  NIL T _ @ @@ @@@
+syn keyword MinimalSpecial  NIL T _ ' `
 
-syn keyword MinimalFuncs match if cond
-syn keyword MinimalFuncs + - * / \\ = <> < <= > >= and or not
-syn keyword MinimalFuncs prog atm? nil? lst? num? chr? sym? tru?
-syn keyword MinimalFuncs car cdr conc cons def eval let list load
-syn keyword MinimalFuncs in out prin prinl print printl read
-syn keyword MinimalFuncs exit quote setq sym
-syn keyword MinimalFuncs foldr foldl map map2 zip filter rev
-
-syn keyword MinimalDebug trace closure
+syn keyword MinimalFuncs
+      \ *
+      \ +
+      \ -
+      \ /
+      \ <
+      \ <=
+      \ <>
+      \ =
+      \ >
+      \ >=
+      \ \\
+      \ and
+      \ append
+      \ assoc
+      \ atm?
+      \ caar
+      \ cadar
+      \ caddr
+      \ cadr
+      \ car
+      \ cdar
+      \ cdr
+      \ chr?
+      \ conc
+      \ cond
+      \ cons
+      \ dedup
+      \ def
+      \ eval
+      \ exit
+      \ filter
+      \ flatten
+      \ foldl
+      \ foldr
+      \ if
+      \ in
+      \ insert
+      \ len
+      \ let
+      \ list
+      \ load
+      \ lst?
+      \ map
+      \ map2
+      \ match
+      \ merge
+      \ nil?
+      \ not
+      \ num?
+      \ or
+      \ out
+      \ prin
+      \ prinl
+      \ print
+      \ printl
+      \ prog
+      \ quote
+      \ read
+      \ rev
+      \ setq
+      \ sym
+      \ sym?
+      \ tru?
+      \ zip
 
 hi default link MinimalComment Comment
 hi default link MinimalCommentRegion Comment
@@ -42,16 +97,8 @@ hi default link MinimalSpecial  Constant
 hi default link MinimalCond     Conditional
 hi default link MinimalFuncs    Function
 hi default link MinimalOperator Operator
-hi default link MinimalDebug    Type
 
 set lisp
-
-set lispwords=
-set lispwords+=prog,match,if,cond,+,-,*,/,\\,=,<>,<,<=,>,>=
-set lispwords+=atm?,lst?,num?,chr?,nil?,sym?,tru?
-set lispwords+=car,cdr,conc,cons,def,eval,let,list,load
-set lispwords+=in,line,out,prin,prinl,print,printl,read
-set lispwords+=exit,quote,setq
-set lispwords+=foldr,foldl,map,map2,zip,filter,rev
+set lispwords=*,+,-,/,<,<=,<>,=,>,>=,\\,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr?,conc,cond,cons,dedup,def,eval,exit,filter,flatten,foldl,foldr,if,in,insert,len,let,list,load,lst?,map,map2,match,merge,nil?,not,num?,or,out,prin,prinl,print,printl,prog,quote,read,rev,setq,sym,sym?,tru?,zip
 
 let b:current_syntax = "minimal"

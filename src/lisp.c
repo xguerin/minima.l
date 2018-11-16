@@ -567,72 +567,99 @@ lisp_eval(const atom_t closure, const atom_t cell)
  * Print function.
  */
 
-static void lisp_prin_atom(const int fd, const atom_t closure,
-                           const atom_t cell, const bool s);
+#define IO_BUFFER_LEN 1024
+
+static size_t
+lisp_prin_atom(const int fd, char * const buf, const size_t idx,
+               const atom_t closure, const atom_t cell, const bool s);
+
+static size_t
+lisp_write(const int fd, char * const buf, const size_t idx,
+           void * data, const size_t len)
+{
+  size_t pidx = idx;
+  /*
+   * Flush the buffer if necessary.
+   */
+  if (pidx + len >= IO_BUFFER_LEN) {
+    write(fd, buf, pidx);
+    pidx = 0;
+  }
+  /*
+   * Append the new data.
+   */
+  memcpy(&buf[pidx], data, len);
+  return pidx + len;
+}
 
 static void
-lisp_prin_pair(const int fd, const atom_t closure, const atom_t cell,
-               const bool s)
+lisp_flush(const int fd, char * const buf, const size_t idx)
 {
+  write(fd, buf, idx);
+}
+
+static size_t
+lisp_prin_pair(const int fd, char * const buf, const size_t idx,
+               const atom_t closure, const atom_t cell, const bool s)
+{
+  size_t nxt = 0;
   /*
    * Print CAR.
    */
-  lisp_prin_atom(fd, closure, CAR(cell), s);
+  nxt = lisp_prin_atom(fd, buf, idx, closure, CAR(cell), s);
   /*
    * Print CDR.
    */
   if (!IS_NULL(CDR(cell))) {
     if (IS_PAIR(CDR(cell))) {
-      if (s) write(fd, " ", 1);
-      lisp_prin_pair(fd, closure, CDR(cell), s);
+      if (s) nxt = lisp_write(fd, buf, nxt, " ", 1);
+      return lisp_prin_pair(fd, buf, nxt, closure, CDR(cell), s);
     }
     else {
-      if (s) write(fd, " . ", 3);
-      lisp_prin_atom(fd, closure, CDR(cell), s);
+      if (s) nxt = lisp_write(fd, buf, nxt, " . ", 3);
+      return lisp_prin_atom(fd, buf, nxt, closure, CDR(cell), s);
     }
   }
-}
-
-static void
-lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell,
-               const bool s)
-{
   /*
    */
+  return nxt;
+}
+
+static size_t
+lisp_prin_atom(const int fd, char * const buf, const size_t idx,
+               const atom_t closure, const atom_t cell, const bool s)
+{
   switch (cell->type) {
     case T_NIL:
-      write(fd, "NIL", 3);
-      break;
+      return lisp_write(fd, buf, idx, "NIL", 3);
     case T_TRUE:
-      write(fd, "T", 1);
-      break;
+      return lisp_write(fd, buf, idx, "T", 1);
     case T_CHAR: {
-      const char c = (char)cell->number;
+      char c = (char)cell->number;
       if (s) {
-        write(fd, "'", 1);
+        size_t nxt = lisp_write(fd, buf, idx, "'", 1);
         switch (c) {
           case '\n':
-            write(fd, "\\n", 2);
+            nxt += lisp_write(fd, buf, nxt, "\\n", 2);
             break;
           case '\t':
-            write(fd, "\\t", 2);
+            nxt += lisp_write(fd, buf, nxt, "\\t", 2);
             break;
           default:
-            write(fd, &c, 1);
+            nxt += lisp_write(fd, buf, nxt, &c, 1);
             break;
         }
-        write(fd, "'", 1);
+        return lisp_write(fd, buf, nxt, "'", 1);
       }
-      else {
-        write(fd, &c, 1);
-      }
-      break;
+      return lisp_write(fd, buf, idx, &c, 1);
     }
     case T_PAIR: {
-      if (s) write(fd, "(", 1);
-      lisp_prin_pair(fd, closure, cell, s);
-      if (s) write(fd, ")", 1);
-      break;
+      size_t nxt = idx;
+      if (s) nxt = lisp_write(fd, buf, nxt, "(", 1);
+      nxt = lisp_prin_pair(fd, buf, nxt, closure, cell, s);
+      if (s) nxt = lisp_write(fd, buf, nxt, ")", 1);
+      return nxt;
+    }
     case T_NUMBER: {
       char buffer[24] = { 0 };
 #ifdef __MACH__
@@ -640,16 +667,13 @@ lisp_prin_atom(const int fd, const atom_t closure, const atom_t cell,
 #else
       sprintf(buffer, "%ld", cell->number);
 #endif
-      write(fd, buffer, strlen(buffer));
-      break;
+      return lisp_write(fd, buf, idx, buffer, strlen(buffer));
     }
     case T_SYMBOL:
-      write(fd, cell->symbol.val, strnlen(cell->symbol.val, 16));
-      break;
-    }
+      return lisp_write(fd, buf, idx, cell->symbol.val,
+                        strnlen(cell->symbol.val, 16));
     case T_WILDCARD:
-      write(fd, "_", 1);
-      break;
+      return lisp_write(fd, buf, idx, "_", 1);
   }
 }
 
@@ -657,7 +681,9 @@ void
 lisp_prin(const atom_t closure, const atom_t cell, const bool s)
 {
   int fd = CAR(CAR(OCHAN))->number;
-  return lisp_prin_atom(fd, closure, cell, s);
+  char buffer[IO_BUFFER_LEN];
+  size_t idx = lisp_prin_atom(fd, buffer, 0, closure, cell, s);
+  lisp_flush(fd, buffer, idx);
 }
 
 /*
