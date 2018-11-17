@@ -11,7 +11,7 @@ elseif exists("b:current_syntax")
     finish
 endif
 
-set iskeyword+=?,+,*,/,\\,=,>,<,_,:
+set iskeyword+=?,+,*,\\,=,>,<,_,:
 
 syn case match
 

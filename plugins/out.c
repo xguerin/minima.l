@@ -29,7 +29,7 @@ lisp_function_out(const atom_t closure, const atom_t cell)
    * If the file name's length > 0, open the file with that name.
    */
   if (len > 0) {
-    open(buffer, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+    fd = open(buffer, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
     if (fd < 0) {
       X(prg);
       return UP(NIL);
