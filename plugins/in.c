@@ -14,10 +14,8 @@ lisp_function_in(const atom_t closure, const atom_t cell)
    * Get CAR/CDR.
    */
   atom_t car = lisp_eval(closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
+  atom_t prg = lisp_cdr(cell);
   X(cell);
-  atom_t prg = lisp_car(cdr);
-  X(cdr);
   /*
    * Construct the file name.
    */
@@ -39,7 +37,7 @@ lisp_function_in(const atom_t closure, const atom_t cell)
    * Push the context, eval the prog, pop the context.
    */
   PUSH_IO_CONTEXT(ICHAN, fd);
-  atom_t res = lisp_eval(closure, prg);
+  atom_t res = lisp_prog(closure, prg, UP(NIL));
   POP_IO_CONTEXT(ICHAN);
   /*
    * Close the FD if necessary and return the value.
