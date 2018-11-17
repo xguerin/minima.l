@@ -57,6 +57,7 @@ syn keyword MinimalFuncs
       \ flatten
       \ foldl
       \ foldr
+      \ fork
       \ if
       \ in
       \ insert
@@ -86,6 +87,7 @@ syn keyword MinimalFuncs
       \ sym
       \ sym?
       \ tru?
+      \ wait
       \ zip
 
 hi default link MinimalComment Comment
@@ -99,6 +101,6 @@ hi default link MinimalFuncs    Function
 hi default link MinimalOperator Operator
 
 set lisp
-set lispwords=*,+,-,/,<,<=,<>,=,>,>=,\\,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr?,conc,cond,cons,dedup,def,eval,exit,filter,flatten,foldl,foldr,if,in,insert,len,let,list,load,lst?,map,map2,match,merge,nil?,not,num?,or,out,prin,prinl,print,printl,prog,quote,read,rev,setq,sym,sym?,tru?,zip
+set lispwords=*,+,-,/,<,<=,<>,=,>,>=,\\,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr?,conc,cond,cons,dedup,def,eval,exit,filter,flatten,foldl,foldr,fork,if,in,insert,len,let,list,load,lst?,map,map2,match,merge,nil?,not,num?,or,out,prin,prinl,print,printl,prog,quote,read,rev,setq,sym,sym?,tru?,wait,zip
 
 let b:current_syntax = "minimal"
