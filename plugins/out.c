@@ -10,6 +10,8 @@
 atom_t
 lisp_function_out(const atom_t closure, const atom_t cell)
 {
+  int fd = 1;
+  char buffer[PATH_MAX + 1];
   /*
    * Get CAR/CDR.
    */
@@ -17,21 +19,29 @@ lisp_function_out(const atom_t closure, const atom_t cell)
   atom_t prg = lisp_cdr(cell);
   X(cell);
   /*
-   * Construct the file name.
+   * Process the CAR.
    */
-  int fd = 1;
-  char buffer[PATH_MAX + 1];
-  size_t len = lisp_make_string(car, buffer, PATH_MAX, 0);
-  X(car);
-  /*
-   * If the file name's length > 0, open the file with that name.
-   */
-  if (len > 0) {
-    fd = open(buffer, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
-    if (fd < 0) {
-      X(prg);
-      return UP(NIL);
+  switch (car->type) {
+    case T_NIL:
+      X(car);
+      break;
+    case T_NUMBER:
+      fd = car->number;
+      X(car);
+      break;
+    case T_PAIR: {
+      lisp_make_string(car, buffer, PATH_MAX, 0);
+      X(car);
+      fd = open(buffer, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+      if (fd < 0) {
+        X(prg);
+        return UP(NIL);
+      }
+      break;
     }
+    default:
+      X(car); X(prg);
+      return UP(NIL);
   }
   /*
    * Push the context, eval the prog, pop the context.
@@ -42,7 +52,7 @@ lisp_function_out(const atom_t closure, const atom_t cell)
   /*
    * Close the FD if necessary and return the value.
    */
-  if (len > 0) {
+  if (fd > 1) {
     close(fd);
   }
   return res;
