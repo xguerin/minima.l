@@ -20,7 +20,7 @@ lisp_readlines_append(const atom_t cell, const char * const buffer,
 }
 
 static atom_t
-lisp_readlines(const atom_t cell, char * const buffer, size_t * const offset)
+lisp_readlines(const atom_t cell, char * const buffer, ssize_t * const rem)
 {
   atom_t res = cell;
   char * p = buffer, * n = NULL;
@@ -40,9 +40,10 @@ lisp_readlines(const atom_t cell, char * const buffer, size_t * const offset)
   /*
    * If there is a remainder, copy it at the beginning of the buffer.
    */
+  *rem = 0;
   if (*p != 0) {
     strcpy(buffer, p);
-    *offset = strlen(buffer);
+    *rem = strlen(buffer);
   }
   /*
    */
@@ -58,24 +59,32 @@ lisp_function_readlines(const atom_t closure, const atom_t cell)
   /*
    */
   atom_t res = UP(NIL);
-  char buffer[BUFFER_LEN + 1];
-  ssize_t len = 0;
-  size_t off = 0;
+  size_t buflen = BUFFER_LEN;
+  char * buffer = malloc(buflen + 1);
+  ssize_t dlt, len = 0;
   /*
    * Read some data and process any lines present.
    */
   do {
-    len = read(fd, buffer, BUFFER_LEN - off);
-    buffer[off + len] = 0;
-    if (len > 0) {
-      res = lisp_readlines(res, buffer, &off);
+    dlt = read(fd, buffer + len, buflen - len);
+    len += dlt;
+    buffer[len] = 0;
+    if (strstr(buffer, "\n") == NULL) {
+      buflen += buflen;
+      buffer = realloc(buffer, buflen + 1);
+      continue;
     }
+    res = lisp_readlines(res, buffer, &len);
   }
-  while (len > 0);
+  while (dlt > 0);
   /*
    * Process any remaining data in the buffer.
    */
-  return lisp_readlines(res, buffer, &off);
+  if (len > 0) {
+    res = lisp_readlines_append(res, buffer, len);
+  }
+  free(buffer);
+  return res;
 }
 
 LISP_REGISTER(readlines, readlines)
