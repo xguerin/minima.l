@@ -3,6 +3,7 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
+#include <mnml/utils.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -640,13 +641,13 @@ lisp_prin_atom(const int fd, char * const buf, const size_t idx,
         size_t nxt = lisp_write(fd, buf, idx, "'", 1);
         switch (c) {
           case '\n':
-            nxt += lisp_write(fd, buf, nxt, "\\n", 2);
+            nxt = lisp_write(fd, buf, nxt, "\\n", 2);
             break;
           case '\t':
-            nxt += lisp_write(fd, buf, nxt, "\\t", 2);
+            nxt = lisp_write(fd, buf, nxt, "\\t", 2);
             break;
           default:
-            nxt += lisp_write(fd, buf, nxt, &c, 1);
+            nxt = lisp_write(fd, buf, nxt, &c, 1);
             break;
         }
         return lisp_write(fd, buf, nxt, "'", 1);
@@ -740,6 +741,19 @@ lisp_make_char(const char c)
   R->number = c;
   TRACE_SEXP(R);
   return R;
+}
+
+atom_t
+lisp_make_string(const char * const str, const size_t len)
+{
+  atom_t res = UP(NIL);
+  for (size_t i = 0; i < len; i += 1) {
+    atom_t c = lisp_make_char(str[len - i - 1]);
+    atom_t n = lisp_cons(c, res);
+    X(c); X(res);
+    res = n;
+  }
+  return lisp_process_escapes(res, false, UP(NIL));
 }
 
 atom_t

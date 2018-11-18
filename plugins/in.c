@@ -30,7 +30,7 @@ lisp_function_in(const atom_t closure, const atom_t cell)
       X(car);
       break;
     case T_PAIR: {
-      lisp_make_string(car, buffer, PATH_MAX, 0);
+      lisp_make_cstring(car, buffer, PATH_MAX, 0);
       X(car);
       fd = open(buffer, O_RDONLY);
       if (fd < 0) {

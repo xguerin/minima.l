@@ -73,10 +73,9 @@ action tok_backt
 
 action tok_number
 {
-  const char * start = UNPREFIX(ts);
-  size_t len = te - start;
+  size_t len = te - ts;
   char * val = (char *)alloca(len + 1);
-  strncpy(val, start, len);
+  strncpy(val, ts, len);
   val[len] = 0;
   int64_t value = strtoll(val, NULL, 10);
   Parse(lexer->parser, NUMBER, (void *)value, NULL);
@@ -85,7 +84,7 @@ action tok_number
 
 action tok_char
 {
-  const char * start = UNPREFIX(ts) + 1;
+  const char * start = ts + 1;
   const char * end = te - 1;
   size_t len = end - start;
   uint64_t val = *start;
@@ -112,7 +111,7 @@ action tok_char
 
 action tok_string
 {
-  const char * start = UNPREFIX(ts) + 1;
+  const char * start = ts + 1;
   const char * end = te - 1;
   size_t len = end - start;
   char * val = strndup(start, len);
@@ -181,11 +180,6 @@ main := |*
   # Quoted rules.
   #
   (quote >tok_quote | backt >tok_backt) . popen  $!err_prefix => tok_popen;
-  (quote >tok_quote | backt >tok_backt) . number $!err_prefix => tok_number;
-  (quote >tok_quote | backt >tok_backt) . string $!err_prefix => tok_string;
-  (quote >tok_quote | backt >tok_backt) . "NIL"  $!err_prefix => tok_nil;
-  (quote >tok_quote | backt >tok_backt) . 'T'    $!err_prefix => tok_true;
-  (quote >tok_quote | backt >tok_backt) . '_'    $!err_prefix => tok_wildcard;
   (quote >tok_quote | backt >tok_backt) . symbol $!err_prefix => tok_symbol;
   #
   # Garbage.

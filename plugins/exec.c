@@ -32,7 +32,7 @@ lisp_exec_make_strings(const atom_t cell, char ** array,
   atom_t car = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
   X(cell);
-  lisp_make_string(car, buffer, PATH_MAX, 0);
+  lisp_make_cstring(car, buffer, PATH_MAX, 0);
   array[idx] = strdup(buffer);
   return lisp_exec_make_strings(cdr, array, len, idx + 1);
 }
@@ -55,7 +55,7 @@ lisp_function_exec(const atom_t closure, const atom_t cell)
    * Build the path string.
    */
   char buffer[PATH_MAX + 1];
-  lisp_make_string(path, buffer, PATH_MAX, 0);
+  lisp_make_cstring(path, buffer, PATH_MAX, 0);
   /*
    * Build the argument list.
    */
@@ -71,8 +71,7 @@ lisp_function_exec(const atom_t closure, const atom_t cell)
    * Call execve.
    */
   int ret = execve(buffer, arg_str, len == 0 ? environ : env_str);
-  TRACE("%s", strerror(errno));
-  return lisp_make_number(ret);
+  return lisp_make_number(ret == 0 ? 0 : errno);
 }
 
 LISP_REGISTER(exec, exec)

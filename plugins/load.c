@@ -32,7 +32,7 @@ lisp_function_load(const atom_t closure, const atom_t cell)
    * Construct the file name.
    */
   char buffer[PATH_MAX + 1];
-  lisp_make_string(car, buffer, PATH_MAX, 0);
+  lisp_make_cstring(car, buffer, PATH_MAX, 0);
   X(car);
   /*
    * Expand the path.

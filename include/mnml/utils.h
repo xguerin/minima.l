@@ -6,8 +6,8 @@
 /*
  * Make a C string from a list of characters.
  */
-size_t lisp_make_string(const atom_t cell, char * const buffer,
-                        const size_t len, const size_t idx);
+size_t lisp_make_cstring(const atom_t cell, char * const buffer,
+                         const size_t len, const size_t idx);
 
 /*
  * Process escapes in a list of characters.

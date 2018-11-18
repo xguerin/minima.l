@@ -86,6 +86,7 @@ void lisp_make_wildcard();
 atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_inline(const uint64_t tag);
 atom_t lisp_make_char(const char c);
+atom_t lisp_make_string(const char * const s, const size_t len);
 atom_t lisp_make_symbol(const symbol_t sym);
 
 #define PUSH_IO_CONTEXT(__c, __d) { \

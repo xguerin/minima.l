@@ -6,8 +6,8 @@
 #include <time.h>
 
 size_t
-lisp_make_string(const atom_t cell, char * const buffer,
-                 const size_t len, const size_t idx)
+lisp_make_cstring(const atom_t cell, char * const buffer,
+                  const size_t len, const size_t idx)
 {
   /*
    * Terminate the string.
@@ -19,7 +19,7 @@ lisp_make_string(const atom_t cell, char * const buffer,
   /*
    * Process the chars.
    */
-  size_t res = lisp_make_string(CDR(cell), buffer + 1, len, idx + 1);
+  size_t res = lisp_make_cstring(CDR(cell), buffer + 1, len, idx + 1);
   *buffer = CAR(cell)->number;
   return res;
 }
