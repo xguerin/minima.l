@@ -3,6 +3,12 @@
 #include <mnml/lisp.h>
 #include <stdlib.h>
 
+
+/*
+ * Destructively append element ELT to list LST.
+ */
+atom_t lisp_append(const atom_t lst, const atom_t elt);
+
 /*
  * Make a C string from a list of characters.
  */

@@ -28,6 +28,12 @@
   lisp_debug(stderr, __c);  \
 }
 
+#define TRACE_CONS(__c) {             \
+  if (getenv("MNML_VERBOSE_CONS")) {  \
+    TRACE_SEXP(__c)                   \
+  }                                   \
+}
+
 void lisp_debug(FILE * fp, const atom_t atom);
 
 #else

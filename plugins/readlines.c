@@ -2,6 +2,7 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
+#include <mnml/utils.h>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -13,10 +14,7 @@ lisp_readlines_append(const atom_t cell, const char * const buffer,
                       const size_t len)
 {
   atom_t str = lisp_make_string(buffer, len);
-  atom_t con = lisp_cons(str, NIL);
-  atom_t res = lisp_conc(cell, con);
-  X(con); X(str); X(cell);
-  return res;
+  return lisp_append(cell, str);
 }
 
 static atom_t

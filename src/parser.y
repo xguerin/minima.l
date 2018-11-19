@@ -54,9 +54,7 @@ items(A) ::= prefix(B).
 
 items(A) ::= items(B) prefix(C).
 {
-  atom_t D = lisp_cons(C, NIL);
-  A = lisp_conc(B, D);
-  X(B); X(C); X(D);
+  A = lisp_append(B, C);
 }
 
 prefix(A) ::= item(B).

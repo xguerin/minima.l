@@ -62,10 +62,7 @@ static void
 lisp_consumer(const atom_t cell)
 {
   atom_t chn = CAR(ICHAN);
-  atom_t new = lisp_cons(cell, NIL);
-  atom_t old = CDR(chn);
-  CDR(chn) = lisp_conc(old, new);
-  X(old); X(new); X(cell);
+  CDR(chn) = lisp_append(CDR(chn), cell);
   TRACE_SEXP(ICHAN);
 }
 
@@ -201,7 +198,7 @@ lisp_cons(const atom_t car, const atom_t cdr)
   R->refs = 1;
   CAR(R) = UP(car);
   CDR(R) = UP(cdr);
-  TRACE_SEXP(R);
+  TRACE_CONS(R);
   return R;
 }
 
@@ -222,7 +219,7 @@ lisp_conc(const atom_t car, const atom_t cdr)
   }
   /*
    */
-  TRACE_SEXP(R);
+  TRACE_CONS(R);
   return R;
 }
 
