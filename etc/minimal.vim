@@ -20,7 +20,7 @@ syn match  MinimalNumber      /\v<[-]?\d+(\.\d+)?>/
 syn region MinimalString      start=/"/ skip=/\\\\\|\\"/ end=/"/
 syn match  MinimalParentheses /[()\[\]]/
 
-syn keyword MinimalSpecial  NIL T _ ' `
+syn keyword MinimalSpecial  NIL T _ ' ` ENV ARGV
 
 syn keyword MinimalFuncs
       \ *
