@@ -52,7 +52,7 @@ atom_t
 lisp_function_readlines(const atom_t closure, const atom_t cell)
 {
   atom_t car = lisp_eval(closure, lisp_car(cell));
-  int fd = car->number;
+  int fd = IS_NULL(car) ? CAR(CAR(ICHAN))->number : car->number;
   X(car); X(cell);
   /*
    */
