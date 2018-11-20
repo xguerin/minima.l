@@ -3,6 +3,7 @@
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/slab.h>
+#include <mnml/utils.h>
 
 #define INPUT(__s) (char *)__s, strlen(__s)
 

@@ -62,12 +62,10 @@ prefix(A) ::= item(B).
   A = B;
 }
 
-prefix(A) ::= QUOTE item(B).
+prefix(A) ::= CQUOTE item(B).
 {
-  MAKE_SYMBOL_STATIC(quote, "quote", 5);
-  atom_t Q = lisp_make_symbol(quote);
-  A = lisp_cons(Q, B);
-  X(Q); X(B);
+  A = lisp_cons(QUOTE, B);
+  X(B);
 }
 
 prefix(A) ::= BACKTICK item(B).

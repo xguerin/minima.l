@@ -2,6 +2,19 @@
 
 #include <mnml/lisp.h>
 #include <stdlib.h>
+#include <string.h>
+
+/*
+ * Interpreter life cycle.
+ */
+
+typedef void (* error_handler_t)();
+
+void lisp_set_parse_error_handler(const error_handler_t h);
+void lisp_set_syntax_error_handler(const error_handler_t h);
+
+void lisp_init();
+void lisp_fini();
 
 /*
  * Destructively append element ELT to list LST.
@@ -33,3 +46,50 @@ atom_t lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
  * Get a timestamp in nanoseconds.
  */
 uint64_t lisp_timestamp();
+
+/*
+ * Singleton constructors.
+ */
+void lisp_make_nil();
+void lisp_make_true();
+void lisp_make_quote();
+void lisp_make_wildcard();
+
+/*
+ * IO context helpers.
+ */
+#define PUSH_IO_CONTEXT(__c, __d) { \
+  atom_t n = lisp_make_number(__d); \
+  atom_t l = lisp_cons(n, NIL);     \
+  atom_t o = __c;                   \
+  __c = lisp_cons(l, o);            \
+  X(o); X(l); X(n);                 \
+}
+
+#define POP_IO_CONTEXT(__c) { \
+  atom_t old = __c;           \
+  __c = UP(CDR(__c));         \
+  X(old);                     \
+}
+
+/*
+ * Symbol matching.
+ */
+#define MAKE_SYMBOL_STATIC(__v, __s, __n)       \
+  symbol_t __v = alloca(sizeof(union _symbol)); \
+  __v->word[0] = 0;                             \
+  __v->word[1] = 0;                             \
+  strncpy(__v->val, __s, __n);
+
+#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)      \
+  symbol_t __v = malloc(sizeof(union _symbol)); \
+  __v->word[0] = 0;                             \
+  __v->word[1] = 0;                             \
+  strncpy(__v->val, __s, __n);
+
+static inline bool
+lisp_symbol_match(const atom_t a, const atom_t b)
+{
+  register __m128i res = _mm_xor_si128(a->symbol.tag, b->symbol.tag);
+  return _mm_test_all_zeros(res, res);
+}

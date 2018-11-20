@@ -10,39 +10,6 @@
 #include <string.h>
 
 /*
- * Syntax error handler.
- */
-
-error_handler_t lisp_parse_error_handler = NULL;
-error_handler_t lisp_syntax_error_handler = NULL;
-
-void parse_error()
-{
-  if (lisp_parse_error_handler != NULL) {
-    lisp_parse_error_handler();
-  }
-}
-
-void syntax_error()
-{
-  if (lisp_syntax_error_handler != NULL) {
-    lisp_syntax_error_handler();
-  }
-}
-
-void
-lisp_set_parse_error_handler(const error_handler_t h)
-{
-  lisp_parse_error_handler = h;
-}
-
-void
-lisp_set_syntax_error_handler(const error_handler_t h)
-{
-  lisp_syntax_error_handler = h;
-}
-
-/*
  * Global symbols.
  */
 
@@ -52,58 +19,8 @@ atom_t ICHAN    = NULL;
 atom_t OCHAN    = NULL;
 atom_t NIL      = NULL;
 atom_t TRUE     = NULL;
+atom_t QUOTE    = NULL;
 atom_t WILDCARD = NULL;
-
-/*
- * Interpreter life cycle.
- */
-
-static void
-lisp_consumer(const atom_t cell)
-{
-  atom_t chn = CAR(ICHAN);
-  CDR(chn) = lisp_append(CDR(chn), cell);
-  TRACE_SEXP(ICHAN);
-}
-
-void
-lisp_init()
-{
-  lisp_slab_allocate();
-  /*
-   * Create the constants.
-   */
-  lisp_make_nil();
-  lisp_make_true();
-  lisp_make_wildcard();
-  /*
-   * Create the GLOBALS.
-   */
-  GLOBALS = UP(NIL);
-  PLUGINS = UP(NIL);
-  ICHAN   = UP(NIL);
-  OCHAN   = UP(NIL);
-  /*
-   * Setup the debug variables.
-   */
-#ifdef LISP_ENABLE_DEBUG
-  MNML_DEBUG        = getenv("MNML_DEBUG")        != NULL;
-  MNML_VERBOSE_CONS = getenv("MNML_VERBOSE_CONS") != NULL;
-  MNML_VERBOSE_RC   = getenv("MNML_VERBOSE_RC")   != NULL;
-  MNML_VERBOSE_SLOT = getenv("MNML_VERBOSE_SLOT") != NULL;
-  MNML_VERBOSE_SLAB = getenv("MNML_VERBOSE_SLAB") != NULL;
-#endif
-}
-
-void
-lisp_fini()
-{
-  lisp_plugin_cleanup();
-  X(OCHAN); X(ICHAN); X(PLUGINS); X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
-  TRACE("D %ld", slab.n_alloc - slab.n_free);
-  LISP_COLLECT();
-  lisp_slab_destroy();
-}
 
 /*
  * Symbol management.
@@ -203,6 +120,14 @@ lisp_conc(const atom_t car, const atom_t cdr)
  */
 
 #define RBUFLEN 1024
+
+static void
+lisp_consumer(const atom_t cell)
+{
+  atom_t chn = CAR(ICHAN);
+  CDR(chn) = lisp_append(CDR(chn), cell);
+  TRACE_SEXP(ICHAN);
+}
 
 static atom_t
 lisp_read_pop()
@@ -665,36 +590,6 @@ lisp_prin(const atom_t closure, const atom_t cell, const bool s)
 /*
  * Helper functions.
  */
-
-void
-lisp_make_nil()
-{
-  atom_t R = lisp_allocate();
-  R->type = T_NIL;
-  R->refs = 1;
-  TRACE_SEXP(R);
-  NIL = R;
-}
-
-void
-lisp_make_true()
-{
-  atom_t R = lisp_allocate();
-  R->type = T_TRUE;
-  R->refs = 1;
-  TRACE_SEXP(R);
-  TRUE = R;
-}
-
-void
-lisp_make_wildcard()
-{
-  atom_t R = lisp_allocate();
-  R->type = T_WILDCARD;
-  R->refs = 1;
-  TRACE_SEXP(R);
-  WILDCARD = R;
-}
 
 atom_t
 lisp_make_number(const int64_t num)

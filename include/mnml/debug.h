@@ -1,7 +1,7 @@
 #pragma once
 
-#include "debug.h"
-#include "types.h"
+#include <mnml/debug.h>
+#include <mnml/types.h>
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -48,5 +48,6 @@ void lisp_debug(FILE * fp, const atom_t atom);
 
 #define TRACE(__fmt, ...)
 #define TRACE_SEXP(__c)
+#define TRACE_CONS(__c)
 
 #endif

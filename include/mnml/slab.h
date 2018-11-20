@@ -1,7 +1,7 @@
 #pragma once
 
-#include "debug.h"
-#include "lisp.h"
+#include <mnml/debug.h>
+#include <mnml/lisp.h>
 
 /*
  * Slab types.
@@ -124,6 +124,7 @@ void lisp_collect();
 #define TRACE_REFS(__f, __t, __c, __n)
 #define TRACE_SLOT(__i, __c)
 #define TRACE_SLAB(__fmt, ...)
+#define TRACE_SLAB_SEXP(__c)
 
 #define LISP_COLLECT()
 

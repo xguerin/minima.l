@@ -63,7 +63,7 @@ action tok_dot
 
 action tok_quote
 {
-  Parse(lexer->parser, QUOTE, 0, NULL);
+  Parse(lexer->parser, CQUOTE, 0, NULL);
 }
 
 action tok_backt

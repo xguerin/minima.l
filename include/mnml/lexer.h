@@ -4,6 +4,12 @@
 #include <unistd.h>
 
 /*
+ * Consumer type.
+ */
+
+typedef void (* lisp_consumer_t)(const atom_t);
+
+/*
  * Lexer type.
  */
 typedef struct _lexer

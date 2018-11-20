@@ -1,11 +1,14 @@
 #pragma once
 
 #include <mnml/lisp.h>
+#include <mnml/utils.h>
 #include <stdbool.h>
 
 /*
  * Plugin management.
  */
+
+extern atom_t PLUGINS;
 
 const char * lisp_prefix();
 atom_t lisp_plugin_load(const atom_t sym);

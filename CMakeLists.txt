@@ -105,3 +105,14 @@ if(MNML_ENABLE_DEBUG)
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+#
+# Install headers
+#
+
+install(
+  FILES
+  include/mnml/lisp.h
+  include/mnml/types.h
+  DESTINATION
+  include/mnml)
