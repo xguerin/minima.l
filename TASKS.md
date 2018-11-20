@@ -4,6 +4,7 @@
 * [X] Association lists for symbols
 * [X] Lambdas
 * [X] Closures
+* [ ] Continuations
 
 # Notes
 
