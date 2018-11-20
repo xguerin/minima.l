@@ -7,5 +7,7 @@
 
 # Notes
 
-The implementation of proper closures might require the use of a `lambda`
+The implementation of proper closures requires the use of a `lambda`
 operator. We need to embed the call-site closure with the lambda.
+
+Closure computation uses shallow-copy duplication for performance.

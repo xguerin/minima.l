@@ -3,11 +3,15 @@
 #include <mnml/lisp.h>
 #include <stdlib.h>
 
-
 /*
  * Destructively append element ELT to list LST.
  */
 atom_t lisp_append(const atom_t lst, const atom_t elt);
+
+/*
+ * Shallow duplicate: 1(1X 1X ...) -> 1(2X 2X ...).
+ */
+atom_t lisp_dup(const atom_t cell);
 
 /*
  * Make a C string from a list of characters.

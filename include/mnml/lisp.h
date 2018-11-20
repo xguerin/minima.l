@@ -54,7 +54,6 @@ void lisp_fini();
 
 atom_t lisp_car(const atom_t cell);
 atom_t lisp_cdr(const atom_t cell);
-atom_t lisp_dup(const atom_t cell);
 
 /*
  * Internal list construction functions. CONS is pure, CONC is destructive.

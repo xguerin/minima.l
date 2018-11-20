@@ -83,6 +83,16 @@ lisp_init()
   PLUGINS = UP(NIL);
   ICHAN   = UP(NIL);
   OCHAN   = UP(NIL);
+  /*
+   * Setup the debug variables.
+   */
+#ifdef LISP_ENABLE_DEBUG
+  MNML_DEBUG        = getenv("MNML_DEBUG")        != NULL;
+  MNML_VERBOSE_CONS = getenv("MNML_VERBOSE_CONS") != NULL;
+  MNML_VERBOSE_RC   = getenv("MNML_VERBOSE_RC")   != NULL;
+  MNML_VERBOSE_SLOT = getenv("MNML_VERBOSE_SLOT") != NULL;
+  MNML_VERBOSE_SLAB = getenv("MNML_VERBOSE_SLAB") != NULL;
+#endif
 }
 
 void
@@ -132,41 +142,6 @@ lisp_lookup(const atom_t closure, const atom_t sym)
 /*
  * Basic functions.
  */
-
-atom_t
-lisp_dup(const atom_t atom)
-{
-  atom_t res;
-  /*
-   */
-  switch (atom->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_WILDCARD:
-      res = UP(atom);
-      break;
-    case T_CHAR:
-      res = lisp_make_char(atom->number);
-      break;
-    case T_NUMBER:
-      res = lisp_make_number(atom->number);
-      break;
-    case T_PAIR: {
-      atom_t car = lisp_dup(CAR(atom));
-      atom_t cdr = lisp_dup(CDR(atom));
-      res = lisp_cons(car, cdr);
-      X(car); X(cdr);
-      break;
-    }
-    case T_SYMBOL:
-      res = lisp_make_symbol(&atom->symbol);
-      break;
-  }
-  /*
-   */
-  TRACE_SEXP(res);
-  return res;
-}
 
 atom_t
 lisp_car(const atom_t cell)
@@ -289,15 +264,20 @@ lisp_read(const atom_t closure, const atom_t cell)
 atom_t
 lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
 {
-  TRACE_SEXP(closure);
   /*
    * Check if the symbol exists and replace it using a zero-copy scan.
+   *
+   * NOTE
+   *
+   * When the symbol exists, replace the whole pair. We do this to support
+   * shallow-copying the closure when calling a lambda (see lisp_dup).
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
     if (lisp_symbol_match(CAR(car), sym)) {
-      X(sym); X(CDR(car));
-      CDR(car) = val;
+      X(car);
+      a->car = lisp_cons(sym, val);
+      X(sym); X(val);
       return closure;
     }
     NEXT(a);
@@ -311,7 +291,6 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
   X(con); X(closure);
   /*
    */
-  TRACE_SEXP(res);
   return res;
 }
 

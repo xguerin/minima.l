@@ -1,12 +1,20 @@
 #pragma once
 
+#include "debug.h"
 #include "types.h"
+#include <stdbool.h>
 #include <stdio.h>
 
 #ifdef LISP_ENABLE_DEBUG
 
+extern bool MNML_DEBUG;
+extern bool MNML_VERBOSE_CONS;
+extern bool MNML_VERBOSE_RC;
+extern bool MNML_VERBOSE_SLOT;
+extern bool MNML_VERBOSE_SLAB;
+
 #define FPRINTF \
-  if (getenv("MNML_DEBUG")) fprintf
+  if (MNML_DEBUG) fprintf
 
 #define TRACE(__fmt, ...) \
   FPRINTF(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
@@ -28,10 +36,10 @@
   lisp_debug(stderr, __c);  \
 }
 
-#define TRACE_CONS(__c) {             \
-  if (getenv("MNML_VERBOSE_CONS")) {  \
-    TRACE_SEXP(__c)                   \
-  }                                   \
+#define TRACE_CONS(__c) {   \
+  if (MNML_VERBOSE_CONS) {  \
+    TRACE_SEXP(__c)         \
+  }                         \
 }
 
 void lisp_debug(FILE * fp, const atom_t atom);

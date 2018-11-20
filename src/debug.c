@@ -5,6 +5,12 @@
 
 #ifdef LISP_ENABLE_DEBUG
 
+bool MNML_DEBUG        = false;
+bool MNML_VERBOSE_CONS = false;
+bool MNML_VERBOSE_RC   = false;
+bool MNML_VERBOSE_SLOT = false;
+bool MNML_VERBOSE_SLAB = false;
+
 /*
  * Debug function.
  */
@@ -80,7 +86,7 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
 void
 lisp_debug(FILE * const fp, const atom_t atom)
 {
-  if (getenv("MNML_DEBUG")) {
+  if (MNML_DEBUG) {
     lisp_debug_atom(fp, atom, true);
     fprintf(fp, "\n");
   }

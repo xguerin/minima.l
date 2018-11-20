@@ -15,6 +15,18 @@ lisp_append(const atom_t lst, const atom_t elt)
   return res;
 }
 
+atom_t
+lisp_dup(const atom_t closure)
+{
+  if (IS_PAIR(closure)) {
+    atom_t rem = lisp_dup(CDR(closure));
+    atom_t res = lisp_cons(CAR(closure), rem);
+    X(rem);
+    return res;
+  }
+  return UP(closure);
+}
+
 size_t
 lisp_make_cstring(const atom_t cell, char * const buffer,
                   const size_t len, const size_t idx)

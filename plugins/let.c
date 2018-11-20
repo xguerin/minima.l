@@ -2,6 +2,7 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
+#include <mnml/utils.h>
 #include <string.h>
 
 static atom_t
