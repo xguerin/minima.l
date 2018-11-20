@@ -16,19 +16,19 @@ lisp_function_if(const atom_t closure, const atom_t cell)
   /*
    * Evaluate the THEN branch if TRUE.
    */
-  if (type == T_TRUE) {
-    atom_t thn = lisp_car(cd0);
-    X(cd0);
-    return lisp_eval(closure, thn);
+  if (unlikely(type == T_NIL)) {
+    atom_t cd1 = lisp_cdr(cd0);
+    atom_t els = lisp_car(cd1);
+    X(cd0); X(cd1);
+    return lisp_eval(closure, els);
   }
   /*
    * Or evaluate the ELSE branch.
    */
   else {
-    atom_t cd1 = lisp_cdr(cd0);
-    atom_t els = lisp_car(cd1);
-    X(cd0); X(cd1);
-    return lisp_eval(closure, els);
+    atom_t thn = lisp_car(cd0);
+    X(cd0);
+    return lisp_eval(closure, thn);
   }
 }
 

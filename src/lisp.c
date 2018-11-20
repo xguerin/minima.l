@@ -452,13 +452,12 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
       X(cdr0);
       /*
        * Bind the arguments and the values. The closure embedded in the lambda
-       * is used as the run environemnt and augmented with the arguments'
+       * is used as the run environment and augmented with the arguments'
        * values. The call-site closure is used for the evaluation of the
        * arguments.
        */
-      atom_t newl = lisp_dup(lcls);
-      X(lcls);
       atom_t rest;
+      atom_t newl = lisp_merge(lcls, lisp_dup(closure));
       atom_t newc = lisp_bind_args(closure, newl, args, vals, &rest);
       /*
        * Partial application:

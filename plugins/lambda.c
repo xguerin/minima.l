@@ -16,9 +16,8 @@ lisp_function_lambda(const atom_t closure, const atom_t cell)
    * Embed the closure in the definition.
    */
   atom_t con0 = lisp_cons(closure, prog);
-  X(prog);
   atom_t con1 = lisp_cons(args, con0);
-  X(args); X(con0);
+  X(prog); X(args); X(con0);
   /*
    * Return the lambda.
    */

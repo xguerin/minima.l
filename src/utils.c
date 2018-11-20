@@ -11,7 +11,6 @@ lisp_append(const atom_t lst, const atom_t elt)
   atom_t con = lisp_cons(elt, NIL);
   atom_t res = lisp_conc(lst, con);
   X(con); X(elt); X(lst);
-  TRACE_CONS(res);
   return res;
 }
 
@@ -25,6 +24,27 @@ lisp_dup(const atom_t closure)
     return res;
   }
   return UP(closure);
+}
+
+atom_t
+lisp_merge(const atom_t defn, const atom_t call)
+{
+  if (IS_NULL(defn)) {
+    X(defn);
+    return call;
+  }
+  /*
+   */
+  atom_t elt = lisp_car(defn);
+  atom_t nxt = lisp_cdr(defn);
+  X(defn);
+  atom_t sym = lisp_car(elt);
+  atom_t val = lisp_cdr(elt);
+  X(elt);
+  atom_t res = lisp_setq(call, sym, val);
+  /*
+   */
+  return lisp_merge(nxt, res);
 }
 
 size_t
