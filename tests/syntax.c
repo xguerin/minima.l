@@ -44,19 +44,30 @@ lisp_test_init()
    */
   lisp_make_nil();
   lisp_make_true();
+  lisp_make_quote();
   lisp_make_wildcard();
   /*
    * Create the GLOBALS and the lexer.
    */
   GLOBALS = UP(NIL);
   lisp_create(lisp_consumer, &lisp_lexer);
+  /*
+   * Setup the debug variables.
+   */
+#ifdef LISP_ENABLE_DEBUG
+  MNML_DEBUG        = getenv("MNML_DEBUG")        != NULL;
+  MNML_VERBOSE_CONS = getenv("MNML_VERBOSE_CONS") != NULL;
+  MNML_VERBOSE_RC   = getenv("MNML_VERBOSE_RC")   != NULL;
+  MNML_VERBOSE_SLOT = getenv("MNML_VERBOSE_SLOT") != NULL;
+  MNML_VERBOSE_SLAB = getenv("MNML_VERBOSE_SLAB") != NULL;
+#endif
 }
 
 void
 lisp_test_fini()
 {
   lisp_destroy(&lisp_lexer);
-  X(GLOBALS); X(WILDCARD); X(TRUE); X(NIL);
+  X(GLOBALS); X(WILDCARD); X(QUOTE); X(TRUE); X(NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   lisp_slab_destroy();

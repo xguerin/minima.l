@@ -26,9 +26,9 @@ lisp_cond(const atom_t closure, const atom_t cell, const atom_t match)
   atom_t prog = lisp_cdr(car);
   X(car);
   /*
-   * If the cond argument is T or _, simply execute the program.
+   * If the cond argument _, simply execute the program.
    */
-  if (IS_TRUE(args) || IS_WILD(args)) {
+  if (IS_WILD(args)) {
     X(args); X(cdr); X(cell);
     return lisp_eval(closure, prog);
   }

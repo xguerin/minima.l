@@ -92,7 +92,8 @@ lisp_build_argv(const int argc, char ** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(var);
-    GLOBALS = lisp_setq(GLOBALS, key, res);
+    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
+    X(key); X(res);
   }
   else {
     X(res);
@@ -124,7 +125,8 @@ lisp_build_env()
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(env);
-    GLOBALS = lisp_setq(GLOBALS, key, res);
+    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
+    X(key); X(res);
   }
   else {
     X(res);

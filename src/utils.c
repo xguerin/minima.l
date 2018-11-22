@@ -129,10 +129,7 @@ lisp_merge(const atom_t defn, const atom_t call)
   atom_t elt = lisp_car(defn);
   atom_t nxt = lisp_cdr(defn);
   X(defn);
-  atom_t sym = lisp_car(elt);
-  atom_t val = lisp_cdr(elt);
-  X(elt);
-  atom_t res = lisp_setq(call, sym, val);
+  atom_t res = lisp_setq(call, elt);
   /*
    */
   return lisp_merge(nxt, res);

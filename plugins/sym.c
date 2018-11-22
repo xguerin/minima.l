@@ -8,7 +8,7 @@ atom_t
 lisp_function_sym(const atom_t closure, const atom_t cell)
 {
   char buffer[17];
-  atom_t car = lisp_car(cell);
+  atom_t car = lisp_eval(closure, lisp_car(cell));
   size_t len = lisp_make_cstring(car, buffer, 16, 0);
   X(car); X(cell);
   if (len == 0) {

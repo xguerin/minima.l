@@ -33,7 +33,8 @@ lisp_plugin_register()                                              \
   atom_t sym = lisp_make_symbol(inp);                               \
   atom_t val = lisp_make_number((uintptr_t)lisp_function_ ## __s);  \
   atom_t res = UP(val);                                             \
-  GLOBALS = lisp_setq(GLOBALS, sym, val);                           \
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(sym, val));                \
+  X(sym); X(val);                                                   \
   return res;                                                       \
 }
 

@@ -36,6 +36,7 @@ lisp_lookup(const atom_t closure, const atom_t sym)
   FOREACH(closure, a) {
     atom_t car = a->car;
     if (lisp_symbol_match(CAR(car), sym)) {
+      TRACE("0x%lx", (uintptr_t)car);
       return UP(CDR(car));
     }
     NEXT(a);
@@ -46,6 +47,7 @@ lisp_lookup(const atom_t closure, const atom_t sym)
   FOREACH(GLOBALS, b) {
     atom_t car = b->car;
     if (lisp_symbol_match(CAR(car), sym)) {
+      TRACE("0x%lx", (uintptr_t)car);
       return UP(CDR(car));
     }
     NEXT(b);
@@ -187,7 +189,7 @@ lisp_read(const atom_t closure, const atom_t cell)
  */
 
 atom_t
-lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
+lisp_setq(const atom_t closure, const atom_t pair)
 {
   /*
    * Check if the symbol exists and replace it using a zero-copy scan.
@@ -199,10 +201,9 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (lisp_symbol_match(CAR(car), sym)) {
+    if (car != pair && lisp_symbol_match(CAR(car), CAR(pair))) {
       X(car);
-      a->car = lisp_cons(sym, val);
-      X(sym); X(val);
+      a->car = pair;
       return closure;
     }
     NEXT(a);
@@ -210,10 +211,8 @@ lisp_setq(const atom_t closure, const atom_t sym, const atom_t val)
   /*
    * The symbol does not exist, so append it.
    */
-  atom_t con = lisp_cons(sym, val);
-  X(sym); X(val);
-  atom_t res = lisp_cons(con, closure);
-  X(con); X(closure);
+  atom_t res = lisp_cons(pair, closure);
+  X(pair); X(closure);
   /*
    */
   return res;
@@ -288,7 +287,8 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
       break;
     }
     case T_SYMBOL: {
-      ret = lisp_setq(closure, arg, val);
+      ret = lisp_setq(closure, lisp_cons(arg, val));
+      X(arg); X(val);
       break;
     }
   }
@@ -299,8 +299,8 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
 }
 
 static atom_t
-lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
-               const atom_t vals, atom_t * const rest)
+lisp_bind_all(const atom_t closure, const atom_t env, const atom_t args,
+              const atom_t vals, atom_t * const rest)
 {
   TRACE_SEXP(closure);
   TRACE_SEXP(env);
@@ -328,9 +328,30 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
   X(args); X(vals);
   /*
   */
-  atom_t res = lisp_bind_args(closure, cl0, oth, rem, rest);
+  atom_t res = lisp_bind_all(closure, cl0, oth, rem, rest);
   TRACE_SEXP(res);
   return res;
+}
+
+static atom_t
+lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
+               const atom_t vals, atom_t * const rest)
+{
+  switch (args->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_NUMBER:
+    case T_CHAR:
+    case T_WILDCARD:
+      *rest = args;
+      X(vals);
+      return env;
+    case T_PAIR:
+      return lisp_bind_all(closure, env, args, vals, rest);
+    case T_SYMBOL:
+      *rest = UP(NIL);
+      return lisp_bind(env, args, vals);
+  }
 }
 
 /*

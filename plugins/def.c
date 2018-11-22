@@ -35,7 +35,8 @@ lisp_function_def(const atom_t closure, const atom_t cell)
   /*
    * Set the symbol's value.
    */
-  GLOBALS = lisp_setq(GLOBALS, symb, UP(con1));
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(symb, con1));
+  X(symb);
   return con1;
 }
 

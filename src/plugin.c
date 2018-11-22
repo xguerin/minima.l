@@ -159,7 +159,8 @@ lisp_plugin_load(const atom_t sym)
    * Append the plugin and call the register function.
    */
   atom_t hnd = lisp_make_number((uint64_t)handle);
-  PLUGINS = lisp_setq(PLUGINS, UP(sym), hnd);
+  PLUGINS = lisp_setq(PLUGINS, lisp_cons(sym, hnd));
+  X(hnd);
   return get_atom();
 }
 
