@@ -70,7 +70,7 @@ lisp_find_plugin(const char * const paths, const atom_t sym)
      */
     DIR * dir = opendir(entry);
     if (dir == NULL) {
-      return UP(NIL);
+      return NULL;
     }
     /*
      * Scan the directory.
