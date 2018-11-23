@@ -15,4 +15,4 @@ lisp_function_time(const atom_t closure, const atom_t cell)
   return lisp_make_number(end - begin);
 }
 
-LISP_REGISTER(time, time)
+LISP_PLUGIN_REGISTER(time, time)

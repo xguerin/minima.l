@@ -28,4 +28,4 @@ lisp_function_prinl(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(prinl, prinl)
+LISP_PLUGIN_REGISTER(prinl, prinl)

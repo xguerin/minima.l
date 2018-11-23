@@ -16,4 +16,4 @@ lisp_function_conc(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(conc, conc)
+LISP_PLUGIN_REGISTER(conc, conc)

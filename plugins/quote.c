@@ -9,4 +9,4 @@ lisp_function_quote(const atom_t closure, const atom_t cell)
   return cell;
 }
 
-LISP_REGISTER(quote, quote)
+LISP_PLUGIN_REGISTER(quote, quote)

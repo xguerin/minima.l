@@ -60,4 +60,4 @@ lisp_function_cond(const atom_t closure, const atom_t cell)
   return lisp_cond(closure, car, cdr);
 }
 
-LISP_REGISTER(cond, cond)
+LISP_PLUGIN_REGISTER(cond, cond)

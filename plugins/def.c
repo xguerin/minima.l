@@ -40,4 +40,4 @@ lisp_function_def(const atom_t closure, const atom_t cell)
   return con1;
 }
 
-LISP_REGISTER(def, def)
+LISP_PLUGIN_REGISTER(def, def)

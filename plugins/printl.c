@@ -31,4 +31,4 @@ lisp_function_printl(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(printl, printl)
+LISP_PLUGIN_REGISTER(printl, printl)

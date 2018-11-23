@@ -13,4 +13,4 @@ lisp_function_not(const atom_t closure, const atom_t cell)
   return UP(res);
 }
 
-LISP_REGISTER(not, not)
+LISP_PLUGIN_REGISTER(not, not)

@@ -4,4 +4,4 @@
 #include <string.h>
 
 BINARY_BOOLEAN_GEN(or, ||);
-LISP_REGISTER(or, or)
+LISP_PLUGIN_REGISTER(or, or)

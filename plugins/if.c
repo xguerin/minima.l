@@ -32,4 +32,4 @@ lisp_function_if(const atom_t closure, const atom_t cell)
   }
 }
 
-LISP_REGISTER(if, if)
+LISP_PLUGIN_REGISTER(if, if)

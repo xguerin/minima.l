@@ -4,4 +4,4 @@
 #include <string.h>
 
 BINARY_NUMBER_GEN(add, +);
-LISP_REGISTER(add, +)
+LISP_PLUGIN_REGISTER(add, +)

@@ -43,4 +43,4 @@ lisp_function_set(const atom_t closure, const atom_t cell)
   return UP(NIL);
 }
 
-LISP_REGISTER(set, <-)
+LISP_PLUGIN_REGISTER(set, <-)

@@ -28,4 +28,4 @@ lisp_function_close(const atom_t closure, const atom_t cell)
   return UP(res ? TRUE : NIL);
 }
 
-LISP_REGISTER(close, close)
+LISP_PLUGIN_REGISTER(close, close)

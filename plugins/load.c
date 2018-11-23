@@ -66,4 +66,4 @@ lisp_function_load(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(load, load)
+LISP_PLUGIN_REGISTER(load, load)

@@ -4,4 +4,4 @@
 #include <string.h>
 
 PREDICATE_GEN(tru, IS_TRUE);
-LISP_REGISTER(istru, tru?)
+LISP_PLUGIN_REGISTER(istru, tru?)

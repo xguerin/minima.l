@@ -4,4 +4,4 @@
 #include <string.h>
 
 BINARY_COMPARE_GEN(le, <=);
-LISP_REGISTER(le, <=)
+LISP_PLUGIN_REGISTER(le, <=)

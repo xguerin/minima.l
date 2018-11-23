@@ -19,4 +19,4 @@ lisp_function_pipe(const atom_t closure, const atom_t cell)
   return con;
 }
 
-LISP_REGISTER(pipe, pipe)
+LISP_PLUGIN_REGISTER(pipe, pipe)

@@ -9,4 +9,4 @@ lisp_function_read(const atom_t closure, const atom_t cell)
   return lisp_read(closure, cell);
 }
 
-LISP_REGISTER(read, read)
+LISP_PLUGIN_REGISTER(read, read)

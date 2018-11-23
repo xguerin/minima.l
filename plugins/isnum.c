@@ -4,4 +4,4 @@
 #include <string.h>
 
 PREDICATE_GEN(num, IS_NUMB);
-LISP_REGISTER(isnum, num?)
+LISP_PLUGIN_REGISTER(isnum, num?)

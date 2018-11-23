@@ -4,4 +4,4 @@
 #include <string.h>
 
 BINARY_BOOLEAN_GEN(and, &&);
-LISP_REGISTER(and, and)
+LISP_PLUGIN_REGISTER(and, and)

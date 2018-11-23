@@ -4,4 +4,4 @@
 #include <string.h>
 
 PREDICATE_GEN(chr, IS_CHAR);
-LISP_REGISTER(ischr, chr?)
+LISP_PLUGIN_REGISTER(ischr, chr?)

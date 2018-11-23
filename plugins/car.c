@@ -13,4 +13,4 @@ lisp_function_cdr(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(cdr, cdr)
+LISP_PLUGIN_REGISTER(cdr, cdr)

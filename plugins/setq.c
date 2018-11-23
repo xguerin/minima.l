@@ -26,4 +26,4 @@ lisp_function_setq(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(setq, setq)
+LISP_PLUGIN_REGISTER(setq, setq)

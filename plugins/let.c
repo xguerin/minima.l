@@ -71,4 +71,4 @@ lisp_function_let(const atom_t closure, const atom_t cell)
   return lisp_let(closure, cell);
 }
 
-LISP_REGISTER(let, let)
+LISP_PLUGIN_REGISTER(let, let)

@@ -42,4 +42,4 @@ lisp_function_neq(const atom_t closure, const atom_t cell)
   return UP(res);
 }
 
-LISP_REGISTER(neq, <>)
+LISP_PLUGIN_REGISTER(neq, <>)

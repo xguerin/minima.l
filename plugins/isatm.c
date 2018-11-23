@@ -4,4 +4,4 @@
 #include <string.h>
 
 PREDICATE_GEN(atm, IS_ATOM);
-LISP_REGISTER(isatm, atm?)
+LISP_PLUGIN_REGISTER(isatm, atm?)

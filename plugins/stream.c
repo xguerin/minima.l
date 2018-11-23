@@ -62,4 +62,4 @@ lisp_function_stream(const atom_t closure, const atom_t cell)
   return lisp_stream(closure, cdr, con);
 }
 
-LISP_REGISTER(stream, |>)
+LISP_PLUGIN_REGISTER(stream, |>)

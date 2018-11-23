@@ -11,14 +11,16 @@
 extern atom_t PLUGINS;
 
 const char * lisp_prefix();
+
 atom_t lisp_plugin_load(const atom_t sym);
+
 void lisp_plugin_cleanup();
 
 /*
  * Helpful macros.
  */
 
-#define LISP_REGISTER(__s, __n)                                     \
+#define LISP_PLUGIN_REGISTER(__s, __n)                              \
                                                                     \
 const char *                                                        \
 lisp_plugin_name()                                                  \

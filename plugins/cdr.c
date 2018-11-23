@@ -13,4 +13,4 @@ lisp_function_car(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(car, car)
+LISP_PLUGIN_REGISTER(car, car)

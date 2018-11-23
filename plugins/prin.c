@@ -25,4 +25,4 @@ lisp_function_prin(const atom_t closure, const atom_t cell)
   return lisp_prin_all(closure, cell, UP(NIL));
 }
 
-LISP_REGISTER(prin, prin)
+LISP_PLUGIN_REGISTER(prin, prin)

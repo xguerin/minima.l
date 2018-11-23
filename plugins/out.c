@@ -58,4 +58,4 @@ lisp_function_out(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(out, out)
+LISP_PLUGIN_REGISTER(out, out)

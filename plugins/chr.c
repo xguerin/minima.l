@@ -13,4 +13,4 @@ lisp_function_chr(const atom_t closure, const atom_t cell)
   return lisp_make_char(val);
 }
 
-LISP_REGISTER(chr, chr)
+LISP_PLUGIN_REGISTER(chr, chr)

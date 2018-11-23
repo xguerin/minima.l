@@ -13,4 +13,4 @@ lisp_function_fork(const atom_t closure, const atom_t cell)
   return lisp_make_number(pid < 0 ? errno : pid);
 }
 
-LISP_REGISTER(fork, fork)
+LISP_PLUGIN_REGISTER(fork, fork)

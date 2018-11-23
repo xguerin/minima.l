@@ -12,4 +12,4 @@ lisp_function_exit(const atom_t closure, const atom_t cell)
   return UP(TRUE);
 }
 
-LISP_REGISTER(exit, exit)
+LISP_PLUGIN_REGISTER(exit, exit)

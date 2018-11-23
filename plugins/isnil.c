@@ -4,4 +4,4 @@
 #include <string.h>
 
 PREDICATE_GEN(nil, IS_NULL);
-LISP_REGISTER(isnil, nil?)
+LISP_PLUGIN_REGISTER(isnil, nil?)

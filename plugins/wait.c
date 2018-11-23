@@ -22,4 +22,4 @@ lisp_function_wait(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(wait, wait)
+LISP_PLUGIN_REGISTER(wait, wait)

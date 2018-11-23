@@ -42,4 +42,4 @@ lisp_function_equ(const atom_t closure, const atom_t cell)
   return UP(res);
 }
 
-LISP_REGISTER(equ, =)
+LISP_PLUGIN_REGISTER(equ, =)

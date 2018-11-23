@@ -85,4 +85,4 @@ lisp_function_readlines(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(readlines, readlines)
+LISP_PLUGIN_REGISTER(readlines, readlines)

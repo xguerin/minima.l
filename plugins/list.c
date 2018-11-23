@@ -37,4 +37,4 @@ lisp_function_list(const atom_t closure, const atom_t cell)
   return lisp_list(closure, cell);
 }
 
-LISP_REGISTER(list, list)
+LISP_PLUGIN_REGISTER(list, list)

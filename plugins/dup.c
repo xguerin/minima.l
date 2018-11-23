@@ -28,4 +28,4 @@ lisp_function_dup(const atom_t closure, const atom_t cell)
   return lisp_make_number(ret < 0 ? errno : ret);
 }
 
-LISP_REGISTER(dup, dup)
+LISP_PLUGIN_REGISTER(dup, dup)

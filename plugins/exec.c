@@ -74,4 +74,4 @@ lisp_function_exec(const atom_t closure, const atom_t cell)
   return lisp_make_number(ret == 0 ? 0 : errno);
 }
 
-LISP_REGISTER(exec, exec)
+LISP_PLUGIN_REGISTER(exec, exec)

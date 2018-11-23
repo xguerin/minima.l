@@ -24,4 +24,4 @@ lisp_function_lambda(const atom_t closure, const atom_t cell)
   return con1;
 }
 
-LISP_REGISTER(lambda, \\)
+LISP_PLUGIN_REGISTER(lambda, \\)

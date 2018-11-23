@@ -4,4 +4,4 @@
 #include <string.h>
 
 PREDICATE_GEN(sym, IS_SYMB);
-LISP_REGISTER(issym, sym?)
+LISP_PLUGIN_REGISTER(issym, sym?)

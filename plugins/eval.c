@@ -11,4 +11,4 @@ lisp_function_eval(const atom_t closure, const atom_t cell)
   return lisp_eval(closure, car);
 }
 
-LISP_REGISTER(eval, eval)
+LISP_PLUGIN_REGISTER(eval, eval)

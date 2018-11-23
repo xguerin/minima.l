@@ -69,4 +69,4 @@ lisp_function_match(const atom_t closure, const atom_t cell)
   return lisp_match(closure, car, cdr);
 }
 
-LISP_REGISTER(match, match)
+LISP_PLUGIN_REGISTER(match, match)

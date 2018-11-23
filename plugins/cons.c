@@ -16,4 +16,4 @@ lisp_function_cons(const atom_t closure, const atom_t cell)
   return res;
 }
 
-LISP_REGISTER(cons, cons)
+LISP_PLUGIN_REGISTER(cons, cons)
