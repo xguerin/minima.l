@@ -8,10 +8,19 @@
 
 # Notes
 
+## Closures
+
 The implementation of proper closures requires the use of a `lambda`
 operator. We need to embed the call-site closure with the lambda.
 
 Closure computation uses shallow-copy duplication for performance.
+
+Should the define-site and the call-site closure be merged? Pros: it allows
+lambdas defined in `let` to be recursive. Cons: it overloads the lambda's
+closure. OCaml solves this by using the `rec` attribute. This is probably
+something that needs to be dealt by the `let` operator.
+
+## Continuations
 
 On continuations. Two strategies: 1/ rewrite all statement in CPS style so
 continuations are readily available; 2/ use coroutines. The former seems more

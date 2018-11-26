@@ -403,8 +403,9 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
        * arguments.
        */
       atom_t rest;
-      atom_t newl = lisp_merge(lcls, lisp_dup(closure));
+      atom_t newl = lisp_dup(lcls);
       atom_t newc = lisp_bind_args(closure, newl, args, vals, &rest);
+      X(lcls);
       /*
        * Partial application:
        * 1. Have lisp_bind_all return a list of unbound arguments
