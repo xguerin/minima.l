@@ -299,8 +299,8 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
 }
 
 static atom_t
-lisp_bind_all(const atom_t closure, const atom_t env, const atom_t args,
-              const atom_t vals, atom_t * const rest)
+lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
+               const atom_t vals, atom_t * const narg, atom_t * const nval)
 {
   TRACE_SEXP(closure);
   TRACE_SEXP(env);
@@ -310,8 +310,8 @@ lisp_bind_all(const atom_t closure, const atom_t env, const atom_t args,
    * Return if we run out of arguments or values.
    */
   if (IS_NULL(args) || IS_NULL(vals)) {
-    *rest = args;
-    X(vals);
+    *narg = args;
+    *nval = vals;
     return env;
   }
   /*
@@ -328,30 +328,66 @@ lisp_bind_all(const atom_t closure, const atom_t env, const atom_t args,
   X(args); X(vals);
   /*
   */
-  atom_t res = lisp_bind_all(closure, cl0, oth, rem, rest);
+  atom_t res = lisp_bind_args(closure, cl0, oth, rem, narg, nval);
   TRACE_SEXP(res);
   return res;
 }
 
+/*
+ * Lambda evaluation.
+ */
+
 static atom_t
-lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
-               const atom_t vals, atom_t * const rest)
+lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
 {
-  switch (args->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_NUMBER:
-    case T_CHAR:
-    case T_WILDCARD:
-      *rest = args;
-      X(vals);
-      return env;
-    case T_PAIR:
-      return lisp_bind_all(closure, env, args, vals, rest);
-    case T_SYMBOL:
-      *rest = UP(NIL);
-      return lisp_bind(env, args, vals);
+  atom_t ret;
+  /*
+   * Grab lambda and values.
+   */
+  atom_t lbda = lisp_car(cell);
+  atom_t vals = lisp_cdr(cell);
+  X(cell);
+  /*
+   * Grab the arguments, the closure and the body of the lambda.
+   */
+  atom_t args = lisp_car(lbda);
+  atom_t cdr0 = lisp_cdr(lbda);
+  X(lbda);
+  atom_t lcls = lisp_car(cdr0);
+  atom_t body = lisp_cdr(cdr0);
+  X(cdr0);
+  /*
+   * Merge the define-site closure into the call-site closure. This is required
+   * by locally recursive lambdas. Define-site definitions take precendence.
+   */
+  atom_t narg;
+  atom_t newl = lisp_merge(lcls, lisp_dup(closure));
+  /*
+   * Bind the arguments and the values. The closure embedded in the lambda
+   * is used as the run environment and augmented with the arguments'
+   * values. The call-site closure is used for the evaluation of the
+   * arguments.
+   */
+  atom_t newc = lisp_bind_args(closure, newl, args, vals, &narg, rem);
+  /*
+   * If the list of remaining arguments is not NIL, handle partial
+   * application.
+   */
+  if (!IS_NULL(narg)) {
+    atom_t con = lisp_cons(newc, body);
+    ret = lisp_cons(narg, con);
+    X(con); X(body);
   }
+  /*
+   * Otherwise, evaluation the function.
+   */
+  else {
+    ret = lisp_prog(newc, body, UP(NIL));
+  }
+  /*
+   */
+  X(narg); X(newc);
+  return ret;
 }
 
 /*
@@ -361,7 +397,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
 static atom_t
 lisp_eval_pair(const atom_t closure, const atom_t cell)
 {
-  atom_t ret;
+  atom_t ret, rem;
   TRACE_SEXP(cell);
   /*
    */
@@ -372,68 +408,41 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
       function_t fun = (function_t)CAR(cell)->number;
       X(cell);
       ret = fun(closure, cdr);
+      rem = UP(NIL);
       break;
     }
     case T_TRUE:
     case T_CHAR:
-    case T_WILDCARD: {
+    case T_WILDCARD:
       ret = cell;
+      rem = UP(NIL);
       break;
-    }
-    case T_PAIR: {
-      /*
-       * Grab lambda and values.
-       */
-      atom_t lbda = lisp_car(cell);
-      atom_t vals = lisp_cdr(cell);
-      X(cell);
-      /*
-       * Grab the arguments, the closure and the body of the lambda.
-       */
-      atom_t args = lisp_car(lbda);
-      atom_t cdr0 = lisp_cdr(lbda);
-      X(lbda);
-      atom_t lcls = lisp_car(cdr0);
-      atom_t body = lisp_cdr(cdr0);
-      X(cdr0);
-      /*
-       * Bind the arguments and the values. The closure embedded in the lambda
-       * is used as the run environment and augmented with the arguments'
-       * values. The call-site closure is used for the evaluation of the
-       * arguments.
-       */
-      atom_t rest;
-      atom_t newl = lisp_dup(lcls);
-      atom_t newc = lisp_bind_args(closure, newl, args, vals, &rest);
-      X(lcls);
-      /*
-       * Partial application:
-       * 1. Have lisp_bind_all return a list of unbound arguments
-       * 2. If that list is NIL, evaluate the function
-       * 3. Otherwise, build a new function with the remaining arguments
-       */
-      if (IS_NULL(rest)) {
-        ret = lisp_prog(newc, body, UP(NIL));
-        X(rest); X(newc);
-      }
-      else {
-        atom_t con = lisp_cons(newc, body);
-        ret = lisp_cons(rest, con);
-        X(con); X(rest); X(newc); X(body);
-      }
-      /*
-       */
+    case T_PAIR:
+      ret = lisp_eval_lambda(closure, cell, &rem);
       break;
-    }
-    case T_SYMBOL: {
+    case T_SYMBOL:
       ret = lisp_eval(closure, cell);
+      rem = UP(NIL);
       break;
-    }
   }
+  /*
+   * Check if there is any remainder arguments.
+   */
+  if (IS_NULL(rem)) {
+    X(rem);
+    TRACE_SEXP(ret);
+    return ret;
+  }
+  /*
+   * Apply the result to the remainder arguments.
+   */
+  atom_t old = ret;
+  ret = lisp_cons(old, rem);
+  X(old); X(rem);
   /*
    */
   TRACE_SEXP(ret);
-  return ret;
+  return lisp_eval_pair(closure, ret);
 }
 
 /*

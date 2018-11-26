@@ -17,7 +17,7 @@ Closure computation uses shallow-copy duplication for performance.
 
 Should the define-site and the call-site closure be merged? Pros: it allows
 lambdas defined in `let` to be recursive. Cons: it overloads the lambda's
-closure. OCaml solves this by using the `rec` attribute. This is probably
+closure. OCaml solves this by using the `rec` attribute. This is maybe
 something that needs to be dealt by the `let` operator.
 
 ## Continuations
