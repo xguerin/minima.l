@@ -357,17 +357,27 @@ lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
   atom_t body = lisp_cdr(cdr0);
   X(cdr0);
   /*
-   * Merge the define-site closure into the call-site closure. This is required
-   * by locally recursive lambdas. Define-site definitions take precendence.
+   * NOTE: Merge the define-site closure into the call-site closure.
+   * This is required by locally recursive lambdas. Define-site definitions
+   * take precendence:
+   *
+   * atom_t newl = lisp_merge(lcls, lisp_dup(closure));
+   *
+   * This is disabled for the moment as when merging both closures, we end up
+   * with a lot more than what we bargained for when calling external functions.
+   *
+   * TODO find a better way to handle locally recursive functions. Ideally, it
+   * should be handled in `let` as this is where the binding occurs.
    */
-  atom_t narg;
-  atom_t newl = lisp_merge(lcls, lisp_dup(closure));
+  atom_t newl = lisp_dup(lcls);
+  X(lcls);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda
    * is used as the run environment and augmented with the arguments'
    * values. The call-site closure is used for the evaluation of the
    * arguments.
    */
+  atom_t narg;
   atom_t newc = lisp_bind_args(closure, newl, args, vals, &narg, rem);
   /*
    * If the list of remaining arguments is not NIL, handle partial
