@@ -55,13 +55,3 @@ atom_t lisp_prog(const atom_t closure, const atom_t cell, const atom_t rslt);
 atom_t lisp_read(const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const atom_t closure, const atom_t cell);
 void   lisp_prin(const atom_t closure, const atom_t cell, const bool s);
-
-/*
- * Helper functions.
- */
-
-atom_t lisp_make_number(const int64_t num);
-atom_t lisp_make_inline(const uint64_t tag);
-atom_t lisp_make_char(const char c);
-atom_t lisp_make_string(const char * const s, const size_t len);
-atom_t lisp_make_symbol(const symbol_t sym);

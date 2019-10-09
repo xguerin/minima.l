@@ -1,5 +1,6 @@
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
+#include <mnml/maker.h>
 #include <mnml/slab.h>
 #include <assert.h>
 #include <stdio.h>
