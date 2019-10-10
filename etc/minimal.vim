@@ -70,6 +70,7 @@ syn keyword MinimalFuncs
       \ iter
       \ len
       \ let
+      \ last
       \ list
       \ load
       \ lst?
@@ -89,6 +90,7 @@ syn keyword MinimalFuncs
       \ print
       \ printl
       \ prog
+      \ quit
       \ quote
       \ read
       \ readlines
