@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mnml/debug.h>
 #include <mnml/types.h>
 #include <stdbool.h>
 #include <stdio.h>

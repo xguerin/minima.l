@@ -246,6 +246,31 @@ lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
 }
 
 /*
+ * RTRN.
+ */
+
+atom_t
+lisp_rtrn(const atom_t closure, const atom_t rslt, const atom_t cont)
+{
+  TRACE_SEXP(rslt);
+  TRACE_SEXP(cont);
+  /*
+   * If the continuation is NIL, return the result.
+   */
+  if (IS_NULL(cont)) {
+    X(cont);
+    return rslt;
+  }
+  /*
+   * Otherwise, call the continuation on the result.
+   */
+  atom_t lst = lisp_cons(rslt, NIL);
+  atom_t fun = lisp_cons(cont, lst);
+  X(lst); X(cont); X(rslt);
+  return lisp_eval(closure, fun);
+}
+
+/*
  * Argument bindings. RC rules: all arguments are consumed.
  */
 

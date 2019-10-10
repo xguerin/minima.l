@@ -76,16 +76,16 @@ void lisp_make_wildcard();
 /*
  * Symbol matching.
  */
-#define MAKE_SYMBOL_STATIC(__v, __s, __n)       \
-  symbol_t __v = alloca(sizeof(union _symbol)); \
-  __v->word[0] = 0;                             \
-  __v->word[1] = 0;                             \
+#define MAKE_SYMBOL_STATIC(__v, __s, __n)                         \
+  symbol_t __v = (union _symbol*) alloca(sizeof(union _symbol));  \
+  __v->word[0] = 0;                                               \
+  __v->word[1] = 0;                                               \
   strncpy(__v->val, __s, __n);
 
-#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)      \
-  symbol_t __v = malloc(sizeof(union _symbol)); \
-  __v->word[0] = 0;                             \
-  __v->word[1] = 0;                             \
+#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                        \
+  symbol_t __v = (union _symbol*) malloc(sizeof(union _symbol));  \
+  __v->word[0] = 0;                                               \
+  __v->word[1] = 0;                                               \
   strncpy(__v->val, __s, __n);
 
 static inline bool
