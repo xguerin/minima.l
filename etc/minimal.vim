@@ -11,7 +11,7 @@ elseif exists("b:current_syntax")
     finish
 endif
 
-set iskeyword+=%,?,+,*,/,\\,=,>,<,_,:
+set iskeyword+=%,?,+,*,/,\\,=,>,<,_,:,&
 
 syn case match
 
@@ -35,6 +35,7 @@ syn keyword MinimalFuncs
       \ =
       \ >
       \ >=
+      \ >&
       \ \\
       \ and
       \ append
@@ -115,6 +116,6 @@ hi default link MinimalFuncs    Function
 hi default link MinimalOperator Operator
 
 set lisp
-set lispwords=%,*,+,-,/,<,<-,<=,<>,=,>,>=,\\,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr,chr?,conc,cond,cons,close,dedup,def,dup,eval,exec,exit,filter,flatten,foldl,foldr,fork,if,in,insert,iter,len,let,list,load,lst?,map,map2,match,merge,nil?,not,ntoa,num?,or,out,pipe,prin,prinl,print,printl,prog,quote,read,readlines,rev,run,setq,split,sym,sym?,tru?,wait,zip
+set lispwords=%,*,+,-,/,<,<-,<=,<>,=,>,>=,>&,\\,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr,chr?,conc,cond,cons,close,dedup,def,dup,eval,exec,exit,filter,flatten,foldl,foldr,fork,if,in,insert,iter,last,len,let,list,load,lst?,map,map2,match,merge,nil?,not,ntoa,num?,or,out,pipe,prin,prinl,print,printl,prog,quit,quote,read,readlines,rev,run,setq,split,sym,sym?,tru?,wait,zip
 
 let b:current_syntax = "minimal"
