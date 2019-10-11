@@ -17,6 +17,12 @@ void lisp_init();
 void lisp_fini();
 
 /*
+ * Return the length of a list.
+ */
+
+size_t lisp_len(const atom_t cell);
+
+/*
  * Destructively append element ELT to list LST.
  */
 atom_t lisp_append(const atom_t lst, const atom_t elt);
