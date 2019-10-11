@@ -3,7 +3,6 @@
 #include <mnml/maker.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <string.h>
 
 /*
  * Interpreter life cycle.
@@ -49,14 +48,6 @@ atom_t lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
 uint64_t lisp_timestamp();
 
 /*
- * Singleton constructors.
- */
-void lisp_make_nil();
-void lisp_make_true();
-void lisp_make_quote();
-void lisp_make_wildcard();
-
-/*
  * IO context helpers.
  */
 #define PUSH_IO_CONTEXT(__c, __d) { \
@@ -76,17 +67,6 @@ void lisp_make_wildcard();
 /*
  * Symbol matching.
  */
-#define MAKE_SYMBOL_STATIC(__v, __s, __n)                         \
-  symbol_t __v = (union _symbol*) alloca(sizeof(union _symbol));  \
-  __v->word[0] = 0;                                               \
-  __v->word[1] = 0;                                               \
-  strncpy(__v->val, __s, __n);
-
-#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                        \
-  symbol_t __v = (union _symbol*) malloc(sizeof(union _symbol));  \
-  __v->word[0] = 0;                                               \
-  __v->word[1] = 0;                                               \
-  strncpy(__v->val, __s, __n);
 
 static inline bool
 lisp_symbol_match(const atom_t a, const atom_t b)

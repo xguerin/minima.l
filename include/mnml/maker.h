@@ -1,6 +1,23 @@
 #pragma once
 
 #include <mnml/types.h>
+#include <string.h>
+
+/*
+ * Symbol makers.
+ */
+
+#define MAKE_SYMBOL_STATIC(__v, __s, __n)                         \
+  symbol_t __v = (union _symbol*) alloca(sizeof(union _symbol));  \
+  __v->word[0] = 0;                                               \
+  __v->word[1] = 0;                                               \
+  strncpy(__v->val, __s, __n);
+
+#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                        \
+  symbol_t __v = (union _symbol*) malloc(sizeof(union _symbol));  \
+  __v->word[0] = 0;                                               \
+  __v->word[1] = 0;                                               \
+  strncpy(__v->val, __s, __n);
 
 /*
  * Function make/split.
@@ -54,3 +71,14 @@ atom_t lisp_make_char(const char c);
 atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_string(const char * const s, const size_t len);
 atom_t lisp_make_symbol(const symbol_t sym);
+
+/*
+ * Singleton makers.
+ */
+
+void lisp_make_nil();
+void lisp_make_true();
+void lisp_make_quote();
+void lisp_make_wildcard();
+
+

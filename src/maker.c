@@ -47,3 +47,42 @@ lisp_make_symbol(const symbol_t sym)
   TRACE_SEXP(R);
   return R;
 }
+
+void
+lisp_make_nil()
+{
+  atom_t R = lisp_allocate();
+  R->type = T_NIL;
+  R->refs = 1;
+  TRACE_SEXP(R);
+  NIL = R;
+}
+
+void
+lisp_make_true()
+{
+  atom_t R = lisp_allocate();
+  R->type = T_TRUE;
+  R->refs = 1;
+  TRACE_SEXP(R);
+  TRUE = R;
+}
+
+void
+lisp_make_quote()
+{
+  MAKE_SYMBOL_STATIC(quote, "quote", 5);
+  atom_t R = lisp_make_symbol(quote);
+  TRACE_SEXP(R);
+  QUOTE = R;
+}
+
+void
+lisp_make_wildcard()
+{
+  atom_t R = lisp_allocate();
+  R->type = T_WILDCARD;
+  R->refs = 1;
+  TRACE_SEXP(R);
+  WILDCARD = R;
+}
