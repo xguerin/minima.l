@@ -79,7 +79,7 @@ cps_swap(const atom_t cell, size_t* counter, atom_t* spill)
  */
 
 static atom_t
-cps_wrap(const atom_t cell, size_t* counter)
+cps_wrap(const atom_t cell, const size_t padding, size_t* counter)
 {
   TRACE_SEXP(cell);
   /*
@@ -89,7 +89,7 @@ cps_wrap(const atom_t cell, size_t* counter)
     atom_t sym_k = cps_make_placeholder(*counter);
     atom_t result = lisp_cons(sym_k, cell);
     X(sym_k); X(cell);
-    *counter = 0;
+    *counter = padding;
     return result;
   }
   /*
@@ -101,7 +101,7 @@ cps_wrap(const atom_t cell, size_t* counter)
   /*
    * Call swap recursively.
    */
-  atom_t curwrap = cps_wrap(cdr, counter);
+  atom_t curwrap = cps_wrap(cdr, padding, counter);
   /*
    * Generate a symbol for the placeholder and increment the counter.
    */
@@ -138,13 +138,13 @@ cps_wrap(const atom_t cell, size_t* counter)
  */
 
 atom_t
-lisp_cps_convert(const atom_t cell)
+lisp_cps_convert(const atom_t cell, const size_t padding)
 {
-  size_t counter = 0;
-  atom_t spill = UP(NIL);
-  atom_t acc = cps_swap(cell, &counter, &spill);
-  atom_t fns = lisp_append(spill, acc);
-  return cps_wrap(fns, &counter);
+  size_t cnt = padding;
+  atom_t spl = UP(NIL);
+  atom_t acc = cps_swap(cell, &cnt, &spl);
+  atom_t fns = lisp_append(spl, acc);
+  return cps_wrap(fns, padding, &cnt);
 }
 
 /*
