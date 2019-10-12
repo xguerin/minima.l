@@ -10,8 +10,8 @@
 
 static atom_t
 cps_make_placeholder(const size_t counter) {
-  char buffer[16];
-  int len = snprintf(buffer, 16, "_%ld", counter);
+  char buffer[LISP_SYMBOL_LENGTH];
+  int len = snprintf(buffer, LISP_SYMBOL_LENGTH, "_%ld", counter);
   MAKE_SYMBOL_STATIC(sym, buffer, len);
   return lisp_make_symbol(sym);
 }

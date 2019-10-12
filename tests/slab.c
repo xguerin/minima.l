@@ -38,7 +38,7 @@ alloc_free_test()
   ASSERT_EQUAL(slab.first, 15);
   for (size_t i = slab.first; i != 16;) {
     i = slab.entries[i].next;
-    ASSERT_TRUE(i >= 0 && i <= 16);
+    ASSERT_TRUE(i <= 16);
   }
   /*
    * Free the slab allocator.
@@ -77,7 +77,7 @@ alloc_full_test()
   ASSERT_EQUAL(slab.first, CELL_COUNT - 1);
   for (size_t i = slab.first; i != -1U;) {
     i = slab.entries[i].next;
-    ASSERT_TRUE(i == -1U || i >= 0 && i < CELL_COUNT);
+    ASSERT_TRUE(i == -1U || i < CELL_COUNT);
   }
   /*
    * Free the slab allocator.
@@ -117,7 +117,7 @@ alloc_xpnd_test()
   ASSERT_EQUAL(slab.first, count - 1);
   for (size_t i = slab.first; i != -1U;) {
     i = slab.entries[i].next;
-    ASSERT_TRUE(i == -1U || i >= 0 && i < CELL_COUNT);
+    ASSERT_TRUE(i == -1U || i < CELL_COUNT);
   }
   /*
    * Free the slab allocator.

@@ -73,7 +73,7 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
       break;
     case T_SYMBOL: {
       char bsym[17] = { 0 };
-      strncpy(bsym, atom->symbol.val, 16);
+      strncpy(bsym, atom->symbol.val, LISP_SYMBOL_LENGTH);
       fprintf(fp, "%s", bsym);
       break;
     }

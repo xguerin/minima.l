@@ -18,6 +18,8 @@ atom_equ(const atom_t a, const atom_t b)
         lisp_equ(a->pair.car, b->pair.car);
     case T_SYMBOL:
       return lisp_symbol_match(a, b);
+    default:
+      return false;
   }
 }
 

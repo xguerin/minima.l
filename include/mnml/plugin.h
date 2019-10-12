@@ -20,6 +20,9 @@ void lisp_plugin_cleanup();
  * Helpful macros.
  */
 
+#define LISP_PLUGIN_NAME_LENGTH(__n)  \
+  sizeof(#__n) <= LISP_SYMBOL_LENGTH ? sizeof(#__n) : LISP_SYMBOL_LENGTH
+
 #define LISP_PLUGIN_REGISTER(__s, __n)                              \
                                                                     \
 const char *                                                        \
@@ -31,7 +34,7 @@ lisp_plugin_name()                                                  \
 atom_t                                                              \
 lisp_plugin_register()                                              \
 {                                                                   \
-  MAKE_SYMBOL_STATIC(inp, #__n, sizeof(#__n));                      \
+  MAKE_SYMBOL_STATIC(inp, #__n, LISP_PLUGIN_NAME_LENGTH(__n));      \
   atom_t sym = lisp_make_symbol(inp);                               \
   atom_t val = lisp_make_number((uintptr_t)lisp_function_ ## __s);  \
   atom_t res = UP(val);                                             \

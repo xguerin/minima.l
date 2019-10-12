@@ -71,23 +71,45 @@ if(MNML_ENABLE_DEBUG)
 endif()
 
 #
-# Flags preferences
+# RPath and PIC configuration
 #
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-deprecated-register -Wno-unused-parameter -Wno-address-of-packed-member")
+#
+# C flags preferences
+#
+
+set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
 
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-register")
+if(${CMAKE_C_COMPILER_ID} STREQUAL "Clang")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-register")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
+endif()
+
+if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-stringop-truncation")
+endif()
+
+#
+# CXX flags preferences
+#
+
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
 set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
+endif()
 
 #
 # Required packages
@@ -100,7 +122,7 @@ find_package(Ragel REQUIRED)
 # Optional packages
 #
 
-find_package(LLVM 9.0)
+find_package(LLVM 7.0)
 
 #
 # Subdirectories

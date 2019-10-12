@@ -638,9 +638,11 @@ lisp_prin_atom(const int fd, char * const buf, const size_t idx,
     }
     case T_SYMBOL:
       return lisp_write(fd, buf, idx, cell->symbol.val,
-                        strnlen(cell->symbol.val, 16));
+                        strnlen(cell->symbol.val, LISP_SYMBOL_LENGTH));
     case T_WILDCARD:
       return lisp_write(fd, buf, idx, "_", 1);
+    default:
+      return 0;
   }
 }
 

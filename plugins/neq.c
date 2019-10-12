@@ -20,6 +20,8 @@ atom_neq(const atom_t a, const atom_t b)
       return lisp_neq(CAR(a), CAR(b)) || lisp_neq(CDR(a), CDR(b));
     case T_SYMBOL:
       return !lisp_symbol_match(a, b);
+    default:
+      return false;
   }
 }
 

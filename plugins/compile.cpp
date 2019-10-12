@@ -15,8 +15,8 @@ extern "C"
 
 static atom_t
 make_placeholder(const size_t counter) {
-  char buffer[16];
-  int len = snprintf(buffer, 16, "_%ld", counter);
+  char buffer[LISP_SYMBOL_LENGTH];
+  int len = snprintf(buffer, LISP_SYMBOL_LENGTH, "_%ld", counter);
   MAKE_SYMBOL_STATIC(sym, buffer, len);
   return lisp_make_symbol(sym);
 }
@@ -44,10 +44,10 @@ static bool
 is_binary_number_op(const atom_t cell)
 {
   return
-    strncmp(cell->symbol.val, "+", 16) == 0 ||
-    strncmp(cell->symbol.val, "-", 16) == 0 ||
-    strncmp(cell->symbol.val, "*", 16) == 0 ||
-    strncmp(cell->symbol.val, "/", 16) == 0;
+    strncmp(cell->symbol.val, "+", LISP_SYMBOL_LENGTH) == 0 ||
+    strncmp(cell->symbol.val, "-", LISP_SYMBOL_LENGTH) == 0 ||
+    strncmp(cell->symbol.val, "*", LISP_SYMBOL_LENGTH) == 0 ||
+    strncmp(cell->symbol.val, "/", LISP_SYMBOL_LENGTH) == 0;
 }
 
 static atom_t
@@ -140,7 +140,7 @@ generate_closure_ref_or_immediate_integer(const atom_t args, const atom_t cell)
     printf("C[%.16s].I", &ref->symbol.val[1]);
     X(ref);
   } else {
-    printf("%lld", cell->number);
+    printf("%ld", cell->number);
   }
 }
 
@@ -363,7 +363,7 @@ generate_argument_conversion(const atom_t cell)
   /*
    * Generate the conversion.
    */
-  if (strncmp(typ->symbol.val, "NUMB", 16) == 0) {
+  if (strncmp(typ->symbol.val, "NUMB", LISP_SYMBOL_LENGTH) == 0) {
     printf("  value_t %.16s = { .I = car->number };\n", arg->symbol.val);
   }
   /*

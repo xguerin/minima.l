@@ -37,9 +37,11 @@ typedef struct _pair
 }
 * pair_t;
 
+#define LISP_SYMBOL_LENGTH 16
+
 typedef union _symbol
 {
-  char      val[16];
+  char      val[LISP_SYMBOL_LENGTH];
   uint64_t  word[2];
   __m128i   tag;
 }

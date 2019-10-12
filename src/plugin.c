@@ -57,7 +57,7 @@ lisp_find_plugin(const char * const paths, const atom_t sym)
    * Extract the symbol name.
    */
   char bsym[17] = { 0 };
-  strncpy(bsym, sym->symbol.val, 16);
+  strncpy(bsym, sym->symbol.val, LISP_SYMBOL_LENGTH);
   /*
    * Scan libraries in the path.
    */
