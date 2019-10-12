@@ -125,7 +125,12 @@ endif()
 
 install(
   FILES
+  include/mnml/debug.h
   include/mnml/lisp.h
+  include/mnml/maker.h
+  include/mnml/plugin.h
+  include/mnml/slab.h
   include/mnml/types.h
+  include/mnml/utils.h
   DESTINATION
   include/mnml)
