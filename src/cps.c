@@ -138,7 +138,7 @@ cps_wrap(const atom_t cell, const size_t padding, size_t* counter)
  */
 
 atom_t
-lisp_cps_convert(const atom_t cell, const size_t padding)
+lisp_cps_lift(const atom_t cell, const size_t padding)
 {
   size_t cnt = padding;
   atom_t spl = UP(NIL);

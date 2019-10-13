@@ -25,7 +25,7 @@ lisp_function_cps(const atom_t closure, const atom_t cell)
   /*
    * Wrap all funcalls with lambda wrappers.
    */
-  atom_t llist = lisp_cps_convert(body, 0);
+  atom_t llist = lisp_cps_lift(body, 0);
   atom_t lambd = lisp_cps_bind(llist);
   /*
    * Grab the lambda's arg and body.

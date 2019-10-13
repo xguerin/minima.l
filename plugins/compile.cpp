@@ -96,6 +96,26 @@ generate_includes_and_types()
   printf("}\n");
   printf("* continuation_t;\n");
   printf("\n");
+  /*
+   * Generate the closure cleaner.
+   */
+  printf("static void cleanup(closure_t C) {\n");
+  printf("  for (size_t i = 0; i < 16; i += 1) {\n");
+  printf("    if (C[i] != NULL) {\n");
+  printf("      X(C[i]);\n");
+  printf("      C[i] = NULL;\n");
+  printf("    }\n");
+  printf("  }\n");
+  printf("}\n");
+  printf("\n");
+}
+
+static void
+generate_comment(const char * const comment)
+{
+  printf("  /*\n");
+  printf("   * %s.\n", comment);
+  printf("   */\n");
 }
 
 /*
@@ -105,34 +125,35 @@ generate_includes_and_types()
 static void
 generate_function_call(const atom_t args)
 {
-  printf("fun(C, ");
+  printf("fun(");
   FOREACH(args, e1) {
     printf("%.16s, ", e1->car->symbol.val);
     NEXT(e1);
   }
-  printf("&K);\n");
+  printf("K);\n");
 }
 
 static void
 generate_continuation_ref(const atom_t cell)
 {
   atom_t sym = get_current_symbol(cell);
-  printf("  struct _continuation K = { .C = C, .F = ");
   /*
    * Call the function directly if we are dealing with a lambda.
    */
   if (IS_PAIR(cell)) {
-    printf("fn%.16s", sym->symbol.val);
+    printf("  struct _continuation _K = { .C = C, .F = fn%.16s };\n",
+           sym->symbol.val);
+    printf("  continuation_t K = &_K;\n");
   }
   /*
    * Otherwise call the continuation in the closure.
    */
   else {
-    printf("(callback_t)C[%.16s]->number", &sym->symbol.val[1]);
+    printf("  continuation_t K = (continuation_t)C[%.16s]->number;\n",
+           &sym->symbol.val[1]);
   }
   /*
    */
-  printf(" };\n");
   X(sym);
 }
 
@@ -152,6 +173,7 @@ generate_continuation_return_call(const atom_t cell)
   else {
     printf("  continuation_t K = (continuation_t)C[%.16s]->number;\n",
            &sym->symbol.val[1]);
+    printf("  cleanup(C);\n");
     printf("  atom_t W = K->F(K->C, R);\n");
   }
   X(sym);
@@ -272,6 +294,7 @@ generate_continuation_block(const atom_t symb, const atom_t args,
   if (lisp_symbol_match(symb, oper)) {
     generate_continuation_ref(next);
     generate_recursive_op(args, args, prms);
+    printf("  cleanup(C);\n");
     printf("  atom_t W = ");
     generate_function_call(args);
   }
@@ -394,7 +417,7 @@ generate_function_block(const atom_t cell)
 static void
 generate_function_prototype(const atom_t args)
 {
-  printf("static atom_t fun(closure_t X, ");
+  printf("static atom_t fun(");
   generate_arguments(args);
   printf("continuation_t K);\n\n");
 }
@@ -405,29 +428,17 @@ generate_function(const atom_t args, const atom_t cell)
   /*
    * Generate the identity continuation.
    */
-  printf("static atom_t identity(closure_t X, atom_t V) {\n");
+  printf("static atom_t identity(closure_t C, atom_t V) {\n");
   printf("  return V;\n");
-  printf("}\n\n");
-  /*
-   * Generate the closure cleaner.
-   */
-  printf("static void cleanup(closure_t C) {\n");
-  printf("  for (size_t i = 0; i < 16; i += 1) {\n");
-  printf("    if (C[i] != NULL) {\n");
-  printf("      X(C[i]);\n");
-  printf("      C[i] = NULL;\n");
-  printf("    }\n");
-  printf("  }\n");
   printf("}\n\n");
   /*
    * Generate the main function.
    */
-  printf("static atom_t fun(closure_t X, ");
+  printf("static atom_t fun(");
   generate_arguments(args);
   printf("continuation_t K) {\n");
   generate_function_block(args);
   generate_continuation_return_call(cell);
-  printf("  cleanup(C);\n");
   printf("  return W;\n");
   printf("}\n\n");
 }
@@ -444,11 +455,11 @@ generate_plugin_entrypoint(const atom_t name, const atom_t args)
    */
   printf("static atom_t lisp_function_%.16s(", name->symbol.val);
   printf("const atom_t closure, const atom_t cell) {\n");
-  printf("  closure_t C;\n");
-  printf("  atom_t cur = cell, cdr;\n");
   /*
    * Expand the arguments.
    */
+  generate_comment("Extract the function parameters");
+  printf("  atom_t cur = cell, cdr;\n");
   FOREACH(args, e0) {
     printf("  atom_t %.16s = lisp_car(cur);\n", e0->car->symbol.val);
     printf("  cdr = lisp_cdr(cur);\n");
@@ -459,10 +470,14 @@ generate_plugin_entrypoint(const atom_t name, const atom_t args)
   /*
    * Generate the identity continuation.
    */
-  printf("  struct _continuation K = { .C = C, .F = identity };\n");
+  generate_comment("Build the final continuation");
+  printf("  closure_t C;\n");
+  printf("  struct _continuation _K = { .C = C, .F = identity };\n");
+  printf("  continuation_t K = &_K;\n");
   /*
    * Generate the function call.
    */
+  generate_comment("Call the function");
   printf("  atom_t R = ");
   generate_function_call(args);
   /*
@@ -506,7 +521,7 @@ lisp_function_compile(const atom_t closure, const atom_t cell)
   /*
    * Wrap all funcalls with lambda wrappers.
    */
-  atom_t fns = lisp_cps_convert(body, len);
+  atom_t fns = lisp_cps_lift(body, len);
   /*
    * Generate the code.
    */
