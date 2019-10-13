@@ -88,10 +88,11 @@ generate_includes_and_types()
   printf("#include <mnml/types.h>\n");
   printf("\n");
   printf("typedef atom_t closure_t[16];\n");
+  printf("typedef atom_t (*callback_t)(closure_t C, atom_t V);\n");
   printf("\n");
   printf("typedef struct _continuation {\n");
   printf("  atom_t * C;\n");
-  printf("  atom_t (*F)(closure_t C, atom_t V);\n");
+  printf("  callback_t F;\n");
   printf("}\n");
   printf("* continuation_t;\n");
   printf("\n");
@@ -100,6 +101,40 @@ generate_includes_and_types()
 /*
  * Generate the code for the continuations.
  */
+
+static void
+generate_function_call(const atom_t args)
+{
+  printf("fun(C, ");
+  FOREACH(args, e1) {
+    printf("%.16s, ", e1->car->symbol.val);
+    NEXT(e1);
+  }
+  printf("&K);\n");
+}
+
+static void
+generate_continuation_ref(const atom_t cell)
+{
+  atom_t sym = get_current_symbol(cell);
+  printf("  struct _continuation K = { .C = C, .F = ");
+  /*
+   * Call the function directly if we are dealing with a lambda.
+   */
+  if (IS_PAIR(cell)) {
+    printf("fn%.16s", sym->symbol.val);
+  }
+  /*
+   * Otherwise call the continuation in the closure.
+   */
+  else {
+    printf("(callback_t)C[%.16s]->number", &sym->symbol.val[1]);
+  }
+  /*
+   */
+  printf(" };\n");
+  X(sym);
+}
 
 static void
 generate_continuation_return_call(const atom_t cell)
@@ -123,44 +158,105 @@ generate_continuation_return_call(const atom_t cell)
 }
 
 static void
+generate_closure_ref_or_immediate(const atom_t args, const atom_t cell)
+{
+  switch (cell->type) {
+    case T_SYMBOL: {
+      atom_t ref = lookup_argument(args, cell);
+      printf("UP(C[%.16s])", &ref->symbol.val[1]);
+      X(ref);
+      break;
+    }
+    case T_NUMBER: {
+      printf("lisp_make_number(%ld)", cell->number);
+      break;
+    }
+    default: {
+      printf("abort()");
+      break;
+    }
+  }
+}
+
+static void
 generate_closure_ref_or_immediate_integer(const atom_t args, const atom_t cell)
 {
-  if (IS_SYMB(cell)) {
-    atom_t ref = lookup_argument(args, cell);
-    printf("C[%.16s]->number", &ref->symbol.val[1]);
-    X(ref);
-  } else {
-    printf("%ld", cell->number);
+  switch (cell->type) {
+    case T_SYMBOL: {
+      atom_t ref = lookup_argument(args, cell);
+      printf("C[%.16s]->number", &ref->symbol.val[1]);
+      X(ref);
+      break;
+    }
+    case T_NUMBER: {
+      printf("%ld", cell->number);
+      break;
+    }
+    default: {
+      printf("abort()");
+      break;
+    }
   }
+}
+
+static void
+generate_recursive_op(const atom_t args, const atom_t prgs, const atom_t prms)
+{
+  /*
+   * Check if there is anything to process.
+   */
+  if (IS_NULL(prgs) || IS_NULL(prms)) {
+    return;
+  }
+  /*
+   * Get CAR and CDR.
+   */
+  atom_t acar = lisp_car(prgs);
+  atom_t acdr = lisp_cdr(prgs);
+  atom_t pcar = lisp_car(prms);
+  atom_t pcdr = lisp_cdr(prms);
+  /*
+   * Generate the binding.
+   */
+  printf("  atom_t %.16s = ", acar->symbol.val);
+  generate_closure_ref_or_immediate(args, pcar);
+  printf(";\n");
+  X(acar); X(pcar);
+  /*
+   * Call the function recursively and clean-up.
+   */
+  generate_recursive_op(args, acdr, pcdr);
+  X(acdr); X(pcdr);
 }
 
 static void
 generate_binary_number_op(const atom_t args, const atom_t cell)
 {
-    /*
-     * Extract v0 and v1 1.
-     */
-    atom_t oper = lisp_car(cell);
-    atom_t cdr0 = lisp_cdr(cell);
-    atom_t val0 = lisp_car(cdr0);
-    atom_t cdr1 = lisp_cdr(cdr0);
-    atom_t val1 = lisp_car(cdr1);
-    /*
-     * Generate the binary behavior.
-     */
-    printf("  atom_t R = lisp_make_number(");
-    generate_closure_ref_or_immediate_integer(args, val0);
-    printf(" %.16s ", oper->symbol.val);
-    generate_closure_ref_or_immediate_integer(args, val1);
-    printf(");\n");
-    /*
-     * Clean-up.
-     */
-    X(oper); X(cdr0); X(val0); X(cdr1); X(val1);
+  /*
+   * Extract v0 and v1 1.
+   */
+  atom_t oper = lisp_car(cell);
+  atom_t cdr0 = lisp_cdr(cell);
+  atom_t val0 = lisp_car(cdr0);
+  atom_t cdr1 = lisp_cdr(cdr0);
+  atom_t val1 = lisp_car(cdr1);
+  /*
+   * Generate the binary behavior.
+   */
+  printf("  atom_t R = lisp_make_number(");
+  generate_closure_ref_or_immediate_integer(args, val0);
+  printf(" %.16s ", oper->symbol.val);
+  generate_closure_ref_or_immediate_integer(args, val1);
+  printf(");\n");
+  /*
+   * Clean-up.
+   */
+  X(oper); X(cdr0); X(val0); X(cdr1); X(val1);
 }
 
 static void
-generate_continuation_block(const atom_t args, const atom_t cell)
+generate_continuation_block(const atom_t symb, const atom_t args,
+                            const atom_t cell, const atom_t next)
 {
   /*
    * Grab the body of the lambda.
@@ -169,26 +265,38 @@ generate_continuation_block(const atom_t args, const atom_t cell)
   atom_t cdr1 = lisp_cdr(cdr0);
   atom_t body = lisp_car(cdr1);
   atom_t oper = lisp_car(body);
+  atom_t prms = lisp_cdr(body);
   /*
-   * Generate the behavior of the operation.
+   * Check for recursive calls.
    */
-  if (is_binary_number_op(oper)) {
+  if (lisp_symbol_match(symb, oper)) {
+    generate_continuation_ref(next);
+    generate_recursive_op(args, args, prms);
+    printf("  atom_t W = ");
+    generate_function_call(args);
+  }
+  /*
+   * Check for binary number operations.
+   */
+  else if (is_binary_number_op(oper)) {
     generate_binary_number_op(args, body);
+    generate_continuation_return_call(next);
   }
   /*
    * Generate a blank behavior.
    */
   else {
     printf("  atom_t R = lisp_make_number(0);\n");
+    generate_continuation_return_call(next);
   }
   /*
    * Clean-up.
    */
-  X(cdr0); X(cdr1); X(body); X(oper);
+  X(cdr0); X(cdr1); X(body); X(oper); X(prms);
 }
 
 static atom_t
-generate_continuations(const atom_t args, const atom_t cell)
+generate_continuations(const atom_t symb, const atom_t args, const atom_t cell)
 {
   TRACE_SEXP(cell);
   /*
@@ -206,7 +314,7 @@ generate_continuations(const atom_t args, const atom_t cell)
   /*
    * Call generate recursively.
    */
-  atom_t nxt = generate_continuations(args, cdr);
+  atom_t nxt = generate_continuations(symb, args, cdr);
   /*
    * If CUR is NIL, return CAR.
    */
@@ -223,8 +331,7 @@ generate_continuations(const atom_t args, const atom_t cell)
    */
   printf("static atom_t fn%.16s(closure_t C, atom_t V) {\n", sym->symbol.val);
   printf("  C[%.16s] = V;\n", &sym->symbol.val[1]);
-  generate_continuation_block(args, car);
-  generate_continuation_return_call(nxt);
+  generate_continuation_block(symb, args, car, nxt);
   printf("  return W;\n");
   printf("}\n\n");
   /*
@@ -282,6 +389,14 @@ generate_function_block(const atom_t cell)
    * Generate the result initialization.
    */
   printf("  atom_t R = lisp_make_number((int64_t)K);\n");
+}
+
+static void
+generate_function_prototype(const atom_t args)
+{
+  printf("static atom_t fun(closure_t X, ");
+  generate_arguments(args);
+  printf("continuation_t K);\n\n");
 }
 
 static void
@@ -348,12 +463,8 @@ generate_plugin_entrypoint(const atom_t name, const atom_t args)
   /*
    * Generate the function call.
    */
-  printf("  atom_t R = fun(C, ");
-  FOREACH(args, e1) {
-    printf("%.16s, ", e1->car->symbol.val);
-    NEXT(e1);
-  }
-  printf("&K);\n");
+  printf("  atom_t R = ");
+  generate_function_call(args);
   /*
    * Generate the return value.
    */
@@ -377,18 +488,16 @@ lisp_function_compile(const atom_t closure, const atom_t cell)
   /*
    * Grab the plugin name and function.
    */
-  atom_t name = lisp_car(cell);
-  atom_t cdr0 = lisp_cdr(cell);
-  atom_t func = lisp_car(cdr0);
-  X(cell); X(cdr0);
+  atom_t symb = UP(lisp_car(cell));
+  X(cell);
   /*
    * Evaluate the symbol argument.
    */
-  atom_t fun = lisp_eval(closure, func);
+  atom_t func = lisp_eval(closure, symb);
   /*
    * Now, extract the argument list, the closure and the body.
    */
-  SPLIT_FUNCTION(fun, args, clos, body);
+  SPLIT_FUNCTION(func, args, clos, body);
   X(clos);
   /*
    * Compute the length of the args.
@@ -402,13 +511,14 @@ lisp_function_compile(const atom_t closure, const atom_t cell)
    * Generate the code.
    */
   generate_includes_and_types();
-  atom_t fst = generate_continuations(args, fns);
+  generate_function_prototype(args);
+  atom_t fst = generate_continuations(symb, args, fns);
   generate_function(args, fst);
-  generate_plugin_entrypoint(name, args);
+  generate_plugin_entrypoint(symb, args);
   /*
    * Clean-up and return.
    */
-  X(args); X(fst);
+  X(symb); X(args); X(fst);
   return UP(TRUE);
 }
 
