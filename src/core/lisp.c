@@ -340,6 +340,15 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
     return env;
   }
   /*
+   * If args is a single symbol, bind the unevaluated values to it.
+   */
+  if (IS_SYMB(args)) {
+    atom_t res = lisp_bind(env, args, vals);
+    *narg = UP(NIL);
+    *nval = UP(NIL);
+    return res;
+  }
+  /*
    * Grab the CARs, evaluate the value and bind them.
    */
   atom_t sym = lisp_car(args);
