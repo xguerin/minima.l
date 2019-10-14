@@ -147,6 +147,7 @@ endif()
 
 install(
   FILES
+  include/mnml/closure.h
   include/mnml/debug.h
   include/mnml/lisp.h
   include/mnml/maker.h
