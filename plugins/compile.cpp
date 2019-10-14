@@ -88,10 +88,12 @@ generate_includes_and_types()
   printf("#include <mnml/slab.h>\n");
   printf("#include <mnml/types.h>\n");
   printf("\n");
+  printf("#define NO_INLINE __attribute__((noinline))\n");
+  printf("\n");
   /*
    * Generate the closure cleaner.
    */
-  printf("static void cleanup(closure_t C) {\n");
+  printf("static void NO_INLINE cleanup(closure_t C) {\n");
   printf("  for (size_t i = 0; i < 16; i += 1) {\n");
   printf("    if (C->V[i] != NULL) {\n");
   printf("      X(C->V[i]);\n");
@@ -101,6 +103,12 @@ generate_includes_and_types()
   printf("  lisp_closure_deallocate(C);\n");
   printf("}\n");
   printf("\n");
+  /*
+   * Generate the identity continuation.
+   */
+  printf("static atom_t identity(closure_t C, atom_t V) {\n");
+  printf("  return V;\n");
+  printf("}\n\n");
 }
 
 static void
@@ -116,10 +124,15 @@ generate_comment(const char * const comment)
  */
 
 static void
-generate_function_capture(const atom_t cell)
+generate_closure_capture()
+{
+  printf("  register closure_t _C = C->C;\n");
+}
+
+static void
+generate_continuation_capture(const atom_t cell)
 {
   atom_t sym = get_current_symbol(cell);
-  printf("  register closure_t _C = C->C;\n");
   /*
    * Call the function directly if we are dealing with a lambda.
    */
@@ -130,8 +143,10 @@ generate_function_capture(const atom_t cell)
    * Otherwise call the continuation in the closure.
    */
   else {
-    printf("  register callback_t _K = (callback_t)C->V[%.16s]->number;\n",
+    printf("  register callback_t _K = (callback_t)C->V[%.16s];\n",
            &sym->symbol.val[1]);
+    printf("  C->V[%.16s] = NULL;\n", &sym->symbol.val[1]);
+    printf("  cleanup(C);\n");
   }
   X(sym);
 }
@@ -148,26 +163,9 @@ generate_function_call(const atom_t args)
 }
 
 static void
-generate_continuation_return_call(const atom_t cell)
+generate_continuation_call(const atom_t cell)
 {
-  atom_t sym = get_current_symbol(cell);
-  /*
-   * Call the function directly if we are dealing with a lambda.
-   */
-  if (IS_PAIR(cell)) {
-    printf("  return fn%.16s(C, R);\n", sym->symbol.val);
-  }
-  /*
-   * Otherwise call the continuation in the closure.
-   */
-  else {
-    printf("  register closure_t _C = C->C;\n");
-    printf("  register callback_t _K = (callback_t)C->V[%.16s]->number;\n",
-           &sym->symbol.val[1]);
-    printf("  cleanup(C);\n");
-    printf("  return _K(_C, R);\n");
-  }
-  X(sym);
+  printf("  return _K(_C, R);\n");
 }
 
 static void
@@ -285,28 +283,41 @@ generate_continuation_block(const atom_t symb, const atom_t args,
   if (lisp_symbol_match(symb, oper)) {
     generate_comment("Collect recursive arguments");
     generate_recursive_op(args, args, prms);
+    /*
+     * Generate the capture and the call to the function.
+     */
     generate_comment("Collect continuation information and clean-up");
-    generate_function_capture(next);
-    printf("  cleanup(C);\n");
+    generate_closure_capture();
+    generate_continuation_capture(next);
     generate_comment("Recursive call");
     generate_function_call(args);
   }
   /*
-   * Check for binary number operations.
-   */
-  else if (is_binary_number_op(oper)) {
-    generate_comment("Compute the result");
-    generate_binary_number_op(args, body);
-    generate_comment("Call the continuation");
-    generate_continuation_return_call(next);
-  }
-  /*
-   * Generate a blank behavior.
+   * Process known operations.
    */
   else {
-    generate_comment("Default behavior for unsupported operation");
-    printf("  register atom_t R = lisp_make_number(0);\n");
-    generate_continuation_return_call(next);
+    /*
+     * Check for binary number operations.
+     */
+    if (is_binary_number_op(oper)) {
+      generate_comment("Compute the binary number operation");
+      generate_binary_number_op(args, body);
+    }
+    /*
+     * Generate a blank behavior.
+     */
+    else {
+      generate_comment("Default behavior for unsupported operation");
+      printf("  register atom_t R = lisp_make_number(0);\n");
+    }
+    /*
+     * Generate the capture and the call to the continuation.
+     */
+    generate_comment("Collect continuation information and clean-up");
+    generate_closure_capture();
+    generate_continuation_capture(next);
+    generate_comment("Call the continuation");
+    generate_continuation_call(next);
   }
   /*
    * Clean-up.
@@ -394,9 +405,9 @@ generate_function_block(const atom_t cell)
    */
   size_t counter = 0;
   generate_comment("Create and initialize the current closure");
-  printf("  register closure_t C = lisp_closure_allocate(_C);\n");
+  printf("  register closure_t _C = lisp_closure_allocate(C);\n");
   FOREACH(cell, arg) {
-    printf("  C->V[%lu] = %.16s;\n", counter, arg->car->symbol.val);
+    printf("  _C->V[%lu] = %.16s;\n", counter, arg->car->symbol.val);
     counter += 1;
     NEXT(arg);
   }
@@ -404,7 +415,7 @@ generate_function_block(const atom_t cell)
    * Generate the result initialization.
    */
   generate_comment("Create the current continuation");
-  printf("  register atom_t R = lisp_make_number((int64_t)K);\n");
+  printf("  register atom_t R = (atom_t)K;\n");
 }
 
 static void
@@ -412,26 +423,18 @@ generate_function_prototype(const atom_t args)
 {
   printf("static atom_t fun(");
   generate_arguments(args);
-  printf("closure_t _C, callback_t K);\n\n");
+  printf("closure_t C, callback_t K);\n\n");
 }
 
 static void
 generate_function(const atom_t args, const atom_t cell)
 {
-  /*
-   * Generate the identity continuation.
-   */
-  printf("static atom_t identity(closure_t C, atom_t V) {\n");
-  printf("  return V;\n");
-  printf("}\n\n");
-  /*
-   * Generate the main function.
-   */
   printf("static atom_t fun(");
   generate_arguments(args);
-  printf("closure_t _C, callback_t K) {\n");
+  printf("closure_t C, callback_t K) {\n");
   generate_function_block(args);
-  generate_continuation_return_call(cell);
+  generate_continuation_capture(cell);
+  generate_continuation_call(cell);
   printf("}\n\n");
 }
 

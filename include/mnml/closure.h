@@ -21,7 +21,7 @@ typedef struct _closure {
  * Closure macros.
  */
 
-#define CLOSURE_SIZE 16
+#define CLOSURE_SIZE 15
 
 /*
  * Closure functions.
