@@ -3,6 +3,7 @@
 #include <mnml/maker.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 /*
  * Interpreter life cycle.
@@ -73,6 +74,9 @@ uint64_t lisp_timestamp();
 /*
  * Symbol matching.
  */
+
+#define LISP_SYMBOL_MATCH(_sym, _str) \
+  (strncmp(_sym->symbol.val, _str, LISP_SYMBOL_LENGTH) == 0)
 
 static inline bool
 lisp_symbol_match(const atom_t a, const atom_t b)

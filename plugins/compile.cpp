@@ -45,10 +45,10 @@ static bool
 is_binary_number_op(const atom_t cell)
 {
   return
-    strncmp(cell->symbol.val, "+", LISP_SYMBOL_LENGTH) == 0 ||
-    strncmp(cell->symbol.val, "-", LISP_SYMBOL_LENGTH) == 0 ||
-    strncmp(cell->symbol.val, "*", LISP_SYMBOL_LENGTH) == 0 ||
-    strncmp(cell->symbol.val, "/", LISP_SYMBOL_LENGTH) == 0;
+    LISP_SYMBOL_MATCH(cell, "+") ||
+    LISP_SYMBOL_MATCH(cell, "-") ||
+    LISP_SYMBOL_MATCH(cell, "*") ||
+    LISP_SYMBOL_MATCH(cell, "/");
 }
 
 static atom_t
@@ -308,7 +308,8 @@ generate_continuation_block(const atom_t symb, const atom_t args,
      */
     else {
       generate_comment("Default behavior for unsupported operation");
-      printf("  register atom_t R = lisp_make_number(0);\n");
+      printf("  register atom_t R = lisp_make_number(0); /* %.16s */\n",
+             oper->symbol.val);
     }
     /*
      * Generate the capture and the call to the continuation.
