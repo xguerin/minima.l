@@ -72,6 +72,11 @@ action tok_backt
   Parse(lexer->parser, BACKTICK, 0, NULL);
 }
 
+action tok_tilde
+{
+  Parse(lexer->parser, TILDE, 0, NULL);
+}
+
 action tok_number
 {
   size_t len = te - ts;
@@ -154,10 +159,11 @@ pclose  = ')';
 dot     = '.';
 quote   = '\'';
 backt   = '`';
+tilde   = '~';
 number  = '-'? digit+;
 char    = '\'' . (print - '\\' | '\\' . '\\') . '\'';
 string  = '"' . ([^"] | '\\' '"')* . '"';
-marks   = [~!@$%^&*_+\-={}\[\]:;|\\<>?,./];
+marks   = [!@$%^&*_+\-={}\[\]:;|\\<>?,./];
 symbol  = (alpha | marks) . (alnum | marks){,15} $!err_symbol;
 comment = '#' . [^\n]*;
 
@@ -180,8 +186,8 @@ main := |*
   #
   # Quoted rules.
   #
-  (quote >tok_quote | backt >tok_backt) . popen  $!err_prefix => tok_popen;
-  (quote >tok_quote | backt >tok_backt) . symbol $!err_prefix => tok_symbol;
+  (quote >tok_quote | backt >tok_backt | tilde >tok_tilde) . popen  $!err_prefix => tok_popen;
+  (quote >tok_quote | backt >tok_backt | tilde >tok_tilde) . symbol $!err_prefix => tok_symbol;
   #
   # Garbage.
   #
