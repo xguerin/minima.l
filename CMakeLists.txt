@@ -131,7 +131,6 @@ find_package(LLVM 7.0)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
-add_subdirectory(grammar)
 add_subdirectory(lisp)
 add_subdirectory(plugins)
 add_subdirectory(src)
