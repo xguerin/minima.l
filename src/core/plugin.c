@@ -100,7 +100,6 @@ lisp_find_plugin(const char * const paths, const atom_t sym)
         }
         const char * (* get_name)() = dlsym(handle, "lisp_plugin_name");
         if (get_name == NULL) {
-          dlclose(handle);
           continue;
         }
         /*

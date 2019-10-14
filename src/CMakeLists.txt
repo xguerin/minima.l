@@ -1,9 +1,7 @@
-add_subdirectory(compiler)
 add_subdirectory(core)
 add_subdirectory(grammar)
 
 add_library(minimal SHARED
-  $<TARGET_OBJECTS:minimal_compiler>
   $<TARGET_OBJECTS:minimal_core>
   $<TARGET_OBJECTS:minimal_grammar>)
 

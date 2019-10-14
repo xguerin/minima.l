@@ -2,7 +2,7 @@
 # Project definition
 #
 
-project("minima.l" C CXX)
+project("minima.l" C)
 cmake_minimum_required(VERSION 3.9)
 
 include(CheckIPOSupported)
@@ -98,31 +98,11 @@ if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
 endif()
 
 #
-# CXX flags preferences
-#
-
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
-
-set(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
-set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_C_FLAGS_RELWITHDEBINFO})
-
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register")
-endif()
-
-#
 # Required packages
 #
 
 find_package(Lemon REQUIRED)
 find_package(Ragel REQUIRED)
-
-#
-# Optional packages
-#
-
-find_package(LLVM 7.0)
 
 #
 # Subdirectories
