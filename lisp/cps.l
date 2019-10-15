@@ -1,7 +1,11 @@
 (load "@lib/append.l")
+(load "@lib/assoc.l")
+(load "@lib/foldl.l")
 (load "@lib/foldr.l")
+(load "@lib/last.l")
 (load "@lib/len.l")
 (load "@lib/ntoa.l")
+(load "@lib/replc.l")
 
 #
 # Make a symbol placeholder
@@ -81,7 +85,7 @@
     (_  . (cons counter (append kvar (list body))))))
 
 #
-# This function convert a function in direct style into CPS.
+# Convert a function in direct style into CPS.
 #
 (def >& (fsym)
   "Convert FSYM into its continuation-passing style."
@@ -91,3 +95,31 @@
         (fargs               . (append args kvar))
         ((count . lifted)    . (cps:lift kvar (+ arglen 1) body)))
     (cons fargs (cons closure (list lifted)))))
+#
+# Collect the usage count for each placeholder variable.
+#
+(def cps:refcolct (kvar acc expr)
+  "Accumulate in ACC references found in EXPR."
+  (foldl
+    (\ (acc e)
+      (if (and (sym? e) (<> e kvar))
+        (let ((cur . (assoc e acc)))
+          (if cur
+            (replc e (+ cur 1) acc)
+            (cons (cons e 1) acc)))
+        acc))
+    acc expr))
+
+(def cps:refcount_r (kvar fun acc)
+  "Recursively collect placeholder reference count in a CPS funcall FUN."
+  (match fun
+    ((if _ _)   . (let (((_ _ thn) . fun))
+                    (cps:refcolct kvar (cps:refcount_r kvar thn acc) fun)))
+    ((if _ _ _) . (let (((_ _ thn els) . fun))
+                    (cps:refcolct kvar (cps:refcount_r kvar els (cps:refcount_r kvar thn acc)) fun)))
+    ((_ . _)    . (let (((_ args body) . (last fun)))
+                    (cps:refcolct kvar (cps:refcount_r (last args) body acc) fun)))))
+
+(def cps:refcount ((args clos body))
+  "Collect placeholder reference count in a CPS function FUN."
+  (if body (cps:refcount_r (last args) body NIL)))
