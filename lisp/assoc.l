@@ -1,7 +1,8 @@
 (load "@lib/caar.l")
 (load "@lib/cdar.l")
 
-(def assoc (x y)
-  (if (= (caar y) x)
-    (cdar y)
-    (assoc x (cdr y))))
+(def assoc (k lst)
+  (if lst
+    (if (= (caar lst) k)
+      (cdar lst)
+      (assoc k (cdr lst)))))

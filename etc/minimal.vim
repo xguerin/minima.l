@@ -58,6 +58,7 @@ syn keyword MinimalFuncs
       \ dedup
       \ def
       \ dup
+      \ erase
       \ eval
       \ exec
       \ exit
@@ -95,6 +96,7 @@ syn keyword MinimalFuncs
       \ quit
       \ quote
       \ read
+      \ replc
       \ readlines
       \ rev
       \ run
