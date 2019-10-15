@@ -14,7 +14,7 @@ endif()
 LEMON(parser SYNTAX_SOURCE)
 RAGEL(lexer ${SYNTAX_SOURCE} SOURCES)
 
-add_library(minimal_grammar OBJECT ${SOURCES})
+add_library(minimal_grammar STATIC ${SOURCES})
 set_property(TARGET minimal_grammar PROPERTY C_STANDARD 99)
 
 if(MNML_HAS_IPO)
