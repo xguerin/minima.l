@@ -72,21 +72,6 @@
     (prinl "#include <mnml/slab.h>")
     (prinl "#include <mnml/types.h>")
     (prinl)
-    (prinl "#define NO_INLINE __attribute__((noinline))")
-    (prinl)
-    #
-    # Generate the closure cleaner.
-    #
-    (prinl "static void NO_INLINE cleanup(closure_t C) {")
-    (prinl "  for (size_t i = 0; i < CLOSURE_SIZE; i += 1) {")
-    (prinl "    if (C->V[i] != NULL) {")
-    (prinl "      X(C->V[i]);")
-    (prinl "      C->V[i] = NULL;")
-    (prinl "    }")
-    (prinl "  }")
-    (prinl "  lisp_closure_deallocate(C);")
-    (prinl "}")
-    (prinl)
     #
     # Generate the identity continuation.
     #
@@ -206,7 +191,7 @@
     (prog
       (prinl (cc:|) "register callback_t _K = (callback_t)C->V[" (cdr (str ref)) "];")
       (prinl (cc:|) "C->V[" (cdr (str ref)) "] = NULL;")
-      (prinl (cc:|) "cleanup(C);"))))
+      (prinl (cc:|) "lisp_closure_deallocate(C);"))))
 
 (def cc:genblock (NAME ARGS kvar body)
   "Generate the basic block for BODY."

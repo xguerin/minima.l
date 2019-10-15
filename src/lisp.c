@@ -284,15 +284,6 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
   /*
    */
   switch (arg->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_CHAR:
-    case T_NUMBER:
-    case T_WILDCARD: {
-      X(arg); X(val);
-      ret = closure;
-      break;
-    }
     case T_PAIR: {
       /*
        * Grab the CARs, evaluate the value and bind them.
@@ -314,6 +305,12 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
     case T_SYMBOL: {
       ret = lisp_setq(closure, lisp_cons(arg, val));
       X(arg); X(val);
+      TRACE_SEXP(ret);
+      break;
+    }
+    default: {
+      X(arg); X(val);
+      ret = closure;
       break;
     }
   }
@@ -455,17 +452,15 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
       rem = UP(NIL);
       break;
     }
-    case T_TRUE:
-    case T_CHAR:
-    case T_WILDCARD:
-      ret = cell;
-      rem = UP(NIL);
-      break;
     case T_PAIR:
       ret = lisp_eval_lambda(closure, cell, &rem);
       break;
     case T_SYMBOL:
       ret = lisp_eval(closure, cell);
+      rem = UP(NIL);
+      break;
+    default:
+      ret = cell;
       rem = UP(NIL);
       break;
   }
@@ -501,14 +496,6 @@ lisp_eval(const atom_t closure, const atom_t cell)
   /*
    */
   switch (cell->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_CHAR:
-    case T_NUMBER:
-    case T_WILDCARD: {
-      ret = cell;
-      break;
-    }
     case T_PAIR: {
       /*
        * Evaluate CAR.
@@ -530,6 +517,10 @@ lisp_eval(const atom_t closure, const atom_t cell)
     case T_SYMBOL: {
       ret = lisp_lookup(closure, cell);
       X(cell);
+      break;
+    }
+    default: {
+      ret = cell;
       break;
     }
   }
