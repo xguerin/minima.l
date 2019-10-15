@@ -134,14 +134,14 @@
   (let (((op arg1 arg2 cont)  . body))
     (prog
       (prin (cc:|) "register atom_t R = lisp_make_number(")
-      (cc:numrvalue ARGS arg1)
+      (cc:numrvalue ARGS kvar arg1)
       (match op
         (+  . (prin " + "))
         (-  . (prin " - "))
         (=  . (prin " == "))
         (<= . (prin " <= "))
         (_  . (prin " /* " op " */ ")))
-      (cc:numrvalue ARGS arg2)
+      (cc:numrvalue ARGS kvar arg2)
       (prinl ");")
       )))
 
@@ -153,29 +153,31 @@
       (if (<> acar kvar)
         (prog
           (prin (cc:|) "register atom_t " acar " = ")
-          (cc:refrvalue ARGS pcar)
+          (cc:refrvalue ARGS kvar pcar)
           (cc:recop ARGS acdr pcdr))))))
 
 (def cc:kvarop (ARGS kvar body)
   "Generate C code for immediate KVAR funcall."
-  (prog
-    (prin (cc:|) "register atom_t R = ")
-    (cc:refrvalue ARGS (car (cdr body)))))
+    (prinl (cc:|) "register atom_t R = UP(V);"))
 
-(def cc:numrvalue (ARGS arg)
+(def cc:numrvalue (ARGS kvar arg)
   "Generate the C code for the number R-value ARG."
   (cond arg
-    (sym? . (let ((idx . (cc:getrefidx ARGS arg)))
-              (prin "C->V[" idx "]->number")))
+    (sym? . (if (= kvar arg)
+              (prin "V->number")
+              (let ((idx . (cc:getrefidx ARGS arg)))
+                (prin "C->V[" idx "]->number"))))
     (num? . (prin arg))
     (_    . (prin "abort()"))))
 
-(def cc:refrvalue (ARGS arg)
+(def cc:refrvalue (ARGS kvar arg)
   "Generate the C code for the ref R-value ARG."
   (cond arg
+    (sym? . (if (= kvar arg)
+              (prinl "UP(V);")
+              (let ((idx . (cc:getrefidx ARGS arg)))
+                (prinl "UP(C->V[" idx "]);"))))
     (num? . (prinl "lisp_make_number(" arg ");"))
-    (sym? . (let ((idx . (cc:getrefidx ARGS arg)))
-              (prinl "UP(C->V[" idx "]);")))
     (_    . (prinl "abort();"))))
 
 (def cc:genclosure (ARGS next)
