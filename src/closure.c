@@ -3,46 +3,41 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MALLOC_SIZE (sizeof(closure_t) + CLOSURE_SIZE * sizeof(atom_t))
-
-static closure_t closure_cache = NULL;
+#define MALLOC_SIZE(_N) (sizeof(closure_t) + (_N) * sizeof(atom_t))
 
 closure_t
-lisp_closure_allocate(closure_t C)
+lisp_closure_get(closure_t * const $, const closure_t C, const size_t N)
 {
   closure_t result;
   /*
    * Allocate the new closure, preferably from the cache.
    */
-  if (closure_cache != NULL) {
-    result = closure_cache;
-    closure_cache = closure_cache->C;
+  if (*$ != NULL) {
+    result = *$;
+    *$ = result->C;
   } else {
-    result = (closure_t)malloc(MALLOC_SIZE);
+    result = (closure_t)malloc(MALLOC_SIZE(N));
   }
   /*
-   * Reset the closure and return.
+   * Return the closure.
    */
-  memset(result, 0, MALLOC_SIZE);
   result->C = C;
   return result;
 }
 
 void
-lisp_closure_deallocate(const closure_t C)
+lisp_closure_put(closure_t * const $, const closure_t C)
 {
-  /*
-   * Clean-up all lingering atoms.
-   */
-  for (size_t i = 0; i < CLOSURE_SIZE; i += 1) {
-    if (unlikely(C->V[i] != NULL)) {
-      X(C->V[i]);
-      C->V[i] = NULL;
-    }
+  C->C = *$;
+  *$ = C;
+}
+
+void
+lisp_closure_clear(closure_t* $)
+{
+  while (*$ != NULL) {
+    closure_t tmp = *$;
+    *$ = tmp->C;
+    free(tmp);
   }
-  /*
-   * Prepend the closure to the list.
-   */
-  C->C = closure_cache;
-  closure_cache = C;
 }

@@ -9,23 +9,25 @@
 
 struct _closure;
 
-typedef atom_t (*callback_t)(struct _closure * C, const atom_t V);
+typedef union _value {
+  int64_t number;
+  union _value (*callback)(struct _closure * C, union _value V);
+}
+value_t;
 
 typedef struct _closure {
   struct _closure * C;
-  atom_t V[];
+  value_t V[];
 }
 * closure_t;
 
-/*
- * Closure macros.
- */
-
-#define CLOSURE_SIZE 15
+typedef value_t (*callback_t)(closure_t C, value_t V);
 
 /*
- * Closure functions.
+ * Closure operations.
  */
 
-closure_t lisp_closure_allocate(closure_t C);
-void lisp_closure_deallocate(const closure_t closure);
+closure_t lisp_closure_get(closure_t* const $, const closure_t C, const size_t N);
+
+void lisp_closure_put(closure_t* const $, closure_t C);
+void lisp_closure_clear(closure_t* const cache);
