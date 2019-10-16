@@ -96,30 +96,59 @@
         ((count . lifted)    . (cps:lift kvar (+ arglen 1) body)))
     (cons fargs (cons closure (list lifted)))))
 #
-# Collect the usage count for each placeholder variable.
+# Collect the usage count for each placeholder variable. The first symbol in the
+# funcall is skipped unless it is the current external continuation variable.
+# Local symbol (eg. local continuations) are collected with a count of 0.
 #
-(def cps:refcolct (kvar acc expr)
+(def cps:refcolct (xvar kvar acc expr)
   "Accumulate in ACC references found in EXPR."
-  (foldl
-    (\ (acc e)
-      (if (and (sym? e) (<> e kvar))
-        (let ((cur . (assoc e acc)))
-          (if cur
-            (replc e (+ cur 1) acc)
-            (cons (cons e 1) acc)))
-        acc))
-    acc expr))
+  (let (((op . _) . expr)
+        (params . (if (= op xvar) expr (cdr expr))))
+    (foldl
+      (\ (acc e)
+        (if (sym? e)
+          (let ((cur . (assoc e acc))
+                (inc . (if (= e kvar) 0 1)))
+            (if cur
+              (replc e (+ cur inc) acc)
+              (cons (cons e inc) acc)))
+          acc))
+      acc params)))
 
-(def cps:refcount_r (kvar fun acc)
+(def cps:refcount_r (xvar kvar fun acc)
   "Recursively collect placeholder reference count in a CPS funcall FUN."
   (match fun
-    ((if _ _)   . (let (((_ _ thn) . fun))
-                    (cps:refcolct kvar (cps:refcount_r kvar thn acc) fun)))
-    ((if _ _ _) . (let (((_ _ thn els) . fun))
-                    (cps:refcolct kvar (cps:refcount_r kvar els (cps:refcount_r kvar thn acc)) fun)))
-    ((_ . _)    . (let (((_ args body) . (last fun)))
-                    (cps:refcolct kvar (cps:refcount_r (last args) body acc) fun)))))
+    ((if _ . _) . (let (((_ _ . ops) . fun))
+                    (cps:refcolct xvar kvar
+                                  (foldr (\ (e acm)
+                                           (cps:refcount_r xvar kvar e acm)) ops acc)
+                                  fun)))
+    ((_ . _)  . (let (((_ args body) . (last fun))
+                      (nvar . (last args)))
+                  (cps:refcolct xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
+    (_ . acc)))
 
 (def cps:refcount ((args clos body))
   "Collect placeholder reference count in a CPS function FUN."
-  (if body (cps:refcount_r (last args) body NIL)))
+  (let ((xvar . (last args)))
+    (if body (cps:refcount_r xvar xvar body NIL))))
+
+#
+# Infer type signature from a CPS funcall.
+#
+(def cps:infer_r (xvar kvar fun acc)
+  "Recursively collect placeholder reference count in a CPS funcall FUN."
+  (match fun
+    ((if _ . _) . (let (((_ _ . ops) . fun))
+                    (cps:refcolct xvar kvar
+                                  (foldr (\ (e acm)
+                                           (cps:refcount_r xvar kvar e acm)) ops acc)
+                                  fun)))
+    ((_ . _)  . (let (((_ args body) . (last fun))
+                      (nvar . (last args)))
+                  (cps:refcolct xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
+    (_ . acc)))
+
+(def cps:infer ((args clos body))
+  "Collect placeholder reference count in a CPS function FUN."
+  (if body (cps:infer_r args body NIL)))
