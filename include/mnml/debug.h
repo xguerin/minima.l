@@ -15,6 +15,9 @@ extern bool MNML_VERBOSE_SLAB;
 #define FPRINTF \
   if (MNML_DEBUG) fprintf
 
+#define ERROR(__fmt, ...) \
+  FPRINTF(stderr, "! (%-16.16s, %03d) [ERROR ] - " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
+
 #define TRACE(__fmt, ...) \
   FPRINTF(stderr, "! (%-16.16s, %03d) [TRACE ] - " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
 

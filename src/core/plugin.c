@@ -50,6 +50,83 @@ lisp_prefix()
 }
 
 static void *
+lisp_find_plugin_at_path(const char * const dirpath, const char * const name)
+{
+  TRACE("looking into %s", dirpath);
+  /*
+   * Open the directory pointed by entry.
+   */
+  DIR * dir = opendir(dirpath);
+  if (dir == NULL) {
+    ERROR("cannot open directory: %s", dirpath);
+    return NULL;
+  }
+  /*
+   * Scan the directory.
+   */
+  struct dirent * de = NULL;
+  while ((de = readdir(dir)) != NULL) {
+    /*
+     * Check the format of the directory entry's name.
+     */
+    if (strncmp(de->d_name, "libminimal_function_", 20) != 0) {
+      continue;
+    }
+    /*
+     * Build the full path.
+     */
+#ifdef __MACH__
+    size_t plen = strlen(dirpath) + de->d_namlen + 2;
+#else
+    size_t plen = strlen(dirpath) + strlen(de->d_name) + 2;
+#endif
+    char * path = alloca(plen);
+    memset(path, 0, plen);
+    strcpy(path, dirpath);
+    strcat(path, "/");
+    strcat(path, de->d_name);
+    /*
+     * Load the file.
+     */
+    TRACE("loading %s", path);
+#ifdef __MACH__
+    void * handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL | RTLD_FIRST);
+#else
+    void * handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
+#endif
+    if (handle == NULL) {
+      ERROR("cannot open library: %s, %s", path, dlerror());
+      continue;
+    }
+    TRACE("checking %s", path);
+    const char * (* get_name)() = dlsym(handle, "lisp_plugin_name");
+    if (get_name == NULL) {
+      ERROR("%s is not a plugin", path);
+      continue;
+    }
+    /*
+     * Check if the symbol is the one we are looking for.
+     */
+    const char * pname = get_name();
+    if (strcmp(pname, name) == 0) {
+      TRACE("symbol %s found in %s", name, path);
+      closedir(dir);
+      return handle;
+    }
+    /*
+     * Close the file.
+     */
+    TRACE("symbol %s not found", name);
+    dlclose(handle);
+  }
+  /*
+   * Close the directory.
+   */
+  closedir(dir);
+  return NULL;
+}
+
+static void *
 lisp_find_plugin(const char * const paths, const atom_t sym)
 {
   TRACE_SEXP(sym);
@@ -61,70 +138,35 @@ lisp_find_plugin(const char * const paths, const atom_t sym)
   /*
    * Scan libraries in the path.
    */
-  const char * p = paths, * n = NULL, * entry = NULL;
-  while (p != NULL) {
-    n = strstr(p, ":");
-    entry = n == NULL ? strdup(p) : strndup(p, p - n);
+  void * result = NULL;
+  char * copy = strdup(paths);
+  char * haystack = copy, * p, * entry;
+  while ((p = strstr(haystack, ":")) != NULL) {
     /*
-     * Open the directory pointed by entry.
+     * Update the pointer.
      */
-    DIR * dir = opendir(entry);
-    if (dir == NULL) {
-      return NULL;
+    *p = 0;
+    entry = haystack;
+    haystack = p + 1;
+    /*
+     * Try loading the library.
+     */
+    result = lisp_find_plugin_at_path(entry, bsym);
+    if (result != NULL) {
+      break;
     }
-    /*
-     * Scan the directory.
-     */
-    struct dirent * de = NULL;
-    while ((de = readdir(dir)) != NULL) {
-      if (strncmp(de->d_name, "libminimal_function_", 20) == 0) {
-        /*
-         * Build the full path.
-         */
-#ifdef __MACH__
-        size_t plen = strlen(entry) + de->d_namlen + 2;
-#else
-        size_t plen = strlen(entry) + strlen(de->d_name) + 2;
-#endif
-        char * path = alloca(plen);
-        memset(path, 0, plen);
-        strcpy(path, entry);
-        strcat(path, "/");
-        strcat(path, de->d_name);
-        /*
-         * Load the file.
-         */
-        void * handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
-        if (handle == NULL) {
-          continue;
-        }
-        const char * (* get_name)() = dlsym(handle, "lisp_plugin_name");
-        if (get_name == NULL) {
-          continue;
-        }
-        /*
-         * Check if the symbol is the one we are looking for.
-         */
-        const char * pname = get_name();
-        if (strcmp(pname, bsym) == 0) {
-          closedir(dir);
-          free((void *)entry);
-          return handle;
-        }
-        /*
-         * Close the file.
-         */
-        dlclose(handle);
-      }
-    }
-    /*
-     * Close the directory.
-     */
-    closedir(dir);
-    free((void *)entry);
-    p = n;
   }
-  return NULL;
+  /*
+   * Try loading the last entry in the path.
+   */
+  if (result == NULL) {
+    result = lisp_find_plugin_at_path(haystack, bsym);
+  }
+  /*
+   * Clean-up and return.
+   */
+  free(copy);
+  return result;
 }
 
 atom_t
@@ -138,7 +180,6 @@ lisp_plugin_load(const atom_t sym)
   if (paths == NULL) {
     paths = lisp_library_prefix();
   }
-  TRACE("looking into %s", paths);
   /*
    * Find the plugin for the symbol.
    */
