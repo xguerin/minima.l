@@ -111,7 +111,6 @@ find_package(Ragel REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
-add_subdirectory(grammar)
 add_subdirectory(lib)
 add_subdirectory(src)
 

@@ -41,14 +41,14 @@ lisp_function_load(const atom_t closure, const atom_t cell)
   /*
    * Open the file.
    */
-  int fd = open(path, O_RDONLY);
-  if (fd < 0) {
+  FILE* handle = fopen(path, "r");
+  if (handle == NULL) {
     return UP(NIL);
   }
   /*
    * Push the context.
    */
-  PUSH_IO_CONTEXT(ICHAN, fd);
+  PUSH_IO_CONTEXT(ICHAN, handle);
   /*
    * Load all the entries
    */
@@ -62,7 +62,7 @@ lisp_function_load(const atom_t closure, const atom_t cell)
    * Pop the context and return the value.
    */
   POP_IO_CONTEXT(ICHAN);
-  close(fd);
+  fclose(handle);
   return res;
 }
 

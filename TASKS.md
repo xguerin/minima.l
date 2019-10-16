@@ -4,7 +4,7 @@
 * [X] Association lists for symbols
 * [X] Lambdas
 * [X] Closures
-* [ ] Continuations
+* [X] Continuations
 
 # Notes
 
@@ -30,3 +30,6 @@ The coroutine stategy for continuations requires garbage collection to clean-up
 aborted continuations. Since I don't want to use a GC, I am now exploring option
 1. This approach requires to convert on the fly immediate-style expressions to
 continuation-passing style.
+
+I ended up implementing it purely in lisp (see lib/lisp/cps.l). It turns out to
+be pretty neat as the generated CPS funcall can be easily generated into C code.

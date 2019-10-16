@@ -44,15 +44,27 @@ lisp_function_in(const atom_t closure, const atom_t cell)
       return UP(NIL);
   }
   /*
+   * Open the file handle.
+   */
+  FILE* handle = fdopen(fd, "r");
+  if (handle == NULL) {
+    X(prg);
+    return UP(NIL);
+  }
+  /*
    * Push the context, eval the prog, pop the context.
    */
-  PUSH_IO_CONTEXT(ICHAN, fd);
+  PUSH_IO_CONTEXT(ICHAN, handle);
   atom_t res = lisp_prog(closure, prg, UP(NIL));
   POP_IO_CONTEXT(ICHAN);
   /*
+   * Close the file handle.
+   */
+  fclose(handle);
+  /*
    * Close the FD if necessary and return the value.
    */
-  if (fd > 0) {
+  if (fd != 0) {
     close(fd);
   }
   return res;

@@ -37,7 +37,7 @@ repl_parse_error_handler()
 {
   write(1, "^ parse error\n", 14);
   if (CDR(CAR(ICHAN)) == NIL) {
-    write(1, ": ", 2);
+    fwrite(": ", 1, 2, stdout);
   }
 }
 
@@ -45,16 +45,16 @@ static void
 stage_prompt(const atom_t cell)
 {
   if (CDR(CAR(ICHAN)) == NIL) {
-    write(1, ": ", 2);
+    fwrite(": ", 1, 2, stdout);
   }
 }
 
 static void
 stage_newline(const atom_t cell)
 {
-  write(1, "> " , 2);
+  fwrite("> " , 1, 2, stdout);
   lisp_prin(NIL, cell, true);
-  write(1, "\n", 1);
+  fwrite("\n", 1, 1, stdout);
 }
 
 static void
@@ -66,7 +66,7 @@ stage_noop(const atom_t cell)
 static void
 stage_push_io(const atom_t cell)
 {
-  PUSH_IO_CONTEXT(ICHAN, 0);
+  PUSH_IO_CONTEXT(ICHAN, stdin);
 }
 
 static void
@@ -151,21 +151,21 @@ main(const int argc, char ** const argv)
    */
   if (argc == 1) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    PUSH_IO_CONTEXT(ICHAN, 0);
-    PUSH_IO_CONTEXT(OCHAN, 1);
+    PUSH_IO_CONTEXT(ICHAN, stdin);
+    PUSH_IO_CONTEXT(OCHAN, stdout);
     run(stage_prompt, stage_noop, stage_newline);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   }
   else {
-    int fd = open(argv[1], O_RDONLY);
-    if (fd >= 0) {
-      PUSH_IO_CONTEXT(ICHAN, fd);
-      PUSH_IO_CONTEXT(OCHAN, 1);
+    FILE* file = fopen(argv[1], "r");
+    if (file != NULL) {
+      PUSH_IO_CONTEXT(ICHAN, file);
+      PUSH_IO_CONTEXT(OCHAN, stdout);
       run(stage_noop, stage_push_io, stage_pop_io);
       POP_IO_CONTEXT(ICHAN);
       POP_IO_CONTEXT(OCHAN);
-      close(fd);
+      fclose(file);
     }
   }
   /*

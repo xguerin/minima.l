@@ -9,78 +9,29 @@
 
 #define BUFFER_LEN 1024
 
-static atom_t
-lisp_readlines_append(const atom_t cell, const char * const buffer,
-                      const size_t len)
-{
-  atom_t str = lisp_make_string(buffer, len);
-  return lisp_append(cell, str);
-}
-
-static atom_t
-lisp_readlines(const atom_t cell, char * const buffer, ssize_t * const rem)
-{
-  atom_t res = cell;
-  char * p = buffer, * n = NULL;
-  size_t len = 0;
-  /*
-   * Invoke strstr() to find the next occurance of CR.
-   */
-  do {
-    n = strstr(p, "\n");
-    if (n != NULL) {
-      len = n - p;
-      res = lisp_readlines_append(res, p, len);
-      p = n + 1;
-    }
-  }
-  while (n != NULL);
-  /*
-   * If there is a remainder, copy it at the beginning of the buffer.
-   */
-  *rem = 0;
-  if (*p != 0) {
-    strcpy(buffer, p);
-    *rem = strlen(buffer);
-  }
-  /*
-   */
-  return res;
-}
-
 atom_t
 lisp_function_readlines(const atom_t closure, const atom_t cell)
 {
-  atom_t car = lisp_eval(closure, lisp_car(cell));
-  int fd = IS_NULL(car) ? CAR(CAR(ICHAN))->number : car->number;
-  X(car); X(cell);
+  FILE* handle = (FILE*)CAR(CAR(ICHAN))->number;
+  X(cell);
   /*
    */
   atom_t res = UP(NIL);
-  size_t buflen = BUFFER_LEN;
-  char * buffer = malloc(buflen + 1);
-  ssize_t dlt, len = 0;
+  char * buffer = malloc(BUFFER_LEN), *p;
   /*
    * Read some data and process any lines present.
    */
   do {
-    dlt = read(fd, buffer + len, buflen - len);
-    len += dlt;
-    buffer[len] = 0;
-    if (strstr(buffer, "\n") == NULL) {
-      buflen += buflen;
-      buffer = realloc(buffer, buflen + 1);
-      continue;
+    p = fgets(buffer, BUFFER_LEN, handle);
+    if (p != NULL) {
+      atom_t str = lisp_make_string(buffer, strlen(buffer));
+      res = lisp_append(res, str);
     }
-    res = lisp_readlines(res, buffer, &len);
   }
-  while (dlt > 0);
+  while (p != NULL);
   /*
-   * Process any remaining data in the buffer.
+   * Clean-up and return the result.
    */
-  if (len > 0) {
-    res = lisp_readlines_append(res, buffer, len);
-  }
   free(buffer);
   return res;
 }

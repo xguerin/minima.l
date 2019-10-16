@@ -80,7 +80,7 @@ def GetCompilationInfoForFile( filename ):
     for extension in SOURCE_EXTENSIONS:
       replacement_file = basename + extension
       if not os.path.exists( replacement_file ):
-        replacement_file = (basename + extension).replace("include/mnml", "src", 1)
+        replacement_file = (basename + extension).replace("include/mnml", "src/core", 1)
       if os.path.exists( replacement_file ):
         compilation_info = database.GetCompilationInfoForFile(
           replacement_file )

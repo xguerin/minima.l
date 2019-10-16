@@ -57,12 +57,12 @@ uint64_t lisp_timestamp();
 /*
  * IO context helpers.
  */
-#define PUSH_IO_CONTEXT(__c, __d) { \
-  atom_t n = lisp_make_number(__d); \
-  atom_t l = lisp_cons(n, NIL);     \
-  atom_t o = __c;                   \
-  __c = lisp_cons(l, o);            \
-  X(o); X(l); X(n);                 \
+#define PUSH_IO_CONTEXT(__c, __d) {           \
+  atom_t n = lisp_make_number((int64_t)__d);  \
+  atom_t l = lisp_cons(n, NIL);               \
+  atom_t o = __c;                             \
+  __c = lisp_cons(l, o);                      \
+  X(o); X(l); X(n);                           \
 }
 
 #define POP_IO_CONTEXT(__c) { \
@@ -74,9 +74,6 @@ uint64_t lisp_timestamp();
 /*
  * Symbol matching.
  */
-
-#define LISP_SYMBOL_MATCH(_sym, _str) \
-  (strncmp(_sym->symbol.val, _str, LISP_SYMBOL_LENGTH) == 0)
 
 static inline bool
 lisp_symbol_match(const atom_t a, const atom_t b)

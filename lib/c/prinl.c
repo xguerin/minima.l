@@ -24,7 +24,7 @@ atom_t
 lisp_function_prinl(const atom_t closure, const atom_t cell)
 {
   atom_t res = lisp_prinl_all(closure, cell, UP(NIL));
-  write(CAR(CAR(OCHAN))->number, "\n", 1);
+  fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   return res;
 }
 

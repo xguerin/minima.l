@@ -1,14 +1,14 @@
 {
-  "src/*.c": {
+  "src/core/*.c": {
     "alternate": "include/mnml/{}.h",
     "type": "lisp_source"
   },
-  "src/*.rl": {
+  "src/grammar/*.rl": {
     "alternate": "include/mnml/{}.h",
     "type": "lisp_parser"
   },
   "include/mnml/*.h": {
-    "alternate": "src/{}.c",
+    "alternate": "src/core/{}.c",
     "type": "lisp_header"
   }
 }

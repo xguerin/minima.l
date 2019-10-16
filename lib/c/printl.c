@@ -17,7 +17,7 @@ lisp_printl_all(const atom_t closure, const atom_t cell, const atom_t result)
   atom_t cdr = lisp_cdr(cell);
   lisp_prin(closure, car, true);
   if (!IS_NULL(cdr)) {
-    write(CAR(CAR(OCHAN))->number, " ", 1);
+    fwrite(" ", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   }
   X(cell); X(result);
   return lisp_printl_all(closure, cdr, car);
@@ -27,7 +27,7 @@ atom_t
 lisp_function_printl(const atom_t closure, const atom_t cell)
 {
   atom_t res = lisp_printl_all(closure, cell, UP(NIL));
-  write(CAR(CAR(OCHAN))->number, "\n", 1);
+  fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   return res;
 }
 
