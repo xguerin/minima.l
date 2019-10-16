@@ -136,14 +136,23 @@
       (prin (cc:|) "register atom_t R = lisp_make_number(")
       (cc:numrvalue ARGS kvar arg1)
       (match op
-        (+  . (prin " + "))
-        (-  . (prin " - "))
+        #
+        # Immediate translation to C.
+        #
+        ~(foldl
+           (\ (acc e) (cons (conc (cons e (list 'prin " " (str e) " "))) acc))
+           NIL '(+ - * / < <= > >=))
+        #
+        # Special cases.
+        #
         (=  . (prin " == "))
-        (<= . (prin " <= "))
+        (<> . (prin " != "))
+        #
+        # Unsupported cases.
+        #
         (_  . (prin " /* " op " */ ")))
       (cc:numrvalue ARGS kvar arg2)
-      (prinl ");")
-      )))
+      (prinl ");"))))
 
 (def cc:recop (ARGS kvar args prms)
   "Generate C code for recursive operations."
@@ -201,30 +210,19 @@
     #
     # Binary operations.
     #
-    ((+ _ _ _)  . (let ((next . (last body)))
-                    (prog
-                      (cc:binnumop ARGS kvar body)
-                      (cc:genclosure ARGS next)
-                      (cc:gennext ARGS next)
-                      (prinl (cc:|) "return _K(_C, R);"))))
-    ((- _ _ _)  . (let ((next . (last body)))
-                    (prog
-                      (cc:binnumop ARGS kvar body)
-                      (cc:genclosure ARGS next)
-                      (cc:gennext ARGS next)
-                      (prinl (cc:|) "return _K(_C, R);"))))
-    ((= _ _ _)  . (let ((next . (last body)))
-                    (prog
-                      (cc:binnumop ARGS kvar body)
-                      (cc:genclosure ARGS next)
-                      (cc:gennext ARGS next)
-                      (prinl (cc:|) "return _K(_C, R);"))))
-    ((<= _ _ _) . (let ((next . (last body)))
-                    (prog
-                      (cc:binnumop ARGS kvar body)
-                      (cc:genclosure ARGS next)
-                      (cc:gennext ARGS next)
-                      (prinl (cc:|) "return _K(_C, R);"))))
+    ~(foldl
+       (\ (acc e)
+         (cons (conc (cons
+                       (list e _ _ _)
+                       '(let ((next . (last body)))
+                          (prog
+                            (cc:binnumop ARGS kvar body)
+                            (cc:genclosure ARGS next)
+                            (cc:gennext ARGS next)
+                            (prinl (cc:|) "return _K(_C, R);"))
+                          )))
+           acc))
+       NIL '(+ - * / = <> < <= > >=))
     #
     # IF/THEN/ELSE
     #
@@ -266,8 +264,7 @@
     #
     # Unknown behavior.
     #
-    (_  . (prinl (cc:|) "abort(); /* " body " */"))
-    ))
+    (_  . (prinl (cc:|) "abort(); /* " body " */"))))
 
 (def cc:genfunc (NAME ARGS kvar body)
   "Generate a continuation KVAR with BODY."
