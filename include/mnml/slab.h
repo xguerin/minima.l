@@ -75,18 +75,18 @@ void lisp_free(const atom_t atom);
 #ifdef __MACH__
 
 #define HEADER_REFS(__f, __t, __n) \
-  FPRINTF(stderr, "! (%-16.16s, %03d) [%2llu->%2llu] - %s = ", __FUNCTION__, __LINE__, __f, __t, __n)
+  FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n)
 
 #define HEADER_SLOT(__i) \
-  FPRINTF(stderr, "! (%-16.16s, %03d) [SLOT  ] - @%lu = ", __FUNCTION__, __LINE__, __i)
+  FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i)
 
 #else
 
 #define HEADER_REFS(__f, __t, __n) \
-  FPRINTF(stderr, "! (%-16.16s, %03d) [%2llu->%2llu] - %s = ", __FUNCTION__, __LINE__, __f, __t, __n)
+  FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n)
 
 #define HEADER_SLOT(__i) \
-  FPRINTF(stderr, "! (%-16.16s, %03d) [SLOT  ] - @%lu = ", __FUNCTION__, __LINE__, __i)
+  FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i)
 
 #endif
 
