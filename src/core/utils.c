@@ -43,6 +43,16 @@ lisp_set_syntax_error_handler(const error_handler_t h)
   lisp_syntax_error_handler = h;
 }
 
+#ifdef LISP_ENABLE_DEBUG
+void lisp_set_debug_flag(const char * const flag)
+{
+  MNML_VERBOSE_CONS = MNML_VERBOSE_CONS || strcmp(flag, "CONS") == 0;
+  MNML_VERBOSE_RC   = MNML_VERBOSE_RC   || strcmp(flag, "RC")   == 0;
+  MNML_VERBOSE_SLAB = MNML_VERBOSE_SLAB || strcmp(flag, "SLAB") == 0;
+  MNML_VERBOSE_SLOT = MNML_VERBOSE_SLOT || strcmp(flag, "SLOT") == 0;
+}
+#endif
+
 void
 lisp_init()
 {
@@ -65,11 +75,28 @@ lisp_init()
    * Setup the debug variables.
    */
 #ifdef LISP_ENABLE_DEBUG
-  MNML_DEBUG        = getenv("MNML_DEBUG")        != NULL;
-  MNML_VERBOSE_CONS = getenv("MNML_VERBOSE_CONS") != NULL;
-  MNML_VERBOSE_RC   = getenv("MNML_VERBOSE_RC")   != NULL;
-  MNML_VERBOSE_SLOT = getenv("MNML_VERBOSE_SLOT") != NULL;
-  MNML_VERBOSE_SLAB = getenv("MNML_VERBOSE_SLAB") != NULL;
+  const char * debug = getenv("MNML_DEBUG");
+  if (debug != NULL) {
+    /*
+     * Enable debugging.
+     */
+    MNML_DEBUG = true;
+    /*
+     * Scan the debug options.
+     */
+    char * copy = strdup(debug);
+    char * haystack = copy;
+    char * value = NULL;
+    while ((value = strstr(haystack, ","))) {
+      *value = 0;
+      printf("### %s\n", haystack);
+      lisp_set_debug_flag(haystack);
+      haystack = value + 1;
+    }
+    printf("### %s\n", haystack);
+    lisp_set_debug_flag(haystack);
+    free(copy);
+  }
 #endif
 }
 

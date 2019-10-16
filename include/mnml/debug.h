@@ -16,17 +16,17 @@ extern bool MNML_VERBOSE_SLAB;
   if (MNML_DEBUG) fprintf
 
 #define TRACE(__fmt, ...) \
-  FPRINTF(stderr, "! %s:%d: " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
+  FPRINTF(stderr, "! (%-16.16s, %03d) [TRACE ] - " __fmt "\n", __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #ifdef __MACH__
 
 #define HEADER_SEXP(__c)  \
-  FPRINTF(stderr, "! %s:%d: [%llu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
+  FPRINTF(stderr, "! (%-16.16s, %03d) [%06llu] - %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
 
 #else
 
 #define HEADER_SEXP(__c)  \
-  FPRINTF(stderr, "! %s:%d: [%lu] %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
+  FPRINTF(stderr, "! (%-16.16s, %03d) [%06lu] - %s = ", __FUNCTION__, __LINE__, __c->refs, #__c)
 
 #endif
 
