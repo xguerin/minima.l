@@ -6,7 +6,8 @@
 atom_t
 lisp_function_read(const atom_t closure, const atom_t cell)
 {
-  return lisp_read(closure, cell);
+  atom_t result = lisp_read(closure, cell);
+  return result == NULL ? UP(NIL) : result;
 }
 
 LISP_PLUGIN_REGISTER(read, read)

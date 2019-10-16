@@ -53,11 +53,10 @@ lisp_function_load(const atom_t closure, const atom_t cell)
    * Load all the entries
    */
   atom_t input, res = UP(NIL);
-  while ((input = lisp_read(NIL, UP(NIL))) != NIL) {
+  while ((input = lisp_read(NIL, UP(NIL))) != NULL) {
     X(res);
     res = lisp_eval(NIL, input);
   }
-  X(input);
   /*
    * Pop the context and return the value.
    */

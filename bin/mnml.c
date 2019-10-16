@@ -25,6 +25,9 @@ run(const stage_t pread, const stage_t peval, const stage_t post)
   while (keep_running) {
     pread(NIL);
     input = lisp_read(NIL, UP(NIL));
+    if (input == NULL) {
+      break;
+    }
     peval(input);
     result = lisp_eval(NIL, input);
     post(result);

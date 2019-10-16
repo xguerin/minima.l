@@ -4,6 +4,7 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -172,7 +173,9 @@ lisp_read(const atom_t closure, const atom_t cell)
   char buffer[RBUFLEN] = { 0 };
   do {
     char* p = fgets(buffer + lexer.rem, RBUFLEN - lexer.rem, handle);
-    if (p == NULL) break;
+    if (p == NULL) {
+      break;
+    }
     size_t len = strlen(p);
     lisp_parse(&lexer, buffer, lexer.rem + len, lexer.rem + len < RBUFLEN);
   }
@@ -181,7 +184,7 @@ lisp_read(const atom_t closure, const atom_t cell)
    * Grab the result and return it.
    */
   lisp_destroy(&lexer);
-  return CDR(chn) != NIL ? lisp_read_pop(): UP(NIL);
+  return CDR(chn) != NIL ? lisp_read_pop(): NULL;
 }
 
 /*
