@@ -487,7 +487,7 @@ Evaluate `prg1`, `prg2`, ..., in sequence and return the last evaluation.
 ```
 #### SET
 ```minimal
-(<- sym 'any)
+(<- 'sym 'any)
 ```
 Set an existing symbol `sym` to `any`.
 ```minimal
