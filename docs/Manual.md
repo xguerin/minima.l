@@ -15,9 +15,9 @@ ISC. See `LICENSE.md`.
 ```
 ## Language
 
-### Encoding
+### Source encoding
 
-The encoding is expected to be UTF-8.
+The source encoding is UTF-8.
 
 ### Comment
 ```minimal
@@ -25,7 +25,7 @@ The encoding is expected to be UTF-8.
 ```
 ### Types
 
-The following internal types are provided:
+#### Table
 
 | Name      | Description                                           |
 |:----------|:------------------------------------------------------|
@@ -39,26 +39,51 @@ The following internal types are provided:
 
 #### Symbols
 
-The interpreter uses symbols to address values for those types. Symbols can be
-created or altered globally using the `def` and `setq` functions. Symbols can
-also be defined locally using the `let` function.
+Symbols are bound to values. Undefined symbols are unbound and resolve to `NIL`.
+Symbols can be created or altered globally using the `def` and `setq` functions.
+Symbols can also be defined locally using the `let` function.
 
-### Strings
+#### Strings
 
-The grammar supports the _String_ type. Represented as a `"`-delimited string of
+The grammar supports the _string_ type. Represented as a `"`-delimited string of
 characters, it is internally stored as a list of characters. For example:
 ```minimal
 : "hello"
 > ('h' 'e' 'l' 'l' 'o')
 ```
+### Expression evaluation
 
-#### Expression evaluation
+#### Generic rules
 
-* Numbers and strings evaluate to themselves
-* Symbols evaluate to their values
-* Lists evaluate to function calls
+* Numbers, strings, `NIL`, `T`, and `_` evaluate to themselves
+* Symbols are dereferenced to their bound values
+* Lists are evaluated as expressions
 
-#### Functions
+#### Expressions
+
+Expression take the following form: `(FUNCTION ARGS...)`. The `FUNCTION` can be:
+
+1. A symbol that must resolve to a function definition
+2. A quoted function definition
+3. A lambda definition
+4. An integer
+
+The forms 1, 2, and 3 are mutually interchangeable:
+```minimal
+: (def add (a b) (+ a b))
+> ((a b) NIL (+ a b))
+: (add 1 2) # Form 1
+> 3
+: ('((a b) NIL (+ a b)) 1 2) # Form 2
+> 3
+: ((\ (a b) (+ a b)) 1 2) # Form 3
+> 3
+```
+The last form is used by the native function mechanism to call into dynamically
+loaded plugins. The integer is casted as a function pointer and invoked by the
+interpreter.
+
+### Functions
 
 Functions are represented as the following 3-uple: `(ARGUMENTS CLOSURE BODY)`.
 The `ARGUMENTS` element is a list of symbols representing the arguments of the
@@ -66,21 +91,21 @@ functions. The `CLOSURE` element is an association list that contains the
 context of the function at the definition site. It is also used for currying.
 Lastly, the `BODY` element is the expression of the function.
 
-### Lambdas
+#### Lambdas
 
 Lambda functions are defined using the `\\` keyword. Invocation of `\\` is
 similar to `def`:
 ```minimal
 : ((\ (x y) (+ x y)) 1 1)
--> 2
+> 2
 
 : ((\ (x) (map (\ (n) (+ n 1)) x)) '(1 2 3 4))
--> (2 3 4 5)
+> (2 3 4 5)
 ```
-### Currying
+#### Currying
 
 Function can be curried. In the example below, the use of the closure for
-currying is also evident:
+currying is obvious:
 ```minimal
 : (def add (a b) (+ a b))
 > ((a b) NIL (+ a b))
@@ -92,6 +117,20 @@ currying is also evident:
 Curryring is available for all user-defined functions as well as for some
 internal functions such as `+`, `-`, `and`, `cons`, and so on.
 
+#### Native functions
+
+Native function (machine code functions) are supported through the _plugin_
+mechanism. A _plugin_ is a shared library that must export the following
+interface:
+```c
+const char * lisp_plugin_name();
+atom_t lisp_plugin_register();
+```
+The `lisp_plugin_register` function returns an `atom_t` value that contains an
+integer representing a pointer to the following signature:
+```c
+atom_t lisp_function(const atom_t closure, const atom_t cell);
+```
 ### Recursion
 
 Function defined using `def` can be recursive. When functions are defined,
@@ -106,16 +145,16 @@ Assignation of arguments in `def`, `lamda`, or `let` functions support
 deconstruction. For instance, with `def`:
 ```minimal
 : (def sum3 ((a b c)) (+ (+ a b) c))
--> sum3
+> sum3
 : (sum3 (list 1 2 3))
--> 6
+> 6
 ```
 Or with a lambda:
 ```minimal
 : (setq data '(("hello" . 1) ("world" . 2)))
--> (("hello" . 1) ("world" . 2))
+> (("hello" . 1) ("world" . 2))
 : (foldl (\ (acc (_ . v))(+ acc v)) 0 data)
--> 3
+> 3
 ```
 ## Globals
 
@@ -129,7 +168,7 @@ argument vector  of the script.
 The `ENV` global contains the environment at the time of the invocation of the
 interpreter.
 
-## Functions
+## Plugins
 
 In the examples below, elements in `[]` are optional and a quoted symbol is
 evaluated.
@@ -268,9 +307,9 @@ Construct a new list cell using the first argument for `car` and the second
 argument for `cdr`.
 ```minimal
 : (cons 1 2)
--> (1 . 2)
+> (1 . 2)
 : (cons 1 (cons 2 3))
--> (1 2 . 3)
+> (1 2 . 3)
 ```
 ### D
 
@@ -283,7 +322,7 @@ the symbol `sym`. An optional `str` can be specified as a documentation string
 and is ignored by the interpreter.
 ```minimal
 : (def add (x y) (+ x y))
--> add
+> add
 ```
 Function defined with the `def` keyword are simply lambda functions assigned to
 symbol. The following expressions are equivalent:
