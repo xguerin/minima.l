@@ -168,104 +168,96 @@ argument vector  of the script.
 The `ENV` global contains the environment at the time of the invocation of the
 interpreter.
 
-## Plugins
+## Functions
 
-In the examples below, elements in `[]` are optional and a quoted symbol is
-evaluated.
+> Elements in `[]` are optional and a quoted symbol is evaluated.
 
-### \#
+### Summary
 
-#### =, <>
-```minimal
-(=  'any1 'any2)
-(<> 'any1 'any2)
-```
-Structural equality and inequality.
+| Name | Syntax | Description |
+|:-----|:-------|:------------|
+| *Structural comparison*                   |||
+| `=`         | `(=  'any 'any)`              | Equality |
+| `<>`        | `(<> 'any 'any)`              | Inequality |
+| *Numeric comparison*                      |||
+| `<`         | `(<  'num 'num)`              | Less-than |
+| `<=`        | `(<= 'num 'num)`              | Less-than-or-equal-to |
+| `>`         | `(>  'num 'num)`              | Greater-than |
+| `>`         | `(>= 'num 'num)`              | Greater-than-or-equal-to |
+| *Arithmetic operations*                   |||
+| `+`         | `(+ 'num 'num)`               | Addition |
+| `-`         | `(- 'num 'num)`               | Subtraction |
+| `*`         | `(* 'num 'num)`               | Multiplication |
+| `/`         | `(/ 'num 'num)`               | Division |
+| `%`         | `(% 'num 'num)`               | Modulo |
+| *Logical operation*                       |||
+| `and`       | `(and 'any 'any)`             | Logical AND |
+| `not`       | `(not 'any)`                  | Logical NOT |
+| `or`        | `(or 'any 'any)`              | Logical OR |
+| *Predicates*                              |||
+| `chr?`      | `(chr? 'any)`                 | Check if `any` is a character |
+| `lst?`      | `(lst? 'any)`                 | Check if `any` is a list |
+| `num?`      | `(num? 'any)`                 | Check if `any` is a number |
+| `sym?`      | `(sym? 'any)`                 | Check if `any` is a symbol |
+| *String operations*                       |||
+| `str`       | `(str 'any)`                  | Make a string out of a symbol |
+| *Symbol and function definition*          |||
+| `<-`        | `(<- sym 'any)`               | [Set](#set) an existing symbol |
+| `def`       | `(def sym args [str] prg)`    | [Define](#def) a function |
+| `let`       | `(let lst . prg)`             | [Let](#let)-binding symbols |
+| `setq`      | `(setq sym 'any)`             | [Bind](#setq) a symbols |
+| `sym`       | `(sym 'any)`                  | Make a symbol out of a string |
+| *Expression composition*                  |||
+| `|>`        | `(|> any0 [any1] ...)`        | [Fluent](#stream) composition |
+| `prog`      | `(prog any0 [any1] ...)`      | [Sequential](#prog) composition |
+| *List manipulation*                       |||
+| `append`    | `(append 'lst 'any)`          | Append `any` to `lst` |
+| `assoc`     | `(assoc 'any 'lst)`           | [Query](#assoc) an association list |
+| `car`       | `(car 'lst)`                  | Get the first element of `lst` |
+| `cadr`      | `(cdr 'lst)`                  | Get the second element of `lst` |
+| `caddr`     | `(caddr 'lst)`                | Get the third element of `lst` |
+| `caar`      | `(caar 'lst)`                 | Get the first element of the head of `lst` |
+| `cadar`     | `(cadar 'lst)`                | Get the second element of the head of `lst` |
+| `cdar`      | `(cdar 'lst)`                 | Get the tail of the head of `lst` |
+| `cdr`       | `(cdr 'lst)`                  | Get the tail of `lst` |
+| `chr`       | `(chr 'num)`                  | Get the character for ASCII numner `num` |
+| `conc`      | `(conc 'lst 'lst)`            | [Concatenate](#conc) two lists into one |
+| `cond`      | `(cond 'any ...)`             | [Predicate](#cond) matching |
+| `cons`      | `(cons 'any 'any)`            | [Construct](#cons) a pair |
+| `list`      | `(list 'any ...)`             | [Create](#list) a list with `any` |
+| `match`     | `(match 'any ...)`            | [Structural](#match) matching |
+| *Control flow*                            |||
+| `if`        | `(if 'any then [else])`       | [If](#if) construct |
+| *Input/output operations*                 |||
+| `in`        | `(in 'any . prg)`             | [In](#if) stream |
+| `out`       | `(out 'any . prg)`            | [Out](#if) stream |
+| `prin`      | `(prin 'any ...)`             | [Symbolic print](#prin) of a list of `any` |
+| `prinl`     | `(prinl 'any ...)`            | [Symbolic print](#prinl) of a list of `any`, with new line |
+| `print`     | `(print 'any ...)`            | [Literal print](#print) of a list of `any` |
+| `printl`    | `(printl 'any ...)`           | [Literal print](#print) of a list of `any`, with new line |
+| `read`      | `(read)`                      | Read a token from the current input stream |
+| `readlines` | `(readlines)`                 | Read all lines from the current input stream |
+| *Miscellaneous operations*                |||
+| `eval`      | `(eval 'any)`                 | [Evaluate](#eval) `any` |
+| `load`      | `(load str)`                  | [Load](#load) an external asset |
+| `time`      | `(time prg)`                  | Time the execution of `prg` |
+| `quit`      | `(quit)`                      | Quit the interpreter loop |
+| `quote`     | `(quote . any)`               | Quote `any` |
 
-#### <, <=, >, >=
-```minimal
-(<  'num 'num)
-(<= 'num 'num)
-(>  'num 'num)
-(>= 'num 'num)
-```
-Numeric comparisons.
+### Description
 
-#### +, -, *, /, %
+#### ASSOC
 ```minimal
-(+ 'num 'num)
-(- 'num 'num)
-(* 'num 'num)
-(/ 'num 'num)
-(% 'num 'num)
+(assoc 'any 'lst)
 ```
-Arithmetic operations.
-
-#### <-
+Return the value for `any` in the association list `lst`. Return `NIL` if the
+symbol is not present.
 ```minimal
-(<- sym 'any)
+: (assoc 'hello '((hello . world)))
+> world
+: (assoc 'foo '((hello . world)))
+> NIL
 ```
-Set an existing symbol `sym` to `any`.
-```minimal
-: (<- A (+ 1 2))
-> NIL 
-: (setq A (+ 1 2))
-> 3
-: (<- A 4)
-> 4
-: A
-> 4
-```
-#### |>
-```minimal
-(|> any0 [any1] ...)
-```
-Fluent composition operator. Evaluate `any0` and pass the result to `any1`, and
-so on until the end of the list.
-```minimal
-: (|> '(1 2 3) cdr car)
-> 2
-```
-### A
-
-#### AND
-```minimal
-(and 'any1 'any2)
-```
-Logical `and` between `any1` and `any2`. Both values must evaluate to `T` or `NIL`.
-
-### C
-
-#### CAR
-```minimal
-(car 'lst)
-```
-Return the head of a list.
-```minimal
-: (car '(1 2 3 4))
-> 1
-```
-#### CDR
-```minimal
-(cdr 'lst)
-```
-Return the tail of a list.
-```minimal
-: (cdr '(1 2 3 4))
-> (2 3 4)
-```
-#### CHR
-```minimal
-(chr 'num)
-```
-Return the character mapped to the ASCII number `num`.
-
-#### CHR?
-```minimal
-(chr? 'any)
-```
-Return `T` or `NIL` whether `any` is a character.
-
 #### CONC
 ```minimal
 (conc 'lst1 'lst2)
@@ -311,8 +303,6 @@ argument for `cdr`.
 : (cons 1 (cons 2 3))
 > (1 2 . 3)
 ```
-### D
-
 #### DEF
 ```minimal
 (def sym args [str] prg ...)
@@ -332,8 +322,6 @@ symbol. The following expressions are equivalent:
 : (setq add (\ (a b) (+ a b)))
 > (\ (a b) (+ a b))
 ```
-### E
-
 #### EVAL
 ```minimal
 (eval 'any)
@@ -343,8 +331,6 @@ Evaluate `any`.
 : (eval '(+ 1 1))
 > 2
 ```
-### I
-
 #### IF
 ```minimal
 (if 'any then [else])
@@ -369,8 +355,6 @@ previous context is restored after the evaluation.
 When the first argument evaluates to `NIL`, the context uses `stdin`. When the
 argument evaluates to a string, `in` assumes the string contains a file path and
 tries to open that file.
-
-### L
 
 #### LET
 ```minimal
@@ -402,9 +386,11 @@ Create a list with `any` arguments.
 #### LOAD
 ```minimal
 (load str)
+(load 'sym [str])
 ```
-Load the `minimal` file pointed by `str`. On success, `load` returns the result of
-the last evaluated operation in the file. Otherwise, `NIL` is returned.
+In the first form, load the `minimal` file pointed by `str`. On success, `load`
+returns the result of the last evaluated operation in the file. Otherwise, `NIL`
+is returned.
 ```minimal
 : (load "lib/lisp/cadr.l")
 > ((x) NIL (car (cdr x)))
@@ -415,14 +401,13 @@ directory of the installation prefix.
 : (load "@lib/cadr.l")
 > ((x) NIL (car (cdr x)))
 ```
-#### LST?
+In the second form, load the `minimal` symbol from plugins either from the
+installation prefix, the `MNML_PLUGIN_PATH` environment variable, or the
+optional `str` path.
 ```minimal
-(lst? 'any)
+: (load '+)
+> 4425116848
 ```
-Return `T` or `NIL` whether `any` is a list.
-
-### M
-
 #### MATCH
 ```minimal
 (match 'any (any . prg) ...)
@@ -433,28 +418,6 @@ _default_ or _catch all_ case is written using the special value `_` as `car`.
 
 Order is important. If multiple match exist, the first one is evaluated. If `_`
 is placed before a valid match, `_` is evaluated.
-
-### N
-
-#### NOT
-```minimal
-(not 'any)
-```
-Logical `not` of `any`. The argument must evaluate to `T` or `NIL`.
-
-#### NUM?
-```minimal
-(num? 'any)
-```
-Return `T` or `NIL` whether `any` is a number.
-
-### O
-
-#### OR
-```minimal
-(or 'any 'any)
-```
-Logical `or` between `any1` and `any2`. Both values must evaluate to `T` or `NIL`.
 
 #### OUT
 ```minimal
@@ -470,8 +433,6 @@ and tries to open that file.
 If the file does not exist, it is created. If the file exists, it is truncated.
 If the file path is prepended with a `+` the file must exist and data will be
 appended to it.
-
-### P
 
 #### PRIN
 ```minimal
@@ -522,43 +483,21 @@ Evaluate `prg1`, `prg2`, ..., in sequence and return the last evaluation.
 : (prog (+ 1 1) (+ 2 2))
 > 4
 ```
-### Q
-
-#### QUIT
+#### SET
 ```minimal
-(quit)
+(<- sym 'any)
 ```
-Terminate the top-level evaluation.
-
-#### QUOTE
+Set an existing symbol `sym` to `any`.
 ```minimal
-(quote . any)
+: (<- A (+ 1 2))
+> NIL 
+: (setq A (+ 1 2))
+> 3
+: (<- A 4)
+> 4
+: A
+> 4
 ```
-Quote `any`. The form `'any` is a syntactic shortcut for this function.
-```minimal
-: (quote . a)
-> a
-```
-### R
-
-#### READ
-```minimal
-(read)
-```
-Read one lisp token from the current input channel.
-```minimal
-: (read)
-(1 2 3)
-> (1 2 3)
-```
-#### READLINES
-```minimal
-(readlines)
-```
-Read all available lines from the current input context.
-
-### S 
-
 #### SETQ
 ```minimal
 (setq sym 'any)
@@ -568,34 +507,13 @@ Associate `any` with the symbol `sym`.
 : (setq A (+ 1 2))
 > 3
 ```
-#### STR
+#### STREAM
 ```minimal
-(str 'sym)
+(|> any0 [any1] ...)
 ```
-Make a string of `sym`.
+Fluent composition operator. Evaluate `any0` and pass the result to `any1`, and
+so on until the end of the list.
 ```minimal
-: (str '+)
-> ('+')
-```
-#### SYM
-```minimal
-(sym str)
-```
-Make a symbol of `str`.
-```minimal
-: (sym "+")
-> +
-: ((sym . "+") 1 1)
+: (|> '(1 2 3) cdr car)
 > 2
 ```
-#### SYM?
-```minimal
-(sym? 'any)
-```
-Return `T` or `NIL` whether `any` is a symbol.
-
-#### TIME
-```minimal
-(time prg)
-```
-Evalue `prg` and return the time in nanoseconds it took to execute.

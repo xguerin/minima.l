@@ -1,0 +1,5 @@
+file(GLOB SOURCES *.l)
+
+if(MNML_INSTALL_EXTRA_PLUGINS)
+  install(FILES ${SOURCES} DESTINATION lisp)
+endif()
