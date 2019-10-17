@@ -7,7 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 
-static const char * lisp_expand_path(const char * path)
+static const char *
+lisp_expand_path(const char * path)
 {
   static char buffer[PATH_MAX];
   if (strncmp(path, "@lib", 4) == 0) {
@@ -20,20 +21,23 @@ static const char * lisp_expand_path(const char * path)
   return path;
 }
 
-atom_t
-lisp_function_load(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_load_plugin(const atom_t symb, const atom_t path)
 {
-  /*
-   * Get CAR/CDR.
-   */
-  atom_t car = lisp_eval(closure, lisp_car(cell));
-  X(cell);
+  atom_t result = lisp_plugin_load(symb, path);
+  X(symb); X(path);
+  return result;
+}
+
+static atom_t
+lisp_load_file(const atom_t cell)
+{
   /*
    * Construct the file name.
    */
   char buffer[PATH_MAX + 1];
-  lisp_make_cstring(car, buffer, PATH_MAX, 0);
-  X(car);
+  lisp_make_cstring(cell, buffer, PATH_MAX, 0);
+  X(cell);
   /*
    * Expand the path.
    */
@@ -63,6 +67,29 @@ lisp_function_load(const atom_t closure, const atom_t cell)
   POP_IO_CONTEXT(ICHAN);
   fclose(handle);
   return res;
+}
+
+atom_t
+lisp_function_load(const atom_t closure, const atom_t cell)
+{
+  /*
+   * Get CAR/CDR.
+   */
+  atom_t fst = lisp_eval(closure, lisp_car(cell));
+  atom_t cdr = lisp_cdr(cell);
+  atom_t snd = lisp_eval(closure, lisp_car(cdr));
+  X(cell); X(cdr);
+  /*
+   * (load 'sym ['path'])
+   */
+  if (IS_SYMB(fst)) {
+    return lisp_load_plugin(fst, snd);
+  }
+  /*
+   * Construct the file name.
+   */
+  X(snd);
+  return lisp_load_file(fst);
 }
 
 LISP_PLUGIN_REGISTER(load, load)

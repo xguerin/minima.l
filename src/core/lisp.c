@@ -56,7 +56,7 @@ lisp_lookup(const atom_t closure, const atom_t sym)
   /*
    * Nothing found, try to load as a plugin.
    */
-  return lisp_plugin_load(sym);
+  return lisp_plugin_load(sym, NIL);
 }
 
 /*

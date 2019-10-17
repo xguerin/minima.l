@@ -12,7 +12,7 @@ extern atom_t PLUGINS;
 
 const char * lisp_prefix();
 
-atom_t lisp_plugin_load(const atom_t sym);
+atom_t lisp_plugin_load(const atom_t cell, const atom_t path);
 
 void lisp_plugin_cleanup();
 
