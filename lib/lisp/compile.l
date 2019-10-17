@@ -62,107 +62,136 @@
 # Code generators.
 #
 
-(def cc:genprologue ()
+(def cc:genretval (TYPES kvar)
+  "Generate the return value conversion."
+  (let ((rtype . (assoc kvar TYPES)))
+    (match rtype
+      (NUMBER . (prinl (cc:|) "return lisp_make_number(V.number);"))
+      (LIST . (prinl (cc:|) "return V.list;"))
+      (_ . (prinl (cc:|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
+      )))
+
+(def cc:genprologue (TYPES kvar)
   "Generate C code prologue."
-  (prog
-    (prinl "#include <mnml/closure.h>")
-    (prinl "#include <mnml/lisp.h>")
-    (prinl "#include <mnml/maker.h>")
-    (prinl "#include <mnml/plugin.h>")
-    (prinl "#include <mnml/slab.h>")
-    (prinl "#include <mnml/types.h>")
-    (prinl)
-    #
-    # Generate the closure cache.
-    #
-    (prinl "static closure_t cache = NULL;")
-    (prinl)
-    #
-    # Generate the identity continuation.
-    #
-    (prinl "static atom_t identity(closure_t C, value_t V) {")
-    (prinl "  return lisp_make_number(V.number);")
-    (prinl "}")
-    (prinl)))
+  (prinl "#include <mnml/closure.h>")
+  (prinl "#include <mnml/lisp.h>")
+  (prinl "#include <mnml/maker.h>")
+  (prinl "#include <mnml/plugin.h>")
+  (prinl "#include <mnml/slab.h>")
+  (prinl "#include <mnml/types.h>")
+  (prinl)
+  #
+  # Generate the closure cache.
+  #
+  (prinl "static closure_t cache = NULL;")
+  (prinl)
+  #
+  # Generate the identity continuation.
+  #
+  (prinl "static atom_t identity(closure_t C, value_t V) {")
+  (cc:>)
+  (cc:genretval TYPES kvar)
+  (cc:<)
+  (prinl "}")
+  (prinl))
 
 (def cc:genprototype (NAME ARGS)
   "Generate C code function prototype."
-  (prog
-    (prin "static atom_t " NAME "(");
-    (iter (\ (e) (prin "value_t " e ", ")) ARGS)
-    (prinl "closure_t C, callback_t K);");
-    (prinl)))
+  (prin "static atom_t " NAME "(");
+  (iter (\ (e) (prin "value_t " e ", ")) ARGS)
+  (prinl "closure_t C, callback_t K);");
+  (prinl))
 
 (def cc:genmain (NAME ARGS REFS kvar)
   "Generate C code for the main function."
-  (prog
-    (prin "static atom_t " NAME "(")
-    (cc:>)
-    (iter (\ (e) (prin "value_t " e ", ")) ARGS)
-    (prinl "closure_t C, callback_t K) {");
-    (prinl (cc:|) "closure_t _C = lisp_closure_get(&cache, C, " (len REFS) ");")
-    (foldl (\ (acc e) (prog
-                        (prinl (cc:|) "_C->V[" acc "] = " e ";")
-                        (+ acc 1)))
-                      0 ARGS)
-    (prinl (cc:|) "value_t R = { .callback = K };");
-    (cc:gennext NAME ARGS kvar)
-    (prinl (cc:|) "return _K(_C, R);")
-    (cc:<)
-    (prinl "}")
-    (prinl)))
+  (prin "static atom_t " NAME "(")
+  (cc:>)
+  (iter (\ (e) (prin "value_t " e ", ")) ARGS)
+  (prinl "closure_t C, callback_t K) {");
+  (prinl (cc:|) "closure_t _C = lisp_closure_get(&cache, C, " (len REFS) ");")
+  (foldl
+    (\ (acc e) (prinl (cc:|) "_C->V[" acc "] = " e ";") (+ acc 1))
+    0 ARGS)
+  (prinl (cc:|) "value_t R = { .callback = K };");
+  (cc:gennext NAME ARGS kvar)
+  (prinl (cc:|) "return _K(_C, R);")
+  (cc:<)
+  (prinl "}")
+  (prinl))
 
-(def cc:genplugin (NAME ARGS)
+(def cc:genargument (TYPES arg)
+  "Generate the argument extraction."
+  (prinl (cc:|) "car = lisp_eval(closure, lisp_car(cur));")
+  #
+  # Determine how to extract the value.
+  #
+  (let ((atype . (assoc arg TYPES)))
+    (match atype
+      (NUMBER .  (prinl (cc:|) "value_t " arg " = { .number = car->number };"))
+      (LIST .  (prinl (cc:|) "value_t " arg " = { .list = UP(car) };"))
+      (_ . (prinl (cc:|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
+      ))
+  #
+  (prinl (cc:|) "X(car);")
+  (prinl (cc:|) "cdr = lisp_cdr(cur);")
+  (prinl (cc:|) "X(cur); cur = cdr;"))
+
+(def cc:genplugin (NAME ARGS TYPES)
   "Generate C code for the plugin."
-  (prog
-    (prinl "static atom_t lisp_function_" NAME "(const atom_t closure, const atom_t cell) {")
-    (cc:>)
-    (prinl (cc:|) "atom_t cur = cell, car, cdr;")
-    (iter
-      (\ (e) (prog
-               (prinl (cc:|) "car = lisp_car(cur);")
-               (prinl (cc:|) "value_t " e " = { .number = car->number };")
-               (prinl (cc:|) "X(car);")
-               (prinl (cc:|) "cdr = lisp_cdr(cur);")
-               (prinl (cc:|) "X(cur); cur = cdr;")))
-      ARGS)
-    (prinl (cc:|) "X(cur);")
-    (prinl (cc:|) "closure_t _C = NULL;")
-    (prinl (cc:|) "callback_t _K = identity;")
-    (prin (cc:|) "atom_t R = " NAME "(")
-    (iter (\ (e) (prin e ", ")) ARGS)
-    (prinl "_C, _K);")
-    (prinl (cc:|) "lisp_closure_clear(&cache);")
-    (prinl (cc:|) "return R;")
-    (cc:<)
-    (prinl "}")
-    (prinl)
-    (prinl "LISP_PLUGIN_REGISTER(" NAME ", " NAME ");")))
+  (prinl "static atom_t lisp_function_" NAME "(const atom_t closure, const atom_t cell) {")
+  (cc:>)
+  (prinl (cc:|) "atom_t cur = cell, car, cdr;")
+  (iter (\ (e) (cc:genargument TYPES e)) ARGS)
+  (prinl (cc:|) "X(cur);")
+  (prinl (cc:|) "closure_t _C = NULL;")
+  (prinl (cc:|) "callback_t _K = identity;")
+  (prin (cc:|) "atom_t R = " NAME "(")
+  (iter (\ (e) (prin e ", ")) ARGS)
+  (prinl "_C, _K);")
+  (prinl (cc:|) "lisp_closure_clear(&cache);")
+  (prinl (cc:|) "return R;")
+  (cc:<)
+  (prinl "}")
+  (prinl)
+  (prinl "LISP_PLUGIN_REGISTER(" NAME ", " NAME ");"))
 
 (def cc:binnumop (ARGS kvar body)
   "Generate C code for binary numeric operations."
   (let (((op arg1 arg2 cont)  . body))
-    (prog
-      (prin (cc:|) "value_t R = { .number = ")
-      (cc:numrvalue ARGS kvar arg1)
-      (match op
-        #
-        # Immediate translation to C.
-        #
-        ~(foldl
-           (\ (acc e) (cons (conc (cons e (list 'prin " " (str e) " "))) acc))
-           NIL '(+ - * / < <= > >=))
-        #
-        # Special cases.
-        #
-        (=  . (prin " == "))
-        (<> . (prin " != "))
-        #
-        # Unsupported cases.
-        #
-        (_  . (prin " /* " op " */ ")))
-      (cc:numrvalue ARGS kvar arg2)
-      (prinl " };"))))
+    (prin (cc:|) "value_t R = { .number = ")
+    (cc:numrvalue ARGS kvar arg1)
+    (match op
+      #
+      # Immediate translation to C.
+      #
+      ~(foldl
+         (\ (acc e) (cons (conc (cons e (list 'prin " " (str e) " "))) acc))
+         NIL '(+ - * / < <= > >=))
+      #
+      # Special cases.
+      #
+      (=  . (prin " == "))
+      (<> . (prin " != "))
+      #
+      # Unsupported cases.
+      #
+      (_  . (prin " /* Unsupported operation " op " */ ")))
+    (cc:numrvalue ARGS kvar arg2)
+    (prinl " };")))
+
+(def cc:unqlstop (ARGS kvar body)
+  "Generate C code for binary numeric operations."
+  (let (((op arg cont)  . body))
+    (prin (cc:|) "value_t R = { .list = ")
+    (match op
+      (car . (prin "lisp_car("))
+      (cdr . (prin "lisp_cdr("))
+      (_   . (prin " /* Unsupported operation " op " */ ")))
+    (cc:lstrvalue ARGS kvar arg)
+    (prinl ") };")
+    (prin (cc:|) "X(")
+    (cc:lstrvalue ARGS kvar arg)
+    (prinl ");")))
 
 (def cc:recop (ARGS kvar args prms)
   "Generate C code for recursive operations."
@@ -179,6 +208,15 @@
   "Generate C code for immediate KVAR funcall."
     (prin (cc:|) "value_t R = ")
     (cc:refrvalue ARGS kvar arg))
+
+(def cc:lstrvalue (ARGS kvar arg)
+  "Generate the C code for the list R-value ARG."
+  (cond arg
+    (sym? . (if (= kvar arg)
+              (prin "V.list")
+              (let ((idx . (cc:getrefidx ARGS arg)))
+                (prin "C->V[" idx "].list"))))
+    (_    . (prin "abort()"))))
 
 (def cc:numrvalue (ARGS kvar arg)
   "Generate the C code for the number R-value ARG."
@@ -221,42 +259,44 @@
     # Binary operations.
     #
     ~(foldl
-       (\ (acc e)
-         (cons (conc (cons
-                       (list e _ _ _)
-                       '(let ((next . (last body)))
-                          (prog
-                            (cc:binnumop ARGS kvar body)
-                            (cc:genclosure CONT next)
-                            (cc:gennext NAME CONT next)
-                            (prinl (cc:|) "return _K(_C, R);"))
-                          )))
-           acc))
+       (\ (acc e) (cons (conc (cons
+                                (list e _ _ _)
+                                '(let ((next . (last body)))
+                                   (cc:binnumop ARGS kvar body)
+                                   (cc:genclosure CONT next)
+                                   (cc:gennext NAME CONT next)
+                                   (prinl (cc:|) "return _K(_C, R);"))))
+                    acc))
        NIL '(+ - * / = <> < <= > >=))
+    #
+    # List operations.
+    #
+    ((car _ _) . (let ((next . (last body)))
+                   (cc:unqlstop ARGS kvar body)
+                   (cc:genclosure CONT next)
+                   (cc:gennext NAME CONT next)
+                   (prinl (cc:|) "return _K(_C, R);")))
     #
     # IF/THEN/ELSE
     #
     ((if _ _ _) . (let (((_ _ then else) . body))
-                    (prog
-                      (prinl (cc:|) "if (V.number) {")
-                      (cc:>)
-                      (cc:genblock NAME ARGS CONT kvar then)
-                      (cc:<)
-                      (prinl (cc:|) "} else {")
-                      (cc:>)
-                      (cc:genblock NAME ARGS CONT kvar else)
-                      (cc:<)
-                      (prinl (cc:|) "}")
-                      )))
+                    (prinl (cc:|) "if (V.number) {")
+                    (cc:>)
+                    (cc:genblock NAME ARGS CONT kvar then)
+                    (cc:<)
+                    (prinl (cc:|) "} else {")
+                    (cc:>)
+                    (cc:genblock NAME ARGS CONT kvar else)
+                    (cc:<)
+                    (prinl (cc:|) "}")))
     #
     # KVAR funcall.
     #
     ((_ _)  . (let ((next . (car body)))
-                (prog
-                  (cc:genclosure CONT next)
-                  (cc:kvarop ARGS kvar body)
-                  (cc:gennext NAME CONT next)
-                  (prinl (cc:|) "return _K(_C, R);"))))
+                (cc:genclosure CONT next)
+                (cc:kvarop ARGS kvar body)
+                (cc:gennext NAME CONT next)
+                (prinl (cc:|) "return _K(_C, R);")))
     #
     # Recursive behavior
     #
@@ -270,7 +310,7 @@
                      (prin (cc:|) "return " NAME "(")
                      (iter (\ (e) (prin e ", ")) ARGS)
                      (prinl "_C, _K);"))
-                   (prinl (cc:|) "abort(); /* " body " */"))))
+                   (prinl (cc:|) "abort(); /* Unsupported operation " symb " */"))))
     #
     # Unknown behavior.
     #
@@ -278,15 +318,14 @@
 
 (def cc:genfunction (NAME ARGS REFS CONT kvar body)
   "Generate a continuation KVAR with BODY."
-  (prog
-    (prinl "static atom_t " NAME kvar "(closure_t C, value_t V) {")
-    (cc:>)
-    (if (assoc kvar REFS)
-      (prinl (cc:|) "C->V[" (cdr (str kvar)) "] = V;"))
-    (cc:genblock NAME ARGS CONT kvar body)
-    (cc:<)
-    (prinl "}")
-    (prinl)))
+  (prinl "static atom_t " NAME kvar "(closure_t C, value_t V) {")
+  (cc:>)
+  (if (> (assoc kvar REFS) 0)
+    (prinl (cc:|) "C->V[" (cdr (str kvar)) "] = V;"))
+  (cc:genblock NAME ARGS CONT kvar body)
+  (cc:<)
+  (prinl "}")
+  (prinl))
 
 (def cc:gencont-any (NAME ARGS REFS CONT kvar fun)
   "Generate the C code for any type of funcall FUN."
@@ -311,10 +350,9 @@
                                 (if (lst? cont) cont)))
                     ite))
         (conts  . (filter nil? clist)))
-    (prog
-      (iter (\ ((_ args body))
-              (cc:gencont-any NAME ARGS REFS CONT (last args) body)) conts)
-      (cc:genfunction NAME ARGS REFS CONT kvar (cons symb (cons cnd first))))))
+    (iter (\ ((_ args body))
+            (cc:gencont-any NAME ARGS REFS CONT (last args) body)) conts)
+    (cc:genfunction NAME ARGS REFS CONT kvar (cons symb (cons cnd first)))))
 
 (def cc:gencont (NAME ARGS REFS CONT kvar fun)
   "Generate the C code for the continuations in FUN."
@@ -330,14 +368,14 @@
 
 (def >! (NAME)
   "Compile the CPS function NAME."
-  (let ((cps            . (>& NAME))
-        ((args _ body)  . cps)
-        (REFS           . (cps:refcount cps))
-        (ARGS           . (rev (cdr (rev args))))
-        (kvar           . (last args)))
-    (prog
-      (cc:genprologue)
-      (cc:genprototype NAME ARGS)
-      (cc:gencont NAME ARGS REFS kvar kvar body)
-      (cc:genmain NAME ARGS REFS kvar)
-      (cc:genplugin NAME ARGS))))
+  (let ((cps           . (>& NAME))
+        ((args _ body) . cps)
+        (ARGS          . (rev (cdr (rev args))))
+        (REFS          . (cps:refcount cps))
+        (TYPES         . (cps:infer NAME cps))
+        (kvar          . (last args)))
+    (cc:genprologue TYPES kvar)
+    (cc:genprototype NAME ARGS)
+    (cc:gencont NAME ARGS REFS kvar kvar body)
+    (cc:genmain NAME ARGS REFS kvar)
+    (cc:genplugin NAME ARGS TYPES)))

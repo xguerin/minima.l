@@ -11,6 +11,7 @@ struct _closure;
 
 typedef union _value {
   int64_t number;
+  atom_t list;
   atom_t (*callback)(struct _closure * C, union _value V);
 }
 value_t;

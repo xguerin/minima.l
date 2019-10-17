@@ -6,6 +6,7 @@
 (load "@lib/len.l")
 (load "@lib/ntoa.l")
 (load "@lib/replc.l")
+(load "@lib/rev.l")
 
 #
 # Make a symbol placeholder
@@ -95,12 +96,17 @@
         (fargs               . (append args kvar))
         ((count . lifted)    . (cps:lift kvar (+ arglen 1) body)))
     (cons fargs (cons closure (list lifted)))))
+
+(def <->& (fsym)
+  "Convert FSYM into its continuation-passing style and store it back into FSYM."
+  (<- fsym (>& fsym)))
+
 #
 # Collect the usage count for each placeholder variable. The first symbol in the
 # funcall is skipped unless it is the current external continuation variable.
 # Local symbol (eg. local continuations) are collected with a count of 0.
 #
-(def cps:refcolct (xvar kvar acc expr)
+(def cps:getrefs (xvar kvar acc expr)
   "Accumulate in ACC references found in EXPR."
   (let (((op . _) . expr)
         (params . (if (= op xvar) expr (cdr expr))))
@@ -118,17 +124,15 @@
 (def cps:refcount_r (xvar kvar fun acc)
   "Recursively collect placeholder reference count in a CPS funcall FUN."
   (match fun
-    ((if _ . _) . (let (((_ _ . ops) . fun))
-                    (cps:refcolct xvar kvar
-                                  (foldr (\ (e acm)
-                                           (cps:refcount_r xvar kvar e acm)) ops acc)
-                                  fun)))
-    ((_ . _)  . (let (((_ args body) . (last fun))
-                      (nvar . (last args)))
-                  (cps:refcolct xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
+    ((if _ . _) . (let (((_ _ . ops) . fun)
+                        (red . (\ (e acm) (cps:refcount_r xvar kvar e acm))))
+                    (cps:getrefs xvar kvar (foldr red ops acc) fun)))
+    ((_ . _) . (let (((_ args body) . (last fun))
+                     (nvar . (last args)))
+                 (cps:getrefs xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
     (_ . acc)))
 
-(def cps:refcount ((args clos body))
+(def cps:refcount ((args _ body))
   "Collect placeholder reference count in a CPS function FUN."
   (let ((xvar . (last args)))
     (if body (cps:refcount_r xvar xvar body NIL))))
@@ -136,19 +140,81 @@
 #
 # Infer type signature from a CPS funcall.
 #
-(def cps:infer_r (xvar kvar fun acc)
-  "Recursively collect placeholder reference count in a CPS funcall FUN."
-  (match fun
-    ((if _ . _) . (let (((_ _ . ops) . fun))
-                    (cps:refcolct xvar kvar
-                                  (foldr (\ (e acm)
-                                           (cps:refcount_r xvar kvar e acm)) ops acc)
-                                  fun)))
-    ((_ . _)  . (let (((_ args body) . (last fun))
-                      (nvar . (last args)))
-                  (cps:refcolct xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
-    (_ . acc)))
+(def cps:addtype (key type acc)
+  "Add TYPE to KEY in ACC."
+  (let ((value . (assoc key acc)))
+    (if value
+      (replc key (cons type value) acc)
+      (cons (cons key (cons type NIL)) acc))))
 
-(def cps:infer ((args clos body))
-  "Collect placeholder reference count in a CPS function FUN."
-  (if body (cps:infer_r args body NIL)))
+(def cps:replace (nvar args)
+  "Replace the last argument by the symbol of the next continuation."
+  (if nvar
+    (rev (cons nvar (cdr (rev args))))
+    args))
+
+(def cps:scantypes (body type alst)
+  "Scan references in BODY and mark them as TYPE in ALST."
+  (let (((_ . args) . body)
+        ((_ (nvar) next) . (last body)))
+    (foldl
+      (\ (acc e) (if (sym? e) (cps:addtype e type acc) acc))
+      (cps:comptypes name nvar next (cps:addtype kvar 'NUMBER alst))
+      (cps:replace nvar args))))
+
+(def cps:comptypes (name kvar body alst)
+  "Compute the types involved in a funcall."
+  (match body
+    #
+    # Generate the binary numeric operations
+    #
+    ~(foldl
+       (\ (acc e) (cons (conc (cons (list e _ _ _)
+                                '(cps:scantypes body 'NUMBER alst))) acc))
+       NIL '(+ - * / = <> < <= > >=))
+    #
+    # Generate the list unary operations
+    #
+    ~(foldl
+       (\ (acc e) (cons (conc (cons (list e _ _)
+                                '(cps:scantypes body 'LIST alst))) acc))
+       NIL '(car cdr))
+    #
+    # Generate the list binary operations
+    #
+    ~(foldl
+       (\ (acc e) (cons (conc (cons (list e _ _ _)
+                                '(cps:scantypes body 'LIST alst))) acc))
+       NIL '(cons conc))
+    #
+    #
+    # IF/THEN/ELSE.
+    #
+    ((if _ . _) . (let (((_ e . ops) . body))
+                    (foldr (\ (e acc) (cps:comptypes name kvar e acc))
+                      ops (cps:addtype e 'NUMBER alst))))
+    #
+    # KVAR funcall.
+    #
+    ((_ _) . alst)
+    #
+    # Generic method invocation case.
+    #
+    ((_ . _)  . (let (((symb . prms) . body)
+                      ((_ (nvar) next) . (last body)))
+                  (cps:comptypes name nvar next alst)))
+    #
+    # Default case, return the association list.
+    #
+    (_ . alst)))
+
+(def cps:reducetypes (alst)
+  "Reduce the type list ALST and check for errors."
+  (let ((cmp . (\ (e1 acc1) (if acc1 (if (= e1 acc1) acc1 'ERROR) e1)))
+        (red . (\ ((symb . types) acc0) (cons (cons symb (foldr cmp types NIL)) acc0))))
+    (foldr red alst NIL)))
+
+(def cps:infer (name (args _ body))
+  "Infer the types of a CPS function FUN with name NAME."
+  (let ((kvar . (last args)))
+    (cps:reducetypes (cps:comptypes name kvar body NIL))))
