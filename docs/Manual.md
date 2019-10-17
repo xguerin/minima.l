@@ -198,6 +198,8 @@ interpreter.
 | `chr?`      | `(chr? 'any)`                 | Check if `any` is a character |
 | `lst?`      | `(lst? 'any)`                 | Check if `any` is a list |
 | `num?`      | `(num? 'any)`                 | Check if `any` is a number |
+| `str?`      | `(str? 'any)`                 | Check if `any` is a string |
+| `sym?`      | `(sym? 'any)`                 | Check if `any` is a symbol |
 | `sym?`      | `(sym? 'any)`                 | Check if `any` is a symbol |
 | *String operations*                       |||
 | `str`       | `(str 'any)`                  | Make a string out of a symbol |
