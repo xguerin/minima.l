@@ -1,3 +1,3 @@
 (def cadar (x)
   "Call CAR CDR CAR on X."
-  (|> x car cdr car))
+  (car (cdr (car x))))
