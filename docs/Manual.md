@@ -114,8 +114,7 @@ currying is obvious:
 : (+1 2)
 > 3
 ```
-Curryring is available for all user-defined functions as well as for some
-internal functions such as `+`, `-`, `and`, `cons`, and so on.
+Curryring is available for all user-defined functions.
 
 #### Native functions
 

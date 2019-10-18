@@ -153,13 +153,13 @@
     (rev (cons nvar (cdr (rev args))))
     args))
 
-(def cps:scantypes (body type alst)
+(def cps:scantypes (kvar body type alst)
   "Scan references in BODY and mark them as TYPE in ALST."
   (let (((_ . args) . body)
         ((_ (nvar) next) . (last body)))
     (foldl
       (\ (acc e) (if (sym? e) (cps:addtype e type acc) acc))
-      (cps:comptypes name nvar next (cps:addtype kvar 'NUMBER alst))
+      (cps:comptypes name nvar next alst)
       (cps:replace nvar args))))
 
 (def cps:comptypes (name kvar body alst)
@@ -170,22 +170,30 @@
     #
     ~(foldl
        (\ (acc e) (cons (conc (cons (list e _ _ _)
-                                '(cps:scantypes body 'NUMBER alst))) acc))
+                                '(cps:scantypes kvar body 'NUMBER alst))) acc))
        NIL '(+ - * / = <> < <= > >=))
     #
     # Generate the list unary operations
     #
     ~(foldl
        (\ (acc e) (cons (conc (cons (list e _ _)
-                                '(cps:scantypes body 'LIST alst))) acc))
+                                '(cps:scantypes kvar body 'LIST alst))) acc))
        NIL '(car cdr))
     #
     # Generate the list binary operations
     #
     ~(foldl
        (\ (acc e) (cons (conc (cons (list e _ _ _)
-                                '(cps:scantypes body 'LIST alst))) acc))
+                                '(cps:scantypes kvar body 'LIST alst))) acc))
        NIL '(cons conc))
+    #
+    # Predicates.
+    #
+    ((nil? _ _) . (let (((_ arg lst) . body)
+                        ((_ (nvar) next) . lst))
+                    (cps:comptypes name nvar next
+                                   (cps:addtype nvar 'NUMBER
+                                                (cps:addtype arg 'LIST alst)))))
     #
     #
     # IF/THEN/ELSE.
@@ -196,7 +204,12 @@
     #
     # KVAR funcall.
     #
-    ((_ _) . alst)
+    ((_ _) . (let (((xvar arg) . body)
+                   (atype . (assoc arg alst))
+                   (xtype . (assoc xvar alst)))
+               (if xtype
+                 (cps:addtype arg (cps:reducetype xtype) alst)
+                 (cps:addtype arg 'UNDEF alst))))
     #
     # Generic method invocation case.
     #
@@ -208,13 +221,43 @@
     #
     (_ . alst)))
 
+(def cps:reducetype (lst)
+  "Reduce the types in LST and check for errors."
+  (foldr
+    (\ (e acc)
+      (if (or (nil? acc) (or (= acc e) (= acc 'UNDEF))) e 'ERROR))
+    lst NIL))
+
 (def cps:reducetypes (alst)
   "Reduce the type list ALST and check for errors."
-  (let ((cmp . (\ (e1 acc1) (if acc1 (if (= e1 acc1) acc1 'ERROR) e1)))
-        (red . (\ ((symb . types) acc0) (cons (cons symb (foldr cmp types NIL)) acc0))))
-    (foldr red alst NIL)))
+  (foldr
+    (\ ((symb . types) acc0) (cons (cons symb (cps:reducetype types)) acc0))
+    alst NIL))
+
+(def cps:fixupkvar (kvar alst)
+  "Mark KVAR in ALST as LIST if not found."
+  (if (nil? (assoc kvar alst))
+    (cps:addtype kvar 'LIST alst)
+    alst))
+
+(def cps:fixupundef (kvar alst)
+  "Scan for UNDEF references in ALST and mark them as KVAR."
+  (let ((ktype . (assoc kvar alst)))
+    (foldr
+      (\ ((k . type) acc)
+        (if (= type 'UNDEF)
+          (cons (cons k ktype) acc)
+          (cons (cons k type) acc)))
+      alst NIL)))
 
 (def cps:infer (name (args _ body))
   "Infer the types of a CPS function FUN with name NAME."
   (let ((kvar . (last args)))
-    (cps:reducetypes (cps:comptypes name kvar body NIL))))
+    #
+    # NOTE(xrg) don't ever consider removing the fluent operator again.
+    #
+    (|> NIL
+        (cps:comptypes name kvar body)
+        (cps:fixupkvar kvar)
+        cps:reducetypes
+        (cps:fixupundef kvar))))

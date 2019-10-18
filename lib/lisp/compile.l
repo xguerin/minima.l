@@ -155,6 +155,16 @@
   (prinl)
   (prinl "LISP_PLUGIN_REGISTER(" NAME ", " NAME ");"))
 
+(def cc:predicateop (ARGS kvar body)
+  "Generate C code for unary predicate operations."
+  (let (((op arg cont) . body))
+    (prin (cc:|) "value_t R = { .integer = ")
+    (match op
+      (nil? . (prin "IS_NULL("))
+      (_   . (prin " /* Unsupported predicate " op " */ ")))
+    (cc:lstrvalue ARGS kvar arg)
+    (prinl ") };")))
+
 (def cc:binnumop (ARGS kvar body)
   "Generate C code for binary numeric operations."
   (let (((op arg1 arg2 cont)  . body))
@@ -180,7 +190,7 @@
     (prinl " };")))
 
 (def cc:unqlstop (ARGS kvar body)
-  "Generate C code for binary numeric operations."
+  "Generate C code for unary list operations."
   (let (((op arg cont)  . body))
     (prin (cc:|) "value_t R = { .list = ")
     (match op
@@ -188,10 +198,20 @@
       (cdr . (prin "lisp_cdr("))
       (_   . (prin " /* Unsupported operation " op " */ ")))
     (cc:lstrvalue ARGS kvar arg)
-    (prinl ") };")
-    (prin (cc:|) "X(")
-    (cc:lstrvalue ARGS kvar arg)
-    (prinl ");")))
+    (prinl ") };")))
+
+(def cc:binlstop (ARGS kvar body)
+  "Generate C code for binary list operations."
+  (let (((op arg0 arg1 cont)  . body))
+    (prin (cc:|) "value_t R = { .list = ")
+    (match op
+      (conc . (prin "lisp_conc("))
+      (cons . (prin "lisp_cdr("))
+      (_   .  (prin " /* Unsupported operation " op " */ ")))
+    (cc:lstrvalue ARGS kvar arg0)
+    (prin ", ")
+    (cc:lstrvalue ARGS kvar arg1)
+    (prinl ") };")))
 
 (def cc:recop (ARGS kvar args prms)
   "Generate C code for recursive operations."
@@ -256,6 +276,19 @@
   "Generate the basic block for BODY."
   (match body
     #
+    # Predicate operations.
+    #
+    ~(foldl
+       (\ (acc e) (cons (conc (cons
+                                (list e _ _)
+                                '(let ((next . (last body)))
+                                   (cc:predicateop ARGS kvar body)
+                                   (cc:genclosure CONT next)
+                                   (cc:gennext NAME CONT next)
+                                   (prinl (cc:|) "return _K(_C, R);"))))
+                    acc))
+       NIL '(nil?))
+    #
     # Binary operations.
     #
     ~(foldl
@@ -269,13 +302,31 @@
                     acc))
        NIL '(+ - * / = <> < <= > >=))
     #
-    # List operations.
+    # Unary list operations.
     #
-    ((car _ _) . (let ((next . (last body)))
-                   (cc:unqlstop ARGS kvar body)
-                   (cc:genclosure CONT next)
-                   (cc:gennext NAME CONT next)
-                   (prinl (cc:|) "return _K(_C, R);")))
+    ~(foldl
+       (\ (acc e) (cons (conc (cons
+                                (list e _ _)
+                                '(let ((next . (last body)))
+                                   (cc:unqlstop ARGS kvar body)
+                                   (cc:genclosure CONT next)
+                                   (cc:gennext NAME CONT next)
+                                   (prinl (cc:|) "return _K(_C, R);"))))
+                    acc))
+       NIL '(car cdr))
+    #
+    # Binary list operations.
+    #
+    ~(foldl
+       (\ (acc e) (cons (conc (cons
+                                (list e _ _ _)
+                                '(let ((next . (last body)))
+                                   (cc:binlstop ARGS kvar body)
+                                   (cc:genclosure CONT next)
+                                   (cc:gennext NAME CONT next)
+                                   (prinl (cc:|) "return _K(_C, R);"))))
+                    acc))
+       NIL '(conc cons))
     #
     # IF/THEN/ELSE
     #
