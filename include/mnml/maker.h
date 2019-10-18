@@ -64,6 +64,79 @@
   X(_l ## _cd1);
 
 /*
+ * CONS helpers.
+ */
+
+#define LISP_CONS_0(R) atom_t R = NIL
+
+#define LISP_CONS_1(R, _1) LISP_CONS_0(R);      \
+{                                               \
+  atom_t r_1;                                   \
+  if (strcmp(#_1, "@") == 0) {                  \
+    MAKE_SYMBOL_STATIC(s_1, "@", 1);            \
+    r_1 = lisp_make_symbol(s_1);                \
+  } else {                                      \
+    MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1));  \
+    atom_t __1 = lisp_make_symbol(s_1);         \
+    r_1 = lisp_cons(__1, R);                    \
+    X(__1); X(R);                               \
+  }                                             \
+  R = r_1;                                      \
+}
+
+#define LISP_CONS_2(R, _2, _1) LISP_CONS_0(R);  \
+{                                               \
+  MAKE_SYMBOL_STATIC(s_2, #_2, strlen(#_2));    \
+  atom_t __2 = lisp_make_symbol(s_2);           \
+  atom_t r_2;                                   \
+  if (strcmp(#_1, "NIL") == 0) {                \
+    r_2 = lisp_cons(__2, R);                    \
+    X(R);                                       \
+  } else {                                      \
+    MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1));  \
+    atom_t __1 = lisp_make_symbol(s_1);         \
+    r_2 = lisp_cons(__2, __1);                  \
+    X(__1);                                     \
+  }                                             \
+  X(__2);                                       \
+  R = r_2;                                      \
+}
+
+#define LISP_CONS_3(R, _3, ...) LISP_CONS_2(R, __VA_ARGS__);  \
+{                                                           \
+  MAKE_SYMBOL_STATIC(s_3, #_3, strlen(#_3));                \
+  atom_t __3 = lisp_make_symbol(s_3);                       \
+  atom_t r_3 = lisp_cons(__3, R);                           \
+  X(__3); X(R);                                             \
+  R = r_3;                                                  \
+}
+
+#define LISP_CONS_4(R, _4, ...) LISP_CONS_3(R, __VA_ARGS__);  \
+{                                                             \
+  MAKE_SYMBOL_STATIC(s_4, #_4, strlen(#_4));                  \
+  atom_t __4 = lisp_make_symbol(s_4);                         \
+  atom_t r_4 = lisp_cons(__4, R);                             \
+  X(__4); X(R);                                               \
+  R = r_4;                                                    \
+}
+
+#define LISP_CONS_5(R, _5, ...) LISP_CONS_4(R, __VA_ARGS__);  \
+{                                                             \
+  MAKE_SYMBOL_STATIC(s_5, #_5, strlen(#_5));                  \
+  atom_t __5 = lisp_make_symbol(s_5);                         \
+  atom_t r_5 = lisp_cons(__5, R);                             \
+  X(__5); X(R);                                               \
+  R = r_5;                                                    \
+}
+
+#define LISP_CONS_(_0, _1, _2, _3, _4, _5, NAME, ...) NAME
+
+#define LISP_CONS(...)                                \
+  LISP_CONS_(__VA_ARGS__, LISP_CONS_5,  LISP_CONS_4,  \
+             LISP_CONS_3,  LISP_CONS_2,  LISP_CONS_1, \
+             LISP_CONS_0)(__VA_ARGS__)
+
+/*
  * Atom makers.
  */
 
@@ -80,5 +153,3 @@ void lisp_make_nil();
 void lisp_make_true();
 void lisp_make_quote();
 void lisp_make_wildcard();
-
-

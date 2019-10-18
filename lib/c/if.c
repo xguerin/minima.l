@@ -1,35 +1,29 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static atom_t
-lisp_function_if(const atom_t closure, const atom_t cell)
+lisp_function_if(const atom_t closure, const atom_t arguments)
 {
-  /*
-   * Evaluate the condition expression.
-   */
-  atom_t cnd = lisp_eval(closure, lisp_car(cell));
-  atom_type_t type = cnd->type;
-  atom_t cd0 = lisp_cdr(cell);
-  X(cnd); X(cell);
+  LISP_LOOKUP(cnd, arguments, COND);
+  LISP_LOOKUP(ops, arguments, PROG);
   /*
    * Evaluate the THEN branch if TRUE.
    */
-  if (unlikely(type == T_NIL)) {
-    atom_t cd1 = lisp_cdr(cd0);
+  if (unlikely(IS_NULL(cnd))) {
+    atom_t cd1 = lisp_cdr(ops);
     atom_t els = lisp_car(cd1);
-    X(cd0); X(cd1);
+    X(cnd); X(ops); X(cd1);
     return lisp_eval(closure, els);
   }
   /*
    * Or evaluate the ELSE branch.
    */
   else {
-    atom_t thn = lisp_car(cd0);
-    X(cd0);
+    atom_t thn = lisp_car(ops);
+    X(cnd); X(ops);
     return lisp_eval(closure, thn);
   }
 }
 
-LISP_PLUGIN_REGISTER(if, if)
+LISP_PLUGIN_REGISTER(if, if, COND, PROG)

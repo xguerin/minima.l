@@ -13,7 +13,7 @@
 #
 (def cps:symbol (id)
   "Generate a symbol placeholder using ID."
-  (sym (cons '_' (ntoa id))))
+  (sym (cons ^_ (ntoa id))))
 
 #
 # Reverse-scan a function body and replace the funcall arguments with
@@ -83,7 +83,7 @@
                # Generic form.
                #
                (_ . (cps:lift-any kvar counter body))))
-    (_  . (cons counter (append kvar (list body))))))
+    (_  .  (cons counter (append kvar (list body))))))
 
 #
 # Convert a function in direct style into CPS.
@@ -92,7 +92,7 @@
   "Convert FSYM into its continuation-passing style."
   (let (((args closure body) . (eval fsym))
         (arglen              . (len args))
-        (kvar                . (list (sym (cons '_' (ntoa arglen)))))
+        (kvar                . (list (sym (cons ^_ (ntoa arglen)))))
         (fargs               . (append args kvar))
         ((count . lifted)    . (cps:lift kvar (+ arglen 1) body)))
     (cons fargs (cons closure (list lifted)))))

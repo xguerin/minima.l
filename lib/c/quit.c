@@ -4,10 +4,9 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_quit(const atom_t closure, const atom_t cell)
+lisp_function_quit(const atom_t closure, const atom_t arguments)
 {
   kill(getpid(), SIGQUIT);
-  X(cell);
   return UP(TRUE);
 }
 

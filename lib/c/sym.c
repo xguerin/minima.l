@@ -2,15 +2,14 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
-#include <string.h>
 
-atom_t
-lisp_function_sym(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_sym(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(car, arguments, X);
   char buffer[17];
-  atom_t car = lisp_eval(closure, lisp_car(cell));
   size_t len = lisp_make_cstring(car, buffer, LISP_SYMBOL_LENGTH, 0);
-  X(car); X(cell);
+  X(car);
   if (len == 0) {
     return UP(NIL);
   }
@@ -18,4 +17,4 @@ lisp_function_sym(const atom_t closure, const atom_t cell)
   return lisp_make_symbol(symb);
 }
 
-LISP_PLUGIN_REGISTER(sym, sym)
+LISP_PLUGIN_REGISTER(sym, sym, X)

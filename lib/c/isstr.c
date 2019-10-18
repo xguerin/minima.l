@@ -1,7 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static bool
 lisp_is_string(const atom_t cell)
@@ -31,5 +30,5 @@ lisp_is_string(const atom_t cell)
   return lisp_is_string(cell->pair.cdr);
 }
 
-PREDICATE_GEN(str, lisp_is_string);
-LISP_PLUGIN_REGISTER(isstr, str?)
+PREDICATE_GEN(str, lisp_is_string, X);
+LISP_PLUGIN_REGISTER(isstr, str?, X)

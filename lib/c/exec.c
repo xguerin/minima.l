@@ -5,8 +5,6 @@
 #include <mnml/utils.h>
 #include <errno.h>
 #include <limits.h>
-#include <string.h>
-#include <string.h>
 #include <unistd.h>
 
 extern char ** environ;
@@ -37,20 +35,15 @@ lisp_exec_make_strings(const atom_t cell, char ** array,
   return lisp_exec_make_strings(cdr, array, len, idx + 1);
 }
 
-atom_t
-lisp_function_exec(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_exec(const atom_t closure, const atom_t arguments)
 {
   /*
    * Get the arguments.
    */
-  atom_t path = lisp_eval(closure, lisp_car(cell));
-  atom_t cdr0 = lisp_cdr(cell);
-  X(cell);
-  atom_t args = lisp_eval(closure, lisp_car(cdr0));
-  atom_t cdr1 = lisp_cdr(cdr0);
-  X(cdr0);
-  atom_t envp = lisp_eval(closure, lisp_car(cdr1));
-  X(cdr1);
+  LISP_LOOKUP(path, arguments, PATH);
+  LISP_LOOKUP(args, arguments, ARGS);
+  LISP_LOOKUP(envp, arguments, ENVP);
   /*
    * Build the path string.
    */
@@ -74,4 +67,4 @@ lisp_function_exec(const atom_t closure, const atom_t cell)
   return lisp_make_number(ret == 0 ? 0 : errno);
 }
 
-LISP_PLUGIN_REGISTER(exec, exec)
+LISP_PLUGIN_REGISTER(exec, exec, PATH, ARGS, ENVP)

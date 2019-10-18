@@ -192,7 +192,7 @@ lisp_dup(const atom_t closure)
 }
 
 /*
- * Merge define-site and call-site closures. The call-site closure is consumed.
+ * Merge define-site and call-site closures. Both closures is consumed.
  */
 
 atom_t

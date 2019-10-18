@@ -28,17 +28,11 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
     case T_CHAR: {
       const char c = (char)atom->number;
       switch (c) {
-        case '\'':
-          fprintf(fp, "'\''");
-          break;
-        case '\\':
-          fprintf(fp, "'\\'");
-          break;
         case '\n':
-          fprintf(fp, "'\\n'");
+          fprintf(fp, ";\\n");
           break;
         default:
-          fprintf(fp, "'%c'", c);
+          fprintf(fp, "^%c", c);
       }
       break;
     }

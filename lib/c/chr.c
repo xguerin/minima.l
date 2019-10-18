@@ -2,15 +2,14 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
-#include <string.h>
 
-atom_t
-lisp_function_chr(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_chr(const atom_t closure, const atom_t arguments)
 {
-  atom_t car = lisp_eval(closure, lisp_car(cell));
+  LISP_LOOKUP(car, arguments, X);
   char val = car->number;
-  X(car); X(cell);
+  X(car);
   return lisp_make_char(val);
 }
 
-LISP_PLUGIN_REGISTER(chr, chr)
+LISP_PLUGIN_REGISTER(chr, chr, X)

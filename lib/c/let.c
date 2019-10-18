@@ -3,7 +3,6 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
-#include <string.h>
 
 static atom_t
 lisp_let_bind(const atom_t closure, const atom_t cell)
@@ -65,10 +64,11 @@ lisp_let(const atom_t closure, const atom_t cell)
   return res;
 }
 
-atom_t
-lisp_function_let(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_let(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   return lisp_let(closure, cell);
 }
 
-LISP_PLUGIN_REGISTER(let, let)
+LISP_PLUGIN_REGISTER(let, let, @)

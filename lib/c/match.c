@@ -1,7 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static bool
 atom_match(const atom_t a, const atom_t b)
@@ -60,13 +59,14 @@ lisp_match(const atom_t closure, const atom_t cell, const atom_t match)
   return lisp_match(closure, cell, cdr);
 }
 
-atom_t
-lisp_function_match(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_match(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   atom_t car = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   X(cell);
   return lisp_match(closure, car, cdr);
 }
 
-LISP_PLUGIN_REGISTER(match, match)
+LISP_PLUGIN_REGISTER(match, match, @)

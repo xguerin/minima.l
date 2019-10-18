@@ -2,7 +2,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static atom_t
 lisp_stream(const atom_t closure, const atom_t cell, const atom_t result)
@@ -47,9 +46,9 @@ lisp_stream(const atom_t closure, const atom_t cell, const atom_t result)
 }
 
 static atom_t
-lisp_function_stream(const atom_t closure, const atom_t cell)
+lisp_function_stream(const atom_t closure, const atom_t arguments)
 {
-  TRACE_SEXP(cell);
+  LISP_LOOKUP(cell, arguments, @);
   /*
    * Grab CAR/CDR.
    */
@@ -62,4 +61,4 @@ lisp_function_stream(const atom_t closure, const atom_t cell)
   return lisp_stream(closure, cdr, con);
 }
 
-LISP_PLUGIN_REGISTER(stream, |>)
+LISP_PLUGIN_REGISTER(stream, |>, @)

@@ -41,9 +41,8 @@ message(STATUS "Build version: " ${VERSION_SHORT})
 # Options
 #
 
-option(MNML_ENABLE_DEBUG          "Enable YAML configuration plugin"  ON)
-option(MNML_ENABLE_TESTS          "Build the Google tests suite"      ON)
-option(MNML_INSTALL_EXTRA_PLUGINS "Install extra plugins"             OFF)
+option(MNML_ENABLE_DEBUG  "Enable YAML configuration plugin"  ON)
+option(MNML_ENABLE_TESTS  "Build the Google tests suite"      ON)
 
 #
 # Global definitions
@@ -112,7 +111,6 @@ find_package(Ragel REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
-add_subdirectory(extra)
 add_subdirectory(lib)
 add_subdirectory(src)
 

@@ -1,11 +1,11 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static atom_t
-lisp_function_lambda(const atom_t closure, const atom_t cell)
+lisp_function_lambda(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   /*
    * Extract the arguments and the PROG of the lambda.
    */
@@ -24,4 +24,4 @@ lisp_function_lambda(const atom_t closure, const atom_t cell)
   return con1;
 }
 
-LISP_PLUGIN_REGISTER(lambda, \\)
+LISP_PLUGIN_REGISTER(lambda, \\, @)

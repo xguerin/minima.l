@@ -2,7 +2,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static atom_t
 lisp_list(const atom_t closure, const atom_t cell)
@@ -32,9 +31,10 @@ lisp_list(const atom_t closure, const atom_t cell)
 }
 
 static atom_t
-lisp_function_list(const atom_t closure, const atom_t cell)
+lisp_function_list(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   return lisp_list(closure, cell);
 }
 
-LISP_PLUGIN_REGISTER(list, list)
+LISP_PLUGIN_REGISTER(list, list, @)

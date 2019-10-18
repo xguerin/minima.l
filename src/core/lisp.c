@@ -28,20 +28,38 @@ atom_t WILDCARD = NULL;
  */
 
 atom_t
-lisp_lookup(const atom_t closure, const atom_t sym)
+lisp_lookup_immediate(const atom_t closure, const symbol_t sym)
 {
-  TRACE_SEXP(sym);
   /*
    * Look-up in the closure.
    */
   FOREACH(closure, a) {
     atom_t car = a->car;
-    if (lisp_symbol_match(CAR(car), sym)) {
+    if (lisp_symbol_match_immediate(CAR(car), sym)) {
       TRACE("0x%lx", (uintptr_t)car);
       return UP(CDR(car));
     }
     NEXT(a);
   }
+  /*
+   * Nothing found.
+   */
+  return UP(NIL);
+}
+
+
+atom_t
+lisp_lookup(const atom_t closure, const atom_t sym)
+{
+  TRACE_SEXP(sym);
+  /*
+   * Load symbol from the closure.
+   */
+  atom_t result = lisp_lookup_immediate(closure, &sym->symbol);
+  if (!IS_NULL(result)) {
+    return result;
+  }
+  X(result);
   /*
    * Look-up in globals.
    */
@@ -54,7 +72,7 @@ lisp_lookup(const atom_t closure, const atom_t sym)
     NEXT(b);
   }
   /*
-   * Nothing found, try to load as a plugin.
+   * Load from the plugins.
    */
   return lisp_plugin_load(sym, NIL);
 }
@@ -332,9 +350,9 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
   TRACE_SEXP(args);
   TRACE_SEXP(vals);
   /*
-   * Return if we run out of arguments or values.
+   * Return if we run out of arguments.
    */
-  if (IS_NULL(args) || IS_NULL(vals)) {
+  if (IS_NULL(args)) {
     *narg = args;
     *nval = vals;
     return env;
@@ -347,6 +365,14 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
     *narg = UP(NIL);
     *nval = UP(NIL);
     return res;
+  }
+  /*
+   * Return if we run out of values.
+   */
+  if (IS_NULL(vals)) {
+    *narg = args;
+    *nval = vals;
+    return env;
   }
   /*
    * Grab the CARs, evaluate the value and bind them.
@@ -375,6 +401,7 @@ static atom_t
 lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
 {
   atom_t ret;
+  TRACE_SEXP(cell);
   /*
    * Grab lambda and values.
    */
@@ -423,7 +450,17 @@ lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
     X(con); X(body);
   }
   /*
-   * Otherwise, evaluation the function.
+   * Evaluation the native function. Native functions have no definition-site
+   * closures, so we pass the previously computed closure with the currently
+   * available closure to the function.
+   */
+  else if (IS_NUMB(body)) {
+    function_t fun = (function_t)body->number;
+    ret = fun(closure, newc);
+    X(body);
+  }
+  /*
+   * Evaluate the function as a PROG.
    */
   else {
     ret = lisp_prog(newc, body, UP(NIL));
@@ -446,15 +483,6 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
   /*
    */
   switch (CAR(cell)->type) {
-    case T_NIL:
-    case T_NUMBER: {
-      atom_t cdr = lisp_cdr(cell);
-      function_t fun = (function_t)CAR(cell)->number;
-      X(cell);
-      ret = fun(closure, cdr);
-      rem = UP(NIL);
-      break;
-    }
     case T_PAIR:
       ret = lisp_eval_lambda(closure, cell, &rem);
       break;
@@ -608,7 +636,7 @@ lisp_prin_atom(FILE* const handle, char * const buf, const size_t idx,
     case T_CHAR: {
       char c = (char)cell->number;
       if (s) {
-        size_t nxt = lisp_write(handle, buf, idx, "'", 1);
+        size_t nxt = lisp_write(handle, buf, idx, "^", 1);
         switch (c) {
           case '\n':
             nxt = lisp_write(handle, buf, nxt, "\\n", 2);
@@ -620,7 +648,7 @@ lisp_prin_atom(FILE* const handle, char * const buf, const size_t idx,
             nxt = lisp_write(handle, buf, nxt, &c, 1);
             break;
         }
-        return lisp_write(handle, buf, nxt, "'", 1);
+        return nxt;
       }
       return lisp_write(handle, buf, idx, &c, 1);
     }

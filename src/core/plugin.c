@@ -217,6 +217,7 @@ lisp_plugin_cleanup()
   TRACE_SEXP(PLUGINS);
   FOREACH(PLUGINS, p) {
     atom_t car = p->car;
+    TRACE_SEXP(car);
     atom_t hnd = CAR(CDR(car));
     dlclose((void *)hnd);
     NEXT(p);

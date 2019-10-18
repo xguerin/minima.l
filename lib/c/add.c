@@ -1,7 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
-BINARY_NUMBER_GEN(add, +);
-LISP_PLUGIN_REGISTER(add, +)
+BINARY_NUMBER_GEN(add, +, X, Y);
+LISP_PLUGIN_REGISTER(add, +, X, Y, NIL)

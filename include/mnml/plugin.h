@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mnml/lisp.h>
+#include <mnml/maker.h>
 #include <mnml/utils.h>
 #include <stdbool.h>
 
@@ -17,90 +18,81 @@ void lisp_plugin_cleanup();
  * Initialization macros.
  */
 
-#define LISP_PLUGIN_NAME_LENGTH(__n)  \
-  sizeof(#__n) <= LISP_SYMBOL_LENGTH ? sizeof(#__n) : LISP_SYMBOL_LENGTH
-
-#define LISP_PLUGIN_REGISTER(__s, __n)                              \
-                                                                    \
-const char *                                                        \
-lisp_plugin_name()                                                  \
-{                                                                   \
-  return #__n;                                                      \
-}                                                                   \
-                                                                    \
-atom_t                                                              \
-lisp_plugin_register()                                              \
-{                                                                   \
-  MAKE_SYMBOL_STATIC(inp, #__n, LISP_PLUGIN_NAME_LENGTH(__n));      \
-  atom_t sym = lisp_make_symbol(inp);                               \
-  atom_t val = lisp_make_number((uintptr_t)lisp_function_ ## __s);  \
-  atom_t res = UP(val);                                             \
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(sym, val));                \
-  X(sym); X(val);                                                   \
-  return res;                                                       \
+#define LISP_PLUGIN_REGISTER(__s, __n, ...)                   \
+                                                              \
+const char *                                                  \
+lisp_plugin_name()                                            \
+{                                                             \
+  return #__n;                                                \
+}                                                             \
+                                                              \
+atom_t                                                        \
+lisp_plugin_register()                                        \
+{                                                             \
+  MAKE_SYMBOL_STATIC(inp, #__n, LISP_GET_SYMBOL_LENGTH(__n)); \
+  atom_t sym = lisp_make_symbol(inp);                         \
+  LISP_CONS(arg, ## __VA_ARGS__);                             \
+  uintptr_t fun = (uintptr_t)lisp_function_ ## __s;           \
+  atom_t adr = lisp_make_number(fun);                         \
+  atom_t cn0 = lisp_cons(NIL, adr);                           \
+  atom_t val = lisp_cons(arg, cn0);                           \
+  atom_t res = UP(val);                                       \
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(sym, val));          \
+  X(sym); X(adr); X(NIL); X(cn0); X(arg); X(val);             \
+  return res;                                                 \
 }
+
+/*
+ * Closure lookup macro.
+ */
+
+#define LISP_LOOKUP(_v, _c, _x)                                 \
+  MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_GET_SYMBOL_LENGTH(#_x));  \
+  atom_t _v = lisp_lookup_immediate(_c, _##_v);
 
 /*
  * Plugin generators.
  */
 
-#define PREDICATE_GEN(_n, _o)                                   \
+#define PREDICATE_GEN(_n, _o, _x)                               \
 static atom_t                                                   \
-lisp_function_is ## _n(const atom_t closure, const atom_t cell) \
+lisp_function_is ## _n(const atom_t closure, const atom_t args) \
 {                                                               \
-  atom_t car = lisp_eval(closure, lisp_car(cell));              \
-  atom_t cdr = lisp_cdr(cell);                                  \
-  X(cell);                                                      \
+  LISP_LOOKUP(car, args, _x);                                   \
   atom_t res = _o(car) ? TRUE : NIL;                            \
-  atom_t cps = lisp_car(cdr);                                   \
-  X(car); X(cdr);                                               \
-  return lisp_rtrn(closure, UP(res), cps);                      \
+  X(car);                                                       \
+  return UP(res);                                               \
 }
 
-#define BINARY_BOOLEAN_GEN(_n, _o)                            \
-static atom_t                                                 \
-lisp_function_ ## _n(const atom_t closure, const atom_t cell) \
-{                                                             \
-  atom_t vl0 = lisp_eval(closure, lisp_car(cell));            \
-  atom_t cdr = lisp_cdr(cell);                                \
-  X(cell);                                                    \
-  atom_t vl1 = lisp_eval(closure, lisp_car(cdr));             \
-  atom_t rem = lisp_cdr(cdr);                                 \
-  X(cdr);                                                     \
-  atom_t res = IS_TRUE(vl0) _o IS_TRUE(vl1) ? TRUE : NIL;     \
-  atom_t cps = lisp_car(rem);                                 \
-  X(vl0); X(vl1); X(rem);                                     \
-  return lisp_rtrn(closure, UP(res), cps);                    \
+#define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                      \
+static atom_t                                                   \
+lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
+{                                                               \
+  LISP_LOOKUP(vl0, args, _x);                                   \
+  LISP_LOOKUP(vl1, args, _y);                                   \
+  atom_t res = IS_TRUE(vl0) _o IS_TRUE(vl1) ? TRUE : NIL;       \
+  X(vl0); X(vl1);                                               \
+  return UP(res);                                               \
 }
 
-#define BINARY_NUMBER_GEN(_n, _o)                             \
-static atom_t                                                 \
-lisp_function_ ## _n(const atom_t closure, const atom_t cell) \
-{                                                             \
-  atom_t vl0 = lisp_eval(closure, lisp_car(cell));            \
-  atom_t cdr = lisp_cdr(cell);                                \
-  X(cell);                                                    \
-  atom_t vl1 = lisp_eval(closure, lisp_car(cdr));             \
-  atom_t rem = lisp_cdr(cdr);                                 \
-  X(cdr);                                                     \
-  atom_t res = lisp_make_number(vl0->number _o vl1->number);  \
-  atom_t cps = lisp_car(rem);                                 \
-  X(vl0); X(vl1); X(rem);                                     \
-  return lisp_rtrn(closure, res, cps);                        \
+#define BINARY_NUMBER_GEN(_n, _o, _x, _y)                       \
+static atom_t                                                   \
+lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
+{                                                               \
+  LISP_LOOKUP(vl0, args, _x);                                   \
+  LISP_LOOKUP(vl1, args, _y);                                   \
+  atom_t res = lisp_make_number(vl0->number _o vl1->number);    \
+  X(vl0); X(vl1);                                               \
+  return res;                                                   \
 }
 
-#define BINARY_COMPARE_GEN(_n, _o)                            \
-static atom_t                                                 \
-lisp_function_ ## _n(const atom_t closure, const atom_t cell) \
-{                                                             \
-  atom_t vl0 = lisp_eval(closure, lisp_car(cell));            \
-  atom_t cdr = lisp_cdr(cell);                                \
-  X(cell);                                                    \
-  atom_t vl1 = lisp_eval(closure, lisp_car(cdr));             \
-  atom_t rem = lisp_cdr(cdr);                                 \
-  X(cdr);                                                     \
-  atom_t res = vl0->number _o vl1->number ? TRUE : NIL;       \
-  atom_t cps = lisp_car(rem);                                 \
-  X(vl0); X(vl1); X(rem);                                     \
-  return lisp_rtrn(closure, UP(res), cps);                    \
+#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                      \
+static atom_t                                                   \
+lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
+{                                                               \
+  LISP_LOOKUP(vl0, args, _x);                                   \
+  LISP_LOOKUP(vl1, args, _y);                                   \
+  atom_t res = vl0->number _o vl1->number ? TRUE : NIL;         \
+  X(vl0); X(vl1);                                               \
+  return UP(res);                                               \
 }

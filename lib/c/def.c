@@ -1,20 +1,19 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static atom_t
-lisp_function_def(const atom_t closure, const atom_t cell)
+lisp_function_def(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   /*
    * Grab the symbol, the arguments, and the body.
    */
   atom_t symb = lisp_car(cell);
   atom_t cdr0 = lisp_cdr(cell);
-  X(cell);
   atom_t args = lisp_car(cdr0);
   atom_t prog = lisp_cdr(cdr0);
-  X(cdr0);
+  X(cell); X(cdr0);
   /*
    * Check if there is a docstring in the declaration.
    */
@@ -29,9 +28,8 @@ lisp_function_def(const atom_t closure, const atom_t cell)
    * Append a dummy closure.
    */
   atom_t con0 = lisp_cons(NIL, prog);
-  X(prog);
   atom_t con1 = lisp_cons(args, con0);
-  X(args); X(con0);
+  X(prog); X(args); X(con0);
   /*
    * Set the symbol's value.
    */
@@ -40,4 +38,4 @@ lisp_function_def(const atom_t closure, const atom_t cell)
   return con1;
 }
 
-LISP_PLUGIN_REGISTER(def, def)
+LISP_PLUGIN_REGISTER(def, def, @)

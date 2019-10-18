@@ -39,6 +39,10 @@ typedef struct _pair
 
 #define LISP_SYMBOL_LENGTH 16
 
+#define LISP_GET_SYMBOL_LENGTH(__n)     \
+  sizeof(#__n) <= LISP_SYMBOL_LENGTH ?  \
+    sizeof(#__n) : LISP_SYMBOL_LENGTH
+
 typedef union _symbol
 {
   char      val[LISP_SYMBOL_LENGTH];
@@ -72,4 +76,4 @@ __attribute__((packed)) * atom_t;
 #define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
 #define IS_ATOM(__a) (!IS_PAIR(__a) && !IS_NULL(__a))
 
-typedef atom_t (* function_t)(const atom_t closure, const atom_t cell);
+typedef atom_t (* function_t)(const atom_t closure, const atom_t arguments);

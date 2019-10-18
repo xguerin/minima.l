@@ -4,7 +4,6 @@
 #include <mnml/utils.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <string.h>
 #include <unistd.h>
 
 static const char *
@@ -69,9 +68,10 @@ lisp_load_file(const atom_t cell)
   return res;
 }
 
-atom_t
-lisp_function_load(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_load(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   /*
    * Get CAR/CDR.
    */
@@ -92,4 +92,4 @@ lisp_function_load(const atom_t closure, const atom_t cell)
   return lisp_load_file(fst);
 }
 
-LISP_PLUGIN_REGISTER(load, load)
+LISP_PLUGIN_REGISTER(load, load, @)

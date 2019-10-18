@@ -1,11 +1,14 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static atom_t
-lisp_function_set(const atom_t closure, const atom_t cell)
+lisp_function_set(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
+  /*
+   * Lookup the symbol and the value.
+   */
   atom_t sym = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   atom_t val = lisp_eval(closure, lisp_car(cdr));
@@ -43,4 +46,4 @@ lisp_function_set(const atom_t closure, const atom_t cell)
   return UP(NIL);
 }
 
-LISP_PLUGIN_REGISTER(set, <-)
+LISP_PLUGIN_REGISTER(set, <-, @)

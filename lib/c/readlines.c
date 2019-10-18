@@ -4,16 +4,14 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
 
 #define BUFFER_LEN 1024
 
-atom_t
-lisp_function_readlines(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_readlines(const atom_t closure, const atom_t arguments)
 {
   FILE* handle = (FILE*)CAR(CAR(ICHAN))->number;
-  X(cell);
   /*
    */
   atom_t res = UP(NIL);

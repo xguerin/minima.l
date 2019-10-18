@@ -1,7 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 #include <unistd.h>
 
 static atom_t
@@ -23,10 +22,11 @@ lisp_print_all(const atom_t closure, const atom_t cell, const atom_t result)
   return lisp_print_all(closure, cdr, car);
 }
 
-atom_t
-lisp_function_print(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_print(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
   return lisp_print_all(closure, cell, UP(NIL));
 }
 
-LISP_PLUGIN_REGISTER(print, print)
+LISP_PLUGIN_REGISTER(print, print, @)

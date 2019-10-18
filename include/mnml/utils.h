@@ -78,6 +78,13 @@ uint64_t lisp_timestamp();
  */
 
 static inline bool
+lisp_symbol_match_immediate(const atom_t a, const symbol_t b)
+{
+  register __m128i res = _mm_xor_si128(a->symbol.tag, b->tag);
+  return _mm_test_all_zeros(res, res);
+}
+
+static inline bool
 lisp_symbol_match(const atom_t a, const atom_t b)
 {
   register __m128i res = _mm_xor_si128(a->symbol.tag, b->symbol.tag);

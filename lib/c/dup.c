@@ -2,12 +2,15 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <errno.h>
-#include <string.h>
 #include <unistd.h>
 
-atom_t
-lisp_function_dup(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_dup(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, @);
+  /*
+   * Grab the arguments.
+   */
   atom_t car = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   atom_t tgt = lisp_eval(closure, lisp_car(cdr));
@@ -28,4 +31,4 @@ lisp_function_dup(const atom_t closure, const atom_t cell)
   return lisp_make_number(ret < 0 ? errno : ret);
 }
 
-LISP_PLUGIN_REGISTER(dup, dup)
+LISP_PLUGIN_REGISTER(dup, dup, @)

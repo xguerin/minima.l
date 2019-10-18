@@ -1,8 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <errno.h>
-#include <string.h>
 #include <unistd.h>
 
 static bool
@@ -21,11 +19,12 @@ lisp_close(const atom_t closure, const atom_t cell, const bool res)
   return res;
 }
 
-atom_t
-lisp_function_close(const atom_t closure, const atom_t cell)
+static atom_t
+lisp_function_close(const atom_t closure, const atom_t arguments)
 {
+  LISP_LOOKUP(cell, arguments, X);
   bool res = lisp_close(closure, cell, true);
   return UP(res ? TRUE : NIL);
 }
 
-LISP_PLUGIN_REGISTER(close, close)
+LISP_PLUGIN_REGISTER(close, close, X)

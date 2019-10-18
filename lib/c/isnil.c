@@ -1,7 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
-PREDICATE_GEN(nil, IS_NULL);
-LISP_PLUGIN_REGISTER(isnil, nil?)
+PREDICATE_GEN(nil, IS_NULL, X);
+LISP_PLUGIN_REGISTER(isnil, nil?, X)

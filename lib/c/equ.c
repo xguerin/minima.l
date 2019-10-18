@@ -1,7 +1,6 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <string.h>
 
 static bool lisp_equ(const atom_t a, const atom_t b);
 
@@ -32,16 +31,13 @@ lisp_equ(const atom_t a, const atom_t b)
 }
 
 static atom_t
-lisp_function_equ(const atom_t closure, const atom_t cell)
+lisp_function_equ(const atom_t closure, const atom_t arguments)
 {
-  atom_t vl0 = lisp_eval(closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
-  atom_t vl1 = lisp_eval(closure, lisp_car(cdr));
-  X(cdr);
+  LISP_LOOKUP(vl0, arguments, X);
+  LISP_LOOKUP(vl1, arguments, Y);
   atom_t res = lisp_equ(vl0, vl1) ? TRUE : NIL;
   X(vl0); X(vl1);
   return UP(res);
 }
 
-LISP_PLUGIN_REGISTER(equ, =)
+LISP_PLUGIN_REGISTER(equ, =, X, Y, NIL)

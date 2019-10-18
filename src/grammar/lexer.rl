@@ -161,9 +161,9 @@ quote   = '\'';
 backt   = '`';
 tilde   = '~';
 number  = '-'? digit+;
-char    = '\'' . (print - '\\' | '\\' . '\\') . '\'';
+char    = '^' . print;
 string  = '"' . ([^"] | '\\' '"')* . '"';
-marks   = [!@$%^&*_+\-={}\[\]:;|\\<>?,./];
+marks   = [!@$%&*_+\-={}\[\]:;|\\<>?,./];
 symbol  = (alpha | marks) . (alnum | marks){,15} $!err_symbol;
 comment = '#' . [^\n]*;
 
@@ -184,10 +184,17 @@ main := |*
   '_'    => tok_wildcard;
   symbol => tok_symbol;
   #
-  # Quoted rules.
+  # Escaped POPEN.
   #
-  (quote >tok_quote | backt >tok_backt | tilde >tok_tilde) . popen  $!err_prefix => tok_popen;
-  (quote >tok_quote | backt >tok_backt | tilde >tok_tilde) . symbol $!err_prefix => tok_symbol;
+  (quote . popen) %tok_quote $!err_prefix => tok_popen;
+  (backt . popen) %tok_backt $!err_prefix => tok_popen;
+  (tilde . popen) %tok_tilde $!err_prefix => tok_popen;
+  #
+  # Escaped SYMBOL.
+  #
+  (quote . symbol) %tok_quote $!err_prefix => tok_symbol;
+  (backt . symbol) %tok_backt $!err_prefix => tok_symbol;
+  (tilde . symbol) %tok_tilde $!err_prefix => tok_symbol;
   #
   # Garbage.
   #
