@@ -10,14 +10,11 @@
 
 extern atom_t PLUGINS;
 
-const char * lisp_prefix();
-
 atom_t lisp_plugin_load(const atom_t cell, const atom_t path);
-
 void lisp_plugin_cleanup();
 
 /*
- * Helpful macros.
+ * Initialization macros.
  */
 
 #define LISP_PLUGIN_NAME_LENGTH(__n)  \
@@ -42,6 +39,10 @@ lisp_plugin_register()                                              \
   X(sym); X(val);                                                   \
   return res;                                                       \
 }
+
+/*
+ * Plugin generators.
+ */
 
 #define PREDICATE_GEN(_n, _o)                                   \
 static atom_t                                                   \

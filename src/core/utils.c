@@ -3,6 +3,9 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
+#include <dirent.h>
+#include <dlfcn.h>
+#include <libgen.h>
 #include <limits.h>
 #include <time.h>
 
@@ -52,6 +55,32 @@ void lisp_set_debug_flag(const char * const flag)
   MNML_VERBOSE_SLOT = MNML_VERBOSE_SLOT || strcmp(flag, "SLOT") == 0;
 }
 #endif
+
+const char *
+lisp_prefix()
+{
+  static bool is_set = false;
+  static char prefix[PATH_MAX] = { 0 };
+  Dl_info libInfo;
+  /*
+   * Compute this library path.
+   */
+  if (!is_set && dladdr(&lisp_prefix, &libInfo) != 0) {
+    char buffer[PATH_MAX] = { 0 };
+#if defined(__OpenBSD__)
+    strlcpy(buffer, libInfo.dli_fname, 4096);
+#else
+    strcpy(buffer, libInfo.dli_fname);
+#endif
+    const char * dname = dirname(dirname(buffer));
+    strcpy(prefix, dname);
+    is_set = true;
+  }
+  /*
+   * Return the result.
+   */
+  return prefix;
+}
 
 void
 lisp_init()
