@@ -1,5 +1,6 @@
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
+#include <mnml/utils.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,7 +19,7 @@ bool MNML_VERBOSE_SLAB    = false;
  */
 
 static void
-lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
+lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
 {
   switch (atom->type) {
     case T_NIL:
@@ -39,6 +40,18 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, const bool alter)
       break;
     }
     case T_PAIR:
+      /*
+       * Check if it's a string.
+       */
+      if (lisp_is_string(atom)) {
+        char buffer[1024];
+        int len = lisp_make_cstring(atom, buffer, 1024, 0);
+        fprintf(fp, "\"%.*s\"", len, buffer);
+        break;
+      }
+      /*
+       * Process the list.
+       */
       if (alter) fprintf(fp, "(");
       /*
        * Print CAR.

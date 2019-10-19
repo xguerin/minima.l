@@ -344,7 +344,7 @@ interpreter.
 | `prinl`     | `(prinl 'any ...)`            | ✓      | [Symbolic print](#prinl) of a list of `any`, with new line |
 | `print`     | `(print 'any ...)`            | ✓      | [Literal print](#print) of a list of `any` |
 | `printl`    | `(printl 'any ...)`           | ✓      | [Literal print](#print) of a list of `any`, with new line |
-| `read`      | `(read)`                      | ✓      | Read a token from the current input stream |
+| `read`      | `(read)`                      | ✓      | [Read a token](#read) from the current input stream |
 | `readlines` | `(readlines)`                 | ✓      | Read all lines from the current input stream |
 | **Core operations**                |        |||
 | `eval`      | `(eval 'any)`                 | ✓      | [Evaluate](#eval) `any` |
@@ -596,6 +596,19 @@ Evaluate `prg1`, `prg2`, ..., in sequence and return the last evaluation.
 : (prog (+ 1 1) (+ 2 2))
 > 4
 ```
+#### READ
+```lisp
+(read)
+```
+Read a token from the current input stream. The current input stream differs
+depending on the context:
+
+* When run interactively, the current input stream is `stdin`
+* When executing a file, or as a _shebang_ interpreter, the current input
+  stream is that of the file
+
+The current input stream is also altered by the [`in`](#in) command.
+
 #### SET
 ```lisp
 (<- 'sym 'any)

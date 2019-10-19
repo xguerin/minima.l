@@ -147,22 +147,23 @@ lisp_consumer(const atom_t cell)
 {
   atom_t chn = CAR(ICHAN);
   CDR(chn) = lisp_append(CDR(chn), cell);
-  TRACE_SEXP(ICHAN);
 }
 
 static atom_t
 lisp_read_pop()
 {
+  TRACE_SEXP(ICHAN);
   /*
-   * ((CHN0 V1 V2) (CHN1 V1 V2) ...).
+   * ((CHN0 PWD V1 V2) (CHN1 PWD V1 V2) ...).
    */
   atom_t chn = CAR(ICHAN);
-  atom_t vls = CDR(chn);
+  atom_t vls = CDR(CDR(chn));
   atom_t res = UP(CAR(vls));
-  CDR(chn) = UP(CDR(vls));
+  CDR(CDR(chn)) = UP(CDR(vls));
   X(vls);
+  /*
+   */
   TRACE_SEXP(ICHAN);
-  TRACE_SEXP(res);
   return res;
 }
 
@@ -170,14 +171,17 @@ atom_t
 lisp_read(const atom_t closure, const atom_t cell)
 {
   TRACE_SEXP(ICHAN);
+  X(cell);
   /*
+   * Grab the channel, the path and the content.
    */
   atom_t chn = CAR(ICHAN);
-  X(cell);
+  atom_t hnd = CAR(chn);
+  atom_t val = CDR(CDR(chn));
   /*
    * Check if there is any value in the channel's buffer.
    */
-  if (CDR(chn) != NIL) {
+  if (!IS_NULL(val)) {
     return lisp_read_pop();
   }
   /*
@@ -185,7 +189,7 @@ lisp_read(const atom_t closure, const atom_t cell)
    */
   lexer_t lexer;
   lisp_create(lisp_consumer, &lexer);
-  FILE* handle = (FILE*)CAR(chn)->number;
+  FILE* handle = (FILE *)hnd->number;
   /*
    */
   char buffer[RBUFLEN] = { 0 };
@@ -197,12 +201,12 @@ lisp_read(const atom_t closure, const atom_t cell)
     size_t len = strlen(p);
     lisp_parse(&lexer, buffer, lexer.rem + len, lexer.rem + len < RBUFLEN);
   }
-  while (CDR(CAR(ICHAN)) == NIL || lisp_pending(&lexer));
+  while (CDR(CDR(CAR(ICHAN))) == NIL || lisp_pending(&lexer));
   /*
    * Grab the result and return it.
    */
   lisp_destroy(&lexer);
-  return CDR(chn) != NIL ? lisp_read_pop(): NULL;
+  return CDR(CDR(chn)) != NIL ? lisp_read_pop(): NULL;
 }
 
 /*

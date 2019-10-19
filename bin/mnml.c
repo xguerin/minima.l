@@ -3,14 +3,16 @@
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (* stage_t)(const atom_t);
+typedef void (* stage_t)(const atom_t, const void * const data);
 
 static bool keep_running = true;
 
@@ -21,18 +23,19 @@ signal_handler(const int sigid)
 }
 
 static void
-run(const stage_t pread, const stage_t peval, const stage_t post)
+run(const stage_t pread, const stage_t peval, const stage_t pdone,
+    const void * data)
 {
   atom_t input, result;
   while (keep_running) {
-    pread(NIL);
+    pread(NIL, data);
     input = lisp_read(NIL, UP(NIL));
     if (input == NULL) {
       break;
     }
-    peval(input);
+    peval(input, data);
     result = lisp_eval(NIL, input);
-    post(result);
+    pdone(result, data);
     X(result);
   }
 }
@@ -47,15 +50,15 @@ repl_parse_error_handler()
 }
 
 static void
-stage_prompt(const atom_t cell)
+stage_prompt(const atom_t cell, const void * const data)
 {
-  if (CDR(CAR(ICHAN)) == NIL) {
+  if (CDR(CDR(CAR(ICHAN))) == NIL) {
     fwrite(": ", 1, 2, stdout);
   }
 }
 
 static void
-stage_newline(const atom_t cell)
+stage_newline(const atom_t cell, const void * const data)
 {
   fwrite("> " , 1, 2, stdout);
   lisp_prin(NIL, cell, true);
@@ -63,21 +66,9 @@ stage_newline(const atom_t cell)
 }
 
 static void
-stage_noop(const atom_t cell)
+stage_noop(const atom_t cell, const void * const data)
 {
 
-}
-
-static void
-stage_push_io(const atom_t cell)
-{
-  PUSH_IO_CONTEXT(ICHAN, stdin);
-}
-
-static void
-stage_pop_io(const atom_t cell)
-{
-  POP_IO_CONTEXT(ICHAN);
 }
 
 static void
@@ -167,6 +158,15 @@ main(const int argc, char ** const argv)
   signal(SIGQUIT, signal_handler);
   signal(SIGTERM, signal_handler);
   /*
+   * Get the current working dsirectory.
+   */
+  char cwd_buf[PATH_MAX];
+  const char * const cwd = getcwd(cwd_buf, PATH_MAX);
+  if (cwd == NULL) {
+    fprintf(stderr, "Cannot get current directory: %s", strerror(errno));
+    return __LINE__;
+  }
+  /*
    * Preload some basic functions if MNML_PRELOAD is not defined.
    */
   const char * PRELOAD = getenv("MNML_PRELOAD");
@@ -210,22 +210,17 @@ main(const int argc, char ** const argv)
    */
   if (argc == 1) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    PUSH_IO_CONTEXT(ICHAN, stdin);
-    PUSH_IO_CONTEXT(OCHAN, stdout);
-    run(stage_prompt, stage_noop, stage_newline);
+    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    run(stage_prompt, stage_noop, stage_newline, cwd);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   }
   else {
-    FILE* file = fopen(argv[1], "r");
-    if (file != NULL) {
-      PUSH_IO_CONTEXT(ICHAN, file);
-      PUSH_IO_CONTEXT(OCHAN, stdout);
-      run(stage_noop, stage_push_io, stage_pop_io);
-      POP_IO_CONTEXT(ICHAN);
-      POP_IO_CONTEXT(OCHAN);
-      fclose(file);
-    }
+    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    atom_t res = lisp_load_file(argv[1]);
+    X(res);
+    POP_IO_CONTEXT(OCHAN);
   }
   /*
    */

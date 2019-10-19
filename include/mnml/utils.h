@@ -42,6 +42,11 @@ atom_t lisp_dup(const atom_t cell);
 atom_t lisp_merge(const atom_t defn, const atom_t call);
 
 /*
+ * Return true if a cell is a string.
+ */
+bool lisp_is_string(const atom_t cell);
+
+/*
  * Make a C string from a list of characters.
  */
 size_t lisp_make_cstring(const atom_t cell, char * const buffer,
@@ -58,14 +63,26 @@ atom_t lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
 uint64_t lisp_timestamp();
 
 /*
+ * Get the full path of a file according to the current ICHAN context.
+ */
+const char * lisp_get_fullpath(const char * const filepath, char * const buffer);
+
+/*
+ * Load a file.
+ */
+atom_t lisp_load_file(const char * const filepath);
+
+/*
  * IO context helpers.
  */
-#define PUSH_IO_CONTEXT(__c, __d) {           \
-  atom_t n = lisp_make_number((int64_t)__d);  \
-  atom_t l = lisp_cons(n, NIL);               \
-  atom_t o = __c;                             \
-  __c = lisp_cons(l, o);                      \
-  X(o); X(l); X(n);                           \
+#define PUSH_IO_CONTEXT(__c, __d, __p) {          \
+  atom_t p = lisp_make_string(__p, strlen(__p));  \
+  atom_t x = lisp_cons(p, NIL);                   \
+  atom_t n = lisp_make_number((int64_t)__d);      \
+  atom_t y = lisp_cons(n, x);                     \
+  atom_t o = __c;                                 \
+  __c = lisp_cons(y, o);                          \
+  X(o); X(y); X(n); X(x); X(p);                   \
 }
 
 #define POP_IO_CONTEXT(__c) { \

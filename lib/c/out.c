@@ -3,6 +3,7 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <fcntl.h>
+#include <libgen.h>
 #include <limits.h>
 #include <unistd.h>
 
@@ -10,12 +11,38 @@ static atom_t
 lisp_function_out(const atom_t closure, const atom_t arguments)
 {
   int fd = 1;
-  char buffer[PATH_MAX + 1];
+  char file_buf[PATH_MAX];
+  char path_buf[PATH_MAX];
+  char dirn_buf[PATH_MAX];
   /*
    * Get CHAN and PROG.
    */
   LISP_LOOKUP(chan, arguments, CHAN);
   LISP_LOOKUP(prog, arguments, PROG);
+  /*
+   * Get the filepath.
+   */
+  lisp_make_cstring(chan, file_buf, PATH_MAX, 0);
+  /*
+   * Get the fullpath for the file.
+   */
+  const char * path = lisp_get_fullpath(file_buf, path_buf);
+  if (path == NULL) {
+    ERROR("Cannot get the full path for %s", file_buf);
+    return UP(NIL);
+  }
+  /*
+   * Grab the current ICHAN directory.
+   */
+  const char * dir = dirname_r(path, dirn_buf);
+  if (dir == NULL) {
+    ERROR("Cannot get directory for %s", path);
+    return UP(NIL);
+  }
+  /*
+   * Get the working directory for the current ICHAN.
+   */
+  lisp_make_cstring(CAR(CDR(CAR(ICHAN))), dirn_buf, PATH_MAX, 0);
   /*
    * Process the CHAN.
    */
@@ -29,12 +56,12 @@ lisp_function_out(const atom_t closure, const atom_t arguments)
       X(chan);
       break;
     case T_PAIR:
-      lisp_make_cstring(chan, buffer, PATH_MAX, 0);
-      fd = open(buffer, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+      fd = open(file_buf, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
       if (fd >= 0) {
         X(chan);
         break;
       }
+      ERROR("Cannot open file %s", path);
       /*
        * NOTE(xrg) fall-through intended.
        */
@@ -54,7 +81,7 @@ lisp_function_out(const atom_t closure, const atom_t arguments)
   /*
    * Push the context, eval the prog, pop the context.
    */
-  PUSH_IO_CONTEXT(OCHAN, handle);
+  PUSH_IO_CONTEXT(OCHAN, handle, dirn_buf);
   atom_t res = lisp_prog(closure, prog, UP(NIL));
   POP_IO_CONTEXT(OCHAN);
   /*

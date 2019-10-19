@@ -169,22 +169,22 @@
     # Generate the binary numeric operations
     #
     ~(foldl
-       (\ (acc e) (cons (conc (cons (list e _ _ _)
-                                '(cps:scantypes kvar body 'NUMBER alst))) acc))
+       (\ (acc e) (cons (cons (list e _ _ _)
+                          '(cps:scantypes kvar body 'NUMBER alst)) acc))
        NIL '(+ - * / = <> < <= > >=))
     #
     # Generate the list unary operations
     #
     ~(foldl
-       (\ (acc e) (cons (conc (cons (list e _ _)
-                                '(cps:scantypes kvar body 'LIST alst))) acc))
+       (\ (acc e) (cons (cons (list e _ _)
+                          '(cps:scantypes kvar body 'LIST alst)) acc))
        NIL '(car cdr))
     #
     # Generate the list binary operations
     #
     ~(foldl
-       (\ (acc e) (cons (conc (cons (list e _ _ _)
-                                '(cps:scantypes kvar body 'LIST alst))) acc))
+       (\ (acc e) (cons (cons (list e _ _ _)
+                          '(cps:scantypes kvar body 'LIST alst)) acc))
        NIL '(cons conc))
     #
     # Predicates.
