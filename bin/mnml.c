@@ -22,12 +22,13 @@ signal_handler(const int sigid)
   keep_running = false;
 }
 
-static void
+static atom_t
 run(const stage_t pread, const stage_t peval, const stage_t pdone,
     const void * data)
 {
-  atom_t input, result;
+  atom_t input, result = UP(NIL);
   while (keep_running) {
+    X(result);
     pread(NIL, data);
     input = lisp_read(NIL, UP(NIL));
     if (input == NULL) {
@@ -36,8 +37,8 @@ run(const stage_t pread, const stage_t peval, const stage_t pdone,
     peval(input, data);
     result = lisp_eval(NIL, input);
     pdone(result, data);
-    X(result);
   }
+  return result;
 }
 
 static void
@@ -150,7 +151,6 @@ lisp_preload(const size_t n, ...)
 int
 main(const int argc, char ** const argv)
 {
-  int status = 0;
   lisp_init();
   /*
    * Register system signals.
@@ -208,23 +208,27 @@ main(const int argc, char ** const argv)
   lisp_build_env();
   /*
    */
+  atom_t result;
   if (argc == 1) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
     PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    run(stage_prompt, stage_noop, stage_newline, cwd);
+    result = run(stage_prompt, stage_noop, stage_newline, cwd);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   }
   else {
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    atom_t res = lisp_load_file(argv[1]);
-    X(res);
+    result = lisp_load_file(argv[1]);
     POP_IO_CONTEXT(OCHAN);
   }
   /*
+   * Compute the return status.
+   */
+  int status = IS_NULL(result) ? 1 : 0;
+  X(result);
+  /*
    */
   lisp_fini();
-  status = slab.n_alloc - slab.n_free;
   return status;
 }
