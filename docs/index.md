@@ -454,12 +454,11 @@ Create a list with `any` arguments.
 ```
 #### LOAD
 ```lisp
-(load str)
-(load 'sym [str])
+(load 'str 'sym ...)
 ```
-In the first form, load the `lisp` file pointed by `str`. On success, `load`
-returns the result of the last evaluated operation in the file. Otherwise, `NIL`
-is returned.
+Load the `lisp` file pointed by `str` or the lisp symbol pointed by 'sym.  On
+success, `load` returns the result of the last evaluated operation in the list.
+Otherwise, `NIL` is returned.
 ```lisp
 : (load "lib/lisp/cadr.l")
 > ((x) NIL (car (cdr x)))
@@ -470,9 +469,8 @@ directory of the installation prefix.
 : (load "@lib/cadr.l")
 > ((x) NIL (car (cdr x)))
 ```
-In the second form, load the `lisp` symbol from plugins either from the
-installation prefix, the `MNML_PLUGIN_PATH` environment variable, or the
-optional `str` path.
+Symbols are loaded from plugins found in the installation prefix or in
+the `MNML_PLUGIN_PATH` environment variable.
 ```lisp
 : (load '+)
 > 4425116848

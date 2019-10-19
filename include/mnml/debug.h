@@ -9,6 +9,8 @@
 
 extern bool MNML_DEBUG;
 extern bool MNML_VERBOSE_CONS;
+extern bool MNML_VERBOSE_MAKE;
+extern bool MNML_VERBOSE_PLUGIN;
 extern bool MNML_VERBOSE_RC;
 extern bool MNML_VERBOSE_SLOT;
 extern bool MNML_VERBOSE_SLAB;

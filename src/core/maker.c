@@ -9,7 +9,7 @@ lisp_make_char(const char c)
   R->type = T_CHAR;
   R->refs = 1;
   R->number = c;
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   return R;
 }
 
@@ -20,7 +20,7 @@ lisp_make_number(const int64_t num)
   R->type = T_NUMBER;
   R->refs = 1;
   R->number = num;
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   return R;
 }
 
@@ -44,7 +44,7 @@ lisp_make_symbol(const symbol_t sym)
   R->type = T_SYMBOL;
   R->refs = 1;
   R->symbol = *sym;
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   return R;
 }
 
@@ -54,7 +54,7 @@ lisp_make_nil()
   atom_t R = lisp_allocate();
   R->type = T_NIL;
   R->refs = 1;
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   NIL = R;
 }
 
@@ -64,7 +64,7 @@ lisp_make_true()
   atom_t R = lisp_allocate();
   R->type = T_TRUE;
   R->refs = 1;
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   TRUE = R;
 }
 
@@ -73,7 +73,7 @@ lisp_make_quote()
 {
   MAKE_SYMBOL_STATIC(quote, "quote", 5);
   atom_t R = lisp_make_symbol(quote);
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   QUOTE = R;
 }
 
@@ -83,6 +83,6 @@ lisp_make_wildcard()
   atom_t R = lisp_allocate();
   R->type = T_WILDCARD;
   R->refs = 1;
-  TRACE_SEXP(R);
+  TRACE_MAKE(R);
   WILDCARD = R;
 }

@@ -8,21 +8,22 @@
 /*
  * Interpreter life cycle.
  */
-
 typedef void (* error_handler_t)();
 
 void lisp_set_parse_error_handler(const error_handler_t h);
 void lisp_set_syntax_error_handler(const error_handler_t h);
 
-const char * lisp_prefix();
-
 void lisp_init();
 void lisp_fini();
 
 /*
+ * Installation information.
+ */
+const char * lisp_prefix();
+
+/*
  * Return the length of a list.
  */
-
 size_t lisp_len(const atom_t cell);
 
 /*
@@ -74,9 +75,25 @@ uint64_t lisp_timestamp();
 }
 
 /*
+ * Scan PATH-like string format.
+ */
+#define FOR_EACH_PATH_ENTRY(__s, __e, BLOCK) {  \
+  char * copy = strdup(__s);                    \
+  char * haystack = copy, * p, * __e;           \
+  while ((p = strstr(haystack, ":")) != NULL) { \
+    *p = 0;                                     \
+    __e = haystack;                             \
+    haystack = p + 1;                           \
+    if (strlen(__e) > 0) BLOCK;                 \
+  }                                             \
+  __e = haystack;                               \
+  BLOCK;                                        \
+  free(copy);                                   \
+}
+
+/*
  * Symbol matching.
  */
-
 static inline bool
 lisp_symbol_match_immediate(const atom_t a, const symbol_t b)
 {

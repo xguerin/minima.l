@@ -137,6 +137,24 @@
              LISP_CONS_0)(__VA_ARGS__)
 
 /*
+ * Debug macros.
+ */
+
+#ifdef LISP_ENABLE_DEBUG
+
+#define TRACE_MAKE(__c) {   \
+  if (MNML_VERBOSE_MAKE) {  \
+    TRACE_SEXP(__c);        \
+  }                         \
+}
+
+#else
+
+#define TRACE_MAKE(__c)
+
+#endif
+
+/*
  * Atom makers.
  */
 

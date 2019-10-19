@@ -1,9 +1,11 @@
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
+#include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -136,17 +138,71 @@ lisp_build_env()
   }
 }
 
+static void
+lisp_preload(const size_t n, ...)
+{
+  va_list args;
+  va_start(args, n);
+  for (size_t i = 0; i < n; i += 1) {
+    const char * const symbol = va_arg(args, const char *);
+    MAKE_SYMBOL_STATIC(s, symbol, LISP_GET_SYMBOL_LENGTH(symbol));
+    atom_t cell = lisp_make_symbol(s);
+    atom_t func = lisp_plugin_load(cell, UP(NIL));
+    X(cell); X(func);
+  }
+  va_end(args);
+}
+
+#define NUMARGS(...)  (sizeof((char *[]){__VA_ARGS__})/sizeof(char *))
+#define PRELOAD(...)  lisp_preload(NUMARGS(__VA_ARGS__), __VA_ARGS__)
+
 int
 main(const int argc, char ** const argv)
 {
   int status = 0;
   lisp_init();
   /*
+   * Register system signals.
    */
   signal(SIGQUIT, signal_handler);
   signal(SIGTERM, signal_handler);
   /*
-   * Build argv and env.
+   * Preload some basic functions if MNML_PRELOAD is not defined.
+   */
+  const char * PRELOAD = getenv("MNML_PRELOAD");
+  if (PRELOAD == NULL) {
+    PRELOAD(/* COMPARATORS */
+            "=", "<>", "<", ">", "<=", ">=",
+            /* ARITHMETICS */
+            "+", "-", "*", "/", "%",
+            /* LOGIC */
+            "and", "or", "not",
+            /* LIST */
+            "car", "cdr", "conc", "cons", "list",
+            /* SYMBOL */
+            "<-", "\\", "def", "let", "setq", "sym",
+            /* STRING AND CHARACTER */
+            "chr", "str",
+            /* CONTROL */
+            "|>", "cond", "if", "match", "prog",
+            /* PREDICATES */
+            "chr?", "lst?", "nil?", "num?", "str?", "sym?", "tru?",
+            /* I/O */
+            "in", "out", "read", "readlines",
+            /* PRINTERS */
+            "prin", "prinl", "print", "printl",
+            /* MISC */
+            "eval", "load", "quit", "quote", "time"
+            /* END */);
+  }
+  /*
+   * Scan the PRELOAD list and load the symbols it contains.
+   */
+  else {
+    FOR_EACH_PATH_ENTRY(PRELOAD, entry, lisp_preload(1, entry));
+  }
+  /*
+   * Build ARGV and ENV.
    */
   lisp_build_argv(argc, argv);
   lisp_build_env();

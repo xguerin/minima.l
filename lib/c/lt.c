@@ -3,4 +3,4 @@
 #include <mnml/slab.h>
 
 BINARY_COMPARE_GEN(lt, <, X, Y);
-LISP_PLUGIN_REGISTER(lt, <, X, Y)
+LISP_PLUGIN_REGISTER(lt, <, X, Y, NIL)

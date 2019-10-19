@@ -69,27 +69,47 @@ lisp_load_file(const atom_t cell)
 }
 
 static atom_t
-lisp_function_load(const atom_t closure, const atom_t arguments)
+lisp_load(const atom_t closure, const atom_t cell)
 {
-  LISP_LOOKUP(cell, arguments, @);
+  atom_t res;
+  TRACE_SEXP(cell);
   /*
    * Get CAR/CDR.
    */
-  atom_t fst = lisp_eval(closure, lisp_car(cell));
+  atom_t car = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
-  atom_t snd = lisp_eval(closure, lisp_car(cdr));
-  X(cell); X(cdr);
+  X(cell);
   /*
-   * (load 'sym ['path'])
+   * If it's a symbol, load it from plugins.
    */
-  if (IS_SYMB(fst)) {
-    return lisp_load_plugin(fst, snd);
+  if (IS_SYMB(car)) {
+    res = lisp_load_plugin(car, UP(NIL));
   }
   /*
    * Construct the file name.
    */
-  X(snd);
-  return lisp_load_file(fst);
+  else {
+    res = lisp_load_file(car);
+  }
+  /*
+   * If CDR is NIL, return the result.
+   */
+  if (IS_NULL(cdr)) {
+    X(cdr);
+    return res;
+  }
+  /*
+   * Return the next evaluation otherwise.
+   */
+  X(res);
+  return lisp_load(closure, cdr);
+}
+
+static atom_t
+lisp_function_load(const atom_t closure, const atom_t arguments)
+{
+  LISP_LOOKUP(cell, arguments, @);
+  return lisp_load(closure, cell);
 }
 
 LISP_PLUGIN_REGISTER(load, load, @)

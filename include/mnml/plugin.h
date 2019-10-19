@@ -11,7 +11,9 @@
 
 extern atom_t PLUGINS;
 
+atom_t lisp_plugin_load_immediate(const char * const sym, const char * const path);
 atom_t lisp_plugin_load(const atom_t cell, const atom_t path);
+
 void lisp_plugin_cleanup();
 
 /*
@@ -37,7 +39,9 @@ lisp_plugin_register()                                        \
   atom_t cn0 = lisp_cons(NIL, adr);                           \
   atom_t val = lisp_cons(arg, cn0);                           \
   atom_t res = UP(val);                                       \
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(sym, val));          \
+  atom_t cns = lisp_cons(sym, val);                           \
+  TRACE_SEXP(cns);                                            \
+  GLOBALS = lisp_setq(GLOBALS, cns);                          \
   X(sym); X(adr); X(NIL); X(cn0); X(arg); X(val);             \
   return res;                                                 \
 }
@@ -96,3 +100,30 @@ lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
   X(vl0); X(vl1);                                               \
   return UP(res);                                               \
 }
+
+/*
+ * Debug macros.
+ */
+
+#ifdef LISP_ENABLE_DEBUG
+
+#define ERROR_PLUGIN(__fmt, ...) {  \
+  if (MNML_VERBOSE_PLUGIN) {        \
+    ERROR(__fmt, ## __VA_ARGS__);   \
+  }                                 \
+}
+
+#define TRACE_PLUGIN(__fmt, ...) {  \
+  if (MNML_VERBOSE_PLUGIN) {        \
+    TRACE(__fmt, ## __VA_ARGS__);   \
+  }                                 \
+}
+
+#else
+
+#define ERROR_PLUGIN(__fmt, ...)
+#define TRACE_PLUGIN(__fmt, ...)
+
+#endif
+
+

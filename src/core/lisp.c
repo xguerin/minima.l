@@ -72,9 +72,9 @@ lisp_lookup(const atom_t closure, const atom_t sym)
     NEXT(b);
   }
   /*
-   * Load from the plugins.
+   * Return NIL.
    */
-  return lisp_plugin_load(sym, NIL);
+  return UP(NIL);
 }
 
 /*
