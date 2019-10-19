@@ -3,6 +3,52 @@
 Minima.l is an opinionated LISP heavily inspired by [Picolisp](http://picolisp.com). It is distributed
 under the ISC license.
 
+## Interpreter
+
+The intepreter is called `mnml`. It can be run interactively:
+```
+$ mnml
+>
+```
+It accepts a file name as a parameter:
+```
+$ mnml file.l
+```
+It can be used as a _shebang_ interpreter:
+```
+#!/usr/bin/env mnml
+
+(+ 1 2)
+```
+By default, the interpreter preload most common [plugins](#native-functions) out of the box. What
+is loaded can be altered by the `MNML_PRELOAD` variable.
+
+### Environment variables
+
+#### MNML_DEBUG
+
+If Minima.l has been compiled with debug support, this variable controls which
+class of debug output to generate:
+
+* `CONS`: list construction operations
+* `MAKE`: atom creation operations
+`* PLUGIN`: plugin operations
+* `RC`: reference counting operations
+* `SLOT`: slot allocator operations
+* `SLAB`: slab allocator operations
+
+The variable can be left empty to restrict debug output to evaluation steps.
+
+#### MNML_PRELOAD
+
+This variable controls which plugin is preloaded by the interpreter. Although it
+can be used empty, you may want to at least preload `load`.
+
+#### MNML_PLUGIN_PATH
+
+This variable controls where to look for plugins, the default being the
+installation prefix.
+
 ## Language
 
 ### Example
@@ -217,101 +263,101 @@ interpreter.
 
 ### Summary
 
-| Name | Syntax | Description |
-|:-----|:-------|:------------|
-| **Structural comparison**                   |||
-| `=`         | `(=  'any 'any)`              | Equality |
-| `<>`        | `(<> 'any 'any)`              | Inequality |
-| **Numeric comparison**                      |||
-| `<`         | `(<  'num 'num)`              | Less-than |
-| `<=`        | `(<= 'num 'num)`              | Less-than-or-equal-to |
-| `>`         | `(>  'num 'num)`              | Greater-than |
-| `>`         | `(>= 'num 'num)`              | Greater-than-or-equal-to |
-| **Arithmetic operations**                   |||
-| `+`         | `(+ 'num 'num)`               | Addition |
-| `-`         | `(- 'num 'num)`               | Subtraction |
-| `*`         | `(* 'num 'num)`               | Multiplication |
-| `/`         | `(/ 'num 'num)`               | Division |
-| `%`         | `(% 'num 'num)`               | Modulo |
-| **Logical operation**                       |||
-| `and`       | `(and 'any 'any)`             | Logical AND |
-| `not`       | `(not 'any)`                  | Logical NOT |
-| `or`        | `(or 'any 'any)`              | Logical OR |
-| **Predicates**                              |||
-| `chr?`      | `(chr? 'any)`                 | Check if `any` is a character |
-| `lst?`      | `(lst? 'any)`                 | Check if `any` is a list |
-| `num?`      | `(num? 'any)`                 | Check if `any` is a number |
-| `str?`      | `(str? 'any)`                 | Check if `any` is a string |
-| `sym?`      | `(sym? 'any)`                 | Check if `any` is a symbol |
-| `sym?`      | `(sym? 'any)`                 | Check if `any` is a symbol |
-| **String operations**                       |||
-| `ntoa`      | `(ntoa 'num)`                 | Convert a number into a string |
-| `split`     | `(split 'str 'chr)`           | Split a string of `chr`-separted tokens |
-| `str`       | `(str 'sym)`                  | Make a string out of a symbol |
-| **Symbol and function definition**          |||
-| `<-`        | `(<- sym 'any)`               | [Set](#set) an existing symbol |
-| `def`       | `(def sym args [str] prg)`    | [Define](#def) a function |
-| `let`       | `(let lst . prg)`             | [Let](#let)-binding symbols |
-| `setq`      | `(setq sym 'any)`             | [Bind](#setq) a symbols |
-| `sym`       | `(sym 'any)`                  | Make a symbol out of a string |
-| **Expression composition**                  |||
-| `|>`        | `(|> any0 [any1] ...)`        | [Fluent](#stream) composition |
-| `prog`      | `(prog any0 [any1] ...)`      | [Sequential](#prog) composition |
-| **List manipulation**                       |||
-| `append`    | `(append 'lst 'any)`          | Append `any` to `lst` |
-| `car`       | `(car 'lst)`                  | Get the first element of `lst` |
-| `cadr`      | `(cdr 'lst)`                  | Get the second element of `lst` |
-| `caddr`     | `(caddr 'lst)`                | Get the third element of `lst` |
-| `caar`      | `(caar 'lst)`                 | Get the first element of the head of `lst` |
-| `cadar`     | `(cadar 'lst)`                | Get the second element of the head of `lst` |
-| `cdar`      | `(cdar 'lst)`                 | Get the tail of the head of `lst` |
-| `cdr`       | `(cdr 'lst)`                  | Get the tail of `lst` |
-| `chr`       | `(chr 'num)`                  | Get the character for ASCII numner `num` |
-| `conc`      | `(conc 'lst 'lst)`            | [Concatenate](#conc) two lists into one |
-| `cons`      | `(cons 'any 'any)`            | [Construct](#cons) a pair |
-| `filter`    | `(filter 'fun 'lst)`          | Filter the content of a list using a predicate |
-| `flatten`   | `(flatten 'lst)`              | Flatten a nested list |
-| `foldl`     | `(foldl 'fun 'acc 'lst)`      | Left-fold of a list |
-| `foldr`     | `(foldr 'fun 'lst 'acc)`      | Right-fold of a list |
-| `insert`    | `(insert 'fun 'any 'lst)`     | Insert an element into a sorted list using a comparator |
-| `iter`      | `(iter 'fun 'lst)`            | Iterate over the elements of a list |
-| `last`      | `(last 'lst)`                 | Return the last element of a list |
-| `len`       | `(len 'lst)`                  | Compute the length of a list |
-| `list`      | `(list 'any ...)`             | [Create](#list) a list with `any` |
-| `map`       | `(map 'fun 'lst)`             | Map the content of a list |
-| `map2`      | `(map2 'fun 'lst 'lst)`       | Map the content of a two lists |
-| `merge`     | `(merge 'fun 'fun 'lst 'lst)` | Sorted and deduped merge of two lists |
-| `rev`       | `(rev 'lst)`                  | Reverse a list |
-| `zip`       | `(zip 'lst 'lst)`             | Sequentially pair-up elements from two lists |
-| **Association list operations**             |||
-| `assoc`     | `(assoc 'any 'lst)`           | [Query](#assoc) an association list |
-| `erase`     | `(erase 'any 'lst)`           | Remove an entry in an association list |
-| `replc`     | `(replc 'any 'any 'lst)`      | Replace an entry in an association list |
-| **Control flow**                            |||
-| `cond`      | `(cond 'any ...)`             | [Predicate](#cond) matching |
-| `if`        | `(if 'any then [else])`       | [If](#if) construct |
-| `match`     | `(match 'any ...)`            | [Structural](#match) matching |
-| **Input/output operations**                 |||
-| `in`        | `(in 'any . prg)`             | [In](#if) stream |
-| `out`       | `(out 'any . prg)`            | [Out](#if) stream |
-| `prin`      | `(prin 'any ...)`             | [Symbolic print](#prin) of a list of `any` |
-| `prinl`     | `(prinl 'any ...)`            | [Symbolic print](#prinl) of a list of `any`, with new line |
-| `print`     | `(print 'any ...)`            | [Literal print](#print) of a list of `any` |
-| `printl`    | `(printl 'any ...)`           | [Literal print](#print) of a list of `any`, with new line |
-| `read`      | `(read)`                      | Read a token from the current input stream |
-| `readlines` | `(readlines)`                 | Read all lines from the current input stream |
-| **Miscellaneous operations**                |||
-| `eval`      | `(eval 'any)`                 | [Evaluate](#eval) `any` |
-| `load`      | `(load str)`                  | [Load](#load) an external asset |
-| `time`      | `(time prg)`                  | Time the execution of `prg` |
-| `quit`      | `(quit)`                      | Quit the interpreter loop |
-| `quote`     | `(quote . any)`               | Quote `any` |
-| **Operating system functions**              |||
-| `close`     | `(dup 'num)`                  | Close afile descriptor `num` |
-| `dup`       | `(dup 'num ['num])`           | Duplicate a file descriptor `num` |
-| `exec`      | `(exec 'str 'lst 'lst)`       | Execute an image at path with arguments and environment |
-| `fork`      | `(fork)`                      | Fork the current process |
-| `wait`      | `(wait 'num)`                 | Wait for PID `num` |
+| Name      | Syntax                      | Plugin | Description |
+|:----------|:----------------------------|:------:|:------------|
+| **Structural comparison**                            ||||
+| `=`         | `(=  'any 'any)`              | ✓      | Equality |
+| `<>`        | `(<> 'any 'any)`              | ✓      | Inequality |
+| **Numeric comparison**                      |        |||
+| `<`         | `(<  'num 'num)`              | ✓      | Less-than |
+| `<=`        | `(<= 'num 'num)`              | ✓      | Less-than-or-equal-to |
+| `>`         | `(>  'num 'num)`              | ✓      | Greater-than |
+| `>`         | `(>= 'num 'num)`              | ✓      | Greater-than-or-equal-to |
+| **Arithmetic operations**                            ||||
+| `+`         | `(+ 'num 'num)`               | ✓      | Addition |
+| `-`         | `(- 'num 'num)`               | ✓      | Subtraction |
+| `*`         | `(* 'num 'num)`               | ✓      | Multiplication |
+| `/`         | `(/ 'num 'num)`               | ✓      | Division |
+| `%`         | `(% 'num 'num)`               | ✓      | Modulo |
+| **Logical operation**                                ||||
+| `and`       | `(and 'any 'any)`             | ✓      | Logical AND |
+| `not`       | `(not 'any)`                  | ✓      | Logical NOT |
+| `or`        | `(or 'any 'any)`              | ✓      | Logical OR |
+| **Predicates**                                       ||||
+| `chr?`      | `(chr? 'any)`                 | ✓      | Return `T` if `any` is a character |
+| `lst?`      | `(lst? 'any)`                 | ✓      | Return `T` if `any` is a list |
+| `nil?`      | `(nil? 'any)`                 | ✓      | Return `T` if `any` is `NIL` |
+| `num?`      | `(num? 'any)`                 | ✓      | Return `T` if `any` is a number |
+| `str?`      | `(str? 'any)`                 | ✓      | Return `T` if `any` is a string |
+| `sym?`      | `(sym? 'any)`                 | ✓      | Return `T` if `any` is a symbol |
+| `tru?`      | `(tru? 'any)`                 | ✓      | Return `T` if `any` is `T` |
+| **String operations**                                ||||
+| `ntoa`      | `(ntoa 'num)`                 |        | Convert `num` into a string |
+| `split`     | `(split 'str 'chr)`           |        | Split `str` of `chr`-separted tokens |
+| `str`       | `(str 'sym)`                  | ✓      | Make a string out of `sym` |
+| **Symbol definition**                                ||||
+| `<-`        | `(<- sym 'any)`               | ✓      | [Set](#set) `sym` to `any` |
+| `def`       | `(def sym args [str] prg)`    | ✓      | [Define](#def) a function |
+| `let`       | `(let lst . prg)`             | ✓      | [Let](#let)-binding symbols |
+| `setq`      | `(setq sym 'any)`             | ✓      | [Bind](#setq) a symbols |
+| `sym`       | `(sym 'str)`                  | ✓      | Make a symbol out of `str` |
+| **List manipulation**                                ||||
+| `append`    | `(append 'lst 'any)`          |        | Append `any` to `lst` |
+| `car`       | `(car 'lst)`                  | ✓      | Get the head element of `lst` |
+| `cadr`      | `(cdr 'lst)`                  |        | Get the 2nd element of `lst` |
+| `caddr`     | `(caddr 'lst)`                |        | Get the 3rd element of `lst` |
+| `caar`      | `(caar 'lst)`                 |        | Get the 1st element of the head of `lst` |
+| `cadar`     | `(cadar 'lst)`                |        | Get the 2nd element of the head of `lst` |
+| `cdar`      | `(cdar 'lst)`                 |        | Get the tail of the head of `lst` |
+| `cdr`       | `(cdr 'lst)`                  | ✓      | Get the tail of `lst` |
+| `chr`       | `(chr 'num)`                  | ✓      | Get the character for ASCII numner `num` |
+| `conc`      | `(conc 'lst 'lst)`            | ✓      | [Concatenate](#conc) two lists into one |
+| `cons`      | `(cons 'any 'any)`            | ✓      | [Construct](#cons) a pair |
+| `filter`    | `(filter 'fun 'lst)`          |        | Filter `lst` using `fun` |
+| `flatten`   | `(flatten 'lst)`              |        | Flatten a nested `lst` |
+| `foldl`     | `(foldl 'fun 'acc 'lst)`      |        | Left-fold a `lst` |
+| `foldr`     | `(foldr 'fun 'lst 'acc)`      |        | Right-fold a `lst` |
+| `insert`    | `(insert 'fun 'any 'lst)`     |        | Insert `any` into a sorted `lst` using `fun` |
+| `iter`      | `(iter 'fun 'lst)`            |        | Iterate over the elements of a list |
+| `last`      | `(last 'lst)`                 |        | Return the last element of a list |
+| `len`       | `(len 'lst)`                  |        | Compute the length `lst` |
+| `list`      | `(list 'any ...)`             | ✓      | [Create](#list) a list with `any` |
+| `map`       | `(map 'fun 'lst)`             |        | Map the content of `lst` |
+| `map2`      | `(map2 'fun 'lst 'lst)`       |        | Map the content of a two lists |
+| `merge`     | `(merge 'fun 'fun 'lst 'lst)` |        | Sorted and deduped merge of two lists |
+| `rev`       | `(rev 'lst)`                  |        | Reverse `lst` |
+| `zip`       | `(zip 'lst 'lst)`             |        | Sequentially pair-up elements from two lists |
+| **Assoc-list operations**                            ||||
+| `assoc`     | `(assoc 'any 'lst)`           |        | [Query](#assoc) an association list |
+| `erase`     | `(erase 'any 'lst)`           |        | Remove an entry in an association list |
+| `replc`     | `(replc 'any 'any 'lst)`      |        | Replace an entry in an association list |
+| **Control flow**                            |        |||
+| `|>`        | `(|> any0 [any1] ...)`        | ✓      | [Fluent](#stream) composition |
+| `cond`      | `(cond 'any ...)`             | ✓      | [Predicate](#cond) matching |
+| `if`        | `(if 'any then [else])`       | ✓      | [If](#if) construct |
+| `match`     | `(match 'any ...)`            | ✓      | [Structural](#match) matching |
+| `prog`      | `(prog any0 [any1] ...)`      | ✓      | [Sequential](#prog) composition |
+| **Input/output operations**                          ||||
+| `in`        | `(in 'any . prg)`             | ✓      | [In](#if) stream |
+| `out`       | `(out 'any . prg)`            | ✓      | [Out](#if) stream |
+| `prin`      | `(prin 'any ...)`             | ✓      | [Symbolic print](#prin) of a list of `any` |
+| `prinl`     | `(prinl 'any ...)`            | ✓      | [Symbolic print](#prinl) of a list of `any`, with new line |
+| `print`     | `(print 'any ...)`            | ✓      | [Literal print](#print) of a list of `any` |
+| `printl`    | `(printl 'any ...)`           | ✓      | [Literal print](#print) of a list of `any`, with new line |
+| `read`      | `(read)`                      | ✓      | Read a token from the current input stream |
+| `readlines` | `(readlines)`                 | ✓      | Read all lines from the current input stream |
+| **Core operations**                |        |||
+| `eval`      | `(eval 'any)`                 | ✓      | [Evaluate](#eval) `any` |
+| `load`      | `(load str)`                  | ✓      | [Load](#load) an external asset |
+| `time`      | `(time prg)`                  | ✓      | Time the execution of `prg` |
+| `quit`      | `(quit)`                      | ✓      | Quit the interpreter loop |
+| `quote`     | `(quote . any)`               | ✓      | Quote `any` |
+| **System functions**                                 ||||
+| `close`     | `(dup 'num)`                  | ✓      | Close afile descriptor `num` |
+| `dup`       | `(dup 'num ['num])`           | ✓      | Duplicate a file descriptor `num` |
+| `exec`      | `(exec 'str 'lst 'lst)`       | ✓      | Execute an image at path with arguments and environment |
+| `fork`      | `(fork)`                      | ✓      | Fork the current process |
+| `wait`      | `(wait 'num)`                 | ✓      | Wait for PID `num` |
 
 ### Description
 
