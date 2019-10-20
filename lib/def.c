@@ -7,11 +7,25 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
   /*
-   * Grab the symbol, the arguments, and the body.
+   * Grab the symbol.
    */
   atom_t symb = lisp_car(cell);
+  if (!IS_SYMB(symb)) {
+    X(symb); X(cell);
+    return UP(NIL);
+  }
+  /*
+   * Grab the arguments body.
+   */
   atom_t cdr0 = lisp_cdr(cell);
   atom_t args = lisp_car(cdr0);
+  if (!IS_NULL(args) && !IS_PAIR(args)) {
+    X(symb); X(cell); X(cdr0); X(args);
+    return UP(NIL);
+  }
+  /*
+   * Grab the body.
+   */
   atom_t prog = lisp_cdr(cdr0);
   X(cell); X(cdr0);
   /*
