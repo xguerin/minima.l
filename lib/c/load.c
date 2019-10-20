@@ -7,14 +7,6 @@
 #include <unistd.h>
 
 static atom_t
-lisp_load_plugin(const atom_t symb, const atom_t path)
-{
-  atom_t result = lisp_plugin_load(symb, path);
-  X(symb); X(path);
-  return result;
-}
-
-static atom_t
 lisp_load(const atom_t closure, const atom_t cell)
 {
   atom_t res;
@@ -29,7 +21,7 @@ lisp_load(const atom_t closure, const atom_t cell)
    * If it's a symbol, load it from plugins.
    */
   if (IS_SYMB(car)) {
-    res = lisp_load_plugin(car, UP(NIL));
+    res = lisp_plugin_load(car, NIL);
   }
   /*
    * Construct the file name.

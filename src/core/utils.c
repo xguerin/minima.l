@@ -50,11 +50,12 @@ lisp_set_syntax_error_handler(const error_handler_t h)
 #ifdef LISP_ENABLE_DEBUG
 void lisp_set_debug_flag(const char * const flag)
 {
-  MNML_VERBOSE_CONS = MNML_VERBOSE_CONS || strcmp(flag, "CONS") == 0;
-  MNML_VERBOSE_MAKE = MNML_VERBOSE_MAKE || strcmp(flag, "MAKE") == 0;
-  MNML_VERBOSE_RC   = MNML_VERBOSE_RC   || strcmp(flag, "RC")   == 0;
-  MNML_VERBOSE_SLAB = MNML_VERBOSE_SLAB || strcmp(flag, "SLAB") == 0;
-  MNML_VERBOSE_SLOT = MNML_VERBOSE_SLOT || strcmp(flag, "SLOT") == 0;
+  MNML_VERBOSE_CONS   = MNML_VERBOSE_CONS   || strcmp(flag, "CONS")   == 0;
+  MNML_VERBOSE_MAKE   = MNML_VERBOSE_MAKE   || strcmp(flag, "MAKE")   == 0;
+  MNML_VERBOSE_RC     = MNML_VERBOSE_RC     || strcmp(flag, "RC")     == 0;
+  MNML_VERBOSE_PLUGIN = MNML_VERBOSE_PLUGIN || strcmp(flag, "PLUGIN") == 0;
+  MNML_VERBOSE_SLAB   = MNML_VERBOSE_SLAB   || strcmp(flag, "SLAB")   == 0;
+  MNML_VERBOSE_SLOT   = MNML_VERBOSE_SLOT   || strcmp(flag, "SLOT")   == 0;
 }
 #endif
 
@@ -109,7 +110,7 @@ lisp_init()
   const char * DEBUG = getenv("MNML_DEBUG");
   if (DEBUG != NULL) {
     MNML_DEBUG = true;
-    FOR_EACH_PATH_ENTRY(DEBUG, flag, lisp_set_debug_flag(flag));
+    FOR_EACH_TOKEN(DEBUG, ",", flag, lisp_set_debug_flag(flag));
   }
 #endif
 }

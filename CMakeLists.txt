@@ -116,7 +116,7 @@ add_subdirectory(src)
 
 if(MNML_ENABLE_DEBUG)
   enable_testing()
-  add_subdirectory(tests)
+  add_subdirectory(test)
 endif()
 
 #

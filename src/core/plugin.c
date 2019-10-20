@@ -124,8 +124,8 @@ lisp_plugin_find(const char * const paths, const atom_t sym)
    * Scan libraries in the path.
    */
   void * result = NULL;
-  FOR_EACH_PATH_ENTRY(paths, entry, result = result == NULL ?
-                      lisp_plugin_find_at_path(entry, bsym) : result)
+  FOR_EACH_TOKEN(paths, ":", entry, result = result == NULL ?
+                 lisp_plugin_find_at_path(entry, bsym) : result)
   return result;
 }
 

@@ -94,10 +94,10 @@ atom_t lisp_load_file(const char * const filepath);
 /*
  * Scan PATH-like string format.
  */
-#define FOR_EACH_PATH_ENTRY(__s, __e, BLOCK) {  \
+#define FOR_EACH_TOKEN(__s, __d, __e, BLOCK) {  \
   char * copy = strdup(__s);                    \
   char * haystack = copy, * p, * __e;           \
-  while ((p = strstr(haystack, ":")) != NULL) { \
+  while ((p = strstr(haystack, __d)) != NULL) { \
     *p = 0;                                     \
     __e = haystack;                             \
     haystack = p + 1;                           \

@@ -139,7 +139,10 @@ lisp_preload(const size_t n, ...)
     const char * const symbol = va_arg(args, const char *);
     MAKE_SYMBOL_STATIC(s, symbol, LISP_GET_SYMBOL_LENGTH(symbol));
     atom_t cell = lisp_make_symbol(s);
-    atom_t func = lisp_plugin_load(cell, UP(NIL));
+    atom_t func = lisp_plugin_load(cell, NIL);
+    if (IS_NULL(func)) {
+      ERROR("Preloading plugin %s failed", symbol);
+    }
     X(cell); X(func);
   }
   va_end(args);
@@ -193,13 +196,13 @@ main(const int argc, char ** const argv)
             "prin", "prinl", "print", "printl",
             /* MISC */
             "eval", "load", "quit", "quote", "time"
-            /* END */);
+             );
   }
   /*
    * Scan the PRELOAD list and load the symbols it contains.
    */
   else {
-    FOR_EACH_PATH_ENTRY(PRELOAD, entry, lisp_preload(1, entry));
+    FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload(1, entry));
   }
   /*
    * Build ARGV and ENV.
@@ -225,7 +228,7 @@ main(const int argc, char ** const argv)
   /*
    * Compute the return status.
    */
-  int status = IS_NULL(result) ? 1 : 0;
+  int status = IS_NULL(result) ? -1 : 0;
   X(result);
   /*
    */
