@@ -1,13 +1,14 @@
 (load "../../lisp/foldl.l")
 
-(def test:run @
+(def test:run (SUITE . TESTS)
   "Run all tests specified as a ((NAME . TEST)) list."
+  (prinl "[" SUITE "]")
   (foldl (\ (acc (name . test))
            (and acc
              (cond (eval test)
                (tru?  . (prog (prinl "✓ " name ": passed") T))
                (_     . (prog (prinl "! " name ": failed") NIL)))))
-    T @))
+    T TESTS))
 
 (def assert:equal (EXPECT . ACTUAL)
   "Assert that EXPECT and ACTUAL are equal."
