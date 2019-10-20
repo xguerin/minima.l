@@ -20,30 +20,30 @@ void lisp_plugin_cleanup();
  * Initialization macros.
  */
 
-#define LISP_PLUGIN_REGISTER(__s, __n, ...)                   \
-                                                              \
-const char *                                                  \
-lisp_plugin_name()                                            \
-{                                                             \
-  return #__n;                                                \
-}                                                             \
-                                                              \
-atom_t                                                        \
-lisp_plugin_register()                                        \
-{                                                             \
-  MAKE_SYMBOL_STATIC(inp, #__n, LISP_GET_SYMBOL_LENGTH(__n)); \
-  atom_t sym = lisp_make_symbol(inp);                         \
-  LISP_CONS(arg, ## __VA_ARGS__);                             \
-  uintptr_t fun = (uintptr_t)lisp_function_ ## __s;           \
-  atom_t adr = lisp_make_number(fun);                         \
-  atom_t cn0 = lisp_cons(NIL, adr);                           \
-  atom_t val = lisp_cons(arg, cn0);                           \
-  atom_t res = UP(val);                                       \
-  atom_t cns = lisp_cons(sym, val);                           \
-  TRACE_SEXP(cns);                                            \
-  GLOBALS = lisp_setq(GLOBALS, cns);                          \
-  X(sym); X(adr); X(NIL); X(cn0); X(arg); X(val);             \
-  return res;                                                 \
+#define LISP_PLUGIN_REGISTER(__s, __n, ...)                     \
+                                                                \
+const char *                                                    \
+lisp_plugin_name()                                              \
+{                                                               \
+  return #__n;                                                  \
+}                                                               \
+                                                                \
+atom_t                                                          \
+lisp_plugin_register()                                          \
+{                                                               \
+  MAKE_SYMBOL_STATIC(inp, #__n, LISP_GET_SYMBOL_LENGTH(#__n));  \
+  atom_t sym = lisp_make_symbol(inp);                           \
+  LISP_CONS(arg, ## __VA_ARGS__);                               \
+  uintptr_t fun = (uintptr_t)lisp_function_ ## __s;             \
+  atom_t adr = lisp_make_number(fun);                           \
+  atom_t cn0 = lisp_cons(NIL, adr);                             \
+  atom_t val = lisp_cons(arg, cn0);                             \
+  atom_t res = UP(val);                                         \
+  atom_t cns = lisp_cons(sym, val);                             \
+  TRACE_SEXP(cns);                                              \
+  GLOBALS = lisp_setq(GLOBALS, cns);                            \
+  X(sym); X(adr); X(NIL); X(cn0); X(arg); X(val);               \
+  return res;                                                   \
 }
 
 /*

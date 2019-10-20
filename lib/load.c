@@ -22,6 +22,7 @@ lisp_load(const atom_t closure, const atom_t cell)
    */
   if (IS_SYMB(car)) {
     res = lisp_plugin_load(car, NIL);
+    X(car);
   }
   /*
    * Construct the file name.

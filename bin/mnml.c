@@ -141,7 +141,7 @@ lisp_preload(const size_t n, ...)
     atom_t cell = lisp_make_symbol(s);
     atom_t func = lisp_plugin_load(cell, NIL);
     if (IS_NULL(func)) {
-      ERROR("Preloading plugin %s failed", symbol);
+      ERROR("Loading plugin %s failed", symbol);
     }
     X(cell); X(func);
   }
