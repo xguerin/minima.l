@@ -25,7 +25,6 @@ lisp_library_prefix()
 static void *
 lisp_plugin_load_at_path(const char * const path, const char * const name)
 {
-  TRACE_PLUGIN("loading %s", path);
   /*
    * Load the file.
    */
@@ -35,13 +34,12 @@ lisp_plugin_load_at_path(const char * const path, const char * const name)
   void * handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
 #endif
   if (handle == NULL) {
-    ERROR_PLUGIN("cannot open library: %s, %s", path, dlerror());
+    ERROR("cannot open library: %s, %s", path, dlerror());
     return NULL;
   }
-  TRACE_PLUGIN("checking %s", path);
   const char * (* get_name)() = dlsym(handle, "lisp_plugin_name");
   if (get_name == NULL) {
-    ERROR_PLUGIN("%s is not a plugin", path);
+    ERROR("%s is not a plugin", path);
     return NULL;
   }
   /*
@@ -49,13 +47,11 @@ lisp_plugin_load_at_path(const char * const path, const char * const name)
    */
   const char * pname = get_name();
   if (strcmp(pname, name) == 0) {
-    TRACE_PLUGIN("symbol %s found in %s", name, path);
     return handle;
   }
   /*
    * Close the file.
    */
-  ERROR_PLUGIN("symbol %s not found", name);
   dlclose(handle);
   return NULL;
 }
@@ -63,13 +59,12 @@ lisp_plugin_load_at_path(const char * const path, const char * const name)
 static void *
 lisp_plugin_find_at_path(const char * const dirpath, const char * const name)
 {
-  TRACE_PLUGIN("looking into %s", dirpath);
   /*
    * Open the directory pointed by entry.
    */
   DIR * dir = opendir(dirpath);
   if (dir == NULL) {
-    ERROR_PLUGIN("cannot open directory: %s", dirpath);
+    ERROR("cannot open directory: %s", dirpath);
     return NULL;
   }
   /*

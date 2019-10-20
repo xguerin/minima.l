@@ -1,4 +1,4 @@
-(load "assert.l" "../../lib/lisp/map.l")
+(load "test.l" "../../lisp/map.l")
 
 (def fib (N)
   (if (<= N 1) N (+ (fib (- N 1)) (fib (- N 2)))))

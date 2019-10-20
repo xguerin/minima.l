@@ -55,11 +55,7 @@ lisp_test_init()
    * Setup the debug variables.
    */
 #ifdef LISP_ENABLE_DEBUG
-  MNML_DEBUG        = getenv("MNML_DEBUG")        != NULL;
-  MNML_VERBOSE_CONS = getenv("MNML_VERBOSE_CONS") != NULL;
-  MNML_VERBOSE_RC   = getenv("MNML_VERBOSE_RC")   != NULL;
-  MNML_VERBOSE_SLOT = getenv("MNML_VERBOSE_SLOT") != NULL;
-  MNML_VERBOSE_SLAB = getenv("MNML_VERBOSE_SLAB") != NULL;
+  lisp_debug_parse_flags();
 #endif
 }
 

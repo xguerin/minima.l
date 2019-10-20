@@ -91,7 +91,7 @@ void lisp_free(const atom_t atom);
 #endif
 
 #define TRACE_REFS(__f, __t, __c, __n) {  \
-  if (MNML_VERBOSE_RC) {                  \
+  if (MNML_VERBOSE_REFC) {                \
     HEADER_REFS(__f, __t, __n);           \
     lisp_debug(stderr, __c);              \
   }                                       \
@@ -110,12 +110,6 @@ void lisp_free(const atom_t atom);
   }                                   \
 }
 
-#define TRACE_SLAB_SEXP(__c) {        \
-  if (MNML_VERBOSE_SLAB) {            \
-    TRACE_SEXP(__c);                  \
-  }                                   \
-}
-
 void lisp_collect();
 #define LISP_COLLECT() lisp_collect()
 
@@ -124,8 +118,6 @@ void lisp_collect();
 #define TRACE_REFS(__f, __t, __c, __n)
 #define TRACE_SLOT(__i, __c)
 #define TRACE_SLAB(__fmt, ...)
-#define TRACE_SLAB_SEXP(__c)
-
 #define LISP_COLLECT()
 
 #endif

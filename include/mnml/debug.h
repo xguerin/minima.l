@@ -7,13 +7,25 @@
 #include <stdio.h>
 #include <sys/time.h>
 
+/*
+ * Debug flags.
+ */
+
 extern bool MNML_DEBUG;
+extern bool MNML_VERBOSE_BIND;
+extern bool MNML_VERBOSE_CHAN;
 extern bool MNML_VERBOSE_CONS;
 extern bool MNML_VERBOSE_MAKE;
-extern bool MNML_VERBOSE_PLUGIN;
-extern bool MNML_VERBOSE_RC;
+extern bool MNML_VERBOSE_PLUG;
+extern bool MNML_VERBOSE_REFC;
 extern bool MNML_VERBOSE_SLOT;
 extern bool MNML_VERBOSE_SLAB;
+
+void lisp_debug_parse_flags();
+
+/*
+ * Debug macros.
+ */
 
 #define FPRINTF(__h, __f, ...)                                                          \
   if (MNML_DEBUG) { const int __L = __LINE__;                                           \
@@ -49,11 +61,17 @@ extern bool MNML_VERBOSE_SLAB;
   lisp_debug(stderr, __c);  \
 }
 
-#define TRACE_CONS(__c) {   \
-  if (MNML_VERBOSE_CONS) {  \
-    TRACE_SEXP(__c)         \
-  }                         \
+#define TRACE_CATG_SEXP(__k, __c) { \
+  if (__k) {                        \
+    TRACE_SEXP(__c)                 \
+  }                                 \
 }
+
+#define TRACE_BIND_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_BIND, __c)
+#define TRACE_CHAN_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_CHAN, __c)
+#define TRACE_CONS_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_CONS, __c)
+#define TRACE_PLUG_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_PLUG, __c)
+#define TRACE_SLAB_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_SLAB, __c)
 
 void lisp_debug(FILE * fp, const atom_t atom);
 
@@ -61,6 +79,9 @@ void lisp_debug(FILE * fp, const atom_t atom);
 
 #define TRACE(__fmt, ...)
 #define TRACE_SEXP(__c)
-#define TRACE_CONS(__c)
+#define TRACE_BIND_SEXP(__c)
+#define TRACE_CHAN_SEXP(__c)
+#define TRACE_CONS_SEXP(__c)
+#define TRACE_PLUG_SEXP(__c)
 
 #endif

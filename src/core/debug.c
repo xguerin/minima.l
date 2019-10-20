@@ -6,13 +6,43 @@
 
 #ifdef LISP_ENABLE_DEBUG
 
-bool MNML_DEBUG           = false;
-bool MNML_VERBOSE_CONS    = false;
-bool MNML_VERBOSE_MAKE    = false;
-bool MNML_VERBOSE_PLUGIN  = false;
-bool MNML_VERBOSE_RC      = false;
-bool MNML_VERBOSE_SLOT    = false;
-bool MNML_VERBOSE_SLAB    = false;
+/*
+ * Debug flags.
+ */
+
+bool MNML_DEBUG        = false;
+bool MNML_VERBOSE_BIND = false;
+bool MNML_VERBOSE_CHAN = false;
+bool MNML_VERBOSE_CONS = false;
+bool MNML_VERBOSE_MAKE = false;
+bool MNML_VERBOSE_PLUG = false;
+bool MNML_VERBOSE_REFC = false;
+bool MNML_VERBOSE_SLOT = false;
+bool MNML_VERBOSE_SLAB = false;
+
+static void
+lisp_debug_set_flag(const char * const flag)
+{
+  MNML_VERBOSE_BIND = MNML_VERBOSE_BIND || strcmp(flag, "BIND") == 0;
+  MNML_VERBOSE_CHAN = MNML_VERBOSE_CHAN || strcmp(flag, "CHAN") == 0;
+  MNML_VERBOSE_CONS = MNML_VERBOSE_CONS || strcmp(flag, "CONS") == 0;
+  MNML_VERBOSE_MAKE = MNML_VERBOSE_MAKE || strcmp(flag, "MAKE") == 0;
+  MNML_VERBOSE_PLUG = MNML_VERBOSE_PLUG || strcmp(flag, "PLUG") == 0;
+  MNML_VERBOSE_REFC = MNML_VERBOSE_REFC || strcmp(flag, "REFC") == 0;
+  MNML_VERBOSE_SLAB = MNML_VERBOSE_SLAB || strcmp(flag, "SLAB") == 0;
+  MNML_VERBOSE_SLOT = MNML_VERBOSE_SLOT || strcmp(flag, "SLOT") == 0;
+}
+
+void
+lisp_debug_parse_flags()
+{
+  const char * DEBUG = getenv("MNML_DEBUG");
+  if (DEBUG != NULL) {
+    MNML_DEBUG = true;
+    FOR_EACH_TOKEN(DEBUG, ",", flag, lisp_debug_set_flag(flag));
+  }
+}
+
 
 /*
  * Debug function.

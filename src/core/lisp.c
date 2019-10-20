@@ -36,7 +36,6 @@ lisp_lookup_immediate(const atom_t closure, const symbol_t sym)
   FOREACH(closure, a) {
     atom_t car = a->car;
     if (lisp_symbol_match_immediate(CAR(car), sym)) {
-      TRACE("0x%lx", (uintptr_t)car);
       return UP(CDR(car));
     }
     NEXT(a);
@@ -51,7 +50,6 @@ lisp_lookup_immediate(const atom_t closure, const symbol_t sym)
 atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
 {
-  TRACE_SEXP(sym);
   /*
    * Load symbol from the closure.
    */
@@ -66,7 +64,6 @@ lisp_lookup(const atom_t closure, const atom_t sym)
   FOREACH(GLOBALS, b) {
     atom_t car = b->car;
     if (lisp_symbol_match(CAR(car), sym)) {
-      TRACE("0x%lx", (uintptr_t)car);
       return UP(CDR(car));
     }
     NEXT(b);
@@ -111,7 +108,7 @@ lisp_cons(const atom_t car, const atom_t cdr)
   R->refs = 1;
   CAR(R) = UP(car);
   CDR(R) = UP(cdr);
-  TRACE_CONS(R);
+  TRACE_CONS_SEXP(R);
   return R;
 }
 
@@ -132,7 +129,7 @@ lisp_conc(const atom_t car, const atom_t cdr)
   }
   /*
    */
-  TRACE_CONS(R);
+  TRACE_CONS_SEXP(R);
   return R;
 }
 
@@ -152,7 +149,7 @@ lisp_consumer(const atom_t cell)
 static atom_t
 lisp_read_pop()
 {
-  TRACE_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(ICHAN);
   /*
    * ((CHN0 PWD V1 V2) (CHN1 PWD V1 V2) ...).
    */
@@ -163,14 +160,14 @@ lisp_read_pop()
   X(vls);
   /*
    */
-  TRACE_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(ICHAN);
   return res;
 }
 
 atom_t
 lisp_read(const atom_t closure, const atom_t cell)
 {
-  TRACE_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(ICHAN);
   X(cell);
   /*
    * Grab the channel, the path and the content.
@@ -250,9 +247,6 @@ lisp_setq(const atom_t closure, const atom_t pair)
 atom_t
 lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
 {
-  TRACE_SEXP(cell);
-  /*
-   */
   if (likely(IS_PAIR(cell))) {
     /*
      * Get CAR/CDR.
@@ -277,8 +271,6 @@ lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
 atom_t
 lisp_rtrn(const atom_t closure, const atom_t rslt, const atom_t cont)
 {
-  TRACE_SEXP(rslt);
-  TRACE_SEXP(cont);
   /*
    * If the continuation is NIL, return the result.
    */
@@ -303,9 +295,9 @@ atom_t
 lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
 {
   atom_t ret;
-  TRACE_SEXP(closure);
-  TRACE_SEXP(arg);
-  TRACE_SEXP(val);
+  TRACE_BIND_SEXP(closure);
+  TRACE_BIND_SEXP(arg);
+  TRACE_BIND_SEXP(val);
   /*
    */
   switch (arg->type) {
@@ -330,7 +322,7 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
     case T_SYMBOL: {
       ret = lisp_setq(closure, lisp_cons(arg, val));
       X(arg); X(val);
-      TRACE_SEXP(ret);
+      TRACE_BIND_SEXP(ret);
       break;
     }
     default: {
@@ -341,7 +333,7 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
   }
   /*
    */
-  TRACE_SEXP(ret);
+  TRACE_BIND_SEXP(ret);
   return ret;
 }
 
@@ -349,10 +341,10 @@ static atom_t
 lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
                const atom_t vals, atom_t * const narg, atom_t * const nval)
 {
-  TRACE_SEXP(closure);
-  TRACE_SEXP(env);
-  TRACE_SEXP(args);
-  TRACE_SEXP(vals);
+  TRACE_BIND_SEXP(closure);
+  TRACE_BIND_SEXP(env);
+  TRACE_BIND_SEXP(args);
+  TRACE_BIND_SEXP(vals);
   /*
    * Return if we run out of arguments.
    */
@@ -393,7 +385,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
   /*
   */
   atom_t res = lisp_bind_args(closure, cl0, oth, rem, narg, nval);
-  TRACE_SEXP(res);
+  TRACE_BIND_SEXP(res);
   return res;
 }
 
@@ -402,9 +394,9 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
  */
 
 static atom_t
-lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
+lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
 {
-  atom_t ret;
+  atom_t rslt;
   TRACE_SEXP(cell);
   /*
    * Grab lambda and values.
@@ -450,7 +442,7 @@ lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
    */
   if (!IS_NULL(narg)) {
     atom_t con = lisp_cons(newc, body);
-    ret = lisp_cons(narg, con);
+    rslt = lisp_cons(narg, con);
     X(con); X(body);
   }
   /*
@@ -460,19 +452,20 @@ lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
    */
   else if (IS_NUMB(body)) {
     function_t fun = (function_t)body->number;
-    ret = fun(closure, newc);
+    rslt = fun(closure, newc);
     X(body);
   }
   /*
    * Evaluate the function as a PROG.
    */
   else {
-    ret = lisp_prog(newc, body, UP(NIL));
+    rslt = lisp_prog(newc, body, UP(NIL));
   }
   /*
    */
   X(narg); X(newc);
-  return ret;
+  TRACE_SEXP(rslt);
+  return rslt;
 }
 
 /*
@@ -482,20 +475,20 @@ lisp_eval_lambda(const atom_t closure, const atom_t cell, atom_t * const rem)
 static atom_t
 lisp_eval_pair(const atom_t closure, const atom_t cell)
 {
-  atom_t ret, rem;
+  atom_t rslt, rem;
   TRACE_SEXP(cell);
   /*
    */
   switch (CAR(cell)->type) {
     case T_PAIR:
-      ret = lisp_eval_lambda(closure, cell, &rem);
+      rslt = lisp_eval_func(closure, cell, &rem);
       break;
     case T_SYMBOL:
-      ret = lisp_eval(closure, cell);
+      rslt = lisp_eval(closure, cell);
       rem = UP(NIL);
       break;
     default:
-      ret = cell;
+      rslt = cell;
       rem = UP(NIL);
       break;
   }
@@ -504,19 +497,18 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
    */
   if (IS_NULL(rem)) {
     X(rem);
-    TRACE_SEXP(ret);
-    return ret;
+    TRACE_SEXP(rslt);
+    return rslt;
   }
   /*
    * Apply the result to the remainder arguments.
    */
-  atom_t old = ret;
-  ret = lisp_cons(old, rem);
+  atom_t old = rslt;
+  rslt = lisp_cons(old, rem);
   X(old); X(rem);
   /*
    */
-  TRACE_SEXP(ret);
-  return lisp_eval_pair(closure, ret);
+  return lisp_eval_pair(closure, rslt);
 }
 
 /*
@@ -526,7 +518,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
 atom_t
 lisp_eval(const atom_t closure, const atom_t cell)
 {
-  atom_t ret;
+  atom_t rslt;
   TRACE_SEXP(cell);
   /*
    */
@@ -546,23 +538,23 @@ lisp_eval(const atom_t closure, const atom_t cell)
       /*
        * Evaluate the list.
        */
-      ret = lisp_eval_pair(closure, new);
+      rslt = lisp_eval_pair(closure, new);
       break;
     }
     case T_SYMBOL: {
-      ret = lisp_lookup(closure, cell);
+      rslt = lisp_lookup(closure, cell);
       X(cell);
       break;
     }
     default: {
-      ret = cell;
+      rslt = cell;
       break;
     }
   }
   /*
    */
-  TRACE_SEXP(ret);
-  return ret;
+  TRACE_SEXP(rslt);
+  return rslt;
 }
 
 /*
