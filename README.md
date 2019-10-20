@@ -1,7 +1,7 @@
 # minima.l
 
-Opinionated lisp interpreter. **Heavily** inspired by [Picolisp](https://picolisp.com). Released under ISC license.
+Opinionated lisp interpreter. **Heavily** inspired by [Picolisp](https://picolisp.com).
 
-The documentation is located [here](https://man.sr.ht/~xguerin/minima.l).
+Released under ISC license.
 
-You can always [buy me a coffee](https://buymeacoff.ee/xguerin) if you like my work.
+The documentation is located [here](https://mnml.world).
