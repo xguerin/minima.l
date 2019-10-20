@@ -28,27 +28,38 @@ is loaded can be altered by the `MNML_PRELOAD` variable.
 #### MNML_DEBUG
 
 If Minima.l has been compiled with debug support, this variable controls which
-class of debug output to generate:
+class of debug output to generate. It accepts a comma-separated list of category
+names:
 
+* `BIND`: argument binding operations
+* `CHAN`: I/O channel operations
 * `CONS`: list construction operations
 * `MAKE`: atom creation operations
-`* PLUGIN`: plugin operations
-* `RC`: reference counting operations
+`* PLUG`: plugin operations
+* `REFC`: reference counting operations
 * `SLOT`: slot allocator operations
 * `SLAB`: slab allocator operations
-
-The variable can be left empty to restrict debug output to evaluation steps.
+```
+$ MNML_DEBUG=PLUG,SLOT mnml
+```
+The variable can be left empty to restrict debug output to `eval`.
 
 #### MNML_PRELOAD
 
-This variable controls which plugin is preloaded by the interpreter. Although it
-can be used empty, you may want to at least preload `load`.
+This variable controls which plugin is preloaded by the interpreter. It accepts
+a comman-separated list of symbols:
+```
+$ MNML_PRELOAD=load,quit mnml
+```
+Although it can be used empty, you may want to at least preload `load`. 
 
 #### MNML_PLUGIN_PATH
 
 This variable controls where to look for plugins, the default being the
-installation prefix.
-
+installation prefix. It accepts a colon-separated list of paths:
+```
+$ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
+```
 ## Language
 
 ### Example
@@ -254,7 +265,7 @@ argument vector  of the script.
 The `ENV` global contains the environment at the time of the invocation of the
 interpreter.
 
-## Functions
+## Function list
 
 ### Notation rules
 

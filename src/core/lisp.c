@@ -393,6 +393,9 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
  * Lambda evaluation.
  */
 
+#define VALID_ARGUMENTS(__a)  (IS_NULL(__a) || IS_PAIR(__a) || IS_SYMB(__a))
+#define VALID_CLOSURE(__a)    (IS_NULL(__a) || IS_PAIR(__a))
+
 static atom_t
 lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
 {
@@ -409,10 +412,17 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
    */
   atom_t args = lisp_car(lbda);
   atom_t cdr0 = lisp_cdr(lbda);
-  X(lbda);
   atom_t lcls = lisp_car(cdr0);
   atom_t body = lisp_cdr(cdr0);
   X(cdr0);
+  /*
+   * If that first argument is not a function, simply evaluate it and return.
+   */
+  if (!VALID_ARGUMENTS(args) || !VALID_CLOSURE(lcls) || IS_NULL(body)) {
+    *rem = vals;
+    X(args); X(lcls); X(body);
+    return lisp_eval(closure, lbda);
+  }
   /*
    * NOTE: Merge the define-site closure into the call-site closure.
    * This is required by locally recursive lambdas. Define-site definitions
@@ -427,7 +437,7 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
    * should be handled in `let` as this is where the binding occurs.
    */
   atom_t newl = lisp_dup(lcls);
-  X(lcls);
+  X(lbda); X(lcls);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda
    * is used as the run environment and augmented with the arguments'
@@ -478,6 +488,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
   atom_t rslt, rem;
   TRACE_SEXP(cell);
   /*
+   * Evaluate the first argument.
    */
   switch (CAR(cell)->type) {
     case T_PAIR:
