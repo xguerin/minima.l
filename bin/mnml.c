@@ -45,7 +45,7 @@ static void
 repl_parse_error_handler()
 {
   write(1, "^ parse error\n", 14);
-  if (CDR(CAR(ICHAN)) == NIL) {
+  if (CDR(CDR(CAR(ICHAN))) == NIL) {
     fwrite(": ", 1, 2, stdout);
   }
 }

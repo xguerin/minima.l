@@ -645,8 +645,14 @@ lisp_prin_atom(FILE* const handle, char * const buf, const size_t idx,
       if (s) {
         size_t nxt = lisp_write(handle, buf, idx, "^", 1);
         switch (c) {
+          case '\033':
+            nxt = lisp_write(handle, buf, nxt, "\\e", 2);
+            break;
           case '\n':
             nxt = lisp_write(handle, buf, nxt, "\\n", 2);
+            break;
+          case '\r':
+            nxt = lisp_write(handle, buf, nxt, "\\r", 2);
             break;
           case '\t':
             nxt = lisp_write(handle, buf, nxt, "\\t", 2);

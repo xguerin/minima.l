@@ -61,8 +61,17 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
     case T_CHAR: {
       const char c = (char)atom->number;
       switch (c) {
+        case '\033':
+          fprintf(fp, "^\\e");
+          break;
         case '\n':
-          fprintf(fp, ";\\n");
+          fprintf(fp, "^\\n");
+          break;
+        case '\r':
+          fprintf(fp, "^\\r");
+          break;
+        case '\t':
+          fprintf(fp, "^\\t");
           break;
         default:
           fprintf(fp, "^%c", c);
@@ -73,7 +82,7 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
       /*
        * Check if it's a string.
        */
-      if (lisp_is_string(atom)) {
+      if (!IS_NULL(atom) && lisp_is_string(atom)) {
         char buffer[1024];
         int len = lisp_make_cstring(atom, buffer, 1024, 0);
         fprintf(fp, "\"%.*s\"", len, buffer);

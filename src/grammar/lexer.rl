@@ -38,7 +38,7 @@ action err_prefix
   fhold; fgoto purge;
 }
 
-action err_symbol
+action parse_error
 {
   parse_error();
   fhold; fgoto purge;
@@ -52,6 +52,10 @@ action tok_popen
 
 action tok_pclose
 {
+  if (lexer->depth == 0) {
+    parse_error();
+    fhold; fgoto purge;
+  }
   Parse(lexer->parser, PCLOSE, 0, NULL);
   lexer->depth -= 1;
   lisp_consume_token(lexer);
@@ -91,15 +95,20 @@ action tok_number
 action tok_char
 {
   const char * start = ts + 1;
-  const char * end = te - 1;
-  size_t len = end - start;
+  size_t len = te - start;
   uint64_t val = *start;
   /*
    */
   if (len == 2) {
     switch (*(start + 1)) {
+      case 'e' :
+        val = '\033';
+        break;
       case 'n' :
         val = '\n';
+        break;
+      case 'r' :
+        val = '\r';
         break;
       case 't' :
         val = '\t';
@@ -161,10 +170,10 @@ quote   = '\'';
 backt   = '`';
 tilde   = '~';
 number  = '-'? digit+;
-char    = '^' . print;
+char    = '^' . (print - '\\' | "\\\\" | "\\e" | "\\n" | "\\r" | "\\t") $!parse_error;
 string  = '"' . ([^"] | '\\' '"')* . '"';
 marks   = [!@$%&*_+\-={}\[\]:;|\\<>?,./];
-symbol  = (alpha | marks) . (alnum | marks){,15} $!err_symbol;
+symbol  = (alpha | marks) . (alnum | marks){,15} $!parse_error;
 comment = '#' . [^\n]*;
 
 purge := any* %{ fgoto main; };
