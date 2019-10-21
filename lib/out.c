@@ -32,14 +32,6 @@ lisp_function_out(const atom_t closure, const atom_t arguments)
     return UP(NIL);
   }
   /*
-   * Grab the current ICHAN directory.
-   */
-  const char * dir = dirname_r(path, dirn_buf);
-  if (dir == NULL) {
-    ERROR("Cannot get directory for %s", path);
-    return UP(NIL);
-  }
-  /*
    * Get the working directory for the current ICHAN.
    */
   lisp_make_cstring(CAR(CDR(CAR(ICHAN))), dirn_buf, PATH_MAX, 0);

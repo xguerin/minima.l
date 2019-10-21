@@ -83,7 +83,7 @@ void lisp_free(const atom_t atom);
 #else
 
 #define HEADER_REFS(__f, __t, __n) \
-  FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n)
+  FPRINTF(stderr, "[%2lu->%2lu] - %s = ", __f, __t, __n)
 
 #define HEADER_SLOT(__i) \
   FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i)

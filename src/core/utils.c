@@ -357,7 +357,8 @@ lisp_load_file(const char * const filepath)
   /*
    * Grab the directory of the file.
    */
-  const char * dir = dirname_r(path, dirn_buf);
+  strcpy(dirn_buf, path);
+  const char * dir = dirname(dirn_buf);
   if (dir == NULL) {
     ERROR("Cannot get directory for %s", path);
     return UP(NIL);

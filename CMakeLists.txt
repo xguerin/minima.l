@@ -95,6 +95,12 @@ endif()
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-stringop-truncation")
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 7.0)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-implicit-fallthrough")
+  endif()
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
+  endif()
 endif()
 
 #

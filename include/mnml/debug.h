@@ -5,6 +5,7 @@
 #include <mnml/types.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 #include <sys/time.h>
 
 /*
