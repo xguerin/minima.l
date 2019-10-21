@@ -35,7 +35,7 @@ lisp_make_string(const char * const str, const size_t len)
   for (size_t i = 0; i < len; i += 1) {
     atom_t c = lisp_make_char(str[len - i - 1]);
     atom_t n = lisp_cons(c, res);
-    X(c); X(res);
+    X(c, res);
     res = n;
   }
   return lisp_process_escapes(res, false, UP(NIL));

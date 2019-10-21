@@ -36,7 +36,7 @@ lisp_function_equ(const atom_t closure, const atom_t arguments)
   LISP_LOOKUP(vl0, arguments, X);
   LISP_LOOKUP(vl1, arguments, Y);
   atom_t res = lisp_equ(vl0, vl1) ? TRUE : NIL;
-  X(vl0); X(vl1);
+  X(vl0, vl1);
   return UP(res);
 }
 

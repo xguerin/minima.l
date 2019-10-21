@@ -11,7 +11,7 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
    */
   atom_t symb = lisp_car(cell);
   if (!IS_SYMB(symb)) {
-    X(symb); X(cell);
+    X(symb, cell);
     return UP(NIL);
   }
   /*
@@ -20,14 +20,14 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
   atom_t cdr0 = lisp_cdr(cell);
   atom_t args = lisp_car(cdr0);
   if (!IS_NULL(args) && !IS_PAIR(args)) {
-    X(symb); X(cell); X(cdr0); X(args);
+    X(symb, cell, cdr0, args);
     return UP(NIL);
   }
   /*
    * Grab the body.
    */
   atom_t prog = lisp_cdr(cdr0);
-  X(cell); X(cdr0);
+  X(cell, cdr0);
   /*
    * Check if there is a docstring in the declaration.
    */
@@ -43,7 +43,7 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
    */
   atom_t con0 = lisp_cons(NIL, prog);
   atom_t con1 = lisp_cons(args, con0);
-  X(prog); X(args); X(con0);
+  X(prog, args, con0);
   /*
    * Set the symbol's value.
    */

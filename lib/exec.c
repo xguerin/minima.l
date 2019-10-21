@@ -59,7 +59,7 @@ lisp_function_exec(const atom_t closure, const atom_t arguments)
    */
   char * env_str[MAX_ARGS + 1];
   size_t len = lisp_exec_make_strings(envp, env_str, MAX_ARGS, 0);
-  X(args); X(envp);
+  X(args, envp);
   /*
    * Call execve.
    */

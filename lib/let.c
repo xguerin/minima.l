@@ -34,7 +34,7 @@ lisp_let_bind(const atom_t closure, const atom_t cell)
   }
   /*
    */
-  X(car); X(cdr);
+  X(car, cdr);
   TRACE_SEXP(closure);
   return closure;
 }

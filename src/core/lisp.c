@@ -234,7 +234,7 @@ lisp_setq(const atom_t closure, const atom_t pair)
    * The symbol does not exist, so append it.
    */
   atom_t res = lisp_cons(pair, closure);
-  X(pair); X(closure);
+  X(pair, closure);
   /*
    */
   return res;
@@ -255,7 +255,7 @@ lisp_prog(const atom_t closure, const atom_t cell, const atom_t result)
     atom_t cdr = lisp_cdr(cell);
     /*
      */
-    X(cell); X(result);
+    X(cell, result);
     return lisp_prog(closure, cdr, res);
   }
   /*
@@ -283,7 +283,7 @@ lisp_rtrn(const atom_t closure, const atom_t rslt, const atom_t cont)
    */
   atom_t lst = lisp_cons(rslt, NIL);
   atom_t fun = lisp_cons(cont, lst);
-  X(lst); X(cont); X(rslt);
+  X(lst, cont, rslt);
   return lisp_eval(closure, fun);
 }
 
@@ -313,7 +313,7 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
        */
       atom_t oth = lisp_cdr(arg);
       atom_t rem = lisp_cdr(val);
-      X(arg); X(val);
+      X(arg, val);
       /*
       */
       ret = lisp_bind(cl0, oth, rem);
@@ -321,12 +321,12 @@ lisp_bind(const atom_t closure, const atom_t arg, const atom_t val)
     }
     case T_SYMBOL: {
       ret = lisp_setq(closure, lisp_cons(arg, val));
-      X(arg); X(val);
+      X(arg, val);
       TRACE_BIND_SEXP(ret);
       break;
     }
     default: {
-      X(arg); X(val);
+      X(arg, val);
       ret = closure;
       break;
     }
@@ -381,7 +381,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
    */
   atom_t oth = lisp_cdr(args);
   atom_t rem = lisp_cdr(vals);
-  X(args); X(vals);
+  X(args, vals);
   /*
   */
   atom_t res = lisp_bind_args(closure, cl0, oth, rem, narg, nval);
@@ -467,7 +467,7 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
   if (!IS_NULL(narg)) {
     atom_t con = lisp_cons(newc, body);
     rslt = lisp_cons(narg, con);
-    X(con); X(body);
+    X(con, body);
   }
   /*
    * Evaluation the native function. Native functions have no definition-site
@@ -487,7 +487,7 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
   }
   /*
    */
-  X(narg); X(newc);
+  X(narg, newc);
   TRACE_SEXP(rslt);
   return rslt;
 }
@@ -534,7 +534,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
    */
   atom_t old = rslt;
   rslt = lisp_cons(old, rem);
-  X(old); X(rem);
+  X(old, rem);
   /*
    */
   return lisp_eval_pair(closure, rslt);
@@ -563,7 +563,7 @@ lisp_eval(const atom_t closure, const atom_t cell)
        * Build the new value.
        */
       atom_t new = lisp_cons(car, cdr);
-      X(car); X(cdr);
+      X(car, cdr);
       /*
        * Evaluate the list.
        */

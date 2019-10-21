@@ -12,7 +12,7 @@ lisp_function_setq(const atom_t closure, const atom_t arguments)
   atom_t sym = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
   atom_t res = lisp_eval(closure, lisp_car(cdr));
-  X(cell); X(cdr);
+  X(cell, cdr);
   /*
    * Don't set anything if NIL.
    */

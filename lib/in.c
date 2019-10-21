@@ -40,7 +40,7 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
        * That argument must be a string.
        */
       if (!lisp_is_string(chan)) {
-        X(chan); X(prog);
+        X(chan, prog);
         return UP(NIL);
       }
       /*
@@ -68,7 +68,7 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
        * NOTE(xrg) fall-through intended.
        */
     default:
-      X(chan); X(prog);
+      X(chan, prog);
       return UP(NIL);
   }
   /*

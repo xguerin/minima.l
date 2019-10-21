@@ -10,7 +10,7 @@ lisp_close(const atom_t closure, const atom_t cell, const bool res)
     atom_t car = lisp_eval(closure, lisp_car(cell));
     atom_t cdr = lisp_cdr(cell);
     int s = close(car->number);
-    X(car); X(cell);
+    X(car, cell);
     return lisp_close(closure, cdr, res && s == 0);
   }
   /*

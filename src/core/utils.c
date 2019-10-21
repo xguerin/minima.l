@@ -106,8 +106,7 @@ void
 lisp_fini()
 {
   lisp_plugin_cleanup();
-  X(OCHAN); X(ICHAN); X(PLUGINS); X(GLOBALS);
-  X(WILDCARD); X(QUOTE); X(TRUE); X(NIL);
+  X(OCHAN, ICHAN, PLUGINS, GLOBALS, WILDCARD, QUOTE, TRUE, NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   lisp_slab_destroy();
@@ -144,7 +143,7 @@ lisp_append(const atom_t lst, const atom_t elt)
 {
   atom_t con = lisp_cons(elt, NIL);
   atom_t res = lisp_conc(lst, con);
-  X(con); X(elt); X(lst);
+  X(con, elt, lst);
   return res;
 }
 

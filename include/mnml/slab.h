@@ -57,12 +57,62 @@ void lisp_slab_destroy();
 atom_t lisp_allocate();
 void lisp_deallocate(const atom_t cell);
 
-#define X(__a) {                  \
+#define LISP_X(__a) {             \
   DOWN(__a);                      \
   if (unlikely(__a->refs == 0)) { \
     lisp_free(__a);               \
   }                               \
 }
+
+#define X_1(_1) \
+{               \
+  LISP_X(_1);   \
+}
+
+#define X_2(_2, ...)  \
+{                     \
+  LISP_X(_2);         \
+  X_1(__VA_ARGS__);   \
+}
+
+#define X_3(_3, ...)  \
+{                     \
+  LISP_X(_3);         \
+  X_2(__VA_ARGS__);   \
+}
+
+#define X_4(_4, ...)  \
+{                     \
+  LISP_X(_4);         \
+  X_3(__VA_ARGS__);   \
+}
+
+#define X_5(_5, ...)  \
+{                     \
+  LISP_X(_5);         \
+  X_4(__VA_ARGS__);   \
+}
+
+#define X_6(_6, ...)  \
+{                     \
+  LISP_X(_6);         \
+  X_5(__VA_ARGS__);   \
+}
+
+#define X_7(_7, ...)  \
+{                     \
+  LISP_X(_7);         \
+  X_6(__VA_ARGS__);   \
+}
+
+#define X_8(_8, ...)  \
+{                     \
+  LISP_X(_8);         \
+  X_7(__VA_ARGS__);   \
+}
+
+#define X_(_1, _2, _3, _4, _5, _6, _7, _8, NAME, ...) NAME
+#define X(...) X_(__VA_ARGS__, X_8, X_7, X_6, X_5,  X_4, X_3,  X_2,  X_1)(__VA_ARGS__)
 
 void lisp_free(const atom_t atom);
 

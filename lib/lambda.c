@@ -17,7 +17,7 @@ lisp_function_lambda(const atom_t closure, const atom_t arguments)
    */
   atom_t con0 = lisp_cons(closure, prog);
   atom_t con1 = lisp_cons(args, con0);
-  X(prog); X(args); X(con0);
+  X(prog, args, con0);
   /*
    * Return the lambda.
    */

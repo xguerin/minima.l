@@ -13,7 +13,7 @@ lisp_function_if(const atom_t closure, const atom_t arguments)
   if (unlikely(IS_NULL(cnd))) {
     atom_t cd1 = lisp_cdr(ops);
     atom_t els = lisp_car(cd1);
-    X(cnd); X(ops); X(cd1);
+    X(cnd, ops, cd1);
     return lisp_eval(closure, els);
   }
   /*
@@ -21,7 +21,7 @@ lisp_function_if(const atom_t closure, const atom_t arguments)
    */
   else {
     atom_t thn = lisp_car(ops);
-    X(cnd); X(ops);
+    X(cnd, ops);
     return lisp_eval(closure, thn);
   }
 }

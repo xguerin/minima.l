@@ -22,7 +22,7 @@ lisp_stream(const atom_t closure, const atom_t cell, const atom_t result)
      * Bind the result.
      */
     atom_t con = lisp_cons(car, result);
-    X(car); X(result);
+    X(car, result);
     atom_t nxt = lisp_cons(con, NIL);
     X(con);
     /*
@@ -36,7 +36,7 @@ lisp_stream(const atom_t closure, const atom_t cell, const atom_t result)
   TRACE_SEXP(result);
   if (likely(IS_PAIR(result))) {
     atom_t car = lisp_car(result);
-    X(cell); X(result);
+    X(cell, result);
     TRACE_SEXP(car);
     return lisp_eval(closure, car);
   }
@@ -55,7 +55,7 @@ lisp_function_stream(const atom_t closure, const atom_t arguments)
   atom_t car = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
   atom_t con = lisp_cons(car, NIL);
-  X(car); X(cell);
+  X(car, cell);
   /*
    */
   return lisp_stream(closure, cdr, con);

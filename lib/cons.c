@@ -8,7 +8,7 @@ lisp_function_cons(const atom_t closure, const atom_t arguments)
   LISP_LOOKUP(fst, arguments, X);
   LISP_LOOKUP(snd, arguments, Y);
   atom_t res = lisp_cons(fst, snd);
-  X(fst); X(snd);
+  X(fst, snd);
   return res;
 }
 

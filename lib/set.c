@@ -12,7 +12,7 @@ lisp_function_set(const atom_t closure, const atom_t arguments)
   atom_t sym = lisp_eval(closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   atom_t val = lisp_eval(closure, lisp_car(cdr));
-  X(cdr); X(cell);
+  X(cdr, cell);
   /*
    * Set the symbol in the current closure.
    */
@@ -42,7 +42,7 @@ lisp_function_set(const atom_t closure, const atom_t arguments)
   /*
    * Return NIL if not found.
    */
-  X(sym); X(val);
+  X(sym, val);
   return UP(NIL);
 }
 

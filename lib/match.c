@@ -31,7 +31,7 @@ lisp_match(const atom_t closure, const atom_t cell, const atom_t match)
    * Sanity checks.
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
-    X(cell); X(match);
+    X(cell, match);
     return UP(NIL);
   }
   /*
@@ -50,12 +50,12 @@ lisp_match(const atom_t closure, const atom_t cell, const atom_t match)
    * Match the cell with CAR.
    */
   if (atom_match(args, cell)) {
-    X(args); X(cdr); X(cell);
+    X(args, cdr, cell);
     return lisp_eval(closure, prog);
   }
   /*
    */
-  X(args); X(prog);
+  X(args, prog);
   return lisp_match(closure, cell, cdr);
 }
 

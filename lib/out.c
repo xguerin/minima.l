@@ -62,7 +62,7 @@ lisp_function_out(const atom_t closure, const atom_t arguments)
        * NOTE(xrg) fall-through intended.
        */
     default:
-      X(chan); X(prog);
+      X(chan, prog);
       return UP(NIL);
   }
   /*
