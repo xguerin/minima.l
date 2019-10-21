@@ -38,13 +38,6 @@ lisp_function_out(const atom_t closure, const atom_t arguments)
       break;
     case T_PAIR:
       /*
-       * That argument must be a string.
-       */
-      if (!lisp_is_string(chan)) {
-        X(chan); X(prog);
-        return UP(NIL);
-      }
-      /*
        * Get the filepath.
        */
       lisp_make_cstring(chan, file_buf, PATH_MAX, 0);
@@ -59,7 +52,7 @@ lisp_function_out(const atom_t closure, const atom_t arguments)
       /*
        * Open the file.
        */
-      fd = open(file_buf, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+      fd = open(path, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
       if (fd >= 0) {
         X(chan);
         break;

@@ -1,65 +1,9 @@
 # Minima.l
 
-Minima.l is an opinionated LISP heavily inspired by [Picolisp](http://picolisp.com). It is distributed
-under the ISC license.
+Opinionated LISP dialect that takes some of its inspirations from [Picolisp](https://picolisp.com),
+[CHICKEN Scheme](http://call-cc.org), and other great languages. It is released under the ISC
+license. The source code is located [here](https://git.sr.ht/~xguerin/minima.l).
 
-## Interpreter
-
-The intepreter is called `mnml`. It can be run interactively:
-```
-$ mnml
->
-```
-It accepts a file name as a parameter:
-```
-$ mnml file.l
-```
-It can be used as a _shebang_ interpreter:
-```
-#!/usr/bin/env mnml
-
-(+ 1 2)
-```
-By default, the interpreter preload most common [plugins](#native-functions) out of the box. What
-is loaded can be altered by the `MNML_PRELOAD` variable.
-
-### Environment variables
-
-#### MNML_DEBUG
-
-If Minima.l has been compiled with debug support, this variable controls which
-class of debug output to generate. It accepts a comma-separated list of category
-names:
-
-* `BIND`: argument binding operations
-* `CHAN`: I/O channel operations
-* `CONS`: list construction operations
-* `MAKE`: atom creation operations
-`* PLUG`: plugin operations
-* `REFC`: reference counting operations
-* `SLOT`: slot allocator operations
-* `SLAB`: slab allocator operations
-```
-$ MNML_DEBUG=PLUG,SLOT mnml
-```
-The variable can be left empty to restrict debug output to `eval`.
-
-#### MNML_PRELOAD
-
-This variable controls which plugin is preloaded by the interpreter. It accepts
-a comman-separated list of symbols:
-```
-$ MNML_PRELOAD=load,quit mnml
-```
-Although it can be used empty, you may want to at least preload `load`. 
-
-#### MNML_PLUGIN_PATH
-
-This variable controls where to look for plugins, the default being the
-installation prefix. It accepts a colon-separated list of paths:
-```
-$ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
-```
 ## Language
 
 ### Example
@@ -253,18 +197,75 @@ Or with a lambda:
 : (foldl (\ (acc (_ . v))(+ acc v)) 0 data)
 > 3
 ```
-## Globals
+### Global variables
 
-### ARGV
+#### ARGV
 
 When `mnml` is executed as a `#!` interpreter, the `ARGV` global contains the
 argument vector  of the script.
 
-### ENV
+#### ENV
 
 The `ENV` global contains the environment at the time of the invocation of the
 interpreter.
 
+## Interpreter
+
+The intepreter is called `mnml`. It can be run interactively:
+```
+$ mnml
+>
+```
+It accepts a file name as a parameter:
+```
+$ mnml file.l
+```
+It can be used as a _shebang_ interpreter:
+```
+#!/usr/bin/env mnml
+
+(+ 1 2)
+```
+By default, the interpreter preload most common [plugins](#native-functions) out of the box. What
+is loaded can be altered by the `MNML_PRELOAD` variable.
+
+### Environment variables
+
+#### MNML_DEBUG
+
+If Minima.l has been compiled with debug support, this variable controls which
+class of debug output to generate. It accepts a comma-separated list of category
+names:
+
+* `BIND`: argument binding operations
+* `CHAN`: I/O channel operations
+* `CONS`: list construction operations
+* `MAKE`: atom creation operations
+`* PLUG`: plugin operations
+* `REFC`: reference counting operations
+* `SLOT`: slot allocator operations
+* `SLAB`: slab allocator operations
+```
+$ MNML_DEBUG=PLUG,SLOT mnml
+```
+The variable can be left empty to restrict debug output to `eval`.
+
+#### MNML_PRELOAD
+
+This variable controls which plugin is preloaded by the interpreter. It accepts
+a comman-separated list of symbols:
+```
+$ MNML_PRELOAD=load,quit mnml
+```
+Although it can be used empty, you may want to at least preload `load`. 
+
+#### MNML_PLUGIN_PATH
+
+This variable controls where to look for plugins, the default being the
+installation prefix. It accepts a colon-separated list of paths:
+```
+$ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
+```
 ## Function list
 
 ### Notation rules
@@ -356,7 +357,7 @@ interpreter.
 | `print`     | `(print 'any ...)`            | ✓      | [Literal print](#print) of a list of `any` |
 | `printl`    | `(printl 'any ...)`           | ✓      | [Literal print](#print) of a list of `any`, with new line |
 | `read`      | `(read)`                      | ✓      | [Read a token](#read) from the current input stream |
-| `readlines` | `(readlines)`                 | ✓      | Read all lines from the current input stream |
+| `readlines` | `(readlines)`                 | ✓      | [Read all lines](#readlines) from the current input stream |
 | **Core operations**                |        |||
 | `eval`      | `(eval 'any)`                 | ✓      | [Evaluate](#eval) `any` |
 | `load`      | `(load str)`                  | ✓      | [Load](#load) an external asset |
@@ -368,16 +369,26 @@ interpreter.
 | `dup`       | `(dup 'num ['num])`           | ✓      | Duplicate a file descriptor `num` |
 | `exec`      | `(exec 'str 'lst 'lst)`       | ✓      | Execute an image at path with arguments and environment |
 | `fork`      | `(fork)`                      | ✓      | Fork the current process |
+| `run`       | `(run 'str 'lst 'alst)`       |        | [Run](#run) a external program `str` |
 | `wait`      | `(wait 'num)`                 | ✓      | Wait for PID `num` |
 
-### Description
+### List
 
 #### ASSOC
+
+##### Invocation
 ```lisp
 (assoc 'any 'lst)
 ```
-Return the value for `any` in the association list `lst`. Return `NIL` if the
-symbol is not present.
+##### Description
+
+Look-up `any` in the association list `lst`.
+
+##### Return value
+
+If a value is bound to `any`, return that value. If not, return `NIL`.
+
+##### Example
 ```lisp
 : (assoc 'hello '((hello . world)))
 > world
@@ -385,10 +396,21 @@ symbol is not present.
 > NIL
 ```
 #### CONC
+
+##### Invocation
 ```lisp
 (conc 'lst1 'lst2)
 ```
-Destructively concatenate two lists into one.
+##### Description
+
+Destructively concatenate two lists `lst1` and `lst2` into a single list.
+
+##### Return value
+
+If `lst1` is a list, return the concatenation of `lst1` and `lst2`. The value
+pointed by `lst1` is actually modified. If `lst1` is not a list, return `NIL`.
+
+##### Example
 ```lisp
 : (setq A '(1 2))
 > (1 2)
@@ -398,15 +420,26 @@ Destructively concatenate two lists into one.
 > (1 2 3 4)
 ```
 #### COND
+
+##### Invocation
 ```lisp
 (cond 'any (any . prg) (any . prg) ...)
 ```
+##### Description
+
 Evaluate `any` and use the `car` of the remaining arguments as a predicate over
 the result. Return the evaluation of the first positive match. The _default_ or
 _catch all_ case is written using the special value `_` as `car`.
 
 Order is important. If multiple match exist, the first one is evaluated. If `_`
 is placed before a valid match, `_` is evaluated.
+
+##### Return value
+
+If a match is made, returns the evaluation of the corresponding `prg`. If no
+match is made, return `NIL`.
+
+##### Example
 ```lisp
 : (def test (v) (cond v (num? . 'number) (lst? . 'list) (_ . 'unknown)))
 > test
@@ -418,11 +451,21 @@ is placed before a valid match, `_` is evaluated.
 > unknown
 ```
 #### CONS
+
+##### Invocation
 ```lisp
 (cons 'any1 'any2)
 ```
-Construct a new list cell using the first argument for `car` and the second
-argument for `cdr`.
+##### Description
+
+Construct a new list using the first argument for `car` and the second argument
+for `cdr`.
+
+##### Return value
+
+Return the newly constructed list without modifying the arguments.
+
+##### Example
 ```lisp
 : (cons 1 2)
 > (1 . 2)
@@ -430,16 +473,17 @@ argument for `cdr`.
 > (1 2 . 3)
 ```
 #### DEF
+
+##### Invocation
 ```lisp
-(def sym args [str] prg ...)
+(def sym lst [str] prg ...)
 ```
+##### Description
+
 Define a function with arguments `args` and body `prg` and associate it with
 the symbol `sym`. An optional `str` can be specified as a documentation string
 and is ignored by the interpreter.
-```lisp
-: (def add (x y) (+ x y))
-> add
-```
+
 Function defined with the `def` keyword are simply lambda functions assigned to
 symbol. The following expressions are equivalent:
 ```lisp
@@ -448,21 +492,50 @@ symbol. The following expressions are equivalent:
 : (setq add (\ (a b) (+ a b)))
 > (\ (a b) (+ a b))
 ```
+##### Return value
+
+Return the S-expression of the newly defined function.
+
+##### Example
+```lisp
+: (def add (x y) (+ x y))
+> ((x y) NIL (+ x y))
+```
 #### EVAL
+
+##### Invocation
 ```lisp
 (eval 'any)
 ```
+##### Description
+
 Evaluate `any`.
+
+##### Return value
+
+Return the result of the evaluation.
+
+##### Example
 ```lisp
-: (eval '(+ 1 1))
+: (eval (list '+ 1 1))
 > 2
 ```
 #### IF
+
+##### Invocation
 ```lisp
-(if 'any then [else])
+(if 'any . lst)
 ```
-When `any` evaluates to `T`, return the evaluation of `then`. Return the
-evaluation of `then` otherwise. Return `NIL` if `then` is not specified.
+##### Description
+
+When `any` evaluates to `T`, evaluate `(car lst)`. Otherwise, evaluate
+`(car (cdr lst))`.
+
+##### Return value
+
+Return the result of the evaluation.
+
+##### Example
 ```lisp
 : (def test (v) (if (> v 10) (* v 2)))
 > test
@@ -472,9 +545,13 @@ evaluation of `then` otherwise. Return `NIL` if `then` is not specified.
 > 40
 ```
 #### IN
+
+##### Invocation
 ```lisp
 (in 'any . prg)
 ```
+##### Description
+
 Create a new input channel context and evaluate `prg` within that context. The
 previous context is restored after the evaluation.
 
@@ -483,14 +560,29 @@ argument evaluates to a string, `in` assumes the string contains a file path and
 tries to open that file.
 
 #### LET
+
+##### Invocation
 ```lisp
 (let lst . prg)
 ```
+##### Description
+
 Evaluate `prg` within the context of the bind list `lst`. The bind list has the
 following format:
 ```lisp
 ((any . 'any)(any . 'any)...)
 ```
+##### Return value
+
+Return the value of the evaluated `prg`.
+
+##### Example
+```lisp
+: (let ((lhv . (+ 1 2)) (rhv . (+ 3 4))) (+ lhv rhv))
+> 10
+```
+##### Description
+
 For each element in the bind list, the `cdr` is evaluated and bound to its `car`
 using the argument assignation process described above.
 ```lisp
@@ -499,28 +591,36 @@ using the argument assignation process described above.
 > 2
 ```
 #### LIST
+
+##### Invocation
 ```lisp
 (list 'any ...)
 ```
+##### Description
+
 Create a list with `any` arguments.
+
+##### Return value
+
+Return the newly created list.
+
+##### Example
 ```lisp
 : (list)
-> (NIL)
+> NIL
 : (list (+ 1 1) 3 "a")
 > (2 3 "a")
 ```
 #### LOAD
+
+##### Invocation
 ```lisp
 (load 'str 'sym ...)
 ```
-Load the `lisp` file pointed by `str` or the lisp symbol pointed by 'sym.  On
-success, `load` returns the result of the last evaluated operation in the list.
-Otherwise, `NIL` is returned.
-```lisp
-: (load "lib/lisp/cadr.l")
-> ((x) NIL (car (cdr x)))
-```
-If the path is prefixed by `@lib`, `load` will look for the file in the library
+##### Description
+
+Load the `lisp` file pointed by `str` or the lisp symbol pointed by 'sym. If the
+path is prefixed by `@lib`, `load` will look for the file in the `lib`
 directory of the installation prefix.
 ```lisp
 : (load "@lib/cadr.l")
@@ -532,21 +632,49 @@ the `MNML_PLUGIN_PATH` environment variable.
 : (load '+)
 > 4425116848
 ```
+##### Return value
+
+Return the result of the last evaluated operation in the list. On error,
+`NIL` is returned.
+
+##### Example
+```lisp
+: (load "lisp/cadr.l")
+> ((x) NIL (car (cdr x)))
+```
 #### MATCH
+
+##### Invocation
 ```lisp
 (match 'any (any . prg) ...)
 ```
+##### Description
+
 Evaluate `any` and use the `car` of the remaining arguments as a structural
-template for the result. Return the evaluation of the first positive match. The
+template for the result. The
 _default_ or _catch all_ case is written using the special value `_` as `car`.
 
 Order is important. If multiple match exist, the first one is evaluated. If `_`
 is placed before a valid match, `_` is evaluated.
 
+##### Return value
+
+Return the evaluation of the first positive match. Return `NIL` otherwise.
+
+##### Example
+```lisp
+: (prinl (match '(1 2 3) ((1 _ _) . "OK") (_ . "KO")))
+OK
+> (^O ^K)
+```
 #### OUT
+
+##### Invocation
 ```lisp
 (out 'any . prg)
 ```
+##### Description
+
 Create a new output channel context and evaluate `prg` within that context. The
 previous context is restored after the evaluation.
 
@@ -558,59 +686,126 @@ If the file does not exist, it is created. If the file exists, it is truncated.
 If the file path is prepended with a `+` the file must exist and data will be
 appended to it.
 
+##### Return value
+
+Return the evaluation of `prg`.
+
+##### Example
+```lisp
+: (out "test.log" (prinl "Hello, world"))
+> (^H ^e ^l ^l ^o ^, ^  ^w ^o ^r ^l ^d)
+```
 #### PRIN
+
+##### Invocation
 ```lisp
 (prin 'any ...)
 ```
+##### Description
+
 Print the string representation of `any`. When multiple arguments are printed,
-no separator is used. The last argument is returned after evaluation.
+no separator is used.
+
+##### Return value
+
+Return the result of the evaluation of the last argument. If there is no
+argument, return `NIL`.
+
+##### Example
 ```lisp
 : (prin "hello, " "world!")
 hello, world!> "world!"
 ```
 #### PRINL
+
+##### Invocation
 ```lisp
 (prinl 'any ...)
 ```
+##### Description
+
 Calls `prin` and appends a new line.
+
+##### Return value
+
+Return the result of the evaluation of the last argument. If there is no
+argument, return `NIL`.
+
+##### Example
 ```lisp
 : (prinl "hello, " "world!")
 hello, world!
 > "world!"
 ```
-##### PRINT
+#### PRINT
+
+##### Invocation
 ```lisp
 (print 'any ...)
 ```
-Print the lisp representation of `any`. When multiple arguments are printed, a
-space separator is used. The last argument is returned after evaluation.
+##### Description
+
+Print the S-expression of `any`. When multiple arguments are printed, a
+space separator is used.
+
+##### Return value
+
+Return the result of the evaluation of the last argument. If there is no
+argument, return `NIL`.
+
+##### Example
 ```lisp
 : (print 'a 'b '(1 2 3))
 a b (1 2 3)> (1 2 3)
 ```
-##### PRINTL
+#### PRINTL
+
+##### Invocation
 ```lisp
 (printl 'any ...)
 ```
+##### Description
+
 Calls `print` and appends a new line.
+
+##### Return value
+
+Return the result of the evaluation of the last argument. If there is no
+argument, return `NIL`.
+
+##### Example
 ```lisp
-: (print 'a 'b (1 2 3) +)
+: (print 'a 'b (1 2 3))
 a b (1 2 3)
 > (1 2 3)
 ```
 #### PROG
+
+##### Invocation
 ```lisp
 (prog prg1 prg2 ...)
 ```
-Evaluate `prg1`, `prg2`, ..., in sequence and return the last evaluation.
+##### Description
+
+Evaluate `prg1`, `prg2`, ..., in sequence.
+
+##### Return value
+
+Return the the result of the last evaluation.
+
+##### Example
 ```lisp
 : (prog (+ 1 1) (+ 2 2))
 > 4
 ```
 #### READ
+
+##### Invocation
 ```lisp
 (read)
 ```
+##### Description
+
 Read a token from the current input stream. The current input stream differs
 depending on the context:
 
@@ -620,11 +815,64 @@ depending on the context:
 
 The current input stream is also altered by the [`in`](#in) command.
 
+##### Return value
+
+Return a valid token or `NIL` if the stream is closed or invalid.
+
+#### READLINES
+
+##### Invocation
+```lisp
+(readlines)
+```
+##### Description
+
+Read all lines from the current input stream. Stop on `EOF`.
+
+##### Return value
+
+Return all lines as a list of string. If present, the trailing `\n` character is
+chopped.
+
+#### RUN
+
+##### Invocation
+```lisp
+(run 'str 'lst 'alst)
+```
+##### Description
+
+Run an external program at path `str` with arguments `lst` and environment
+`alst`.  If `alst` is `NIL`, the current environment `ENV` is used instead.
+
+This function combines `fork`, `exec`, `dup`, `close`, `pipe`, and `wait` to
+provide a handy way to run external binaries in a single shot.
+
+##### Return value
+
+Return a pair with `CAR` as the status code of the binary and `CDR` the
+output of the command as list of lines (see [`readlines`](#readlines)).
+
+##### Example
+```lisp
+: (run "/bin/hostname" NIL NIL)
+> (0 (^E ^n ^c ^e ^l ^a ^d ^u ^s))
+```
 #### SET
+
+##### Invocation
 ```lisp
 (<- 'sym 'any)
 ```
+##### Description
+
 Set an existing symbol `sym` to `any`.
+
+##### Return value
+
+Return the value associated to the symbol.
+
+##### Example
 ```lisp
 : (<- A (+ 1 2))
 > NIL 
@@ -636,20 +884,40 @@ Set an existing symbol `sym` to `any`.
 > 4
 ```
 #### SETQ
+
+##### Invocation
 ```lisp
 (setq sym 'any)
 ```
+##### Description
+
 Associate `any` with the symbol `sym`.
+
+##### Return value
+
+Return the value associated to the symbol.
+
+##### Example
 ```lisp
 : (setq A (+ 1 2))
 > 3
 ```
 #### STREAM
+
+##### Invocation
 ```lisp
 (|> any0 [any1] ...)
 ```
+##### Description
+
 Fluent composition operator. Evaluate `any0` and pass the result to `any1`, and
 so on until the end of the list.
+
+##### Return value
+
+Return the result of the last `any` operation.
+
+##### Example
 ```lisp
 : (|> '(1 2 3) cdr car)
 > 2

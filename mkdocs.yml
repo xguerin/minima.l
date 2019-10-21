@@ -1,2 +1,6 @@
 site_name: Minima.l
 theme: cinder
+nav:
+    - Home: index.md
+    - Notes:
+        - Continuations: notes/Continuations.md

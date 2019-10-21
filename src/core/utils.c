@@ -337,13 +337,28 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
    * Get the fullpath.
    */
   const char * path = realpath(absl_buf, buffer);
+  if (path != NULL) {
+    return path;
+  }
+  /*
+   * If the last entry does not exist yet, realpath is going to fail.
+   * So we remove it and try to resolve the directory path.
+   */
+  char * last = absl_buf, * p;
+  while((p = strstr(last, "/"))) {
+    last = p + 1;
+  }
+  *(last - 1) = '\0';
+  path = realpath(absl_buf, buffer);
+  *(last - 1) = '/';
   if (path == NULL) {
     ERROR("Cannot get realpath for %s", absl_buf);
     return NULL;
   }
   /*
-   * Return the path.
+   * Return the full path.
    */
+  strcat(buffer, (last - 1));
   return path;
 }
 
