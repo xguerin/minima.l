@@ -23,8 +23,7 @@ signal_handler(const int sigid)
 }
 
 static atom_t
-run(const stage_t pread, const stage_t peval, const stage_t pdone,
-    const void * data)
+run(stage_t pread, const stage_t pdone, const void * data)
 {
   atom_t input, result = UP(NIL);
   while (keep_running) {
@@ -34,7 +33,6 @@ run(const stage_t pread, const stage_t peval, const stage_t pdone,
     if (input == NULL) {
       break;
     }
-    peval(input, data);
     result = lisp_eval(NIL, input);
     pdone(result, data);
   }
@@ -64,12 +62,6 @@ stage_newline(const atom_t cell, const void * const data)
   fwrite("> " , 1, 2, stdout);
   lisp_prin(NIL, cell, true);
   fwrite("\n", 1, 1, stdout);
-}
-
-static void
-stage_noop(const atom_t cell, const void * const data)
-{
-
 }
 
 static void
@@ -151,9 +143,44 @@ lisp_preload(const size_t n, ...)
 #define NUMARGS(...)  (sizeof((char *[]){__VA_ARGS__})/sizeof(char *))
 #define PRELOAD(...)  lisp_preload(NUMARGS(__VA_ARGS__), __VA_ARGS__)
 
+static void
+lisp_help(const char * const name)
+{
+  fprintf(stderr, "Usage: %s [-h|-v] [FILE.L]\n", name);
+  fprintf(stderr, "Options:\n");
+  fprintf(stderr, "\t-h: print this help\n");
+  fprintf(stderr, "\t-v: show Minima.l runtime information\n");
+}
+
 int
 main(const int argc, char ** const argv)
 {
+  /*
+   * Parse arguments.
+   */
+  int c;
+  while ((c = getopt(argc, argv, "hv")) != -1) {
+    switch (c) {
+      case 'h':
+        lisp_help(argv[0]);
+        return 0;
+      case 'v':
+        return 0;
+      default:
+        lisp_help(argv[0]);
+        return __LINE__;
+    }
+  }
+  /*
+   * Grab any extraneous options and use that as input files.
+   */
+  const char * filename = NULL;
+  if (optind < argc) {
+    filename = argv[optind];
+  }
+  /*
+   * Initialize the engine.
+   */
   if (!lisp_init()) {
     fprintf(stderr, "Minima.l engine initialization failed.");
     return __LINE__;
@@ -215,11 +242,11 @@ main(const int argc, char ** const argv)
   /*
    */
   atom_t result;
-  if (argc == 1) {
+  if (filename == NULL) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
     PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    result = run(stage_prompt, stage_noop, stage_newline, cwd);
+    result = run(stage_prompt, stage_newline, cwd);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   }
