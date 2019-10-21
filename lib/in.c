@@ -20,18 +20,6 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
   LISP_LOOKUP(chan, arguments, CHAN);
   LISP_LOOKUP(prog, arguments, PROG);
   /*
-   * Get the filepath.
-   */
-  lisp_make_cstring(chan, file_buf, PATH_MAX, 0);
-  /*
-   * Get the fullpath for the file.
-   */
-  const char * path = lisp_get_fullpath(file_buf, path_buf);
-  if (path == NULL) {
-    ERROR("Cannot get the full path for %s", file_buf);
-    return UP(NIL);
-  }
-  /*
    * Get the working directory for the current ICHAN.
    */
   lisp_make_cstring(CAR(CDR(CAR(ICHAN))), dirn_buf, PATH_MAX, 0);
@@ -48,6 +36,28 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
       X(chan);
       break;
     case T_PAIR:
+      /*
+       * That argument must be a string.
+       */
+      if (!lisp_is_string(chan)) {
+        X(chan); X(prog);
+        return UP(NIL);
+      }
+      /*
+       * Get the filepath.
+       */
+      lisp_make_cstring(chan, file_buf, PATH_MAX, 0);
+      /*
+       * Get the fullpath for the file.
+       */
+      const char * path = lisp_get_fullpath(file_buf, path_buf);
+      if (path == NULL) {
+        ERROR("Cannot get the full path for %s", file_buf);
+        return UP(NIL);
+      }
+      /*
+       * Open the file.
+       */
       fd = open(path, O_RDONLY);
       if (fd >= 0) {
         X(chan);

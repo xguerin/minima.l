@@ -67,4 +67,4 @@ lisp_function_exec(const atom_t closure, const atom_t arguments)
   return lisp_make_number(ret == 0 ? 0 : errno);
 }
 
-LISP_PLUGIN_REGISTER(exec, exec, PATH, ARGS, ENVP)
+LISP_PLUGIN_REGISTER(exec, exec, PATH, ARGS, ENVP, NIL)

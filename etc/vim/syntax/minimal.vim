@@ -58,7 +58,6 @@ syn keyword MinimalFuncs
       \ cons
       \ dedup
       \ def
-      \ dup
       \ erase
       \ eval
       \ filter

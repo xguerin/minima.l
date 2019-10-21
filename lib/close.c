@@ -22,9 +22,9 @@ lisp_close(const atom_t closure, const atom_t cell, const bool res)
 static atom_t
 lisp_function_close(const atom_t closure, const atom_t arguments)
 {
-  LISP_LOOKUP(cell, arguments, X);
+  LISP_LOOKUP(cell, arguments, @);
   bool res = lisp_close(closure, cell, true);
   return UP(res ? TRUE : NIL);
 }
 
-LISP_PLUGIN_REGISTER(close, close, X)
+LISP_PLUGIN_REGISTER(close, close, @)
