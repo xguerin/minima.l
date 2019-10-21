@@ -1,0 +1,21 @@
+image: debian/stable
+packages:
+    - cmake
+    - lemon
+    - ragel
+sources:
+    - https://git.sr.ht/~xguerin/minima.l
+tasks:
+    - setup: |
+        cd minima.l
+        mkdir build
+        cd build
+        cmake ..
+    - build: |
+        cd minima.l
+        cd build
+        make
+    - test: |
+        cd minima.l
+        cd build
+        make test

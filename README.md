@@ -8,6 +8,6 @@ license. The documentation is located [here](https://mnml.world).
 
 ## Build status
 
-| Arch Linux  |
-|:------------|
-| [![Arch status](https://builds.sr.ht/~xguerin/minima.l/arch.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/arch.yml?) |
+| Arch Linux  | Debian Stable |
+|:------------|:--------------|
+| [![Arch](https://builds.sr.ht/~xguerin/minima.l/arch.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/arch.yml?)        | [![Debian Stable](https://builds.sr.ht/~xguerin/minima.l/debian.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/debian.yml?) |
