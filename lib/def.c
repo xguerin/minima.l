@@ -39,17 +39,18 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
   }
   X(doc);
   /*
-   * Append a dummy closure.
+   * Append an empty currying list and closure.
    */
   atom_t con0 = lisp_cons(NIL, prog);
-  atom_t con1 = lisp_cons(args, con0);
-  X(prog, args, con0);
+  atom_t con1 = lisp_cons(NIL, con0);
+  atom_t con2 = lisp_cons(args, con1);
+  X(prog, args, con0, con1);
   /*
    * Set the symbol's value.
    */
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(symb, con1));
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(symb, con2));
   X(symb);
-  return con1;
+  return con2;
 }
 
 LISP_PLUGIN_REGISTER(def, def, @)

@@ -82,12 +82,12 @@
 #
 (def >& (fsym)
   "Convert FSYM into its continuation-passing style."
-  (let (((args closure body) . (eval fsym))
-        (arglen              . (len args))
-        (kvar                . (list (sym (cons ^_ (ntoa arglen)))))
-        (fargs               . (append args kvar))
-        ((count . lifted)    . (cps:lift kvar (+ arglen 1) body)))
-    (cons fargs (cons closure (list lifted)))))
+  (let (((args closure clst body) . (eval fsym))
+        (arglen                   . (len args))
+        (kvar                     . (list (sym (cons ^_ (ntoa arglen)))))
+        (fargs                    . (append args kvar))
+        ((count . lifted)         . (cps:lift kvar (+ arglen 1) body)))
+    (cons fargs (cons closure (cons clst (list lifted))))))
 
 (def <->& (fsym)
   "Convert FSYM into its continuation-passing style and store it back into FSYM."
@@ -124,7 +124,7 @@
                  (cps:getrefs xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
     (_ . acc)))
 
-(def cps:refcount ((args _ body))
+(def cps:refcount ((args _ _ body))
   "Collect placeholder reference count in a CPS function FUN."
   (let ((xvar . (last args)))
     (if body (cps:refcount_r xvar xvar body NIL))))
@@ -242,7 +242,7 @@
           (cons (cons k type) acc)))
       alst NIL)))
 
-(def cps:infer (name (args _ body))
+(def cps:infer (name (args _ _ body))
   "Infer the types of a CPS function FUN with name NAME."
   (let ((kvar . (last args)))
     #

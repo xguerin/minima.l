@@ -24,7 +24,7 @@ atom_t QUOTE    = NULL;
 atom_t WILDCARD = NULL;
 
 /*
- * Symbol management.
+ * Symbol lookup.
  */
 
 atom_t
@@ -46,32 +46,40 @@ lisp_lookup_immediate(const atom_t closure, const symbol_t sym)
   return UP(NIL);
 }
 
-
 atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
 {
+  TRACE_SEXP(closure);
   /*
-   * Load symbol from the closure.
+   * Default condition, check the global environemnt.
    */
-  atom_t result = lisp_lookup_immediate(closure, &sym->symbol);
-  if (!IS_NULL(result)) {
-    return result;
+  if (IS_NULL(closure)) {
+    FOREACH(GLOBALS, g) {
+      atom_t car = g->car;
+      if (lisp_symbol_match(CAR(car), sym)) {
+        return UP(CDR(car));
+      }
+      NEXT(g);
+    }
+    /*
+     * Nothing found.
+     */
+    return UP(NIL);
   }
-  X(result);
   /*
-   * Look-up in globals.
+   * Look for the symbol up the closure stack.
    */
-  FOREACH(GLOBALS, b) {
-    atom_t car = b->car;
+  FOREACH(CAR(closure), a) {
+    atom_t car = a->car;
     if (lisp_symbol_match(CAR(car), sym)) {
       return UP(CDR(car));
     }
-    NEXT(b);
+    NEXT(a);
   }
   /*
-   * Return NIL.
+   * Check the next level.
    */
-  return UP(NIL);
+  return lisp_lookup(CDR(closure), sym);
 }
 
 /*
@@ -351,6 +359,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
   if (IS_NULL(args)) {
     *narg = args;
     *nval = vals;
+    TRACE_BIND_SEXP(env);
     return env;
   }
   /*
@@ -360,6 +369,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
     atom_t res = lisp_bind(env, args, vals);
     *narg = UP(NIL);
     *nval = UP(NIL);
+    TRACE_BIND_SEXP(res);
     return res;
   }
   /*
@@ -368,6 +378,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
   if (IS_NULL(vals)) {
     *narg = args;
     *nval = vals;
+    TRACE_BIND_SEXP(env);
     return env;
   }
   /*
@@ -384,9 +395,7 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
   X(args, vals);
   /*
   */
-  atom_t res = lisp_bind_args(closure, cl0, oth, rem, narg, nval);
-  TRACE_BIND_SEXP(res);
-  return res;
+  return lisp_bind_args(closure, cl0, oth, rem, narg, nval);
 }
 
 /*
@@ -395,14 +404,15 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
 
 #define VALID_ARGUMENTS(__a)  (IS_NULL(__a) || IS_PAIR(__a) || IS_SYMB(__a))
 #define VALID_CLOSURE(__a)    (IS_NULL(__a) || IS_PAIR(__a))
+#define VALID_CURYLIST(__a)   (IS_NULL(__a) || IS_PAIR(__a))
 
 static bool
 lisp_is_func(const atom_t cell)
 {
   /*
-   * Check if the format is correct: (LST LST LST).
+   * Check if the format is correct: (LST LST LST LST).
    */
-  if (CDR(cell) == NIL || CDR(CDR(cell)) == NIL) {
+  if (CDR(cell) == NIL || CDR(CDR(cell)) == NIL || CDR(CDR(CDR(cell))) == NIL) {
     return false;
   }
   /*
@@ -410,8 +420,17 @@ lisp_is_func(const atom_t cell)
    */
   atom_t args = CAR(cell);
   atom_t clos = CAR(CDR(cell));
-  return VALID_ARGUMENTS(args) && VALID_CLOSURE(clos);
+  atom_t clst = CAR(CDR(CDR(cell)));
+  return VALID_ARGUMENTS(args) && VALID_CLOSURE(clos) && VALID_CURYLIST(clst);
 }
+
+/*
+ * NOTE(xrg) Function evaluation rely on a closure stack. Each new context is
+ * pushed on the stack before the evaluation of the function.
+ *
+ * A function's closure contain its currently resolved arguments during
+ * currying. This context takes precedence over those in the closure stack.
+ */
 
 static atom_t
 lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
@@ -429,29 +448,11 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
    */
   atom_t args = lisp_car(lbda);
   atom_t cdr0 = lisp_cdr(lbda);
-  atom_t lcls = lisp_car(cdr0);
-  atom_t body = lisp_cdr(cdr0);
-  X(cdr0);
-  /*
-   * NOTE(xrg) merge the define-site closure into the call-site closure.
-   * This is required by locally recursive lambdas. Define-site definitions
-   * take precendence:
-   */
-   atom_t newl = lisp_merge(lcls, lisp_dup(closure));
-  /*
-   * NOTE(xrg) this is temporarily enabled as when merging both closures we end
-   * up with a lot more than what we bargained for when calling external
-   * functions. To disable it, comment the line above and replace with the code
-   * below:
-   *
-   * atom_t newl = lisp_dup(lcls);
-   * X(lcls);
-   *
-   * TODO(xrg) figure out why we disabled that code in the first place and
-   * find a better way to handle locally recursive functions. Ideally, it
-   * should be handled in `let` as this is where the binding occurs.
-   */
-   X(lbda);
+  atom_t clos = lisp_car(cdr0);
+  atom_t cdr1 = lisp_cdr(cdr0);
+  atom_t clst = lisp_car(cdr1);
+  atom_t body = lisp_cdr(cdr1);
+  X(lbda, cdr0, cdr1);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda
    * is used as the run environment and augmented with the arguments'
@@ -459,15 +460,17 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
    * arguments.
    */
   atom_t narg;
-  atom_t newc = lisp_bind_args(closure, newl, args, vals, &narg, rem);
+  atom_t next = lisp_bind_args(closure, clst, args, vals, &narg, rem);
   /*
    * If the list of remaining arguments is not NIL, handle partial
    * application.
    */
   if (!IS_NULL(narg)) {
-    atom_t con = lisp_cons(newc, body);
-    rslt = lisp_cons(narg, con);
-    X(con, body);
+    atom_t con0 = lisp_cons(next, body);
+    atom_t con1 = lisp_cons(clos, con0);
+    X(next, body, clos, con0);
+    rslt = lisp_cons(narg, con1);
+    X(narg, con1);
   }
   /*
    * Evaluation the native function. Native functions have no definition-site
@@ -476,18 +479,25 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
    */
   else if (IS_NUMB(body)) {
     function_t fun = (function_t)body->number;
-    rslt = fun(closure, newc);
-    X(body);
+    atom_t ncls = IS_NULL(clos) ? UP(closure) : lisp_cons(clos, closure);
+    X(clos, body, narg);
+    rslt = fun(ncls, next);
+    X(ncls, next);
   }
   /*
-   * Evaluate the function as a PROG.
+   * Stack the closures and the curried arguments in order and evaluate the
+   * function as a PROG.
    */
   else {
-    rslt = lisp_prog(newc, body, UP(NIL));
+    atom_t cdup = lisp_dup(clos);
+    atom_t con0 = IS_NULL(cdup) ? UP(closure) : lisp_conc(cdup, closure);
+    atom_t con1 = IS_NULL(next) ? UP(con0) : lisp_cons(next, con0);
+    X(narg, clos, cdup, con0, next);
+    rslt = lisp_prog(con1, body, UP(NIL));
+    X(con1);
   }
   /*
    */
-  X(narg, newc);
   TRACE_SEXP(rslt);
   return rslt;
 }

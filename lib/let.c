@@ -5,7 +5,7 @@
 #include <mnml/utils.h>
 
 static atom_t
-lisp_let_bind(const atom_t closure, const atom_t cell)
+lisp_let_bind(const atom_t closure, const atom_t env, const atom_t cell)
 {
   TRACE_SEXP(cell);
   /*
@@ -13,8 +13,7 @@ lisp_let_bind(const atom_t closure, const atom_t cell)
    */
   if (unlikely(!IS_PAIR(cell))) {
     X(cell);
-    TRACE_SEXP(closure);
-    return closure;
+    return env;
   }
   /*
    * Grab CAR and CDR.
@@ -23,20 +22,25 @@ lisp_let_bind(const atom_t closure, const atom_t cell)
   atom_t cdr = lisp_cdr(cell);
   X(cell);
   /*
-   * Process the CAR.
+   * Return if the element is not a pair.
    */
-  if (likely(IS_PAIR(car))) {
-    atom_t arg = lisp_car(car);
-    atom_t val = lisp_eval(closure, lisp_cdr(car));
-    X(car);
-    atom_t newc = lisp_bind(closure, arg, val);
-    return lisp_let_bind(newc, cdr);
+  if (unlikely(!IS_PAIR(car))) {
+    X(car, cdr);
+    TRACE_SEXP(env);
+    return env;
   }
   /*
+   * Temporarily append this current environment to the evaluation closure.
    */
-  X(car, cdr);
-  TRACE_SEXP(closure);
-  return closure;
+  atom_t tmp = lisp_cons(env, closure);
+  atom_t arg = lisp_car(car);
+  atom_t val = lisp_eval(tmp, lisp_cdr(car));
+  X(tmp, car);
+  /*
+   * Bind the result to the environment and process the remainder.
+   */
+  atom_t next = lisp_bind(env, arg, val);
+  return lisp_let_bind(closure, next, cdr);
 }
 
 static atom_t
@@ -50,17 +54,16 @@ lisp_let(const atom_t closure, const atom_t cell)
   atom_t prog = lisp_cdr(cell);
   X(cell);
   /*
-   * Recursively apply the bind list.
+   * Recursively apply the bind list and queue it up in the closure list.
    */
-  TRACE_SEXP(closure);
-  atom_t newl = lisp_dup(closure);
-  atom_t newc = lisp_let_bind(newl, bind);
-  TRACE_SEXP(newc);
+  atom_t next = lisp_let_bind(closure, UP(NIL), bind);
+  atom_t clo = lisp_cons(next, closure);
+  X(next);
   /*
    * Evaluate the prog with the new bind list.
    */
-  atom_t res = lisp_prog(newc, prog, UP(NIL));
-  X(newc);
+  atom_t res = lisp_prog(clo, prog, UP(NIL));
+  X(clo);
   return res;
 }
 

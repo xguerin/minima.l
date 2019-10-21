@@ -3,4 +3,6 @@ theme: cinder
 nav:
     - Home: index.md
     - Notes:
+        - Closures: notes/Closures.md
         - Continuations: notes/Continuations.md
+        - Tasks: notes/Tasks.md

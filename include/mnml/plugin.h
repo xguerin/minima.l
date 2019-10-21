@@ -37,12 +37,13 @@ lisp_plugin_register()                                          \
   uintptr_t fun = (uintptr_t)lisp_function_ ## __s;             \
   atom_t adr = lisp_make_number(fun);                           \
   atom_t cn0 = lisp_cons(NIL, adr);                             \
-  atom_t val = lisp_cons(arg, cn0);                             \
+  atom_t cn1 = lisp_cons(NIL, cn0);                             \
+  atom_t val = lisp_cons(arg, cn1);                             \
   atom_t res = UP(val);                                         \
   atom_t cns = lisp_cons(sym, val);                             \
   TRACE_PLUG_SEXP(cns);                                         \
   GLOBALS = lisp_setq(GLOBALS, cns);                            \
-  X(sym); X(adr); X(NIL); X(cn0); X(arg); X(val);               \
+  X(sym, adr, NIL, cn0, cn1, arg, val);                         \
   return res;                                                   \
 }
 
@@ -52,7 +53,7 @@ lisp_plugin_register()                                          \
 
 #define LISP_LOOKUP(_v, _c, _x)                                 \
   MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_GET_SYMBOL_LENGTH(#_x));  \
-  atom_t _v = lisp_lookup_immediate(_c, _##_v);
+  atom_t _v = lisp_lookup_immediate(_c, _##_v)
 
 /*
  * Plugin generators.
@@ -75,7 +76,7 @@ lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
   LISP_LOOKUP(vl0, args, _x);                                   \
   LISP_LOOKUP(vl1, args, _y);                                   \
   atom_t res = IS_TRUE(vl0) _o IS_TRUE(vl1) ? TRUE : NIL;       \
-  X(vl0); X(vl1);                                               \
+  X(vl0, vl1);                                                  \
   return UP(res);                                               \
 }
 
@@ -86,7 +87,7 @@ lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
   LISP_LOOKUP(vl0, args, _x);                                   \
   LISP_LOOKUP(vl1, args, _y);                                   \
   atom_t res = lisp_make_number(vl0->number _o vl1->number);    \
-  X(vl0); X(vl1);                                               \
+  X(vl0, vl1);                                                  \
   return res;                                                   \
 }
 
@@ -97,6 +98,6 @@ lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
   LISP_LOOKUP(vl0, args, _x);                                   \
   LISP_LOOKUP(vl1, args, _y);                                   \
   atom_t res = vl0->number _o vl1->number ? TRUE : NIL;         \
-  X(vl0); X(vl1);                                               \
+  X(vl0, vl1);                                                  \
   return UP(res);                                               \
 }

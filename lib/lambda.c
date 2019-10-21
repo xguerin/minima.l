@@ -13,15 +13,16 @@ lisp_function_lambda(const atom_t closure, const atom_t arguments)
   atom_t prog = lisp_cdr(cell);
   X(cell);
   /*
-   * Embed the closure in the definition.
+   * Append an empty currying list and capture the closure.
    */
-  atom_t con0 = lisp_cons(closure, prog);
-  atom_t con1 = lisp_cons(args, con0);
-  X(prog, args, con0);
+  atom_t con0 = lisp_cons(NIL, prog);
+  atom_t con1 = lisp_cons(closure, con0);
+  atom_t con2 = lisp_cons(args, con1);
+  X(prog, args, con0, con1);
   /*
    * Return the lambda.
    */
-  return con1;
+  return con2;
 }
 
 LISP_PLUGIN_REGISTER(lambda, \\, @)

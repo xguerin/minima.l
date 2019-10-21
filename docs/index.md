@@ -70,10 +70,10 @@ Expression take the following form: `(FUNCTION ARGS ...)`. The `FUNCTION` can be
 The forms 1, 2, and 3 are mutually interchangeable:
 ```lisp
 : (def add (a b) (+ a b))
-> ((a b) NIL (+ a b))
+> ((a b) NIL NIL (+ a b))
 : (add 1 2) # Form 1
 > 3
-: ('((a b) NIL (+ a b)) 1 2) # Form 2
+: ('((a b) NIL NIL (+ a b)) 1 2) # Form 2
 > 3
 : ((\ (a b) (+ a b)) 1 2) # Form 3
 > 3
@@ -82,14 +82,14 @@ The forms 1, 2, and 3 are mutually interchangeable:
 
 Functions are represented internally as the following 3-uple:
 ```lisp
-(ARGUMENTS CLOSURE . BODY)
+(ARGUMENTS CLOSURE BINDINGS . BODY)
 ```
 The `ARGUMENTS` element is a list of symbols representing the arguments of the
 functions. The `CLOSURE` element is an association list that contains the
-context of the function at the definition site. It is also used for currying.
-Lastly, the `BODY` element is the expression of the function. When defined
-through plugins, the body may also be a number representing the memory address
-of the native implementation of the function.
+context of the function at the definition site. The `BINDINGS` element is used
+for currying. Lastly, the `BODY` element is the expression of the function. When
+defined through plugins, the body may also be a number representing the memory
+address of the native implementation of the function.
 
 #### Lambdas
 
@@ -98,7 +98,6 @@ similar to `def`:
 ```lisp
 : ((\ (x y) (+ x y)) 1 1)
 > 2
-
 : ((\ (x) (map (\ (n) (+ n 1)) x)) '(1 2 3 4))
 > (2 3 4 5)
 ```
@@ -108,9 +107,9 @@ Minima.l supports currying. It uses the function's closure to store the curried
 arguments. Curryring is available to all `lisp` and native functions. For example:
 ```lisp
 : (def add (a b) (+ a b))
-> ((a b) NIL (+ a b))
+> ((a b) NIL NIL (+ a b))
 : (setq +1 (add 1))
-> ((b) ((a . 1)) (+ a b))
+> ((b) NIL ((a . 1)) (+ a b))
 : (+1 2)
 > 3
 ```
@@ -499,7 +498,7 @@ Return the S-expression of the newly defined function.
 ##### Example
 ```lisp
 : (def add (x y) (+ x y))
-> ((x y) NIL (+ x y))
+> ((x y) NIL NIL (+ x y))
 ```
 #### EVAL
 
@@ -624,7 +623,7 @@ path is prefixed by `@lib`, `load` will look for the file in the `lib`
 directory of the installation prefix.
 ```lisp
 : (load "@lib/cadr.l")
-> ((x) NIL (car (cdr x)))
+> ((x) NIL NIL (car (cdr x)))
 ```
 Symbols are loaded from plugins found in the installation prefix or in
 the `MNML_PLUGIN_PATH` environment variable.
@@ -640,7 +639,7 @@ Return the result of the last evaluated operation in the list. On error,
 ##### Example
 ```lisp
 : (load "lisp/cadr.l")
-> ((x) NIL (car (cdr x)))
+> ((x) NIL NIL (car (cdr x)))
 ```
 #### MATCH
 
