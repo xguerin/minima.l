@@ -361,7 +361,7 @@ $ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
 | **Core operations**                |        |||
 | `eval`      | `(eval 'any)`                 | ✓      | [Evaluate](#eval) `any` |
 | `load`      | `(load str)`                  | ✓      | [Load](#load) an external asset |
-| `time`      | `(time prg)`                  | ✓      | Time the execution of `prg` |
+| `time`      | `(time prg)`                  | ✓      | [Time](#time) the execution of `prg` |
 | `quit`      | `(quit)`                      | ✓      | Quit the interpreter loop |
 | `quote`     | `(quote . any)`               | ✓      | Quote `any` |
 | **System functions**                                 ||||
@@ -921,4 +921,26 @@ Return the result of the last `any` operation.
 ```lisp
 : (|> '(1 2 3) cdr car)
 > 2
+```
+#### TIME
+
+##### Invocation
+```lisp
+(time prg)
+```
+##### Description
+
+Compute the execution time of `prg`.
+
+##### Return value
+
+Return the computed time, in nanoseconds. If `prg` is `NIL`, return the current
+timestamp.
+
+##### Example
+```lisp
+: (time (+ 1 2))
+> 8433
+: (time)
+862596451378329
 ```
