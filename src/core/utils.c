@@ -297,7 +297,11 @@ uint64_t
 lisp_timestamp()
 {
   struct timespec ts = { 0 };
+#if defined(__OpenBSD__)
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
   clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+#endif
   return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 

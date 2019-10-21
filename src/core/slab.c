@@ -44,7 +44,7 @@ lisp_slab_allocate()
   memset(&slab, 0, sizeof(slab_t));
   slab.n_pages = 16;
   /*
-   * Allocate the slab (32GB).
+   * Allocate the slab (64MB).
    */
   slab.entries = (atom_t)mmap(NULL, SLAB_SIZE, PROT_NONE,
                               MAP_ANON | MAP_PRIVATE, -1, 0);

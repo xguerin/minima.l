@@ -692,7 +692,7 @@ lisp_prin_atom(FILE* const handle, char * const buf, const size_t idx,
     }
     case T_NUMBER: {
       char buffer[24] = { 0 };
-#ifdef __MACH__
+#if defined(__MACH__) || defined(__OpenBSD__)
       sprintf(buffer, "%lld", cell->number);
 #else
       sprintf(buffer, "%ld", cell->number);

@@ -1,0 +1,34 @@
+image: openbsd/latest
+packages:
+    - cmake
+    - ragel
+sources:
+    - https://git.sr.ht/~xguerin/minima.l
+environment:
+    lemon: https://www.sqlite.org/src/raw/tool/lemon.c?name=61d5f0af1eff8f754b75ddca668c9897fd30759e389bfffb42ce9e4d38fd4746
+    lempar: https://www.sqlite.org/src/raw/tool/lempar.c?name=eb2841e2a7fd484cf44b1f526b06e7ab0f216d2f41818bf9485e8f38e3d1db19
+tasks:
+    - make_lemon: |
+        mkdir lemon
+        cd lemon
+        curl --silent -o lemon.c ${lemon}
+        curl --silent -o lempar.c ${lempar}
+        clang -o lemon lemon.c
+    - install_lemon: |
+        mkdir -p $HOME/.local/bin
+        mkdir -p $HOME/.local/share/lemon
+        cp lemon/lemon $HOME/.local/bin
+        cp lemon/lempar.c $HOME/.local/share/lemon
+    - setup: |
+        cd minima.l
+        mkdir build
+        cd build
+        cmake -DLEMON_ROOT=$HOME/.local ..
+    - build: |
+        cd minima.l
+        cd build
+        make
+    - test: |
+        cd minima.l
+        cd build
+        make test

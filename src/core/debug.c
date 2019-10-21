@@ -113,7 +113,7 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
       if (alter) fprintf(fp, ")");
       break;
     case T_NUMBER:
-#ifdef __MACH__
+#if defined(__MACH__) || defined(__OpenBSD__)
       fprintf(fp, "%lld", atom->number);
 #else
       fprintf(fp, "%ld", atom->number);

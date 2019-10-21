@@ -45,7 +45,7 @@ void lisp_debug_parse_flags();
 #define TRACE(__fmt, ...) \
   FPRINTF(stderr, "[TRACE ] - " __fmt "\n", __VA_ARGS__)
 
-#ifdef __MACH__
+#if defined(__MACH__) || defined(__OpenBSD__)
 
 #define HEADER_SEXP(__c)  \
   FPRINTF(stderr, "[%06llu] - %s = ", __c->refs, #__c)

@@ -23,7 +23,7 @@ extern slab_t slab;
  * Slab macros.
  */
 
-#define SLAB_SIZE (32ULL * 1024ULL * 1024ULL * 1024ULL)
+#define SLAB_SIZE (64ULL * 1024ULL * 1024ULL)
 #define PAGE_SIZE 4096ULL
 
 #define CELL_COUNT ((slab.n_pages * PAGE_SIZE) / sizeof(struct _atom))
@@ -72,7 +72,7 @@ void lisp_free(const atom_t atom);
 
 #ifdef LISP_ENABLE_DEBUG
 
-#ifdef __MACH__
+#if defined(__MACH__) || defined(__OpenBSD__)
 
 #define HEADER_REFS(__f, __t, __n) \
   FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n)

@@ -14,7 +14,7 @@
 
 #define OK { return true; }
 
-#ifdef __MACH__
+#if defined(__MACH__) || defined(__OpenBSD__)
 
 #define HEADER_EQUAL(__l, __a, __b)                         \
   printf("line %d: " #__a " == 0x%llx, 0x%llx expected\n",  \
