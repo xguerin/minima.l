@@ -51,7 +51,7 @@ atom_t lisp_decref(const atom_t, const char * const name);
  * Slab functions.
  */
 
-void lisp_slab_allocate();
+bool lisp_slab_allocate();
 void lisp_slab_destroy();
 
 atom_t lisp_allocate();

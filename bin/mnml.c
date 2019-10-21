@@ -154,7 +154,10 @@ lisp_preload(const size_t n, ...)
 int
 main(const int argc, char ** const argv)
 {
-  lisp_init();
+  if (!lisp_init()) {
+    fprintf(stderr, "Minima.l engine initialization failed.");
+    return __LINE__;
+  }
   /*
    * Register system signals.
    */

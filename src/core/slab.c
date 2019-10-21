@@ -38,7 +38,7 @@ atom_t lisp_decref(const atom_t atom, const char * const name)
 
 slab_t slab = { 0 };
 
-void
+bool
 lisp_slab_allocate()
 {
   memset(&slab, 0, sizeof(slab_t));
@@ -48,13 +48,20 @@ lisp_slab_allocate()
    */
   slab.entries = (atom_t)mmap(NULL, SLAB_SIZE, PROT_NONE,
                               MAP_ANON | MAP_PRIVATE, -1, 0);
+  if (slab.entries == MAP_FAILED) {
+    ERROR("Cannot reserve %lluB of slab memory", SLAB_SIZE);
+    return false;
+  }
   TRACE_SLAB("0x%lx", (uintptr_t)slab.entries);
   /*
    * Allocate the first page.
    */
   const size_t size = (slab.n_pages << 1) * PAGE_SIZE;
   int res = mprotect(slab.entries, size, PROT_READ | PROT_WRITE);
-  if (res != 0) abort();
+  if (res != 0) {
+    ERROR("Cannot allocate %luB of slab pages", size);
+    return false;
+  }
   /*
    * Initialize the relative addressing.
    */
@@ -62,9 +69,10 @@ lisp_slab_allocate()
     slab.entries[i].next = i + 1;
   }
   slab.entries[CELL_COUNT - 1].next = END_MK;
+  return true;
 }
 
-void
+static bool
 lisp_slab_expand()
 {
   const size_t size = (slab.n_pages << 1) * PAGE_SIZE;
@@ -73,7 +81,10 @@ lisp_slab_expand()
    * Commit twice the amount of memory.
    */
   int res = mprotect(slab.entries, size, PROT_READ | PROT_WRITE);
-  if (res != 0) abort();
+  if (res != 0) {
+    ERROR("Cannot expand slab pages to %lu", size);
+    return false;
+  }
   /*
    * Initialize the relative addressing.
    */
@@ -86,6 +97,7 @@ lisp_slab_expand()
    */
   slab.first = CELL_COUNT;
   slab.n_pages <<= 1;
+  return true;
 }
 
 void
@@ -99,12 +111,15 @@ lisp_slab_destroy()
  */
 
 atom_t
-lisp_allocate() {
+lisp_allocate()
+{
   /*
    * Expand if necessary.
    */
   if (unlikely(slab.first == END_MK)) {
-    lisp_slab_expand();
+    if (!lisp_slab_expand()) {
+      return UP(NIL);
+    }
   }
   /*
    * Mark the slot as used.
@@ -125,7 +140,8 @@ lisp_allocate() {
 }
 
 void
-lisp_deallocate(const atom_t __p) {
+lisp_deallocate(const atom_t __p)
+{
   size_t n = ((uintptr_t)__p - (uintptr_t)slab.entries) / sizeof(struct _atom);
   atom_t entry = &slab.entries[n];
   TRACE_SLAB("%ld", n);

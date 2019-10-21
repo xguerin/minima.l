@@ -13,7 +13,7 @@ typedef void (* error_handler_t)();
 void lisp_set_parse_error_handler(const error_handler_t h);
 void lisp_set_syntax_error_handler(const error_handler_t h);
 
-void lisp_init();
+bool lisp_init();
 void lisp_fini();
 
 /*

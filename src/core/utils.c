@@ -73,10 +73,12 @@ lisp_prefix()
   return prefix;
 }
 
-void
+bool
 lisp_init()
 {
-  lisp_slab_allocate();
+  if (!lisp_slab_allocate()) {
+    return false;
+  }
   /*
    * Create the constants.
    */
@@ -97,6 +99,7 @@ lisp_init()
 #ifdef LISP_ENABLE_DEBUG
   lisp_debug_parse_flags();
 #endif
+  return true;
 }
 
 void
