@@ -1,4 +1,4 @@
-(load "@lib/foldr.l")
+(load "foldr.l")
 
 (def flatten (lst)
   "Flatten k-deep LST into a 1-deep list."

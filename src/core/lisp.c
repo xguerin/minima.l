@@ -396,6 +396,23 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
 #define VALID_ARGUMENTS(__a)  (IS_NULL(__a) || IS_PAIR(__a) || IS_SYMB(__a))
 #define VALID_CLOSURE(__a)    (IS_NULL(__a) || IS_PAIR(__a))
 
+static bool
+lisp_is_func(const atom_t cell)
+{
+  /*
+   * Check if the format is correct: (LST LST LST).
+   */
+  if (CDR(cell) == NIL || CDR(CDR(cell)) == NIL) {
+    return false;
+  }
+  /*
+   * Grab the arguments and the closure, and check if they are valid.
+   */
+  atom_t args = CAR(cell);
+  atom_t clos = CAR(CDR(cell));
+  return VALID_ARGUMENTS(args) && VALID_CLOSURE(clos);
+}
+
 static atom_t
 lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
 {
@@ -416,28 +433,25 @@ lisp_eval_func(const atom_t closure, const atom_t cell, atom_t * const rem)
   atom_t body = lisp_cdr(cdr0);
   X(cdr0);
   /*
-   * If that first argument is not a function, simply evaluate it and return.
-   */
-  if (!VALID_ARGUMENTS(args) || !VALID_CLOSURE(lcls) || IS_NULL(body)) {
-    *rem = vals;
-    X(args); X(lcls); X(body);
-    return lisp_eval(closure, lbda);
-  }
-  /*
-   * NOTE: Merge the define-site closure into the call-site closure.
+   * NOTE(xrg) merge the define-site closure into the call-site closure.
    * This is required by locally recursive lambdas. Define-site definitions
    * take precendence:
+   */
+   atom_t newl = lisp_merge(lcls, lisp_dup(closure));
+  /*
+   * NOTE(xrg) this is temporarily enabled as when merging both closures we end
+   * up with a lot more than what we bargained for when calling external
+   * functions. To disable it, comment the line above and replace with the code
+   * below:
    *
-   * atom_t newl = lisp_merge(lcls, lisp_dup(closure));
+   * atom_t newl = lisp_dup(lcls);
+   * X(lcls);
    *
-   * This is disabled for the moment as when merging both closures, we end up
-   * with a lot more than what we bargained for when calling external functions.
-   *
-   * TODO find a better way to handle locally recursive functions. Ideally, it
+   * TODO(xrg) figure out why we disabled that code in the first place and
+   * find a better way to handle locally recursive functions. Ideally, it
    * should be handled in `let` as this is where the binding occurs.
    */
-  atom_t newl = lisp_dup(lcls);
-  X(lbda); X(lcls);
+   X(lbda);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda
    * is used as the run environment and augmented with the arguments'
@@ -488,20 +502,24 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
   atom_t rslt, rem;
   TRACE_SEXP(cell);
   /*
-   * Evaluate the first argument.
+   * Handle the case when CAR is a function.
    */
-  switch (CAR(cell)->type) {
-    case T_PAIR:
-      rslt = lisp_eval_func(closure, cell, &rem);
-      break;
-    case T_SYMBOL:
-      rslt = lisp_eval(closure, cell);
-      rem = UP(NIL);
-      break;
-    default:
-      rslt = cell;
-      rem = UP(NIL);
-      break;
+  if (IS_PAIR(CAR(cell)) && lisp_is_func(CAR(cell))) {
+    rslt = lisp_eval_func(closure, cell, &rem);
+  }
+  /*
+   * If it's a symbol, re-evaluate cell.
+   */
+  else if (IS_SYMB(CAR(cell))) {
+    rslt = lisp_eval(closure, cell);
+    rem = UP(NIL);
+  }
+  /*
+   * Otherwise, just return the cell.
+   */
+  else {
+    rslt = cell;
+    rem = UP(NIL);
   }
   /*
    * Check if there is any remainder arguments.

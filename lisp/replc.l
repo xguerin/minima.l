@@ -1,4 +1,4 @@
-(load "@lib/foldr.l")
+(load "foldr.l")
 
 (def replc (k v lst)
   (foldr

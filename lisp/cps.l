@@ -1,12 +1,4 @@
-(load "@lib/append.l")
-(load "@lib/assoc.l")
-(load "@lib/foldl.l")
-(load "@lib/foldr.l")
-(load "@lib/last.l")
-(load "@lib/len.l")
-(load "@lib/ntoa.l")
-(load "@lib/replc.l")
-(load "@lib/rev.l")
+(load "append.l" "assoc.l" "foldl.l" "foldr.l" "last.l" "len.l" "ntoa.l" "replc.l" "rev.l")
 
 #
 # Make a symbol placeholder

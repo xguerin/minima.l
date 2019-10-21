@@ -1,5 +1,4 @@
-(load "@lib/caar.l")
-(load "@lib/cdar.l")
+(load "caar.l" "cdar.l")
 
 (def assoc (k lst)
   "Return the value for K in the association list LST."

@@ -1,4 +1,4 @@
-(load "@lib/foldr.l")
+(load "foldr.l")
 
 (def erase (k lst)
   (foldr

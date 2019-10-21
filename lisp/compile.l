@@ -1,11 +1,4 @@
-(load "@lib/cps.l")
-(load "@lib/iter.l")
-(load "@lib/filter.l")
-(load "@lib/foldl.l")
-(load "@lib/foldr.l")
-(load "@lib/last.l")
-(load "@lib/map.l")
-(load "@lib/rev.l")
+(load "cps.l" "iter.l" "filter.l" "foldl.l" "foldr.l" "last.l" "map.l" "rev.l")
 
 #
 # Indentation management

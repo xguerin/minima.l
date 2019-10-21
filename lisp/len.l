@@ -1,4 +1,4 @@
-(load "@lib/foldl.l")
+(load "foldl.l")
 
 (def len (lst)
   "Return the length of LST."

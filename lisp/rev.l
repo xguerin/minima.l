@@ -1,4 +1,4 @@
-(load "@lib/foldl.l")
+(load "foldl.l")
 
 (def rev (lst)
   "Reverse LST."

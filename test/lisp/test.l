@@ -1,13 +1,13 @@
-(load "../../lisp/foldl.l")
+(load "../../lisp/foldl.l" "../../lisp/term.l")
 
 (def test:run (SUITE . TESTS)
   "Run all tests specified as a ((NAME . TEST)) list."
-  (prinl "[" SUITE "]")
+  (prinl (term:bold "[") (term:bold SUITE) (term:bold "]"))
   (foldl (\ (acc (name . test))
            (and acc
              (cond (eval test)
-               (tru?  . (prog (prinl "✓ " name ": passed") T))
-               (_     . (prog (prinl "! " name ": failed") NIL)))))
+               (tru?  . (prog (prinl "✓ " name ": " (term:green "passed")) T))
+               (_     . (prog (prinl "! " name ": " (term:red "failed")) NIL)))))
     T TESTS))
 
 (def assert:equal (EXPECT . ACTUAL)
