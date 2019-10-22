@@ -369,6 +369,7 @@ $ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
 | `exec`      | `(exec 'str 'lst 'lst)`       | ✓      | Execute an image at path with arguments and environment |
 | `fork`      | `(fork)`                      | ✓      | Fork the current process |
 | `run`       | `(run 'str 'lst 'alst)`       |        | [Run](#run) a external program `str` |
+| `unlink`    | `(unlink 'str)`               |        | Unlink the file pointed by `str` |
 | `wait`      | `(wait 'num)`                 | ✓      | Wait for PID `num` |
 
 ### List
