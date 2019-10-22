@@ -52,7 +52,6 @@ atom_t lisp_conc(const atom_t a, const atom_t b);
 atom_t lisp_bind(const atom_t closure, const atom_t args, const atom_t vals);
 atom_t lisp_setq(const atom_t closure, const atom_t pair);
 atom_t lisp_prog(const atom_t closure, const atom_t cell, const atom_t rslt);
-atom_t lisp_rtrn(const atom_t closure, const atom_t rslt, const atom_t cont);
 
 /*
  * Read, eval, print functions.
