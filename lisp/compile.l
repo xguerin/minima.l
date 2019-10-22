@@ -448,6 +448,10 @@
       (cc:gen:cont SYMB ARGS REFS kvar kvar body)
       (cc:gen:main SYMB ARGS REFS kvar)
       (cc:gen:plugin SYMB ARGS TYPES))
+    #
+    # Return then symbol passed as argument.
+    #
+    SYMB
     ))
 
 (def cc:build (SYMB . WHERE)
@@ -465,7 +469,7 @@
     #
     (let ((incd . (append (prefix) "/include"))
           (libd . (append (prefix) "/lib"))
-          (args . (list "-g3" "-shared" "-fPIC" "-fomit-frame-pointer" "-flto" "-o" oout cout "-I" incd "-L" libd "-lminimal"))
+          (args . (list "-O3" "-shared" "-fPIC" "-fomit-frame-pointer" "-flto" "-o" oout cout "-I" incd "-L" libd "-lminimal"))
           ((status . messages) . (run "/usr/bin/gcc" args ENV)))
-      status
+      (= 0 status)
       )))
