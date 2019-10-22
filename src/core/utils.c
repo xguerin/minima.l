@@ -319,6 +319,9 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
     strcpy(expn_buf, lisp_prefix());
     strcat(expn_buf, "/lisp");
     strcat(expn_buf, &filepath[4]);
+  } else if (filepath[0] == '~' && getenv("HOME") != NULL) {
+    strcpy(expn_buf, getenv("HOME"));
+    strcat(expn_buf, &filepath[1]);
   } else {
     strcpy(expn_buf, filepath);
   }
