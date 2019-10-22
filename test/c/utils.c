@@ -28,3 +28,5 @@ lisp_equ(const atom_t a, const atom_t b)
 {
   return a->type == b->type && atom_equ(a, b);
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

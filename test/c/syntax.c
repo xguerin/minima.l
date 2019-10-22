@@ -354,3 +354,5 @@ main(const int argc, char ** const argv)
   TEST(conc_cons_tests);
   return 0;
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

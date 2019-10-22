@@ -41,3 +41,5 @@ lisp_closure_clear(closure_t* $)
     free(tmp);
   }
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

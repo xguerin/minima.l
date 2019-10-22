@@ -53,3 +53,5 @@ bool lisp_pending(const lexer_t * const lexer);
 #define TRACE_LEXER(__s, ...)
 
 #endif
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

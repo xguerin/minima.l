@@ -101,3 +101,5 @@ lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
   X(vl0, vl1);                                                  \
   return UP(res);                                               \
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

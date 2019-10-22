@@ -727,3 +727,5 @@ lisp_prin(const atom_t closure, const atom_t cell, const bool s)
   size_t idx = lisp_prin_atom(handle, buffer, 0, closure, cell, s);
   lisp_flush(handle, buffer, idx);
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

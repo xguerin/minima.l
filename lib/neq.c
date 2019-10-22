@@ -41,3 +41,5 @@ lisp_function_neq(const atom_t closure, const atom_t arguments)
 }
 
 LISP_PLUGIN_REGISTER(neq, <>, X, Y, NIL)
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

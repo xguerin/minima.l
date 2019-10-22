@@ -68,3 +68,5 @@ lisp_function_exec(const atom_t closure, const atom_t arguments)
 }
 
 LISP_PLUGIN_REGISTER(exec, exec, PATH, ARGS, ENVP, NIL)
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

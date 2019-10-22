@@ -41,3 +41,5 @@ lisp_function_readlines(const atom_t closure, const atom_t arguments)
 }
 
 LISP_PLUGIN_REGISTER(readlines, readlines)
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

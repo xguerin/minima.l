@@ -75,3 +75,5 @@ lisp_function_let(const atom_t closure, const atom_t arguments)
 }
 
 LISP_PLUGIN_REGISTER(let, let, @)
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

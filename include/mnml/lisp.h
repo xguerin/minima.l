@@ -61,3 +61,5 @@ atom_t lisp_rtrn(const atom_t closure, const atom_t rslt, const atom_t cont);
 atom_t lisp_read(const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const atom_t closure, const atom_t cell);
 void   lisp_prin(const atom_t closure, const atom_t cell, const bool s);
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

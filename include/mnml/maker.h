@@ -171,3 +171,5 @@ void lisp_make_nil();
 void lisp_make_true();
 void lisp_make_quote();
 void lisp_make_wildcard();
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

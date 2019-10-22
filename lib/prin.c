@@ -26,3 +26,5 @@ lisp_function_prin(const atom_t closure, const atom_t arguments)
 }
 
 LISP_PLUGIN_REGISTER(prin, prin, @)
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

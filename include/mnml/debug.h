@@ -86,3 +86,5 @@ void lisp_debug(FILE * fp, const atom_t atom);
 #define TRACE_PLUG_SEXP(__c)
 
 #endif
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

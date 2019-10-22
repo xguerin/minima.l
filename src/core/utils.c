@@ -420,3 +420,5 @@ lisp_load_file(const char * const filepath)
   fclose(handle);
   return res;
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et

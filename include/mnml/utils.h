@@ -124,3 +124,5 @@ lisp_symbol_match(const atom_t a, const atom_t b)
   register __m128i res = _mm_xor_si128(a->symbol.tag, b->symbol.tag);
   return _mm_test_all_zeros(res, res);
 }
+
+// vim: tw=80:sw=2:ts=2:sts=2:et
