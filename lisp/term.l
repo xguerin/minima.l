@@ -9,9 +9,9 @@
   (|>
     "[0m"
     (cons (chr 27))
-    (append STR)
+    ($+ STR)
     (cons ^m)
-    (append CODE)
+    ($+ CODE)
     (cons ^[)
     (cons (chr 27))))
 
