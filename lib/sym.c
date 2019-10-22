@@ -7,6 +7,16 @@ static atom_t
 lisp_function_sym(const atom_t closure, const atom_t arguments)
 {
   LISP_LOOKUP(car, arguments, X);
+  /*
+   * Check that the argument is a string.
+   */
+  if (unlikely(!(IS_PAIR(car) && lisp_is_string(car)))) {
+    X(car);
+    return UP(NIL);
+  }
+  /*
+   * Process the string.
+   */
   char buffer[17];
   size_t len = lisp_make_cstring(car, buffer, LISP_SYMBOL_LENGTH, 0);
   X(car);
