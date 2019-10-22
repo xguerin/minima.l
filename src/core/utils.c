@@ -317,7 +317,7 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
    */
   if (strncmp(filepath, "@lib", 4) == 0) {
     strcpy(expn_buf, lisp_prefix());
-    strcat(expn_buf, "/lisp");
+    strcat(expn_buf, "/share/mnml");
     strcat(expn_buf, &filepath[4]);
   } else if (filepath[0] == '~' && getenv("HOME") != NULL) {
     strcpy(expn_buf, getenv("HOME"));

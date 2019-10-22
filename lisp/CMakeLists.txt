@@ -1,3 +1,3 @@
 file(GLOB SOURCES *.l)
 
-install(FILES ${SOURCES} DESTINATION lisp)
+install(FILES ${SOURCES} DESTINATION share/mnml)
