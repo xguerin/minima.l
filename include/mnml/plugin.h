@@ -39,12 +39,11 @@ lisp_plugin_register()                                          \
   atom_t cn0 = lisp_cons(NIL, adr);                             \
   atom_t cn1 = lisp_cons(NIL, cn0);                             \
   atom_t val = lisp_cons(arg, cn1);                             \
-  atom_t res = UP(val);                                         \
   atom_t cns = lisp_cons(sym, val);                             \
   TRACE_PLUG_SEXP(cns);                                         \
   GLOBALS = lisp_setq(GLOBALS, cns);                            \
-  X(sym, adr, NIL, cn0, cn1, arg, val);                         \
-  return res;                                                   \
+  X(adr, NIL, cn0, cn1, arg, val);                              \
+  return sym;                                                   \
 }
 
 /*

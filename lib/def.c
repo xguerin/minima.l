@@ -49,8 +49,8 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
    * Set the symbol's value.
    */
   GLOBALS = lisp_setq(GLOBALS, lisp_cons(symb, con2));
-  X(symb);
-  return con2;
+  X(con2);
+  return symb;
 }
 
 LISP_PLUGIN_REGISTER(def, def, @)
