@@ -363,6 +363,8 @@ $ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
 | `time`      | `(time prg)`                  | ✓      | [Time](#time) the execution of `prg` |
 | `quit`      | `(quit)`                      | ✓      | Quit the interpreter loop |
 | `quote`     | `(quote . any)`               | ✓      | Quote `any` |
+| **Interpreter functions**                            ||||
+| `prefix`    | `(prefix)`                    | ✓      | Return `mnml` installation prefix |
 | **System functions**                                 ||||
 | `close`     | `(dup 'num)`                  | ✓      | Close afile descriptor `num` |
 | `dup`       | `(dup 'num ['num])`           | ✓      | Duplicate a file descriptor `num` |
