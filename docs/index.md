@@ -833,8 +833,7 @@ Read all lines from the current input stream. Stop on `EOF`.
 
 ##### Return value
 
-Return all lines as a list of string. If present, the trailing `\n` character is
-chopped.
+Return all lines as a list of string. 
 
 #### RUN
 

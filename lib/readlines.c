@@ -24,11 +24,6 @@ lisp_function_readlines(const atom_t closure, const atom_t arguments)
     if (p == NULL) {
       continue;
     }
-    size_t len = strlen(p);
-    if (p[len - 1] == '\n') {
-      p[len - 1] = '\0';
-      len -= 1;
-    }
     atom_t str = lisp_make_string(buffer, strlen(p));
     res = lisp_append(res, str);
   }
