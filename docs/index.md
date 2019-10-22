@@ -313,7 +313,7 @@ $ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
 | `setq`      | `(setq sym 'any)`             | ✓      | [Bind](#setq) a symbols |
 | `sym`       | `(sym 'str)`                  | ✓      | Make a symbol out of `str` |
 | **List manipulation**                                ||||
-| `append`    | `(append 'lst 'any)`          |        | Append `any` to `lst` |
+| `append`    | `(append 'lst . any)`         |        | Recursively append `any` to `lst` |
 | `car`       | `(car 'lst)`                  | ✓      | Get the head element of `lst` |
 | `cadr`      | `(cdr 'lst)`                  |        | Get the 2nd element of `lst` |
 | `caddr`     | `(caddr 'lst)`                |        | Get the 3rd element of `lst` |
