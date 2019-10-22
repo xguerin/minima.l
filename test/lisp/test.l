@@ -17,9 +17,9 @@
     (if (= EXPECT EVAL)
       T
       (prog
-        (print '! EXPECT '= OP)
-        (prin " FAILED ")
-        (print EXPECT)
-        (prin " <> ")
+        (prinl (term:red "> FAILED "))
+        (prin "! " (term:underlined "Expect") ": ")
+        (printl EXPECT)
+        (prin "! " (term:underlined "Actual") ": ")
         (printl EVAL)
         ))))
