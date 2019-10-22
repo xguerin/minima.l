@@ -129,7 +129,7 @@ lisp_preload(const size_t n, ...)
   va_start(args, n);
   for (size_t i = 0; i < n; i += 1) {
     const char * const symbol = va_arg(args, const char *);
-    MAKE_SYMBOL_STATIC(s, symbol, LISP_GET_SYMBOL_LENGTH(symbol));
+    MAKE_SYMBOL_STATIC(s, symbol, LISP_SYMBOL_LENGTH);
     atom_t cell = lisp_make_symbol(s);
     atom_t func = lisp_plugin_load(cell, NIL);
     if (IS_NULL(func)) {

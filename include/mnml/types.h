@@ -39,10 +39,6 @@ typedef struct _pair
 
 #define LISP_SYMBOL_LENGTH 16
 
-#define LISP_GET_SYMBOL_LENGTH(__n)   \
-  strlen(__n) <= LISP_SYMBOL_LENGTH ? \
-    strlen(__n) : LISP_SYMBOL_LENGTH
-
 typedef union _symbol
 {
   char      val[LISP_SYMBOL_LENGTH];

@@ -31,7 +31,7 @@ lisp_plugin_name()                                              \
 atom_t                                                          \
 lisp_plugin_register()                                          \
 {                                                               \
-  MAKE_SYMBOL_STATIC(inp, #__n, LISP_GET_SYMBOL_LENGTH(#__n));  \
+  MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);            \
   atom_t sym = lisp_make_symbol(inp);                           \
   LISP_CONS(arg, ## __VA_ARGS__);                               \
   uintptr_t fun = (uintptr_t)lisp_function_ ## __s;             \
@@ -52,7 +52,7 @@ lisp_plugin_register()                                          \
  */
 
 #define LISP_LOOKUP(_v, _c, _x)                                 \
-  MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_GET_SYMBOL_LENGTH(#_x));  \
+  MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_SYMBOL_LENGTH);           \
   atom_t _v = lisp_lookup_immediate(_c, _##_v)
 
 /*
