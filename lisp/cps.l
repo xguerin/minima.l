@@ -106,7 +106,7 @@
       (\ (acc e)
         (if (sym? e)
           (let ((cur . (assoc e acc))
-                (inc . (if (= e kvar) 0 1)))
+                (inc . (if (and (= e kvar) (<> kvar xvar)) 0 1)))
             (if cur
               (replc e (+ cur inc) acc)
               (cons (cons e inc) acc)))

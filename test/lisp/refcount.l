@@ -6,7 +6,7 @@
   # Basic function.
   #
   ("basic" . (let ((fun . (\ (a b) (+ a b)))
-                   (exp . '((_2 . 0) (b . 1) (a . 1)))
+                   (exp . '((_2 . 1) (b . 1) (a . 1)))
                    (act . (cps:refcount (>& 'fun))))
                (assert:equal exp act)))
   #
