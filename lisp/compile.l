@@ -1,6 +1,6 @@
 (load
-  "cps.l" "iter.l" "filter.l" "foldl.l" "foldr.l" "last.l" "map.l" "rev.l" "run.l"
-  'prefix 'unlink)
+  "assoc.l" "cps.l" "iter.l" "filter.l" "foldl.l" "foldr.l" "last.l" "map.l"
+  "rev.l" "run.l" 'prefix 'unlink)
 
 #
 # Indentation management.
@@ -45,8 +45,8 @@
   (let ((tostr  . (str ref)))
     (if (= (car tostr) ^_)
       (cdr tostr)
-      (cc:getargidx ARGS ref 0)))
-  )))
+      (cc:getargidx ARGS ref 0))
+    ))
 
 (def cc:replace (kvar body)
   "Replace the continuation in BODY by KVAR."
@@ -227,28 +227,24 @@
 
 (def cc:gen:argument (TYPES arg)
   "Generate the argument extraction."
-  (prinl (o|) "car = lisp_eval(closure, lisp_car(cur));")
+  (prinl (o|) "LISP_LOOKUP(_" arg ", arguments, " arg ");")
   #
   # Determine how to extract the value.
   #
   (let ((atype . (assoc arg TYPES)))
     (match atype
-      (NUMBER .  (prinl (o|) "value_t " arg " = { .number = car->number };"))
-      (LIST .  (prinl (o|) "value_t " arg " = { .list = UP(car) };"))
-      (_ . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
+      (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
+      (LIST   . (prinl (o|) "value_t " arg " = { .list = UP(car) };"))
+      (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
       ))
   #
-  (prinl (o|) "X(car);")
-  (prinl (o|) "cdr = lisp_cdr(cur);")
-  (prinl (o|) "X(cur); cur = cdr;"))
+  (prinl (o|) "X(_" arg ");"))
 
 (def cc:gen:plugin (NAME ARGS TYPES)
   "Generate C code for the plugin."
-  (prinl "static atom_t lisp_function_" NAME "(const atom_t closure, const atom_t cell) {")
+  (prinl "static atom_t lisp_function_" NAME "(const atom_t closure, const atom_t arguments) {")
   (o>)
-  (prinl (o|) "atom_t cur = cell, car, cdr;")
   (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
-  (prinl (o|) "X(cur);")
   (prinl (o|) "closure_t _C = NULL;")
   (prinl (o|) "callback_t _K = identity;")
   (prin (o|) "atom_t R = " NAME "(")
@@ -259,7 +255,9 @@
   (<o)
   (prinl "}")
   (prinl)
-  (prinl "LISP_PLUGIN_REGISTER(" NAME ", " NAME ");"))
+  (prin "LISP_PLUGIN_REGISTER(" NAME ", " NAME)
+  (iter (\ (e) (prin ", " e)) ARGS)
+  (prinl ");"))
 
 #
 # Inner section generators.
@@ -428,7 +426,7 @@
 # Main compiler entrypoint.
 #
 
-(def cc:generate (SYMB)
+(def cc:transpile (SYMB)
   "Generate the C code for the CPS function SYMB."
   (let ((cps             . (>& SYMB))
         ((args _ _ body) . cps)
@@ -452,10 +450,12 @@
       (cc:gen:plugin SYMB ARGS TYPES))
     ))
 
-(def cc:build (SYMB)
+(def cc:build (SYMB . WHERE)
   "Build the plugin for the CPS function SYMB."
-  (let ((cout            . (append (str SYMB) ".c"))
-        (oout . (append "libminimal_function_" (str SYMB) ".so")))
+  (let ((wopt . (eval (car WHERE)))
+        (trgt . (if wopt wopt (append (assoc "HOME" ENV) "/.mnml")))
+        (cout . (append (str SYMB) ".c"))
+        (oout . (append trgt "/libminimal_function_" (str SYMB) ".so")))
     #
     # Remove the SO file
     #
@@ -465,7 +465,7 @@
     #
     (let ((incd . (append (prefix) "/include"))
           (libd . (append (prefix) "/lib"))
-          (args . (list "-shared" "-fPIC" "-fomit-frame-pointer" "-o" oout cout "-I" incd "-L" libd "-lminimal"))
+          (args . (list "-g3" "-shared" "-fPIC" "-fomit-frame-pointer" "-flto" "-o" oout cout "-I" incd "-L" libd "-lminimal"))
           ((status . messages) . (run "/usr/bin/gcc" args ENV)))
       status
       )))
