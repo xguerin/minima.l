@@ -127,6 +127,35 @@ if(MNML_ENABLE_DEBUG)
 endif()
 
 #
+# Headers
+#
+
+set(HEADERS
+  include/mnml/closure.h
+  include/mnml/debug.h
+  include/mnml/lisp.h
+  include/mnml/maker.h
+  include/mnml/plugin.h
+  include/mnml/slab.h
+  include/mnml/types.h
+  include/mnml/utils.h)
+
+foreach(HEADER IN LISTS HEADERS)
+  set(TARGET "${CMAKE_BINARY_DIR}/${HEADER}")
+  list(APPEND TARGET_HEADERS "${TARGET}")
+  add_custom_command(
+    OUTPUT "${TARGET}"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${CMAKE_SOURCE_DIR}/${HEADER}" "${TARGET}"
+    MAIN_DEPENDENCY "${CMAKE_SOURCE_DIR}/${HEADER}"
+    VERBATIM)
+endforeach()
+
+add_custom_target(minimal_headers
+  ALL
+  DEPENDS ${HEADERS}
+  SOURCES ${TARGET_HEADERS})
+
+#
 # Install headers
 #
 

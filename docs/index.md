@@ -833,7 +833,7 @@ Read all lines from the current input stream. Stop on `EOF`.
 
 ##### Return value
 
-Return all lines as a list of string. 
+Return all lines as a list of string trimmed of any carry return.
 
 #### RUN
 

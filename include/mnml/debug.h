@@ -65,7 +65,7 @@ void lisp_debug_parse_flags();
 
 #define HEADER_REFC(__f, __t, __n)                      \
 {                                                       \
-  TRACE_REFS("[%2llu->%2llu] - %s = ", __f, __t, __n);  \
+  TRACE_REFC("[%2llu->%2llu] - %s = ", __f, __t, __n);  \
 }
 
 #define HEADER_SLOT(__i)                                \

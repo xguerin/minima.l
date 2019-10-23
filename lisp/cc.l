@@ -427,7 +427,7 @@
 # Main compiler entrypoint.
 #
 
-(def cc:transpile (SYMB)
+(def cc:compile (SYMB)
   "Generate the C code for the CPS function SYMB."
   (let ((cps             . (>& SYMB))
         ((args _ _ body) . cps)
@@ -456,6 +456,18 @@
     SYMB
     ))
 
+(def cc:flags ()
+  "Generate the build flags based on the OS name."
+  (let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV))
+        (incd . (append (prefix) "/include"))
+        (libd . (append (prefix) "/lib"))
+        (srcd . (append (prefix) "/src"))
+        (flags . (list
+                   "-O3" "-shared" "-fPIC" "-fomit-frame-pointer"
+                   "-I" incd "-L" libd "-L" srcd "-lminimal"
+                   "-o" oout cout)))
+    (if (= osname "Linux") ($+ flags '("-flto")) flags)))
+
 (def cc:build (SYMB)
   "Build the plugin for the CPS function SYMB."
   (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
@@ -468,9 +480,5 @@
     #
     # Build the SO file
     #
-    (let ((incd . (append (prefix) "/include"))
-          (libd . (append (prefix) "/lib"))
-          (args . (list "-O3" "-shared" "-fPIC" "-fomit-frame-pointer" "-flto" "-o" oout cout "-I" incd "-L" libd "-lminimal"))
-          ((status . messages) . (run "/usr/bin/gcc" args ENV)))
-      (= 0 status)
-      )))
+    (let (((status . messages) . (run "/usr/bin/cc" (cc:flags) ENV)))
+      (if (= 0 status) (load SYMB)))))

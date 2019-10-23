@@ -23,3 +23,17 @@
         (prin "! " (term:underlined "Actual") ": ")
         (printl EVAL)
         ))))
+
+(def assert:predicate (PREDICATE . VALUE)
+  "Assert that VALUE matches the PREDICATE."
+  (let ((OP . (car VALUE))
+        (EVAL . (eval OP)))
+    (if (PREDICATE EVAL)
+      T
+      (prog
+        (prinl (term:red "> FAILED "))
+        (prin "! " (term:underlined "Predicate") ": ")
+        (printl PREDICATE)
+        (prin "! " (term:underlined "Value") ": ")
+        (printl EVAL)
+        ))))
