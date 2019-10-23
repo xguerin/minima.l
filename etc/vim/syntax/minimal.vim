@@ -103,8 +103,10 @@ syn keyword MinimalFuncs
       \ sym
       \ sym?
       \ time
+      \ unless
       \ unlink
       \ tru?
+      \ when
       \ zip
 
 hi default link MinimalComment Comment
@@ -119,6 +121,6 @@ hi default link MinimalFuncs      Function
 hi default link MinimalOperator   Operator
 
 set lisp
-set lispwords=%,*,+,-,/,<,<-,<=,<>,=,>,>=,>&,\\,\|>,$+,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr,chr?,conc,cond,cons,dedup,def,dup,eval,filter,flatten,foldl,foldr,if,in,insert,iter,last,len,let,list,load,lst?,map,map2,match,merge,nil?,not,ntoa,num?,or,out,prefix,prin,prinl,print,printl,prog,quit,quote,read,readlines,rev,setq,split,str,str?,sym,sym?,time,unlink,tru?,zip
+set lispwords=%,*,+,-,/,<,<-,<=,<>,=,>,>=,>&,\\,\|>,$+,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr,chr?,conc,cond,cons,dedup,def,dup,eval,filter,flatten,foldl,foldr,if,in,insert,iter,last,len,let,list,load,lst?,map,map2,match,merge,nil?,not,ntoa,num?,or,out,prefix,prin,prinl,print,printl,prog,quit,quote,read,readlines,rev,setq,split,str,str?,sym,sym?,time,unless,unlink,tru?,when,zip
 
 let b:current_syntax = "minimal"
