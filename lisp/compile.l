@@ -204,14 +204,14 @@
 
 (def cc:gen:prototype (NAME ARGS)
   "Generate C code function prototype."
-  (prin "static atom_t " NAME "(");
+  (prin "static atom_t _mnml_" NAME "(");
   (iter (\ (e) (prin "value_t " e ", ")) ARGS)
   (prinl "closure_t C, callback_t K);");
   (prinl))
 
 (def cc:gen:main (NAME ARGS REFS kvar)
   "Generate C code for the main function."
-  (prin "static atom_t " NAME "(")
+  (prin "static atom_t _mnml_" NAME "(")
   (o>)
   (iter (\ (e) (prin "value_t " e ", ")) ARGS)
   (prinl "closure_t C, callback_t K) {");
@@ -247,7 +247,7 @@
   (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
   (prinl (o|) "closure_t _C = NULL;")
   (prinl (o|) "callback_t _K = identity;")
-  (prin (o|) "atom_t R = " NAME "(")
+  (prin (o|) "atom_t R = _mnml_" NAME "(")
   (iter (\ (e) (prin e ", ")) ARGS)
   (prinl "_C, _K);")
   (prinl (o|) "lisp_closure_clear(&cache);")
@@ -257,6 +257,7 @@
   (prinl)
   (prin "LISP_PLUGIN_REGISTER(" NAME ", " NAME)
   (iter (\ (e) (prin ", " e)) ARGS)
+  (if (= (len ARGS) 2) (prin ", NIL"))
   (prinl ");"))
 
 #
@@ -272,7 +273,7 @@
 (def cc:gen:next (NAME CONT ref)
   "Generate the continuation capture for REF."
   (if (<> CONT ref)
-    (prinl (o|) "callback_t _K = " NAME ref ";")
+    (prinl (o|) "callback_t _K = _mnml_" NAME ref ";")
     (prog
       (prinl (o|) "callback_t _K = C->V[" (cdr (str ref)) "].callback;")
       (prinl (o|) "lisp_closure_put(&cache, C);"))))
@@ -363,7 +364,7 @@
                      (cc:gen:closure CONT next)
                      (cc:op:recur ARGS kvar ARGS prms)
                      (cc:gen:next NAME CONT next)
-                     (prin (o|) "return " NAME "(")
+                     (prin (o|) "return _mnml_" NAME "(")
                      (iter (\ (e) (prin e ", ")) ARGS)
                      (prinl "_C, _K);"))
                    (prinl (o|) "abort(); /* Unsupported operation " symb " */"))))
@@ -374,7 +375,7 @@
 
 (def cc:gen:function (NAME ARGS REFS CONT kvar body)
   "Generate a continuation KVAR with BODY."
-  (prinl "static atom_t " NAME kvar "(closure_t C, value_t V) {")
+  (prinl "static atom_t _mnml_" NAME kvar "(closure_t C, value_t V) {")
   (o>)
   (if (> (assoc kvar REFS) 0)
     (prinl (o|) "C->V[" (cdr (str kvar)) "] = V;"))
@@ -434,7 +435,8 @@
         (REFS            . (cps:refcount cps))
         (TYPES           . (cps:infer NAME cps))
         (kvar            . (last args))
-        (cout            . (append (str SYMB) ".c")))
+        (trgt            . (append (assoc "HOME" ENV) "/.mnml"))
+        (cout            . (append trgt "/" (str SYMB) ".c")))
     #
     # Remove the C file
     #
@@ -454,11 +456,10 @@
     SYMB
     ))
 
-(def cc:build (SYMB . WHERE)
+(def cc:build (SYMB)
   "Build the plugin for the CPS function SYMB."
-  (let ((wopt . (eval (car WHERE)))
-        (trgt . (if wopt wopt (append (assoc "HOME" ENV) "/.mnml")))
-        (cout . (append (str SYMB) ".c"))
+  (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
+        (cout . (append trgt "/" (str SYMB) ".c"))
         (oout . (append trgt "/libminimal_function_" (str SYMB) ".so")))
     #
     # Remove the SO file
