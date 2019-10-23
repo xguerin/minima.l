@@ -15,7 +15,6 @@
  */
 
 atom_t GLOBALS  = NULL;
-atom_t PLUGINS  = NULL;
 atom_t ICHAN    = NULL;
 atom_t OCHAN    = NULL;
 atom_t NIL      = NULL;

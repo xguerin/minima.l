@@ -1,3 +1,4 @@
+#include <mnml/debug.h>
 #include <mnml/maker.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
@@ -11,7 +12,7 @@ lisp_make_char(const char c)
     R->refs = 1;
     R->number = c;
   }
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   return R;
 }
 
@@ -24,7 +25,7 @@ lisp_make_number(const int64_t num)
     R->refs = 1;
     R->number = num;
   }
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   return R;
 }
 
@@ -50,7 +51,7 @@ lisp_make_symbol(const symbol_t sym)
     R->refs = 1;
     R->symbol = *sym;
   }
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   return R;
 }
 
@@ -62,7 +63,7 @@ lisp_make_nil()
     R->type = T_NIL;
     R->refs = 1;
   }
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   NIL = R;
 }
 
@@ -74,7 +75,7 @@ lisp_make_true()
     R->type = T_TRUE;
     R->refs = 1;
   }
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   TRUE = R;
 }
 
@@ -83,7 +84,7 @@ lisp_make_quote()
 {
   MAKE_SYMBOL_STATIC(quote, "quote", 5);
   atom_t R = lisp_make_symbol(quote);
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   QUOTE = R;
 }
 
@@ -95,7 +96,7 @@ lisp_make_wildcard()
     R->type = T_WILDCARD;
     R->refs = 1;
   }
-  TRACE_MAKE(R);
+  TRACE_MAKE_SEXP(R);
   WILDCARD = R;
 }
 

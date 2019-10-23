@@ -2,17 +2,27 @@
 #include <mnml/maker.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-#include <dlfcn.h>
 #include <dirent.h>
+#include <dlfcn.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+static atom_t PLUGINS;
+
+/*
+ * Helper functions.
+ */
 
 static const char *
 lisp_library_prefix()
 {
   static bool is_set = false;
-  static char buffer[PATH_MAX + 4] = { 0 };
+  static char buffer[PATH_MAX];
   if (!is_set) {
     const char * prefix = lisp_prefix();
     strcpy(buffer, prefix);
@@ -21,6 +31,114 @@ lisp_library_prefix()
   }
   return buffer;
 }
+
+static const char *
+lisp_usercache_prefix()
+{
+  static bool is_set = false;
+  static char buffer[PATH_MAX];
+  if (!is_set) {
+    strcpy(buffer, getenv("HOME"));
+    strcat(buffer, "/.mnml");
+    is_set = true;
+  }
+  return buffer;
+}
+
+static char *
+lisp_plugin_paths()
+{
+  static bool is_set = false;
+  static char buffer[8192];
+  /*
+   * Prepare the path if not set.
+   */
+  if (!is_set) {
+    /*
+     * Set the system prefix first.
+     */
+    strcpy(buffer, lisp_library_prefix());
+    /*
+     * Then, append the user cache path.
+     */
+    strcat(buffer, ":");
+    strcat(buffer, lisp_usercache_prefix());
+    /*
+     * Append the user-defined variable.
+     */
+    if (getenv("MNML_PLUGIN_PATH") != NULL) {
+      strcat(buffer, ":");
+      strcat(buffer, getenv("MNML_PLUGIN_PATH"));
+    }
+    /*
+     */
+    is_set = true;
+  }
+  /*
+   * Return the paths.
+   */
+  return strdup(buffer);
+}
+
+/*
+ * Lifecycle management.
+ */
+
+bool
+lisp_plugin_init()
+{
+  /*
+   * Reset the PLUGINS variable.
+   */
+  PLUGINS = UP(NIL);
+  /*
+   * Try to create the user cache directory.
+   */
+  struct stat ss;
+  int rc = stat(lisp_usercache_prefix(), &ss);
+  if (rc != 0) {
+    if (errno == ENOENT && mkdir(lisp_usercache_prefix(), S_IRWXU) == 0) {
+      return true;
+    }
+    ERROR("%s: %s", lisp_usercache_prefix(), strerror(errno));
+    return false;
+  }
+  /*
+   * Check the stats.
+   */
+  if ((ss.st_mode & S_IFDIR) == 0) {
+    ERROR("%s exists and is not a directory", lisp_usercache_prefix());
+    return false;
+  }
+  if ((ss.st_mode & S_IRWXU) == 0) {
+    ERROR("%s cannot be accessed", lisp_usercache_prefix());
+    return false;
+  }
+  /*
+   * Report the known load path.
+   */
+  TRACE_PLUG("Plugin load path: %s", lisp_plugin_paths());
+  /*
+   * Good to go.
+   */
+  return true;
+}
+
+void
+lisp_plugin_fini()
+{
+  FOREACH(PLUGINS, p) {
+    atom_t car = p->car;
+    atom_t hnd = CAR(CDR(car));
+    dlclose((void *)hnd);
+    NEXT(p);
+  }
+  X(PLUGINS);
+}
+
+/*
+ * Plugin load.
+ */
 
 static void *
 lisp_plugin_load_at_path(const char * const path, const char * const name)
@@ -124,36 +242,13 @@ lisp_plugin_find(const char * const paths, const atom_t sym)
   return result;
 }
 
-static char *
-lisp_plugin_paths(const atom_t path)
-{
-  /*
-   * Try to get the path from the argument.
-   */
-  if (!IS_NULL(path)) {
-    char buffer[PATH_MAX] = { 0 };
-    lisp_make_cstring(path, buffer, PATH_MAX, 0);
-    return strdup(buffer);
-  }
-  /*
-   * Try to get the path from the environment.
-   */
-  if (getenv("MNML_PLUGIN_PATH") != NULL) {
-    return strdup(getenv("MNML_PLUGIN_PATH"));
-  }
-  /*
-   * Get the prefix path.
-   */
-  return strdup(lisp_library_prefix());
-}
-
 atom_t
-lisp_plugin_load(const atom_t cell, const atom_t path)
+lisp_plugin_load(const atom_t cell)
 {
   /*
    * Load the environment variable.
    */
-  char * paths = lisp_plugin_paths(path);
+  char * paths = lisp_plugin_paths();
   /*
    * Find the plugin for the symbol.
    */
@@ -177,17 +272,6 @@ lisp_plugin_load(const atom_t cell, const atom_t path)
   PLUGINS = lisp_setq(PLUGINS, lisp_cons(cell, hnd));
   X(hnd);
   return get_atom();
-}
-
-void
-lisp_plugin_cleanup()
-{
-  FOREACH(PLUGINS, p) {
-    atom_t car = p->car;
-    atom_t hnd = CAR(CDR(car));
-    dlclose((void *)hnd);
-    NEXT(p);
-  }
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

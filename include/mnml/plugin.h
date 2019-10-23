@@ -1,20 +1,23 @@
 #pragma once
 
+#include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/maker.h>
 #include <mnml/utils.h>
 #include <stdbool.h>
 
 /*
- * Plugin management.
+ * Lifecycle management.
  */
 
-extern atom_t PLUGINS;
+bool lisp_plugin_init();
+void lisp_plugin_fini();
 
-atom_t lisp_plugin_load_immediate(const char * const sym, const char * const path);
-atom_t lisp_plugin_load(const atom_t cell, const atom_t path);
+/*
+ * Plugin load.
+ */
 
-void lisp_plugin_cleanup();
+atom_t lisp_plugin_load(const atom_t cell);
 
 /*
  * Initialization macros.

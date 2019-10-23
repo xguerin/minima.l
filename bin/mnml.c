@@ -131,7 +131,7 @@ lisp_preload(const size_t n, ...)
     const char * const symbol = va_arg(args, const char *);
     MAKE_SYMBOL_STATIC(s, symbol, LISP_SYMBOL_LENGTH);
     atom_t cell = lisp_make_symbol(s);
-    atom_t func = lisp_plugin_load(cell, NIL);
+    atom_t func = lisp_plugin_load(cell);
     if (IS_NULL(func)) {
       ERROR("Loading plugin %s failed", symbol);
     }
@@ -182,7 +182,7 @@ main(const int argc, char ** const argv)
    * Initialize the engine.
    */
   if (!lisp_init()) {
-    fprintf(stderr, "Minima.l engine initialization failed.");
+    fprintf(stderr, "Minima.l engine initialization failed.\n");
     return __LINE__;
   }
   /*

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mnml/debug.h>
 #include <mnml/lisp.h>
 
 /*
@@ -122,52 +121,11 @@ void lisp_free(const atom_t atom);
 
 #ifdef LISP_ENABLE_DEBUG
 
-#if defined(__MACH__) || defined(__OpenBSD__)
-
-#define HEADER_REFS(__f, __t, __n) \
-  FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n)
-
-#define HEADER_SLOT(__i) \
-  FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i)
-
-#else
-
-#define HEADER_REFS(__f, __t, __n) \
-  FPRINTF(stderr, "[%2lu->%2lu] - %s = ", __f, __t, __n)
-
-#define HEADER_SLOT(__i) \
-  FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i)
-
-#endif
-
-#define TRACE_REFS(__f, __t, __c, __n) {  \
-  if (MNML_VERBOSE_REFC) {                \
-    HEADER_REFS(__f, __t, __n);           \
-    lisp_debug(stderr, __c);              \
-  }                                       \
-}
-
-#define TRACE_SLOT(__i, __c) {        \
-  if (MNML_VERBOSE_SLOT) {            \
-    HEADER_SLOT(__i);                 \
-    lisp_debug(stderr, __c);          \
-  }                                   \
-}
-
-#define TRACE_SLAB(__fmt, ...) {      \
-  if (MNML_VERBOSE_SLAB) {            \
-    TRACE(__fmt, __VA_ARGS__);        \
-  }                                   \
-}
-
 void lisp_collect();
 #define LISP_COLLECT() lisp_collect()
 
 #else
 
-#define TRACE_REFS(__f, __t, __c, __n)
-#define TRACE_SLOT(__i, __c)
-#define TRACE_SLAB(__fmt, ...)
 #define LISP_COLLECT()
 
 #endif

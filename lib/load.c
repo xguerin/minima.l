@@ -21,7 +21,7 @@ lisp_load(const atom_t closure, const atom_t cell)
    * If it's a symbol, load it from plugins.
    */
   if (IS_SYMB(car)) {
-    res = lisp_plugin_load(car, NIL);
+    res = lisp_plugin_load(car);
     X(car);
   }
   /*

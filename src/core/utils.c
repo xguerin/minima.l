@@ -90,7 +90,6 @@ lisp_init()
    * Create the GLOBALS.
    */
   GLOBALS = UP(NIL);
-  PLUGINS = UP(NIL);
   ICHAN   = UP(NIL);
   OCHAN   = UP(NIL);
   /*
@@ -99,14 +98,26 @@ lisp_init()
 #ifdef LISP_ENABLE_DEBUG
   lisp_debug_parse_flags();
 #endif
-  return true;
+  /*
+   * Initialize the plugins.
+   */
+  return lisp_plugin_init();
 }
 
 void
 lisp_fini()
 {
-  lisp_plugin_cleanup();
-  X(OCHAN, ICHAN, PLUGINS, GLOBALS, WILDCARD, QUOTE, TRUE, NIL);
+  /*
+   * Clean-up the plugins.
+   */
+  lisp_plugin_fini();
+  /*
+   * Destroy the global variables.
+   */
+  X(OCHAN, ICHAN, GLOBALS, WILDCARD, QUOTE, TRUE, NIL);
+  /*
+   * Destroy the slab allocator.
+   */
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   lisp_slab_destroy();

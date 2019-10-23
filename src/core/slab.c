@@ -18,14 +18,14 @@
 atom_t
 lisp_incref(const atom_t atom, const char * const name)
 {
-  TRACE_REFS(atom->refs, atom->refs + 1, atom, name);
+  TRACE_REFC_SEXP(atom->refs, atom->refs + 1, name, atom);
   atom->refs += 1;
   return atom;
 }
 
 atom_t lisp_decref(const atom_t atom, const char * const name)
 {
-  TRACE_REFS(atom->refs, atom->refs - 1, atom, name);
+  TRACE_REFC_SEXP(atom->refs, atom->refs - 1, name, atom);
   atom->refs -= 1;
   return atom;
 }
@@ -188,7 +188,7 @@ lisp_collect()
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
     atom_t entry = &slab.entries[i];
     if (entry->next == IN_USE) {
-      TRACE_SLOT(i, entry);
+      TRACE_SLOT_SEXP(i, entry);
     }
   }
 }
