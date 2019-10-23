@@ -19,7 +19,7 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
    */
   atom_t cdr0 = lisp_cdr(cell);
   atom_t args = lisp_car(cdr0);
-  if (!IS_NULL(args) && !IS_PAIR(args)) {
+  if (!(IS_NULL(args) || IS_PAIR(args) || IS_SYMB(args))) {
     X(symb, cell, cdr0, args);
     return UP(NIL);
   }
