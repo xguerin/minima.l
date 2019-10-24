@@ -1,8 +1,12 @@
 site_name: Minima.l
-theme: cinder
+theme: readthedocs
 nav:
     - Home: index.md
+    - Manual:
+        - Language: manual/Language.md
+        - Interpreter: manual/Interpreter.md
+        - Reference: manual/Reference.md
     - Notes:
         - Closures: notes/Closures.md
         - Continuations: notes/Continuations.md
-        - Tasks: notes/Tasks.md
+        - "Type Inference": notes/Inference.md

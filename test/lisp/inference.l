@@ -45,4 +45,11 @@
                     (act . (cps:infer 'fun (>& 'fun))))
                 (assert:equal exp act)))
   #
+  # Single branch IF.
+  #
+  ("ifthen" . (let ((fun . (\ (x y) (if (< x y) (+ x y))))
+                    (exp . '((_2 . ERROR) (y . NUMBER) (x . NUMBER) (_3 . NUMBER)))
+                    (act . (cps:infer 'fun (>& 'fun))))
+                (assert:equal exp act)))
+  #
   )

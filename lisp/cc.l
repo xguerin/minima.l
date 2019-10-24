@@ -1,6 +1,6 @@
 (load
   "assoc.l" "cps.l" "iter.l" "filter.l" "foldl.l" "foldr.l" "last.l" "map.l"
-  "rev.l" "run.l" 'prefix 'unlink)
+  "rev.l" "run.l" "unless.l" "when.l" 'prefix 'unlink)
 
 #
 # Indentation management.
@@ -116,21 +116,20 @@
     (cc:value:lst ARGS kvar arg1)
     (prinl ") };")))
 
+(def cc:op:kvar (ARGS kvar (_ arg))
+  "Generate C code for immediate KVAR funcall."
+  (prin (o|) "value_t R = ")
+  (cc:value:ref ARGS kvar arg))
+
 (def cc:op:recur (ARGS kvar args prms)
   "Generate C code for recursive operations."
   (if (and (not (nil? args)) (not (nil? prms)))
     (let (((acar . acdr) . args)
           ((pcar . pcdr) . prms))
-      (if (<> acar kvar)
-        (prog
+      (unless (= acar kvar)
           (prin (o|) "value_t " acar " = ")
           (cc:value:ref ARGS kvar pcar)
-          (cc:op:recur ARGS acdr pcdr))))))
-
-(def cc:op:kvar (ARGS kvar (_ arg))
-  "Generate C code for immediate KVAR funcall."
-  (prin (o|) "value_t R = ")
-  (cc:value:ref ARGS kvar arg))
+          (cc:op:recur ARGS acdr pcdr)))))
 
 #
 # Value handlers.
@@ -178,7 +177,7 @@
       (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
       )))
 
-(def cc:gen:prologue (TYPES kvar)
+(def cc:gen:prologue (SYMB CPS TYPES kvar)
   "Generate C code prologue."
   (prinl "#include <mnml/closure.h>")
   (prinl "#include <mnml/lisp.h>")
@@ -186,6 +185,16 @@
   (prinl "#include <mnml/plugin.h>")
   (prinl "#include <mnml/slab.h>")
   (prinl "#include <mnml/types.h>")
+  (prinl)
+  #
+  # Generate some information
+  #
+  (prinl "/*")
+  (prin  " * FUNCTION   : ") (printl SYMB)
+  (prin  " * DEFINITION : ") (printl (eval SYMB))
+  (prin  " * CPS        : ") (printl CPS)
+  (prin  " * TYPES      : ") (printl TYPES)
+  (prinl " */")
   (prinl)
   #
   # Generate the closure cache.
@@ -219,7 +228,7 @@
   (foldl
     (\ (acc e) (prinl (o|) "_C->V[" acc "] = " e ";") (+ acc 1)) 0 ARGS)
   (prinl (o|) "value_t R = { .callback = K };");
-  (cc:gen:next NAME ARGS kvar)
+  (cc:gen:next NAME REFS ARGS kvar)
   (prinl (o|) "return _K(_C, R);")
   (<o)
   (prinl "}")
@@ -270,15 +279,17 @@
     (prinl (o|) "closure_t _C = C->C;")
     (prinl (o|) "closure_t _C = C;")))
 
-(def cc:gen:next (NAME CONT ref)
+(def cc:gen:next (NAME REFS CONT ref)
   "Generate the continuation capture for REF."
-  (if (<> CONT ref)
-    (prinl (o|) "callback_t _K = _mnml_" NAME ref ";")
+  (if (= CONT ref)
     (prog
-      (prinl (o|) "callback_t _K = C->V[" (cdr (str ref)) "].callback;")
-      (prinl (o|) "lisp_closure_put(&cache, C);"))))
+      (if (= (assoc ref REFS) 0)
+        (prinl (o|) "callback_t _K = V.callback;")
+        (prinl (o|) "callback_t _K = C->V[" (cdr (str ref)) "].callback;"))
+      (prinl (o|) "lisp_closure_put(&cache, C);"))
+    (prinl (o|) "callback_t _K = _mnml_" NAME ref ";")))
 
-(def cc:gen:block (NAME ARGS CONT kvar body)
+(def cc:gen:block (NAME ARGS REFS CONT kvar body)
   "Generate the basic block for BODY."
   (match body
     #
@@ -290,7 +301,7 @@
                           (quote  . (let ((next . (last body)))
                                       (cc:op:predicate ARGS kvar body)
                                       (cc:gen:closure CONT next)
-                                      (cc:gen:next NAME CONT next)
+                                      (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
                     acc))
        NIL '(nil?))
@@ -303,7 +314,7 @@
                           (quote  . (let ((next . (last body)))
                                       (ccp:op:binnum ARGS kvar body)
                                       (cc:gen:closure CONT next)
-                                      (cc:gen:next NAME CONT next)
+                                      (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
                     acc))
        NIL '(+ - * / = <> < <= > >=))
@@ -316,7 +327,7 @@
                           (quote .  (let ((next . (last body)))
                                       (cc:op:unqlst ARGS kvar body)
                                       (cc:gen:closure CONT next)
-                                      (cc:gen:next NAME CONT next)
+                                      (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
                     acc))
        NIL '(car cdr))
@@ -329,7 +340,7 @@
                           (quote .  (let ((next . (last body)))
                                       (cc:op:binlst ARGS kvar body)
                                       (cc:gen:closure CONT next)
-                                      (cc:gen:next NAME CONT next)
+                                      (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
                     acc))
        NIL '(conc cons))
@@ -339,11 +350,11 @@
     ((if _ _ _) . (let (((_ _ then else) . body))
                     (prinl (o|) "if (V.number) {")
                     (o>)
-                    (cc:gen:block NAME ARGS CONT kvar then)
+                    (cc:gen:block NAME ARGS REFS CONT kvar then)
                     (<o)
                     (prinl (o|) "} else {")
                     (o>)
-                    (cc:gen:block NAME ARGS CONT kvar else)
+                    (cc:gen:block NAME ARGS REFS CONT kvar else)
                     (<o)
                     (prinl (o|) "}")))
     #
@@ -352,7 +363,7 @@
     ((_ _)  . (let ((next . (car body)))
                 (cc:gen:closure CONT next)
                 (cc:op:kvar ARGS kvar body)
-                (cc:gen:next NAME CONT next)
+                (cc:gen:next NAME REFS CONT next)
                 (prinl (o|) "return _K(_C, R);")))
     #
     # Recursive behavior
@@ -363,7 +374,7 @@
                    (prog
                      (cc:gen:closure CONT next)
                      (cc:op:recur ARGS kvar ARGS prms)
-                     (cc:gen:next NAME CONT next)
+                     (cc:gen:next NAME REFS CONT next)
                      (prin (o|) "return _mnml_" NAME "(")
                      (iter (\ (e) (prin e ", ")) ARGS)
                      (prinl "_C, _K);"))
@@ -379,7 +390,7 @@
   (o>)
   (if (> (assoc kvar REFS) 0)
     (prinl (o|) "C->V[" (cdr (str kvar)) "] = V;"))
-  (cc:gen:block NAME ARGS CONT kvar body)
+  (cc:gen:block NAME ARGS REFS CONT kvar body)
   (<o)
   (prinl "}")
   (prinl))
@@ -434,27 +445,29 @@
         (ARGS            . (rev (cdr (rev args))))
         (REFS            . (cps:refcount cps))
         (TYPES           . (cps:infer NAME cps))
+        (isvalid         . (foldl (\ (acc (_ . t)) (and (<> t 'ERROR) acc)) T TYPES))
         (kvar            . (last args))
         (trgt            . (append (assoc "HOME" ENV) "/.mnml"))
         (cout            . (append trgt "/" (str SYMB) ".c")))
-    #
-    # Remove the C file
-    #
-    (unlink cout)
-    #
-    # Generate the C file
-    #
-    (out cout
-      (cc:gen:prologue TYPES kvar)
-      (cc:gen:prototype SYMB ARGS)
-      (cc:gen:cont SYMB ARGS REFS kvar kvar body)
-      (cc:gen:main SYMB ARGS REFS kvar)
-      (cc:gen:plugin SYMB ARGS TYPES))
-    #
-    # Return then symbol passed as argument.
-    #
-    SYMB
-    ))
+    (when isvalid
+      #
+      # Remove the C file
+      #
+      (unlink cout)
+      #
+      # Generate the C file
+      #
+      (out cout
+        (cc:gen:prologue SYMB cps TYPES kvar)
+        (cc:gen:prototype SYMB ARGS)
+        (cc:gen:cont SYMB ARGS REFS kvar kvar body)
+        (cc:gen:main SYMB ARGS REFS kvar)
+        (cc:gen:plugin SYMB ARGS TYPES))
+      #
+      # Return then symbol passed as argument.
+      #
+      SYMB
+      )))
 
 (def cc:flags ()
   "Generate the build flags based on the OS name."
@@ -463,7 +476,7 @@
         (libd . (append (prefix) "/lib"))
         (srcd . (append (prefix) "/src"))
         (flags . (list
-                   "-O3" "-shared" "-fPIC" "-fomit-frame-pointer"
+                   "-g3" "-shared" "-fPIC" "-fomit-frame-pointer"
                    "-I" incd "-L" libd "-L" srcd "-lminimal"
                    "-o" oout cout)))
     (if (= osname "Linux") ($+ flags '("-flto")) flags)))
@@ -473,12 +486,13 @@
   (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
         (cout . (append trgt "/" (str SYMB) ".c"))
         (oout . (append trgt "/libminimal_function_" (str SYMB) ".so")))
-    #
-    # Remove the SO file
-    #
-    (unlink oout)
-    #
-    # Build the SO file
-    #
-    (let (((status . messages) . (run "/usr/bin/cc" (cc:flags) ENV)))
-      (if (= 0 status) (load SYMB)))))
+    (when SYMB
+      #
+      # Remove the SO file
+      #
+      (unlink oout)
+      #
+      # Build the SO file
+      #
+      (let (((status . messages) . (run "/usr/bin/cc" (cc:flags) ENV)))
+        (if (= 0 status) (load SYMB))))))

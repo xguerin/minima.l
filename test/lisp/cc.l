@@ -38,6 +38,19 @@
                     (and (assert:predicate 'num? bod))
                     (and (assert:equal 3 (_div 9 3)))))))
   #
+  # IF/THEN/ELSE
+  #
+  ("ite"  . (prog
+              (def _ite (a b) (if (< a b) a b))
+              (let ((res . (cc:build (cc:compile '_ite)))
+                    (bod . (|> _ite cdr cdr cdr)))
+                (|> T
+                    (and (assert:equal '_ite res))
+                    (and (assert:predicate 'num? bod))
+                    (and (assert:equal 1 (_ite 1 3)))
+                    (and (assert:equal 1 (_ite 3 1)))
+                    ))))
+  #
   # Fibonacci.
   #
   ("fib"  . (prog

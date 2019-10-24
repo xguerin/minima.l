@@ -29,7 +29,7 @@
 (def cps:lift-ith (kvar counter body)
   "Lift IF-BODY arguments into lambdas; use KVAR as external continuation."
   (let (((_ stmt then)           . body)
-        ((then:next . then:body) . (cps:lift kvar else:next then))
+        ((then:next . then:body) . (cps:lift kvar counter then))
         (nbody                   . (list then:body))
         ((stmt:next . stmt:body) . (cps:lift nbody then:next (list 'if stmt))))
     (cons else:next stmt:body)))
@@ -89,10 +89,6 @@
         ((count . lifted)         . (cps:lift kvar (+ arglen 1) body)))
     (cons fargs (cons closure (cons clst (list lifted))))))
 
-(def <->& (fsym)
-  "Convert FSYM into its continuation-passing style and store it back into FSYM."
-  (<- fsym (>& fsym)))
-
 #
 # Collect the usage count for each placeholder variable. The first symbol in the
 # funcall is skipped unless it is the current external continuation variable.
@@ -106,7 +102,7 @@
       (\ (acc e)
         (if (sym? e)
           (let ((cur . (assoc e acc))
-                (inc . (if (and (= e kvar) (<> kvar xvar)) 0 1)))
+                (inc . (if (= e kvar) 0 1)))
             (if cur
               (replc e (+ cur inc) acc)
               (cons (cons e inc) acc)))
@@ -126,18 +122,13 @@
 
 (def cps:refcount ((args _ _ body))
   "Collect placeholder reference count in a CPS function FUN."
-  (let ((xvar . (last args)))
-    (if body (cps:refcount_r xvar xvar body NIL))))
+  (if (lst? body)
+    (let ((xvar . (last args)))
+      (if body (cps:refcount_r xvar xvar body NIL)))))
 
 #
 # Infer type signature from a CPS funcall.
 #
-(def cps:addtype (key type acc)
-  "Add TYPE to KEY in ACC."
-  (let ((value . (assoc key acc)))
-    (if value
-      (replc key (cons type value) acc)
-      (cons (cons key (cons type NIL)) acc))))
 
 (def cps:replace (nvar args)
   "Replace the last argument by the symbol of the next continuation."
@@ -145,16 +136,33 @@
     (rev (cons nvar (cdr (rev args))))
     args))
 
-(def cps:scantypes (kvar body type alst)
+(def cps:type:add (key type acc)
+  "Add TYPE to KEY in ACC."
+  (let ((value . (assoc key acc)))
+    (if value
+      (replc key (cons type value) acc)
+      (cons (cons key (cons type NIL)) acc))))
+
+(def cps:type:get (key acc)
+  "Get the type of KEY in ACC."
+  (cond key
+    (nil? . 'NULL)
+    (num? . 'NUMBER)
+    (str? . 'STRING)
+    (sym? .  (let ((type . (assoc key acc))) (if type type 'UNDEF)))
+    (lst? . 'LIST)
+    ( _   . 'UNDEF)))
+
+(def cps:type:scan (NAME CONT kvar body type alst)
   "Scan references in BODY and mark them as TYPE in ALST."
   (let (((_ . args) . body)
         ((_ (nvar) next) . (last body)))
     (foldl
-      (\ (acc e) (if (sym? e) (cps:addtype e type acc) acc))
-      (cps:comptypes name nvar next alst)
+      (\ (acc e) (if (sym? e) (cps:type:add e type acc) acc))
+      (cps:type:findr NAME CONT nvar next alst)
       (cps:replace nvar args))))
 
-(def cps:comptypes (name kvar body alst)
+(def cps:type:findr (NAME CONT kvar body alst)
   "Compute the types involved in a funcall."
   (match body
     #
@@ -162,85 +170,90 @@
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:scantypes kvar body 'NUMBER alst)) acc))
+                          '(cps:type:scan NAME CONT kvar body 'NUMBER alst)) acc))
        NIL '(+ - * / = <> < <= > >=))
     #
     # Generate the list unary operations
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _)
-                          '(cps:scantypes kvar body 'LIST alst)) acc))
+                          '(cps:type:scan NAME CONT kvar body 'LIST alst)) acc))
        NIL '(car cdr))
     #
     # Generate the list binary operations
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:scantypes kvar body 'LIST alst)) acc))
+                          '(cps:type:scan NAME CONT kvar body 'LIST alst)) acc))
        NIL '(cons conc))
     #
     # Predicates.
     #
     ((nil? _ _) . (let (((_ arg lst) . body)
                         ((_ (nvar) next) . lst))
-                    (cps:comptypes name nvar next
-                                   (cps:addtype nvar 'NUMBER
-                                                (cps:addtype arg 'LIST alst)))))
+                    (|> (cps:type:add arg 'LIST alst)
+                        (cps:type:add nvar 'NUMBER)
+                        (cps:type:findr NAME CONT nvar next))))
     #
+    # IF/THEN.
+    #
+    ((if _ _) . (let (((_ e thn) . body))
+                  (|> (cps:type:add e 'NUMBER alst)
+                      (cps:type:findr NAME CONT kvar thn)
+                      (cps:type:add CONT 'NULL))))
     #
     # IF/THEN/ELSE.
     #
-    ((if _ . _) . (let (((_ e . ops) . body))
-                    (foldr (\ (e acc) (cps:comptypes name kvar e acc))
-                      ops (cps:addtype e 'NUMBER alst))))
+    ((if _ _ _) . (let (((_ e then els) . body))
+                    (|> (cps:type:add e 'NUMBER alst)
+                        (cps:type:findr NAME CONT kvar thn)
+                        (cps:type:findr NAME CONT kvar els))))
     #
     # KVAR funcall.
     #
-    ((_ _) . (let (((xvar arg) . body)
+    ((_ _) . (let (((var arg) . body)
                    (atype . (assoc arg alst))
-                   (xtype . (assoc xvar alst)))
+                   (xtype . (assoc var alst)))
                (if xtype
-                 (cps:addtype arg (cps:reducetype xtype) alst)
-                 (cps:addtype arg 'UNDEF alst))))
+                 (cps:type:add arg (cps:type:fold1 xtype) alst)
+                 (cps:type:add var (cps:type:get arg xtype) alst))))
     #
     # Generic method invocation case.
     #
     ((_ . _)  . (let (((symb . prms) . body)
                       ((_ (nvar) next) . (last body)))
-                  (cps:comptypes name nvar next alst)))
+                  (cps:type:findr NAME CONT nvar next alst)))
     #
     # Default case, return the association list.
     #
     (_ . alst)))
 
-(def cps:reducetype (lst)
-  "Reduce the types in LST and check for errors."
+(def cps:type:fold1 (lst)
+  "fold1 the types in LST and check for errors."
   (foldr
     (\ (e acc)
       (if (or (nil? acc) (or (= acc e) (= acc 'UNDEF))) e 'ERROR))
     lst NIL))
 
-(def cps:reducetypes (alst)
-  "Reduce the type list ALST and check for errors."
+(def cps:type:fold (alst)
+  "fold1 the type list ALST and check for errors."
   (foldr
-    (\ ((symb . types) acc0) (cons (cons symb (cps:reducetype types)) acc0))
+    (\ ((symb . types) acc0) (cons (cons symb (cps:type:fold1 types)) acc0))
     alst NIL))
 
-(def cps:fixupkvar (kvar alst)
-  "Mark KVAR in ALST as LIST if not found."
-  (if (nil? (assoc kvar alst))
-    (cps:addtype kvar 'LIST alst)
-    alst))
-
-(def cps:fixupundef (kvar alst)
-  "Scan for UNDEF references in ALST and mark them as KVAR."
-  (let ((ktype . (assoc kvar alst)))
-    (foldr
-      (\ ((k . type) acc)
-        (if (= type 'UNDEF)
-          (cons (cons k ktype) acc)
-          (cons (cons k type) acc)))
-      alst NIL)))
+(def cps:type:findl (kvar body alst)
+  "Resolve the type for KVAR if it does not have one."
+  (match body
+    ((if _ _)   . (let (((_ _ thn) . body))
+                    (cps:type:findl kvar thn (cps:type:add kvar 'NULL alst))))
+    ((if _ _ _) . (let (((_ _ thn els) . body))
+                    (cps:type:findl kvar els (cps:type:findl kvar thn alst))))
+    ((_ _)      . (let (((op arg) . body)
+                        (atype . (cps:type:fold1 (cps:type:get arg alst))))
+                    (cps:type:add kvar atype alst)))
+    ((_ . _)    . (let (((_ _ next) . (last body)))
+                    (cps:type:findl kvar next alst)))
+    (_ . alst)))
 
 (def cps:infer (name (args _ _ body))
   "Infer the types of a CPS function FUN with name NAME."
@@ -249,7 +262,6 @@
     # NOTE(xrg) don't ever consider removing the fluent operator again.
     #
     (|> NIL
-        (cps:comptypes name kvar body)
-        (cps:fixupkvar kvar)
-        cps:reducetypes
-        (cps:fixupundef kvar))))
+        (cps:type:findr name kvar kvar body)
+        (cps:type:findl kvar body)
+        cps:type:fold)))
