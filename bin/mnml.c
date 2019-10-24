@@ -90,6 +90,70 @@ lisp_build_argv(const int argc, char ** const argv)
 }
 
 static void
+lisp_build_config()
+{
+  atom_t key, val, con, nxt;
+  atom_t res = UP(NIL);
+  /*
+   * Add the version string.
+   */
+  MAKE_SYMBOL_STATIC(version, "VERSION", 7);
+  key = lisp_make_symbol(version);
+  val = lisp_make_string(MNML_VERSION, strlen(MNML_VERSION));
+  con = lisp_cons(key, val);
+  nxt = lisp_cons(con, res);
+  X(key, val, con, res);
+  res = nxt;
+  /*
+   * Add the prefix.
+   */
+  MAKE_SYMBOL_STATIC(prefix, "PREFIX", 6);
+  key = lisp_make_symbol(prefix);
+  val = lisp_make_string(lisp_prefix(), strlen(lisp_prefix()));
+  con = lisp_cons(key, val);
+  nxt = lisp_cons(con, res);
+  X(key, val, con, res);
+  res = nxt;
+  /*
+   * Add the compiler version.
+   */
+  MAKE_SYMBOL_STATIC(compver, "COMPVER", 7);
+  key = lisp_make_symbol(compver);
+  val = lisp_make_string(MNML_COMPILER_VERSION, strlen(MNML_COMPILER_VERSION));
+  con = lisp_cons(key, val);
+  nxt = lisp_cons(con, res);
+  X(key, val, con, res);
+  res = nxt;
+  /*
+   * Add the compiler ID.
+   */
+  MAKE_SYMBOL_STATIC(compid, "COMPID", 6);
+  key = lisp_make_symbol(compid);
+  val = lisp_make_string(MNML_COMPILER_ID, strlen(MNML_COMPILER_ID));
+  con = lisp_cons(key, val);
+  nxt = lisp_cons(con, res);
+  X(key, val, con, res);
+  res = nxt;
+  /*
+   * Add the build timestamp.
+   */
+  MAKE_SYMBOL_STATIC(buildts, "BUILD_TS", 8);
+  key = lisp_make_symbol(buildts);
+  val = lisp_make_string(MNML_BUILD_TIMESTAMP, strlen(MNML_BUILD_TIMESTAMP));
+  con = lisp_cons(key, val);
+  nxt = lisp_cons(con, res);
+  X(key, val, con, res);
+  res = nxt;
+  /*
+   * Set the variable if the list is not NIL.
+   */
+  MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
+  key = lisp_make_symbol(env);
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
+  X(key); X(res);
+}
+
+static void
 lisp_build_env()
 {
   extern char ** environ;
@@ -235,9 +299,10 @@ main(const int argc, char ** const argv)
     FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload(1, entry));
   }
   /*
-   * Build ARGV and ENV.
+   * Build ARGV, CONFIG and ENV.
    */
   lisp_build_argv(argc, argv);
+  lisp_build_config();
   lisp_build_env();
   /*
    */

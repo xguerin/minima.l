@@ -63,14 +63,14 @@ void lisp_debug_parse_flags();
   FPRINTF(stderr, "[%06llu] - %s = ", __c->refs, #__c); \
 }
 
-#define HEADER_REFC(__f, __t, __n)                      \
-{                                                       \
-  TRACE_REFC("[%2llu->%2llu] - %s = ", __f, __t, __n);  \
+#define HEADER_REFC(__f, __t, __n)                          \
+{                                                           \
+  FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n); \
 }
 
-#define HEADER_SLOT(__i)                                \
-{                                                       \
-  TRACE_SLOT("[SLOT  ] - @%lu = ", __i);                \
+#define HEADER_SLOT(__i)                      \
+{                                             \
+  FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i); \
 }
 
 #else
@@ -85,9 +85,9 @@ void lisp_debug_parse_flags();
   FPRINTF(stderr, "[%2lu->%2lu] - %s = ", __f, __t, __n); \
 }
 
-#define HEADER_SLOT(__i)                  \
-{                                         \
-  TRACE_SLOT("[SLOT  ] - @%lu = ", __i);  \
+#define HEADER_SLOT(__i)                      \
+{                                             \
+  FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i); \
 }
 
 #endif

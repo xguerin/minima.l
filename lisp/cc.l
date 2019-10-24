@@ -472,9 +472,9 @@
 (def cc:flags ()
   "Generate the build flags based on the OS name."
   (let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV))
-        (incd . (append (prefix) "/include"))
-        (libd . (append (prefix) "/lib"))
-        (srcd . (append (prefix) "/src"))
+        (incd . (append (assoc 'PREFIX CONFIG) "/include"))
+        (libd . (append (assoc 'PREFIX CONFIG) "/lib"))
+        (srcd . (append (assoc 'PREFIX CONFIG) "/src"))
         (flags . (list
                    "-g3" "-shared" "-fPIC" "-fomit-frame-pointer"
                    "-I" incd "-L" libd "-L" srcd "-lminimal"

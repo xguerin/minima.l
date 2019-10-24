@@ -1,9 +1,10 @@
-# minima.l
+# Minima.l
 
 ## About
 
 Opinionated LISP dialect that takes some of its inspirations from [Picolisp](https://picolisp.com),
 [CHICKEN Scheme](http://call-cc.org), and other great languages. The documentation is located [here](https://mnml.world).
+
 ```lisp
 (def fib (N)
   (if (<= N 1)
@@ -12,11 +13,13 @@ Opinionated LISP dialect that takes some of its inspirations from [Picolisp](htt
 
 (prinl "Result: " (fib 30))
 ```
+
 ## Build status
 
 | Arch | Debian | OpenBSD |
 |:-----|:-------|:--------|
 | [![Arch](https://builds.sr.ht/~xguerin/minima.l/arch.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/arch.yml?) | [![Debian](https://builds.sr.ht/~xguerin/minima.l/debian.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/debian.yml?) | [![OpenBSD](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml?) |
+
 
 ## License
 
@@ -33,4 +36,3 @@ ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-

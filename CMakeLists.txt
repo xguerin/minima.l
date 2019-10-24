@@ -38,6 +38,13 @@ set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 message(STATUS "Build version: " ${VERSION_SHORT})
 
 #
+# Get the current build timestamp
+#
+
+string(TIMESTAMP BUILD_TIMESTAMP "%Y/%m/%d-%H:%M:%S")
+message(STATUS "Build timestamp: " ${BUILD_TIMESTAMP})
+
+#
 # Options
 #
 
@@ -58,7 +65,12 @@ if(NOT CMAKE_BUILD_TYPE)
   set(MNML_HAS_IPO NO)
 endif()
 
+add_definitions(-DMNML_COMPILER_ID="${CMAKE_C_COMPILER_ID}")
+add_definitions(-DMNML_COMPILER_VERSION="${CMAKE_C_COMPILER_VERSION}")
+add_definitions(-DMNML_COMPILER_VERSION="${CMAKE_C_COMPILER_VERSION}")
+add_definitions(-DMNML_BUILD_TIMESTAMP="${BUILD_TIMESTAMP}")
 add_definitions(-DMNML_VERSION="${VERSION_SHORT}")
+
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DYYNOERRORRECOVERY)
 

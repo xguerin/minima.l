@@ -141,12 +141,6 @@
 | `quit`      | `(quit)`                      | ✓      | Quit the interpreter loop |
 | `quote`     | `(quote . any)`               | ✓      | Quote `any` |
 
-#### Interpreter functions
-
-| Name      | Syntax                      | Plugin | Description |
-|:----------|:----------------------------|:------:|:------------|
-| `prefix`    | `(prefix)`                    | ✓      | Return `mnml` installation prefix |
-
 #### System functions
 
 | Name      | Syntax                      | Plugin | Description |

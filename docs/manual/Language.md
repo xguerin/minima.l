@@ -188,6 +188,13 @@ Or with a lambda:
 When `mnml` is executed as a `#!` interpreter, the `ARGV` global contains the
 argument vector  of the script.
 
+### CONFIG
+
+The `CONFIG` global contains the current runtime of the interpreter. It contains
+the installation `PREFIX`, the interpreter `VERSION`, its build timestamp
+`BUILD_TS`, and the name `COMPNAME` and version `COMPVER` of the compiler used to
+build it.
+
 ### ENV
 
 The `ENV` global contains the environment at the time of the invocation of the
