@@ -641,7 +641,7 @@ lisp_prin_atom(FILE* const handle, char * const buf, const size_t idx,
 {
   switch (cell->type) {
     case T_NIL:
-      return lisp_write(handle, buf, idx, "NIL", 3);
+      return s ? lisp_write(handle, buf, idx, "NIL", 3) : 0;
     case T_TRUE:
       return lisp_write(handle, buf, idx, "T", 1);
     case T_CHAR: {
