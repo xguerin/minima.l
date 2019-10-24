@@ -98,64 +98,6 @@ arguments. Curryring is available to all `lisp` and native functions. For exampl
 : (+1 2)
 > 3
 ```
-### Native functions
-
-Native function (machine code functions) are supported through the _plugin_
-mechanism. A _plugin_ is a shared library that must export the following
-interface:
-```c
-const char * lisp_plugin_name();
-atom_t lisp_plugin_register();
-```
-The `lisp_plugin_register` function returns an `atom_t` value that points to a
-list definition as follows:
-```lisp
-(AGUMENTS NIL . INTEGER)
-```
-The integer part represents a pointer to a function with the following
-signature:
-```c
-atom_t lisp_function_NAME(const atom_t closure);
-```
-### Writing a plugin
-
-The macro below is used to register a new plugin:
-```c
-#define LISP_PLUGIN_REGISTER(__s, __n, ...)
-```
-The first argument `__s` is the suffix of the function. The second argument
-`__n` is the name of the symbol. The variadic arguments are intended to be
-for the function argument symbols. For instance, the function `add` is
-defined as follow:
-```c
-static atom_t
-lisp_function_add(const atom_t closure)
-{
-  /* ... */
-}
-LISP_PLUGIN_REGISTER(add, add, X, Y, NIL)
-```
-The argument symbols can be defined as follows:
-
-| C version                                 | Minimal equivalent      |
-|:------------------------------------------|:------------------------|
-| `LISP_PLUGIN_REGISTER(fun, fun)`            | `(def fun () ...)`        |
-| `LISP_PLUGIN_REGISTER(fun, fun, @)`         | `(def fun @ ...)`         |
-| `LISP_PLUGIN_REGISTER(fun, fun, A)`         | `(def fun (A) ...)`       |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, NIL)`    | `(def fun (A) ...)`       |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, B)`      | `(def fun (A . B) ...)`   |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, B, NIL)` | `(def fun (A B) ...)`     |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, B, C)`   | `(def fun (A B . C) ...)` |
-
-Values for the declared symbols are passed to the plugin by the interpreter
-through its closure. They can be retrieved using the following macro:
-```c
-#define LISP_LOOKUP(_v, _c, _x)
-```
-The first argument is a name to use for the variable to be assigned the value.
-The second argument is the name of the closure. The last argument is the symbol
-to look up.
-
 ### Recursion
 
 A function defined using `def` can be recursive. When functions are defined,
