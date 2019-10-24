@@ -12,7 +12,7 @@ struct _closure;
 typedef union _value {
   int64_t number;
   atom_t atom;
-  atom_t (*callback)(struct _closure * C, union _value V);
+  atom_t (*callback)(const atom_t E, struct _closure * C, union _value V);
 }
 value_t;
 
@@ -22,7 +22,7 @@ typedef struct _closure {
 }
 * closure_t;
 
-typedef atom_t (*callback_t)(closure_t C, value_t V);
+typedef atom_t (*callback_t)(const atom_t E, closure_t C, value_t V);
 
 /*
  * Closure operations.

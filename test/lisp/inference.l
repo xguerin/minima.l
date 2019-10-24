@@ -19,10 +19,10 @@
   #
   # Recursive function.
   #
-  ("recursive" . (let ((fun . (\ (N) (if (<= N 1) N (+ (fun (- N 1)) (fun (- N 2))))))
-                       (exp . '((_5 . NUMBER) (_3 . NUMBER) (N . NUMBER) (_1 . NUMBER) (_2 . NUMBER) (_4 . NUMBER) (_6 . NUMBER)))
-                       (act . (cps:infer 'fun (>& 'fun))))
-                   (assert:equal exp act)))
+  ("fib"  . (let ((fun . (\ (N) (if (<= N 1) N (+ (fun (- N 1)) (fun (- N 2))))))
+                  (exp . '((_5 . NUMBER) (_3 . NUMBER) (_2 . NUMBER) (_4 . NUMBER) (N . NUMBER) (_1 . NUMBER) (_6 . NUMBER)))
+                  (act . (cps:infer 'fun (>& 'fun))))
+              (assert:equal exp act)))
   #
   # List arguments.
   #
