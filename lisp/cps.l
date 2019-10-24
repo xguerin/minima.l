@@ -1,4 +1,6 @@
-(load "append.l" "assoc.l" "foldl.l" "foldr.l" "last.l" "len.l" "ntoa.l" "replc.l" "rev.l")
+(load
+  "append.l" "assoc.l" "foldl.l" "foldr.l" "has.l" "last.l" "len.l" "ntoa.l"
+  "orelse.l" "replc.l" "rev.l" "when.l")
 
 #
 # Make a symbol placeholder
@@ -32,7 +34,7 @@
         ((then:next . then:body) . (cps:lift kvar counter then))
         (nbody                   . (list then:body))
         ((stmt:next . stmt:body) . (cps:lift nbody then:next (list 'if stmt))))
-    (cons else:next stmt:body)))
+    (cons stmt:next stmt:body)))
 
 (def cps:lift-ite (kvar counter body)
   "Lift IF-BODY arguments into lambdas; use KVAR as external continuation."
@@ -41,14 +43,14 @@
         ((then:next . then:body) . (cps:lift kvar else:next then))
         (nbody                   . (list then:body else:body))
         ((stmt:next . stmt:body) . (cps:lift nbody then:next (list 'if stmt))))
-    (cons else:next stmt:body)))
+    (cons stmt:next stmt:body)))
 
 #
 # Lift a generic funcall into wrapping lambdas.
 #
 (def cps:lift-any (kvar counter body)
   "Lift BODY arguments into lambdas; use KVAR as external continuation."
-  (let (((count . swapped) . (cps:swap kvar counter body)))
+  (let (((_ . swapped) . (cps:swap kvar counter body)))
     (foldr (\ (e (id . res))
              (if (lst? e)
                (let ((largs . (list (cps:symbol id)))
@@ -65,17 +67,17 @@
 (def cps:lift (kvar counter body)
   "Lift BODY arguments into lambdas; use KVAR as external continuation."
   (cond body
-    (lst? .  (match body
-               #
-               # Control forms,
-               #
-               ((if _ _  ) . (cps:lift-ith kvar counter body))
-               ((if _ _ _) . (cps:lift-ite kvar counter body))
-               #
-               # Generic form.
-               #
-               (_ . (cps:lift-any kvar counter body))))
-    (_  .  (cons counter (append kvar (list body))))))
+    (lst? . (match body
+              #
+              # Control forms,
+              #
+              ((if _ _  ) . (cps:lift-ith kvar counter body))
+              ((if _ _ _) . (cps:lift-ite kvar counter body))
+              #
+              # Generic form.
+              #
+              (_ . (cps:lift-any kvar counter body))))
+    (_  . (cons counter (append kvar (list body))))))
 
 #
 # Convert a function in direct style into CPS.
@@ -86,7 +88,7 @@
         (arglen                   . (len args))
         (kvar                     . (list (sym (cons ^_ (ntoa arglen)))))
         (fargs                    . (append args kvar))
-        ((count . lifted)         . (cps:lift kvar (+ arglen 1) body)))
+        ((_ . lifted)             . (cps:lift kvar (+ arglen 1) body)))
     (cons fargs (cons closure (cons clst (list lifted))))))
 
 #
@@ -149,20 +151,27 @@
     (nil? . 'NULL)
     (num? . 'NUMBER)
     (str? . 'STRING)
-    (sym? .  (let ((type . (assoc key acc))) (if type type 'UNDEF)))
+    (sym? .  (<|> (assoc key acc) 'ANY))
     (lst? . 'LIST)
-    ( _   . 'UNDEF)))
+    ( _   . 'ANY)))
 
-(def cps:type:scan (NAME CONT kvar body type alst)
+(def cps:type:scan (NAME ARGS CONT kvar body type alst)
   "Scan references in BODY and mark them as TYPE in ALST."
   (let (((_ . args) . body)
         ((_ (nvar) next) . (last body)))
     (foldl
       (\ (acc e) (if (sym? e) (cps:type:add e type acc) acc))
-      (cps:type:findr NAME CONT nvar next alst)
+      (cps:type:findr NAME ARGS CONT nvar next alst)
       (cps:replace nvar args))))
 
-(def cps:type:findr (NAME CONT kvar body alst)
+(def cps:type:func (NAME ARGS symb params alst)
+  "Check if SYMB is a function from ARGS."
+  (if (and (has ARGS symb) (<> NAME symb))
+    (|> (foldl (\ (acc e) (cps:type:add e 'ANY acc)) alst params)
+        (cps:type:add symb 'FUNC))
+    alst))
+
+(def cps:type:findr (NAME ARGS CONT kvar body alst)
   "Compute the types involved in a funcall."
   (match body
     #
@@ -170,44 +179,46 @@
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:type:scan NAME CONT kvar body 'NUMBER alst)) acc))
+                          '(cps:type:scan NAME ARGS CONT kvar body 'NUMBER alst)) acc))
        NIL '(+ - * / = <> < <= > >=))
     #
     # Generate the list unary operations
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _)
-                          '(cps:type:scan NAME CONT kvar body 'LIST alst)) acc))
+                          '(cps:type:scan NAME ARGS CONT kvar body 'LIST alst)) acc))
        NIL '(car cdr))
     #
     # Generate the list binary operations
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:type:scan NAME CONT kvar body 'LIST alst)) acc))
+                          '(cps:type:scan NAME ARGS CONT kvar body 'LIST alst)) acc))
        NIL '(cons conc))
     #
     # Predicates.
     #
-    ((nil? _ _) . (let (((_ arg lst) . body)
-                        ((_ (nvar) next) . lst))
-                    (|> (cps:type:add arg 'LIST alst)
-                        (cps:type:add nvar 'NUMBER)
-                        (cps:type:findr NAME CONT nvar next))))
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ _)
+                          '(let (((_ arg lst) . body)
+                                 ((_ (nvar) next) . lst))
+                             (|> (cps:type:add nvar 'NUMBER alst)
+                                 (cps:type:findr NAME ARGS CONT nvar next)))) acc))
+       NIL '(lst? nil?))
     #
     # IF/THEN.
     #
     ((if _ _) . (let (((_ e thn) . body))
                   (|> (cps:type:add e 'NUMBER alst)
-                      (cps:type:findr NAME CONT kvar thn)
+                      (cps:type:findr NAME ARGS CONT kvar thn)
                       (cps:type:add CONT 'NULL))))
     #
     # IF/THEN/ELSE.
     #
-    ((if _ _ _) . (let (((_ e then els) . body))
+    ((if _ _ _) . (let (((_ e thn els) . body))
                     (|> (cps:type:add e 'NUMBER alst)
-                        (cps:type:findr NAME CONT kvar thn)
-                        (cps:type:findr NAME CONT kvar els))))
+                        (cps:type:findr NAME ARGS CONT kvar thn)
+                        (cps:type:findr NAME ARGS CONT kvar els))))
     #
     # KVAR funcall.
     #
@@ -216,27 +227,32 @@
                    (xtype . (assoc var alst)))
                (if xtype
                  (cps:type:add arg (cps:type:fold1 xtype) alst)
-                 (cps:type:add var (cps:type:get arg xtype) alst))))
+                 (if atype
+                   (cps:type:add var atype alst)
+                   (|> (cps:type:add var 'ANY alst) (cps:type:add arg 'ANY))))))
     #
     # Generic method invocation case.
     #
-    ((_ . _)  . (let (((symb . prms) . body)
+    ((_ . _)  . (let (((symb . args) . body)
                       ((_ (nvar) next) . (last body)))
-                  (cps:type:findr NAME CONT nvar next alst)))
+                  (|> (cps:type:func NAME ARGS symb (cps:replace nvar args) alst)
+                      (cps:type:findr NAME ARGS CONT nvar next))))
     #
     # Default case, return the association list.
     #
     (_ . alst)))
 
 (def cps:type:fold1 (lst)
-  "fold1 the types in LST and check for errors."
+  "Fold the types in LST and check for errors."
   (foldr
     (\ (e acc)
-      (if (or (nil? acc) (or (= acc e) (= acc 'UNDEF))) e 'ERROR))
+      (if (nil? acc) e
+        (if (or (= acc e) (= acc 'ANY)) e
+          (if (= e 'ANY) acc 'ERROR))))
     lst NIL))
 
 (def cps:type:fold (alst)
-  "fold1 the type list ALST and check for errors."
+  "Fold the type list ALST and check for errors."
   (foldr
     (\ ((symb . types) acc0) (cons (cons symb (cps:type:fold1 types)) acc0))
     alst NIL))
@@ -262,6 +278,6 @@
     # NOTE(xrg) don't ever consider removing the fluent operator again.
     #
     (|> NIL
-        (cps:type:findr name kvar kvar body)
+        (cps:type:findr name args kvar kvar body)
         (cps:type:findl kvar body)
         cps:type:fold)))

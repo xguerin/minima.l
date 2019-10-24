@@ -63,12 +63,13 @@
   (let (((op arg cont) . body))
     (prin (o|) "value_t R = { .integer = ")
     (match op
+      (lst? . (prin "IS_PAIR("))
       (nil? . (prin "IS_NULL("))
       (_   . (prin " /* Unsupported predicate " op " */ ")))
     (cc:value:lst ARGS kvar arg)
     (prinl ") };")))
 
-(def ccp:op:binnum (ARGS kvar body)
+(def cc:op:num:two (ARGS kvar body)
   "Generate C code for binary numeric operations."
   (let (((op arg1 arg2 cont)  . body))
     (prin (o|) "value_t R = { .number = ")
@@ -92,10 +93,10 @@
     (cc:value:num ARGS kvar arg2)
     (prinl " };")))
 
-(def cc:op:unqlst (ARGS kvar body)
+(def cc:op:lst:one (ARGS kvar body)
   "Generate C code for unary list operations."
   (let (((op arg cont)  . body))
-    (prin (o|) "value_t R = { .list = ")
+    (prin (o|) "value_t R = { .atom = ")
     (match op
       (car . (prin "lisp_car("))
       (cdr . (prin "lisp_cdr("))
@@ -103,10 +104,10 @@
     (cc:value:lst ARGS kvar arg)
     (prinl ") };")))
 
-(def cc:op:binlst (ARGS kvar body)
+(def cc:op:lst:two (ARGS kvar body)
   "Generate C code for binary list operations."
   (let (((op arg0 arg1 cont)  . body))
-    (prin (o|) "value_t R = { .list = ")
+    (prin (o|) "value_t R = { .atom = ")
     (match op
       (conc . (prin "lisp_conc("))
       (cons . (prin "lisp_cdr("))
@@ -139,9 +140,9 @@
   "Generate the C code for the list R-value ARG."
   (cond arg
     (sym? . (if (= kvar arg)
-              (prin "V.list")
+              (prin "V.atom")
               (let ((idx . (cc:getrefidx ARGS arg)))
-                (prin "C->V[" idx "].list"))))
+                (prin "C->V[" idx "].atom"))))
     (_    . (prin "abort()"))))
 
 (def cc:value:num (ARGS kvar arg)
@@ -173,7 +174,8 @@
   (let ((rtype . (assoc kvar TYPES)))
     (match rtype
       (NUMBER . (prinl (o|) "return lisp_make_number(V.number);"))
-      (LIST . (prinl (o|) "return V.list;"))
+      (LIST . (prinl (o|) "return V.atom;"))
+      (ANY . (prinl (o|) "return V.atom;"))
       (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
       )))
 
@@ -243,7 +245,8 @@
   (let ((atype . (assoc arg TYPES)))
     (match atype
       (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
-      (LIST   . (prinl (o|) "value_t " arg " = { .list = UP(car) };"))
+      (LIST   . (prinl (o|) "value_t " arg " = { .atom = UP(_" arg ") };"))
+      (ANY    . (prinl (o|) "value_t " arg " = { .atom = UP(_" arg ") };"))
       (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
       ))
   #
@@ -251,7 +254,7 @@
 
 (def cc:gen:plugin (NAME ARGS TYPES)
   "Generate C code for the plugin."
-  (prinl "static atom_t lisp_function_" NAME "(const atom_t closure, const atom_t arguments) {")
+  (prinl "static atom_t lisp_function_" NAME "(const atom_t env, const atom_t arguments) {")
   (o>)
   (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
   (prinl (o|) "closure_t _C = NULL;")
@@ -304,7 +307,7 @@
                                       (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
                     acc))
-       NIL '(nil?))
+       NIL '(lst? nil?))
     #
     # Binary operations.
     #
@@ -312,7 +315,7 @@
        (\ (acc e) (cons (cons
                           (list e _ _ _)
                           (quote  . (let ((next . (last body)))
-                                      (ccp:op:binnum ARGS kvar body)
+                                      (cc:op:num:two ARGS kvar body)
                                       (cc:gen:closure CONT next)
                                       (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
@@ -325,7 +328,7 @@
        (\ (acc e) (cons (cons
                           (list e _ _)
                           (quote .  (let ((next . (last body)))
-                                      (cc:op:unqlst ARGS kvar body)
+                                      (cc:op:lst:one ARGS kvar body)
                                       (cc:gen:closure CONT next)
                                       (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))
@@ -338,7 +341,7 @@
        (\ (acc e) (cons (cons
                           (list e _ _ _)
                           (quote .  (let ((next . (last body)))
-                                      (cc:op:binlst ARGS kvar body)
+                                      (cc:op:lst:two ARGS kvar body)
                                       (cc:gen:closure CONT next)
                                       (cc:gen:next NAME REFS CONT next)
                                       (prinl (o|) "return _K(_C, R);"))))

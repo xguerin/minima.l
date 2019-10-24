@@ -52,4 +52,11 @@
                     (act . (cps:infer 'fun (>& 'fun))))
                 (assert:equal exp act)))
   #
+  # Functional argument
+  #
+  ("func" . (let ((fun . (\ (f y) (f y)))
+                  (exp . '((f . FUNC) (_2 . ANY) (y . ANY)))
+                  (act . (cps:infer 'fun (>& 'fun))))
+              (assert:equal exp act)))
+  #
   )
