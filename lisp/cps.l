@@ -148,12 +148,12 @@
 (def cps:type:get (key acc)
   "Get the type of KEY in ACC."
   (cond key
-    (nil? . 'NULL)
+    (nil? . 'ATOM)
     (num? . 'NUMBER)
     (str? . 'STRING)
-    (sym? .  (<|> (assoc key acc) 'ANY))
-    (lst? . 'LIST)
-    ( _   . 'ANY)))
+    (sym? .  (<|> (assoc key acc) 'ATOM))
+    (lst? . 'ATOM)
+    ( _   . 'ATOM)))
 
 (def cps:type:scan (NAME ARGS CONT kvar body type alst)
   "Scan references in BODY and mark them as TYPE in ALST."
@@ -167,8 +167,8 @@
 (def cps:type:func (NAME ARGS symb params alst)
   "Check if SYMB is a function from ARGS."
   (if (and (has ARGS symb) (<> NAME symb))
-    (|> (foldl (\ (acc e) (cps:type:add e 'ANY acc)) alst params)
-        (cps:type:add symb 'FUNC))
+    (|> (foldl (\ (acc e) (cps:type:add e 'ATOM acc)) alst params)
+        (cps:type:add symb 'ATOM))
     alst))
 
 (def cps:type:findr (NAME ARGS CONT kvar body alst)
@@ -186,14 +186,14 @@
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _)
-                          '(cps:type:scan NAME ARGS CONT kvar body 'LIST alst)) acc))
+                          '(cps:type:scan NAME ARGS CONT kvar body 'ATOM alst)) acc))
        NIL '(car cdr))
     #
     # Generate the list binary operations
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:type:scan NAME ARGS CONT kvar body 'LIST alst)) acc))
+                          '(cps:type:scan NAME ARGS CONT kvar body 'ATOM alst)) acc))
        NIL '(cons conc))
     #
     # Predicates.
@@ -229,7 +229,7 @@
                  (cps:type:add arg (cps:type:fold1 xtype) alst)
                  (if atype
                    (cps:type:add var atype alst)
-                   (|> (cps:type:add var 'ANY alst) (cps:type:add arg 'ANY))))))
+                   (|> (cps:type:add var 'ATOM alst) (cps:type:add arg 'ATOM))))))
     #
     # Generic method invocation case.
     #
@@ -246,9 +246,7 @@
   "Fold the types in LST and check for errors."
   (foldr
     (\ (e acc)
-      (if (nil? acc) e
-        (if (or (= acc e) (= acc 'ANY)) e
-          (if (= e 'ANY) acc 'ERROR))))
+      (if (|> (nil? acc) (or (= e acc)) (or (= acc 'ATOM))) e 'ERROR))
     lst NIL))
 
 (def cps:type:fold (alst)

@@ -27,21 +27,21 @@
   # List arguments.
   #
   ("list_0" . (let ((fun . (\ (x) (car (car (car x)))))
-                    (exp . '((x . LIST) (_3 . LIST) (_1 . LIST) (_2 . LIST)))
+                    (exp . '((x . ATOM) (_3 . ATOM) (_1 . ATOM) (_2 . ATOM)))
                     (act . (cps:infer 'fun (>& 'fun))))
                 (assert:equal exp act)))
   #
   # Type mismatch.
   #
   ("mismatch" . (let ((fun . (\ (x y) (+ y (car (car (car x))))))
-                      (exp . '((x . LIST) (_5 . LIST) (_4 . LIST) (_2 . NUMBER) (_3 . ERROR) (y . NUMBER)))
+                      (exp . '((x . ATOM) (_5 . ATOM) (_4 . ATOM) (_2 . NUMBER) (_3 . ERROR) (y . NUMBER)))
                       (act . (cps:infer 'fun (>& 'fun))))
                   (assert:equal exp act)))
   #
   # Unused argument.
   #
   ("unused" . (let ((fun . (\ (x) (car (car (car '(1 2))))))
-                    (exp . '((_4 . LIST) (_3 . LIST) (_1 . LIST) (_2 . LIST)))
+                    (exp . '((_4 . ATOM) (_3 . ATOM) (_1 . ATOM) (_2 . ATOM)))
                     (act . (cps:infer 'fun (>& 'fun))))
                 (assert:equal exp act)))
   #
@@ -55,7 +55,7 @@
   # Functional argument
   #
   ("func" . (let ((fun . (\ (f y) (f y)))
-                  (exp . '((f . FUNC) (_2 . ANY) (y . ANY)))
+                  (exp . '((f . ATOM) (_2 . ATOM) (y . ATOM)))
                   (act . (cps:infer 'fun (>& 'fun))))
               (assert:equal exp act)))
   #

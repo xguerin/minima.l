@@ -143,9 +143,7 @@
                                         (prin "lisp_make_number(")
                                         (cc:value:num ARGS kvar arg)
                                         (prinl ");")))
-                            (LIST . (genquot arg))
-                            (ANY  . (genquot arg))
-                            (FUNC . (genquot arg))
+                            (ATOM . (genquot arg))
                             (_    . (prinl "UP(NIL); /* Unsupported type " (str type) " */"))
                             )))))
         (gencall  . (\ (arg)
@@ -163,9 +161,7 @@
     (/**/ "Convert the atom_t result to value_t.")
     (match type
       (NUMBER . (prinl (o|) "value_t R = { .number = __R->number };"))
-      (LIST   . (prinl (o|) "value_t R = { .atom = UP(__R) };"))
-      (ANY    . (prinl (o|) "value_t R = { .atom = UP(__R) };"))
-      (FUNC   . (prinl (o|) "value_t R = { .atom = UP(__R) };"))
+      (ATOM   . (prinl (o|) "value_t R = { .atom = UP(__R) };"))
       (_      . (prinl (o|) "value_t R = { .number = 0 }; /* Unsupported type " (str atype) " */")))
     (prinl (o|) "X(__R);")
     ))
@@ -222,8 +218,7 @@
   (let ((rtype . (assoc kvar TYPES)))
     (match rtype
       (NUMBER . (prinl (o|) "return lisp_make_number(V.number);"))
-      (LIST . (prinl (o|) "return V.atom;"))
-      (ANY . (prinl (o|) "return V.atom;"))
+      (ATOM   . (prinl (o|) "return V.atom;"))
       (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
       )))
 
@@ -293,9 +288,7 @@
   (let ((atype . (assoc arg TYPES)))
     (match atype
       (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
-      (LIST   . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
-      (ANY    . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
-      (FUNC   . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
+      (ATOM   . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
       (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
       ))
   #
