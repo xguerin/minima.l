@@ -35,23 +35,19 @@
   (iter (\ (e) (prinl (o|) " * " e)) @)
   (prinl (o|) " */"))
 
-(def cc:getref (fun)
-  "Return the current symbol of the function FUN."
-  (let (((_ (symb) _) . fun)) symb))
-
-(def cc:getargidx (ARGS ref idx)
+(def cc:arg:idx (ARGS ref idx)
   "Get the index of REF in the closure based on ARGS."
   (if ARGS
     (if (= (car ARGS) ref)
       idx
-      (cc:getargidx (cdr ARGS) ref (+ idx 1)))))
+      (cc:arg:idx (cdr ARGS) ref (+ idx 1)))))
 
-(def cc:getrefidx (ARGS ref)
+(def cc:ref:idx (ARGS ref)
   "Get the index of REF in the closure."
   (let ((tostr  . (str ref)))
     (if (= (car tostr) ^_)
       (cdr tostr)
-      (cc:getargidx ARGS ref 0))
+      (cc:arg:idx ARGS ref 0))
     ))
 
 (def cc:replace (kvar body)
@@ -61,7 +57,7 @@
     (list kvar)))
 
 #
-# Operation handlers.
+# Operation generators.
 #
 
 (def cc:op:predicate (ARGS kvar body)
@@ -123,7 +119,7 @@
     (cc:value:lst ARGS kvar arg1)
     (prinl ") };")))
 
-(def cc:op:kvar (ARGS kvar (_ arg))
+(def cc:op:extcall (ARGS kvar (_ arg))
   "Generate C code for immediate KVAR funcall."
   (prin (o|) "value_t R = ")
   (cc:value:ref ARGS kvar arg))
@@ -177,154 +173,38 @@
         (cc:op:reccall ARGS acdr pcdr)))))
 
 #
-# Value handlers.
+# Value generators.
 #
+
+(def cc:gen:ref (ARGS kvar ref)
+  "Generate the code for REF."
+  (if (= kvar ref)
+    (prin "V")
+    (prin "C->V[" (cc:ref:idx ARGS ref) "]")))
 
 (def cc:value:lst (ARGS kvar arg)
   "Generate the C code for the list R-value ARG."
   (cond arg
-    (sym? . (if (= kvar arg)
-              (prin "V.atom")
-              (let ((idx . (cc:getrefidx ARGS arg)))
-                (prin "C->V[" idx "].atom"))))
+    (sym? . (prog (cc:gen:ref ARGS kvar arg) (prin ".atom")))
     (_    . (prin "abort()"))))
 
 (def cc:value:num (ARGS kvar arg)
   "Generate the C code for the number R-value ARG."
   (cond arg
-    (sym? . (if (= kvar arg)
-              (prin "V.number")
-              (let ((idx . (cc:getrefidx ARGS arg)))
-                (prin "C->V[" idx "].number"))))
+    (sym? . (prog (cc:gen:ref ARGS kvar arg) (prin ".number")))
     (num? . (prin arg))
     (_    . (prin "abort()"))))
 
 (def cc:value:ref (ARGS kvar arg)
   "Generate the C code for the ref R-value ARG."
   (cond arg
-    (sym? . (if (= kvar arg)
-              (prinl "V;")
-              (let ((idx . (cc:getrefidx ARGS arg)))
-                (prinl "C->V[" idx "];"))))
-    (num? . (prinl "{ .number = " arg " };"))
-    (_    . (prinl "abort();"))))
+    (sym? . (cc:gen:ref ARGS kvar arg))
+    (num? . (prin "{ .number = " arg " }"))
+    (_    . (prin "abort()")))
+  (prinl ";"))
 
 #
-# Outer section generators.
-#
-
-(def cc:gen:retval (TYPES kvar)
-  "Generate the return value conversion."
-  (let ((rtype . (assoc kvar TYPES)))
-    (match rtype
-      (NUMBER . (prinl (o|) "return lisp_make_number(V.number);"))
-      (ATOM   . (prinl (o|) "return V.atom;"))
-      (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
-      )))
-
-(def cc:gen:prologue (SYMB CPS TYPES kvar)
-  "Generate C code prologue."
-  (prinl "#include <mnml/closure.h>")
-  (prinl "#include <mnml/lisp.h>")
-  (prinl "#include <mnml/maker.h>")
-  (prinl "#include <mnml/plugin.h>")
-  (prinl "#include <mnml/slab.h>")
-  (prinl "#include <mnml/types.h>")
-  (prinl)
-  #
-  # Generate some information
-  #
-  (prinl "/*")
-  (prin  " * FUNCTION   : ") (printl SYMB)
-  (prin  " * DEFINITION : ") (printl (eval SYMB))
-  (prin  " * CPS        : ") (printl CPS)
-  (prin  " * TYPES      : ") (printl TYPES)
-  (prinl " */")
-  (prinl)
-  #
-  # Generate the closure cache.
-  #
-  (prinl "static closure_t cache = NULL;")
-  (prinl))
-
-(def cc:gen:identity (TYPES kvar)
-  "Generate C code for the identity continuation."
-  (prinl "static atom_t identity(const atom_t E, closure_t C, value_t V) {")
-  (o>)
-  (cc:gen:retval TYPES kvar)
-  (<o)
-  (prinl "}")
-  (prinl))
-
-(def cc:gen:prototype (NAME ARGS)
-  "Generate C code function prototype."
-  (prin "static atom_t _mnml_" NAME "(const atom_t E, ");
-  (iter (\ (e) (prin "value_t " e ", ")) ARGS)
-  (prinl "closure_t C, callback_t K);");
-  (prinl))
-
-(def cc:gen:main (NAME ARGS REFS kvar)
-  "Generate C code for the main function."
-  (prin "static atom_t _mnml_" NAME "(const atom_t E, ")
-  (o>)
-  (iter (\ (e) (prin "value_t " e ", ")) ARGS)
-  (prinl "closure_t C, callback_t K) {");
-  (/**/ "Allocate a new closure.") 
-  (prinl (o|) "closure_t _C = lisp_closure_get(&cache, C, " (len REFS) ");")
-  (/**/ "Save the arguments.")
-  (foldl
-    (\ (acc e) (prinl (o|) "_C->V[" acc "] = " e ";") (+ acc 1)) 0 ARGS)
-  (/**/ "Generate the callback.")
-  (cc:gen:callback NAME REFS ARGS kvar)
-  (/**/ "Generate the continuation argument.")
-  (prinl (o|) "value_t R = { .callback = K };");
-  (/**/ "Call the continuation.")
-  (prinl (o|) "return _K(E, _C, R);")
-  (<o)
-  (prinl "}")
-  (prinl))
-
-(def cc:gen:argument (TYPES arg)
-  "Generate the argument extraction."
-  (prinl (o|) "LISP_LOOKUP(_" arg ", arguments, " arg ");")
-  #
-  # Determine how to extract the value.
-  #
-  (let ((atype . (assoc arg TYPES)))
-    (match atype
-      (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
-      (ATOM   . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
-      (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
-      ))
-  #
-  (prinl (o|) "X(_" arg ");"))
-
-(def cc:gen:plugin (NAME ARGS TYPES)
-  "Generate C code for the plugin."
-  (prinl "static atom_t lisp_function_" NAME "(const atom_t env, const atom_t arguments) {")
-  (o>)
-  (/**/ "Grab the arguments.")
-  (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
-  (/**/ "Define the default closure and callback.")
-  (prinl (o|) "closure_t _C = NULL;")
-  (prinl (o|) "callback_t _K = identity;")
-  (/**/ "Call the main function.")
-  (prin (o|) "atom_t R = _mnml_" NAME "(env, ")
-  (iter (\ (e) (prin e ", ")) ARGS)
-  (prinl "_C, _K);")
-  (/**/ "Clear the closure cache and return.")
-  (prinl (o|) "lisp_closure_clear(&cache);")
-  (prinl (o|) "return R;")
-  (<o)
-  (prinl "}")
-  (prinl)
-  (prin "LISP_PLUGIN_REGISTER(" NAME ", " NAME)
-  (iter (\ (e) (prin ", " e)) ARGS)
-  (if (= (len ARGS) 2) (prin ", NIL"))
-  (prinl ");"))
-
-#
-# Inner section generators.
+# Intermediate continuations.
 #
 
 (def cc:gen:closure (CONT next)
@@ -438,7 +318,7 @@
                 (/**/ "Build the closure.")
                 (cc:gen:closure CONT next)
                 (/**/ "Collect the argument for the external continuation.")
-                (cc:op:kvar ARGS kvar body)
+                (cc:op:extcall ARGS kvar body)
                 (/**/ "Build the continuation.")
                 (cc:gen:callback NAME REFS CONT next)
                 (/**/ "Call the continuation.")
@@ -522,6 +402,128 @@
     # Default behavior.
     #
     (_  .  (cc:gen:cont-any NAME ARGS REFS CONT kvar fun))))
+
+#
+# Prologue and identity.
+#
+
+(def cc:gen:prologue (SYMB CPS TYPES kvar)
+  "Generate C code prologue."
+  (prinl "#include <mnml/closure.h>")
+  (prinl "#include <mnml/lisp.h>")
+  (prinl "#include <mnml/maker.h>")
+  (prinl "#include <mnml/plugin.h>")
+  (prinl "#include <mnml/slab.h>")
+  (prinl "#include <mnml/types.h>")
+  (prinl)
+  #
+  # Generate some information
+  #
+  (prinl "/*")
+  (prin  " * FUNCTION   : ") (printl SYMB)
+  (prin  " * DEFINITION : ") (printl (eval SYMB))
+  (prin  " * CPS        : ") (printl CPS)
+  (prin  " * TYPES      : ") (printl TYPES)
+  (prinl " */")
+  (prinl)
+  #
+  # Generate the closure cache.
+  #
+  (prinl "static closure_t cache = NULL;")
+  (prinl))
+
+(def cc:gen:retval (TYPES kvar)
+  "Generate the return value conversion."
+  (let ((rtype . (assoc kvar TYPES)))
+    (match rtype
+      (NUMBER . (prinl (o|) "return lisp_make_number(V.number);"))
+      (ATOM   . (prinl (o|) "return V.atom;"))
+      (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
+      )))
+
+(def cc:gen:identity (TYPES kvar)
+  "Generate C code for the identity continuation."
+  (prinl "static atom_t identity(const atom_t E, closure_t C, value_t V) {")
+  (o>)
+  (cc:gen:retval TYPES kvar)
+  (<o)
+  (prinl "}")
+  (prinl))
+
+#
+# Main function.
+#
+
+(def cc:gen:prototype (NAME ARGS)
+  "Generate C code function prototype."
+  (prin "static atom_t _mnml_" NAME "(const atom_t E, ");
+  (iter (\ (e) (prin "value_t " e ", ")) ARGS)
+  (prinl "closure_t C, callback_t K);");
+  (prinl))
+
+(def cc:gen:main (NAME ARGS REFS kvar)
+  "Generate C code for the main function."
+  (prin "static atom_t _mnml_" NAME "(const atom_t E, ")
+  (o>)
+  (iter (\ (e) (prin "value_t " e ", ")) ARGS)
+  (prinl "closure_t C, callback_t K) {");
+  (/**/ "Allocate a new closure.") 
+  (prinl (o|) "closure_t _C = lisp_closure_get(&cache, C, " (len REFS) ");")
+  (/**/ "Save the arguments.")
+  (foldl
+    (\ (acc e) (prinl (o|) "_C->V[" acc "] = " e ";") (+ acc 1)) 0 ARGS)
+  (/**/ "Generate the callback.")
+  (cc:gen:callback NAME REFS ARGS kvar)
+  (/**/ "Generate the continuation argument.")
+  (prinl (o|) "value_t R = { .callback = K };");
+  (/**/ "Call the continuation.")
+  (prinl (o|) "return _K(E, _C, R);")
+  (<o)
+  (prinl "}")
+  (prinl))
+
+#
+# Plugin.
+#
+
+(def cc:gen:argument (TYPES arg)
+  "Generate the argument extraction."
+  (prinl (o|) "LISP_LOOKUP(_" arg ", arguments, " arg ");")
+  #
+  # Determine how to extract the value.
+  #
+  (let ((atype . (assoc arg TYPES)))
+    (match atype
+      (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
+      (ATOM   . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
+      (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
+      ))
+  #
+  (prinl (o|) "X(_" arg ");"))
+
+(def cc:gen:plugin (NAME ARGS TYPES)
+  "Generate C code for the plugin."
+  (prinl "static atom_t lisp_function_" NAME "(const atom_t env, const atom_t arguments) {")
+  (o>)
+  (/**/ "Grab the arguments.")
+  (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
+  (/**/ "Define the default closure and callback.")
+  (prinl (o|) "closure_t _C = NULL;")
+  (prinl (o|) "callback_t _K = identity;")
+  (/**/ "Call the main function.")
+  (prin (o|) "atom_t R = _mnml_" NAME "(env, ")
+  (iter (\ (e) (prin e ", ")) ARGS)
+  (prinl "_C, _K);")
+  (/**/ "Clear the closure cache and return.")
+  (prinl (o|) "lisp_closure_clear(&cache);")
+  (prinl (o|) "return R;")
+  (<o)
+  (prinl "}")
+  (prinl)
+  (prin "LISP_PLUGIN_REGISTER(" NAME ", " NAME)
+  (iter (\ (e) (prin ", " e)) ARGS)
+  (if (= (len ARGS) 2) (prin ", NIL"))
+  (prinl ");"))
 
 #
 # Main compiler entrypoint.
