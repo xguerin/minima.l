@@ -22,6 +22,10 @@ signal_handler(const int sigid)
   keep_running = false;
 }
 
+/*
+ * REPL.
+ */
+
 static atom_t
 run(stage_t pread, const stage_t pdone, const void * data)
 {
@@ -63,6 +67,32 @@ stage_newline(const atom_t cell, const void * const data)
   lisp_prin(NIL, cell, true);
   fwrite("\n", 1, 1, stdout);
 }
+
+/*
+ * String evaluation.
+ */
+
+static atom_t PAIRS;
+
+static void
+lisp_push(const atom_t cell)
+{
+  PAIRS = lisp_append(PAIRS, cell);
+}
+
+static atom_t
+lisp_pop()
+{
+  atom_t rslt = lisp_car(PAIRS);
+  atom_t next = lisp_cdr(PAIRS);
+  X(PAIRS);
+  PAIRS = next;
+  return rslt;
+}
+
+/*
+ * Variable builders.
+ */
 
 static void
 lisp_build_argv(const int argc, char ** const argv)
@@ -186,6 +216,10 @@ lisp_build_env()
   }
 }
 
+/*
+ * Plugin preload.
+ */
+
 static void
 lisp_preload(const size_t n, ...)
 {
@@ -207,14 +241,23 @@ lisp_preload(const size_t n, ...)
 #define NUMARGS(...)  (sizeof((char *[]){__VA_ARGS__})/sizeof(char *))
 #define PRELOAD(...)  lisp_preload(NUMARGS(__VA_ARGS__), __VA_ARGS__)
 
+/*
+ * Help.
+ */
+
 static void
 lisp_help(const char * const name)
 {
-  fprintf(stderr, "Usage: %s [-h|-v] [FILE.L]\n", name);
+  fprintf(stderr, "Usage: %s [-h|-v] [-e EXPR | FILE.L]\n", name);
   fprintf(stderr, "Options:\n");
+  fprintf(stderr, "\t-e: evaluate EXPR\n");
   fprintf(stderr, "\t-h: print this help\n");
   fprintf(stderr, "\t-v: show Minima.l runtime information\n");
 }
+
+/*
+ * Main.
+ */
 
 int
 main(const int argc, char ** const argv)
@@ -223,12 +266,17 @@ main(const int argc, char ** const argv)
    * Parse arguments.
    */
   int c;
-  while ((c = getopt(argc, argv, "hv")) != -1) {
+  char * expr = NULL;
+  while ((c = getopt(argc, argv, "hve:")) != -1) {
     switch (c) {
+      case 'e':
+        expr = optarg;
+        break;
       case 'h':
         lisp_help(argv[0]);
         return 0;
       case 'v':
+        fprintf(stdout, "%s\n", MNML_VERSION);
         return 0;
       default:
         lisp_help(argv[0]);
@@ -307,7 +355,7 @@ main(const int argc, char ** const argv)
   /*
    */
   atom_t result;
-  if (filename == NULL) {
+  if (filename == NULL && expr == NULL) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
     PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
@@ -315,7 +363,47 @@ main(const int argc, char ** const argv)
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   }
-  else {
+  else if (filename == NULL) {
+    /*
+     * Setup the PAIRS to NIL.
+     */
+    PAIRS = UP(NIL);
+    /*
+     * Parse the expression.
+     */
+    lexer_t lexer;
+    size_t len = strlen(expr);
+    lisp_lexer_create(lisp_push, &lexer);
+    lisp_lexer_parse(&lexer, expr, len, true);
+    lisp_lexer_destroy(&lexer);
+    /*
+     * Push the IO context.
+     */
+    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    /*
+     * Evaluate the parsed expressions.
+     */
+    result = UP(NIL);
+    while (keep_running) {
+      X(result);
+      atom_t car = lisp_pop();
+      if (car == NIL) {
+        result = UP(car);
+        break;
+      }
+      result = lisp_eval(NIL, car);
+    }
+    /*
+     * Pop the IO context.
+     */
+    POP_IO_CONTEXT(ICHAN);
+    POP_IO_CONTEXT(OCHAN);
+    /*
+     * Clear the PAIRS.
+     */
+    X(PAIRS);
+  } else {
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
     result = lisp_load_file(argv[1]);
     POP_IO_CONTEXT(OCHAN);

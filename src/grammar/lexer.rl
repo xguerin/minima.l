@@ -223,7 +223,7 @@ typedef struct _region
 * region_t;
 
 void
-lisp_create(const lisp_consumer_t consumer, lexer_t * const lexer)
+lisp_lexer_create(const lisp_consumer_t consumer, lexer_t * const lexer)
 {
   %% write init;
   lexer->consumer = consumer;
@@ -233,15 +233,15 @@ lisp_create(const lisp_consumer_t consumer, lexer_t * const lexer)
 }
 
 void
-lisp_destroy(lexer_t * const lexer)
+lisp_lexer_destroy(lexer_t * const lexer)
 {
   ParseFree(lexer->parser, free);
   memset(lexer, 0xA, sizeof(lexer_t));
 }
 
 void
-lisp_parse(lexer_t * const lexer, char * const str,
-           const size_t len, const bool end)
+lisp_lexer_parse(lexer_t * const lexer, char * const str,
+                 const size_t len, const bool end)
 {
   const char* p = str + lexer->rem;
   const char* pe = str + len;
@@ -260,7 +260,7 @@ lisp_parse(lexer_t * const lexer, char * const str,
 }
 
 bool
-lisp_pending(const lexer_t * const lexer)
+lisp_lexer_pending(const lexer_t * const lexer)
 {
   return lexer->depth != 0 || lexer->rem > 0;
 }

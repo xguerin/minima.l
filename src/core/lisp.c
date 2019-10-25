@@ -192,7 +192,7 @@ lisp_read(const atom_t closure, const atom_t cell)
    * Read from the file descriptor.
    */
   lexer_t lexer;
-  lisp_create(lisp_consumer, &lexer);
+  lisp_lexer_create(lisp_consumer, &lexer);
   FILE* handle = (FILE *)hnd->number;
   /*
    */
@@ -203,13 +203,13 @@ lisp_read(const atom_t closure, const atom_t cell)
       break;
     }
     size_t len = strlen(p);
-    lisp_parse(&lexer, buffer, lexer.rem + len, lexer.rem + len < RBUFLEN);
+    lisp_lexer_parse(&lexer, buffer, lexer.rem + len, lexer.rem + len < RBUFLEN);
   }
-  while (CDR(CDR(CAR(ICHAN))) == NIL || lisp_pending(&lexer));
+  while (CDR(CDR(CAR(ICHAN))) == NIL || lisp_lexer_pending(&lexer));
   /*
    * Grab the result and return it.
    */
-  lisp_destroy(&lexer);
+  lisp_lexer_destroy(&lexer);
   return CDR(CDR(chn)) != NIL ? lisp_read_pop(): NULL;
 }
 

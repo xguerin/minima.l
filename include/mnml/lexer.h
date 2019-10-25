@@ -28,16 +28,16 @@ lexer_t;
 /*
  * Lexer lifecycle.
  */
-void lisp_create(const lisp_consumer_t consumer, lexer_t * const lexer);
-void lisp_destroy(lexer_t * const lexer);
+void lisp_lexer_create(const lisp_consumer_t consumer, lexer_t * const lexer);
+void lisp_lexer_destroy(lexer_t * const lexer);
 
 /*
  * Lexer parse.
  */
-void lisp_parse(lexer_t * const lexer, char * const str,
-                const size_t len, const bool end);
+void lisp_lexer_parse(lexer_t * const lexer, char * const str,
+                      const size_t len, const bool end);
 
-bool lisp_pending(const lexer_t * const lexer);
+bool lisp_lexer_pending(const lexer_t * const lexer);
 
 /*
  * Debug macros.
