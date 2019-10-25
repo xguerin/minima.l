@@ -175,7 +175,7 @@
   "Compute the types involved in a funcall."
   (match body
     #
-    # Generate the binary numeric operations
+    # Generate the binary numeric operations.
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
@@ -189,7 +189,7 @@
                           '(cps:type:scan NAME ARGS CONT kvar body 'ATOM alst)) acc))
        NIL '(car cdr))
     #
-    # Generate the list binary operations
+    # Generate the list binary operations.
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
@@ -202,7 +202,8 @@
        (\ (acc e) (cons (cons (list e _ _)
                           '(let (((_ arg lst) . body)
                                  ((_ (nvar) next) . lst))
-                             (|> (cps:type:add nvar 'NUMBER alst)
+                             (|> (cps:type:add arg 'ATOM alst)
+                                 (cps:type:add nvar 'NUMBER)
                                  (cps:type:findr NAME ARGS CONT nvar next)))) acc))
        NIL '(lst? nil?))
     #
