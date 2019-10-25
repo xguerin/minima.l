@@ -22,6 +22,7 @@
         (printl EXPECT)
         (prin "! " (term:underlined "Actual") ": ")
         (printl EVAL)
+        NIL
         ))))
 
 (def assert:predicate (PREDICATE . VALUE)
@@ -36,4 +37,5 @@
         (printl PREDICATE)
         (prin "! " (term:underlined "Value") ": ")
         (printl EVAL)
+        NIL
         ))))

@@ -77,7 +77,7 @@ lisp_function_ ## _n(const atom_t closure, const atom_t args)   \
 {                                                               \
   LISP_LOOKUP(vl0, args, _x);                                   \
   LISP_LOOKUP(vl1, args, _y);                                   \
-  atom_t res = IS_TRUE(vl0) _o IS_TRUE(vl1) ? TRUE : NIL;       \
+  atom_t res = (!IS_NULL(vl0)) _o (!IS_NULL(vl1)) ? TRUE : NIL; \
   X(vl0, vl1);                                                  \
   return UP(res);                                               \
 }
