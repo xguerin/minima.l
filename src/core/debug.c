@@ -128,6 +128,8 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
     case T_WILDCARD:
       fprintf(fp, "_");
       break;
+    default:
+      abort();
   }
 }
 

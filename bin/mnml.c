@@ -389,7 +389,7 @@ main(const int argc, char ** const argv)
       X(result);
       atom_t car = lisp_pop();
       if (car == NIL) {
-        result = UP(car);
+        result = car;
         break;
       }
       result = lisp_eval(NIL, car);

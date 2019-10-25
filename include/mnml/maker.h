@@ -67,7 +67,7 @@
  * CONS helpers.
  */
 
-#define LISP_CONS_0(R) atom_t R = NIL
+#define LISP_CONS_0(R) atom_t R = UP(NIL)
 
 #define LISP_CONS_1(R, _1) LISP_CONS_0(R);      \
 {                                               \
@@ -79,8 +79,9 @@
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1));  \
     atom_t __1 = lisp_make_symbol(s_1);         \
     r_1 = lisp_cons(__1, R);                    \
-    X(__1); X(R);                               \
+    X(__1);                                     \
   }                                             \
+  X(R);                                         \
   R = r_1;                                      \
 }
 
@@ -91,14 +92,13 @@
   atom_t r_2;                                   \
   if (strcmp(#_1, "NIL") == 0) {                \
     r_2 = lisp_cons(__2, R);                    \
-    X(R);                                       \
   } else {                                      \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1));  \
     atom_t __1 = lisp_make_symbol(s_1);         \
     r_2 = lisp_cons(__2, __1);                  \
     X(__1);                                     \
   }                                             \
-  X(__2);                                       \
+  X(__2, R);                                    \
   R = r_2;                                      \
 }
 
@@ -107,7 +107,7 @@
   MAKE_SYMBOL_STATIC(s_3, #_3, strlen(#_3));                \
   atom_t __3 = lisp_make_symbol(s_3);                       \
   atom_t r_3 = lisp_cons(__3, R);                           \
-  X(__3); X(R);                                             \
+  X(__3, R);                                                \
   R = r_3;                                                  \
 }
 
@@ -116,7 +116,7 @@
   MAKE_SYMBOL_STATIC(s_4, #_4, strlen(#_4));                  \
   atom_t __4 = lisp_make_symbol(s_4);                         \
   atom_t r_4 = lisp_cons(__4, R);                             \
-  X(__4); X(R);                                               \
+  X(__4, R);                                                  \
   R = r_4;                                                    \
 }
 
@@ -125,7 +125,7 @@
   MAKE_SYMBOL_STATIC(s_5, #_5, strlen(#_5));                  \
   atom_t __5 = lisp_make_symbol(s_5);                         \
   atom_t r_5 = lisp_cons(__5, R);                             \
-  X(__5); X(R);                                               \
+  X(__5, R);                                                  \
   R = r_5;                                                    \
 }
 

@@ -23,38 +23,38 @@ atom_t lisp_plugin_load(const atom_t cell);
  * Initialization macros.
  */
 
-#define LISP_PLUGIN_REGISTER(__s, __n, ...)                     \
-                                                                \
-const char *                                                    \
-lisp_plugin_name()                                              \
-{                                                               \
-  return #__n;                                                  \
-}                                                               \
-                                                                \
-atom_t                                                          \
-lisp_plugin_register()                                          \
-{                                                               \
-  MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);            \
-  atom_t sym = lisp_make_symbol(inp);                           \
-  LISP_CONS(arg, ## __VA_ARGS__);                               \
-  uintptr_t fun = (uintptr_t)lisp_function_ ## __s;             \
-  atom_t adr = lisp_make_number(fun);                           \
-  atom_t cn0 = lisp_cons(NIL, adr);                             \
-  atom_t cn1 = lisp_cons(NIL, cn0);                             \
-  atom_t val = lisp_cons(arg, cn1);                             \
-  atom_t cns = lisp_cons(sym, val);                             \
-  TRACE_PLUG_SEXP(cns);                                         \
-  GLOBALS = lisp_setq(GLOBALS, cns);                            \
-  X(adr, NIL, cn0, cn1, arg, val);                              \
-  return sym;                                                   \
+#define LISP_PLUGIN_REGISTER(__s, __n, ...)           \
+                                                      \
+const char *                                          \
+lisp_plugin_name()                                    \
+{                                                     \
+  return #__n;                                        \
+}                                                     \
+                                                      \
+atom_t                                                \
+lisp_plugin_register()                                \
+{                                                     \
+  MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);  \
+  atom_t sym = lisp_make_symbol(inp);                 \
+  LISP_CONS(arg, ## __VA_ARGS__);                     \
+  uintptr_t fun = (uintptr_t)lisp_function_ ## __s;   \
+  atom_t adr = lisp_make_number(fun);                 \
+  atom_t cn0 = lisp_cons(NIL, adr);                   \
+  atom_t cn1 = lisp_cons(NIL, cn0);                   \
+  atom_t val = lisp_cons(arg, cn1);                   \
+  atom_t cns = lisp_cons(sym, val);                   \
+  TRACE_PLUG_SEXP(cns);                               \
+  GLOBALS = lisp_setq(GLOBALS, cns);                  \
+  X(adr, cn0, cn1, arg, val);                         \
+  return sym;                                         \
 }
 
 /*
  * Closure lookup macro.
  */
 
-#define LISP_LOOKUP(_v, _c, _x)                                 \
-  MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_SYMBOL_LENGTH);           \
+#define LISP_LOOKUP(_v, _c, _x)                       \
+  MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_SYMBOL_LENGTH); \
   atom_t _v = lisp_lookup_immediate(_c, _##_v)
 
 /*
