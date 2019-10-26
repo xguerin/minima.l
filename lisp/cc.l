@@ -101,8 +101,8 @@
   (let (((op arg cont)  . body))
     (prin (o|) "value_t R = { .atom = ")
     (match op
-      (car . (prin "CAR("))
-      (cdr . (prin "CDR("))
+      (car . (prin "lisp_car("))
+      (cdr . (prin "lisp_cdr("))
       (_   . (prin " /* Unsupported operation " op " */ ")))
     (cc:value:lst ARGS kvar arg)
     (prinl ") };")))
@@ -146,11 +146,11 @@
         (gencall  . (\ (arg)
                       (unless (= arg kvar)
                         (prinl (o|) "__T = lisp_cons(" arg ", __S);")
-                        (prinl (o|) "X(__S); __S = __T;"))))
+                        (prinl (o|) "X(" arg", __S); __S = __T;"))))
         (type     . (assoc kvar TYPES)))
     (iter genargs args)
     (/**/ "Build the expression to evaluate.")
-    (prinl (o|) "atom_t __S = NIL, __T;")
+    (prinl (o|) "atom_t __S = UP(NIL), __T;")
     (iter gencall (rev args))
     (/**/ "Evaluate the expression.")
     (prinl (o|) "atom_t __R = lisp_eval(E, __S);")
@@ -216,13 +216,16 @@
 (def cc:gen:callback (NAME REFS CONT ref)
   "Generate the callback capture for REF."
   (if (= CONT ref)
-    (prog
-      (if (= (assoc ref REFS) 0)
-        (prinl (o|) "callback_t _K = V.callback;")
-        (prinl (o|) "callback_t _K = C->V[" (cdr (str ref)) "].callback;"))
-      (/**/ "Clean-up the closure.")
-      (prinl (o|) "lisp_closure_put(&cache, C);"))
+    (if (= (assoc ref REFS) 0)
+      (prinl (o|) "callback_t _K = V.callback;")
+      (prinl (o|) "callback_t _K = C->V[" (cdr (str ref)) "].callback;"))
     (prinl (o|) "callback_t _K = _mnml_" NAME ref ";")))
+
+(def cc:gen:cleanup (ARGS TYPES CONT ref)
+  "Generate the variable clean-up."
+  (when (= CONT ref)
+    (/**/ "Clean-up the closure.")
+    (prinl (o|) "lisp_closure_put(&cache, C);")))
 
 (def cc:gen:block (NAME ARGS REFS TYPES CONT kvar body)
   "Generate the basic block for BODY."
@@ -235,6 +238,7 @@
                     (op ARGS TYPES kvar body)
                     (/**/ "Build the continuation.")
                     (cc:gen:callback NAME REFS CONT next)
+                    (cc:gen:cleanup ARGS TYPES CONT next)
                     (/**/ "Call the continuation.")
                     (if rec?
                       (prog
@@ -381,7 +385,7 @@
   (let ((rtype . (assoc kvar TYPES)))
     (match rtype
       (NUMBER . (prinl (o|) "return lisp_make_number(V.number);"))
-      (ATOM   . (prinl (o|) "return UP(V.atom);"))
+      (ATOM   . (prinl (o|) "return V.atom;"))
       (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
       )))
 
@@ -441,9 +445,7 @@
       (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
       (ATOM   . (prinl (o|) "value_t " arg " = { .atom = _" arg " };"))
       (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))
-      ))
-  #
-  (prinl (o|) "X(_" arg ");"))
+      )))
 
 (def cc:gen:plugin (NAME ARGS TYPES)
   "Generate C code for the plugin."
