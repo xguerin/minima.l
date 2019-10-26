@@ -83,9 +83,10 @@ action tok_tilde
 
 action tok_number
 {
-  size_t len = te - ts;
+  const char * start = UNPREFIX(ts);
+  size_t len = te - start;
   char * val = (char *)alloca(len + 1);
-  strncpy(val, ts, len);
+  strncpy(val, start, len);
   val[len] = 0;
   int64_t value = strtoll(val, NULL, 10);
   Parse(lexer->parser, NUMBER, (void *)value, NULL);
@@ -204,6 +205,12 @@ main := |*
   (quote . symbol) %tok_quote $!err_prefix => tok_symbol;
   (backt . symbol) %tok_backt $!err_prefix => tok_symbol;
   (tilde . symbol) %tok_tilde $!err_prefix => tok_symbol;
+  #
+  # Escaped NUMBER.
+  #
+  (quote . number) %tok_quote $!err_prefix => tok_number;
+  (backt . number) %tok_backt $!err_prefix => tok_number;
+  (tilde . number) %tok_tilde $!err_prefix => tok_number;
   #
   # Garbage.
   #
