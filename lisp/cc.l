@@ -37,6 +37,12 @@
   (prinl)
   (prinl (o|) " */"))
 
+(def cc:replace (kvar body)
+  "Replace the continuation in BODY by KVAR."
+  (if (cdr body)
+    (cons (car body) (cc:replace kvar (cdr body)))
+    (list kvar)))
+
 (def cc:arg:idx (ARGS ref idx)
   "Get the index of REF in the closure based on ARGS."
   (if ARGS
@@ -50,12 +56,6 @@
     (if (= (car tostr) ^_)
       (cdr tostr)
       (cc:arg:idx ARGS ref 0))))
-
-(def cc:replace (kvar body)
-  "Replace the continuation in BODY by KVAR."
-  (if (cdr body)
-    (cons (car body) (cc:replace kvar (cdr body)))
-    (list kvar)))
 
 #
 # Operation generators.
@@ -229,23 +229,21 @@
 
 (def cc:gen:block (NAME ARGS REFS TYPES CONT kvar body)
   "Generate the basic block for BODY."
-  (let ((make . (\ (succ op)
-                  (let ((rec? . (= NAME (car body)))
-                        (next . (succ body)))
-                    (/**/ "Build the closure.")
-                    (cc:gen:closure CONT next)
-                    (/**/ "Collect the arguments.")
-                    (op ARGS TYPES kvar body)
-                    (/**/ "Build the continuation.")
-                    (cc:gen:callback NAME REFS CONT next)
-                    (cc:gen:cleanup ARGS TYPES CONT next)
-                    (/**/ "Call the continuation.")
-                    (if rec?
-                      (prog
-                        (prin (o|) "return _mnml_" NAME "(E, ")
-                        (iter (\ (e) (prin e ", ")) ARGS)
-                        (prinl "_C, _K);"))
-                      (prinl (o|) "return _K(E, _C, R);"))))))
+  (let ((make . (\ (succ op) (let ((next . (succ body)))
+                               (/**/ "Build the closure.")
+                               (cc:gen:closure CONT next)
+                               (/**/ "Collect the arguments.")
+                               (op ARGS TYPES kvar body)
+                               (/**/ "Build the continuation.")
+                               (cc:gen:callback NAME REFS CONT next)
+                               (cc:gen:cleanup ARGS TYPES CONT next)
+                               (/**/ "Call the continuation.")
+                               (if (= NAME (car body))
+                                 (prog
+                                   (prin (o|) "return _mnml_" NAME "(E, ")
+                                   (iter (\ (e) (prin e ", ")) ARGS)
+                                   (prinl "_C, _K);"))
+                                 (prinl (o|) "return _K(E, _C, R);"))))))
     (match body
       #
       # Predicate operations.
@@ -271,6 +269,10 @@
       ~(foldl
          (\ (acc e) (cons (cons (list e _ _ _) '(make last cc:op:lst:two)) acc))
          NIL '(conc cons))
+      #
+      # Quote operation.
+      #
+      ((quote . _) . ((prinl (o|) "abort(); /* " body " */")))
       #
       # IF/THEN/ELSE
       #
