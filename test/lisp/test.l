@@ -1,4 +1,4 @@
-(load "../../lisp/foldl.l" "../../lisp/term.l")
+(load "../../lisp/foldl.l" "../../lisp/term.l" 'slabinfo)
 
 (def test:run (SUITE . TESTS)
   "Run all tests specified as a ((NAME . TEST)) list."
@@ -9,6 +9,10 @@
                (tru?  . (prog (prinl "✓ " name ": " (term:green "passed")) T))
                (_     . (prog (prinl "! " name ": " (term:red "failed")) NIL)))))
     T TESTS))
+
+(def test:slabdelta ()
+  "Return the slab allocator position."
+  (let (((alloc . free) . (slabinfo))) (- alloc free)))
 
 (def assert:equal (EXPECT . ACTUAL)
   "Assert that EXPECT and ACTUAL are equal."
