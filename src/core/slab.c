@@ -26,6 +26,9 @@ lisp_incref(const atom_t atom, const char * const name)
 atom_t lisp_decref(const atom_t atom, const char * const name)
 {
   TRACE_REFC_SEXP(atom->refs, atom->refs - 1, name, atom);
+  if (atom->refs == 0xa0a0a0a0a0a0a0aULL) {
+    abort();
+  }
   atom->refs -= 1;
   return atom;
 }
