@@ -96,10 +96,10 @@
 # funcall is skipped unless it is the current external continuation variable.
 # Local symbol (eg. local continuations) are collected with a count of 0.
 #
-(def cps:getrefs (xvar kvar acc expr)
+(def cps:getrefs (ARGS kvar acc expr)
   "Accumulate in ACC references found in EXPR."
   (let (((op . _) . expr)
-        (params . (if (= op xvar) expr (cdr expr))))
+        (params . (if (has ARGS op) expr (cdr expr))))
     (foldl
       (\ (acc e)
         (if (sym? e)
@@ -111,22 +111,22 @@
           acc))
       acc params)))
 
-(def cps:refcount_r (xvar kvar fun acc)
+(def cps:refcount_r (ARGS kvar fun acc)
   "Recursively collect placeholder reference count in a CPS funcall FUN."
   (match fun
     ((if _ . _) . (let (((_ _ . ops) . fun)
-                        (red . (\ (e acm) (cps:refcount_r xvar kvar e acm))))
-                    (cps:getrefs xvar kvar (foldr red ops acc) fun)))
+                        (red . (\ (e acm) (cps:refcount_r ARGS kvar e acm))))
+                    (cps:getrefs ARGS kvar (foldr red ops acc) fun)))
     ((_ . _) . (let (((_ args body) . (last fun))
                      (nvar . (last args)))
-                 (cps:getrefs xvar kvar (cps:refcount_r xvar nvar body acc) fun)))
+                 (cps:getrefs ARGS kvar (cps:refcount_r ARGS nvar body acc) fun)))
     (_ . acc)))
 
-(def cps:refcount ((args _ _ body))
+(def cps:refcount ((ARGS _ _ body))
   "Collect placeholder reference count in a CPS function FUN."
   (if (lst? body)
-    (let ((xvar . (last args)))
-      (if body (cps:refcount_r xvar xvar body NIL)))))
+    (let ((xvar . (last ARGS)))
+      (if body (cps:refcount_r ARGS xvar body NIL)))))
 
 #
 # Infer type signature from a CPS funcall.
