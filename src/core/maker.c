@@ -7,11 +7,9 @@ atom_t
 lisp_make_char(const char c)
 {
   atom_t R = lisp_allocate();
-  if (likely(R != NIL)) {
-    R->type = T_CHAR;
-    R->refs = 1;
-    R->number = c;
-  }
+  R->type = T_CHAR;
+  R->refs = 1;
+  R->number = c;
   TRACE_MAKE_SEXP(R);
   return R;
 }
@@ -20,11 +18,9 @@ atom_t
 lisp_make_number(const int64_t num)
 {
   atom_t R = lisp_allocate();
-  if (likely(R != NIL)) {
-    R->type = T_NUMBER;
-    R->refs = 1;
-    R->number = num;
-  }
+  R->type = T_NUMBER;
+  R->refs = 1;
+  R->number = num;
   TRACE_MAKE_SEXP(R);
   return R;
 }
@@ -46,11 +42,9 @@ atom_t
 lisp_make_symbol(const symbol_t sym)
 {
   atom_t R = lisp_allocate();
-  if (likely(R != NIL)) {
-    R->type = T_SYMBOL;
-    R->refs = 1;
-    R->symbol = *sym;
-  }
+  R->type = T_SYMBOL;
+  R->refs = 1;
+  R->symbol = *sym;
   TRACE_MAKE_SEXP(R);
   return R;
 }
@@ -59,10 +53,8 @@ void
 lisp_make_nil()
 {
   atom_t R = lisp_allocate();
-  if (likely(R != NIL)) {
-    R->type = T_NIL;
-    R->refs = 1;
-  }
+  R->type = T_NIL;
+  R->refs = 1;
   TRACE_MAKE_SEXP(R);
   NIL = R;
 }
@@ -71,10 +63,8 @@ void
 lisp_make_true()
 {
   atom_t R = lisp_allocate();
-  if (likely(R != NIL)) {
-    R->type = T_TRUE;
-    R->refs = 1;
-  }
+  R->type = T_TRUE;
+  R->refs = 1;
   TRACE_MAKE_SEXP(R);
   TRUE = R;
 }
@@ -92,10 +82,8 @@ void
 lisp_make_wildcard()
 {
   atom_t R = lisp_allocate();
-  if (R != NIL) {
-    R->type = T_WILDCARD;
-    R->refs = 1;
-  }
+  R->type = T_WILDCARD;
+  R->refs = 1;
   TRACE_MAKE_SEXP(R);
   WILDCARD = R;
 }

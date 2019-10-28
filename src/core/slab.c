@@ -27,6 +27,7 @@ atom_t lisp_decref(const atom_t atom, const char * const name)
 {
   TRACE_REFC_SEXP(atom->refs, atom->refs - 1, name, atom);
   if (atom->refs == 0xa0a0a0a0a0a0a0aULL) {
+    TRACE("Double-free error: %s", name);
     abort();
   }
   atom->refs -= 1;
@@ -117,11 +118,12 @@ atom_t
 lisp_allocate()
 {
   /*
-   * Expand if necessary.
+   * Expand if necessary. Die if we can't.
    */
   if (unlikely(slab.first == END_MK)) {
     if (!lisp_slab_expand()) {
-      return UP(NIL);
+      TRACE("Out-of-memory error");
+      abort();
     }
   }
   /*
