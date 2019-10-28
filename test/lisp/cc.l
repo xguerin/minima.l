@@ -64,6 +64,19 @@
                     (and (assert:equal 1 (_ite 3 1)))
                     (and (assert:equal (+ pre 21) (test:slabdelta)))
                     ))))
+  ("ite_nested" . (prog
+                    (def _ite_nested (a b c) (if (< a b) (if (> b c) b c) a))
+                    (let ((res . (cc:build (cc:compile '_ite_nested)))
+                          (bod . (|> _ite_nested cdr cdr cdr))
+                          (pre . (test:slabdelta)))
+                      (|> T
+                          (and (assert:equal '_ite_nested res))
+                          (and (assert:predicate 'num? bod))
+                          (and (assert:equal 3 (_ite_nested 3 2 1)))
+                          (and (assert:equal 3 (_ite_nested 2 3 1)))
+                          (and (assert:equal 4 (_ite_nested 2 3 4)))
+                          (and (assert:equal (+ pre 21) (test:slabdelta)))
+                          ))))
   #
   # Fibonacci.
   #

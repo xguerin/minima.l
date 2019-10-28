@@ -365,7 +365,7 @@
                     ite))
         (conts  . (filter nil? clist)))
     (iter (\ ((_ args body))
-            (cc:gen:cont-any NAME ARGS REFS TYPES CONT (last args) body)) conts)
+            (cc:gen:cont NAME ARGS REFS TYPES CONT (last args) body)) conts)
     (cc:gen:function NAME ARGS REFS TYPES CONT kvar (cons symb (cons cnd first)))))
 
 (def cc:gen:cont (NAME ARGS REFS TYPES CONT kvar fun)

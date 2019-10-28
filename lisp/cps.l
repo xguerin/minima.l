@@ -226,11 +226,13 @@
     ((_ _) . (let (((var arg) . body)
                    (atype . (assoc arg alst))
                    (xtype . (assoc var alst)))
-               (if xtype
+               (if (and xtype (not atype))
                  (cps:type:add arg (cps:type:fold1 xtype) alst)
-                 (if atype
+                 (if (and atype (not xtype))
                    (cps:type:add var atype alst)
-                   (|> (cps:type:add var 'ATOM alst) (cps:type:add arg 'ATOM))))))
+                   (if (and (not atype) (not xtype))
+                     (|> (cps:type:add var 'ATOM alst) (cps:type:add arg 'ATOM))
+                     alst)))))
     #
     # Generic method invocation case.
     #
