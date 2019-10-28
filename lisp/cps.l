@@ -212,7 +212,7 @@
     ((if _ _) . (let (((_ e thn) . body))
                   (|> (cps:type:add e 'NUMBER alst)
                       (cps:type:findr NAME ARGS CONT kvar thn)
-                      (cps:type:add CONT 'NULL))))
+                      (cps:type:add CONT 'ATOM))))
     #
     # IF/THEN/ELSE.
     #
@@ -226,12 +226,13 @@
     ((_ _) . (let (((var arg) . body)
                    (atype . (assoc arg alst))
                    (xtype . (assoc var alst)))
-               (if (and xtype (not atype))
+               (if (|> xtype (and (not atype)))
                  (cps:type:add arg (cps:type:fold1 xtype) alst)
-                 (if (and atype (not xtype))
+                 (if (|> atype (and (not xtype)))
                    (cps:type:add var atype alst)
-                   (if (and (not atype) (not xtype))
-                     (|> (cps:type:add var 'ATOM alst) (cps:type:add arg 'ATOM))
+                   (if (|> (not atype) (and (not xtype)))
+                     (|> (cps:type:add var 'UNDEF alst)
+                         (cps:type:add arg 'UNDEF))
                      alst)))))
     #
     # Generic method invocation case.
@@ -249,7 +250,7 @@
   "Fold the types in LST and check for errors."
   (foldr
     (\ (e acc)
-      (if (|> (nil? acc) (or (= e acc)) (or (= acc 'ATOM))) e 'ERROR))
+      (if (|> (nil? acc) (or (= e acc)) (or (= acc 'UNDEF))) e 'ERROR))
     lst NIL))
 
 (def cps:type:fold (alst)
@@ -262,7 +263,8 @@
   "Resolve the type for KVAR if it does not have one."
   (match body
     ((if _ _)   . (let (((_ _ thn) . body))
-                    (cps:type:findl kvar thn (cps:type:add kvar 'NULL alst))))
+                    (cps:type:findl kvar thn
+                                    (cps:type:add kvar 'ATOM alst))))
     ((if _ _ _) . (let (((_ _ thn els) . body))
                     (cps:type:findl kvar els (cps:type:findl kvar thn alst))))
     ((_ _)      . (let (((op arg) . body)
