@@ -48,8 +48,9 @@ message(STATUS "Build timestamp: " ${BUILD_TIMESTAMP})
 # Options
 #
 
-option(MNML_ENABLE_DEBUG  "Enable YAML configuration plugin"  ON)
-option(MNML_ENABLE_TESTS  "Build the Google tests suite"      ON)
+option(MNML_ENABLE_DEBUG  "Enable debug output"         ON)
+option(MNML_ENABLE_SSE41  "Enable SSE4.1 optimizations" ON)
+option(MNML_ENABLE_TESTS  "Build and run tests"         ON)
 
 #
 # Global definitions
@@ -80,6 +81,10 @@ add_definitions(-DYYNOERRORRECOVERY)
 
 if(MNML_ENABLE_DEBUG)
   add_definitions(-DLISP_ENABLE_DEBUG)
+endif()
+
+if(MNML_ENABLE_SSE41)
+  add_definitions(-DLISP_ENABLE_SSE41)
 endif()
 
 #

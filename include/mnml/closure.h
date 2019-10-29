@@ -2,6 +2,7 @@
 
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
+#include <stdlib.h>
 
 /*
  * Closure types.

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <stdint.h>
+
+#ifdef LISP_ENABLE_SSE41
 #include <smmintrin.h>
+#endif
 
 /*
  * Optimization macros.
@@ -43,7 +46,9 @@ typedef union _symbol
 {
   char      val[LISP_SYMBOL_LENGTH];
   uint64_t  word[2];
+#ifdef LISP_ENABLE_SSE41
   __m128i   tag;
+#endif
 }
 __attribute__((packed)) * symbol_t;
 

@@ -114,15 +114,23 @@ atom_t lisp_load_file(const char * const filepath);
 static inline bool
 lisp_symbol_match_immediate(const atom_t a, const symbol_t b)
 {
+#ifdef LISP_ENABLE_SSE41
   register __m128i res = _mm_xor_si128(a->symbol.tag, b->tag);
   return _mm_test_all_zeros(res, res);
+#else
+  return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH) == 0;
+#endif
 }
 
 static inline bool
 lisp_symbol_match(const atom_t a, const atom_t b)
 {
+#ifdef LISP_ENABLE_SSE41
   register __m128i res = _mm_xor_si128(a->symbol.tag, b->symbol.tag);
   return _mm_test_all_zeros(res, res);
+#else
+  return memcmp(a->symbol.val, b->symbol.val, LISP_SYMBOL_LENGTH) == 0;
+#endif
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et
