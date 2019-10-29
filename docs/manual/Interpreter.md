@@ -55,3 +55,12 @@ installation prefix. It accepts a colon-separated list of paths:
 ```
 $ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
 ```
+### MNML_SCRIPT_PATH
+
+This variable controls where to look for lisp scripts, the default being
+`share/mnml` in the installation prefix:
+```
+$ MNML_SCRIPT_PATH=/some/path mnml
+```
+When set, that path is use to replace occurences of `@lib` in `(load)`
+statements.

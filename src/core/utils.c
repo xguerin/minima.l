@@ -327,8 +327,12 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
    * Expand the path.
    */
   if (strncmp(filepath, "@lib", 4) == 0) {
-    strcpy(expn_buf, lisp_prefix());
-    strcat(expn_buf, "/share/mnml");
+    if (getenv("MNML_SCRIPT_PATH") != NULL) {
+      strcpy(expn_buf, getenv("MNML_SCRIPT_PATH"));
+    } else {
+      strcpy(expn_buf, lisp_prefix());
+      strcat(expn_buf, "/share/mnml");
+    }
     strcat(expn_buf, &filepath[4]);
   } else if (filepath[0] == '~' && getenv("HOME") != NULL) {
     strcpy(expn_buf, getenv("HOME"));
