@@ -104,7 +104,7 @@ atom_t lisp_load_file(const char * const filepath);
     if (strlen(__e) > 0) BLOCK;                 \
   }                                             \
   __e = haystack;                               \
-  BLOCK;                                        \
+    if (strlen(__e) > 0) BLOCK;                 \
   free(copy);                                   \
 }
 

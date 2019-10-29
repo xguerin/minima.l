@@ -35,6 +35,7 @@ run(stage_t pread, const stage_t pdone, const void * data)
     pread(NIL, data);
     input = lisp_read(NIL, UP(NIL));
     if (input == NULL) {
+      result = UP(NIL);
       break;
     }
     result = lisp_eval(NIL, input);
@@ -221,7 +222,7 @@ lisp_build_env()
  */
 
 static void
-lisp_preload(const size_t n, ...)
+lisp_preload_plugins(const size_t n, ...)
 {
   va_list args;
   va_start(args, n);
@@ -239,7 +240,44 @@ lisp_preload(const size_t n, ...)
 }
 
 #define NUMARGS(...)  (sizeof((char *[]){__VA_ARGS__})/sizeof(char *))
-#define PRELOAD(...)  lisp_preload(NUMARGS(__VA_ARGS__), __VA_ARGS__)
+#define PRELOAD(...)  lisp_preload_plugins(NUMARGS(__VA_ARGS__), __VA_ARGS__)
+
+static void
+lisp_preload()
+{
+  const char * PRELOAD = getenv("MNML_PRELOAD");
+  if (PRELOAD == NULL) {
+    PRELOAD(/* COMPARATORS */
+            "=", "<>", "<", ">", "<=", ">=",
+            /* ARITHMETICS */
+            "+", "-", "*", "/", "%",
+            /* LOGIC */
+            "and", "or", "not",
+            /* LIST */
+            "car", "cdr", "conc", "cons", "list",
+            /* SYMBOL */
+            "<-", "\\", "def", "let", "setq", "sym",
+            /* STRING AND CHARACTER */
+            "chr", "str",
+            /* CONTROL */
+            "|>", "cond", "if", "match", "prog",
+            /* PREDICATES */
+            "chr?", "lst?", "nil?", "num?", "str?", "sym?", "tru?",
+            /* I/O */
+            "in", "out", "read", "readlines",
+            /* PRINTERS */
+            "prin", "prinl", "print", "printl",
+            /* MISC */
+            "eval", "load", "quit", "quote", "time"
+              );
+  }
+  /*
+   * Scan the PRELOAD list and load the symbols it contains.
+   */
+  else {
+    FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload(1, entry));
+  }
+}
 
 /*
  * Help.
@@ -248,8 +286,9 @@ lisp_preload(const size_t n, ...)
 static void
 lisp_help(const char * const name)
 {
-  fprintf(stderr, "Usage: %s [-h|-v] [-e EXPR | FILE.L]\n", name);
+  fprintf(stderr, "Usage: %s [-b|-h|-v] [-e EXPR | FILE.L]\n", name);
   fprintf(stderr, "Options:\n");
+  fprintf(stderr, "\t-b: bare mode (no preloads, no ARGV, no CONFIG, no ENV)\n");
   fprintf(stderr, "\t-e: evaluate EXPR\n");
   fprintf(stderr, "\t-h: print this help\n");
   fprintf(stderr, "\t-v: show Minima.l runtime information\n");
@@ -266,9 +305,13 @@ main(const int argc, char ** const argv)
    * Parse arguments.
    */
   int c;
+  bool bare = false;
   char * expr = NULL;
-  while ((c = getopt(argc, argv, "hve:")) != -1) {
+  while ((c = getopt(argc, argv, "bhve:")) != -1) {
     switch (c) {
+      case 'b':
+        bare = true;
+        break;
       case 'e':
         expr = optarg;
         break;
@@ -312,46 +355,14 @@ main(const int argc, char ** const argv)
     return __LINE__;
   }
   /*
-   * Preload some basic functions if MNML_PRELOAD is not defined.
+   * Preload plugins, build ARGV, CONFIG and ENV.
    */
-  const char * PRELOAD = getenv("MNML_PRELOAD");
-  if (PRELOAD == NULL) {
-    PRELOAD(/* COMPARATORS */
-            "=", "<>", "<", ">", "<=", ">=",
-            /* ARITHMETICS */
-            "+", "-", "*", "/", "%",
-            /* LOGIC */
-            "and", "or", "not",
-            /* LIST */
-            "car", "cdr", "conc", "cons", "list",
-            /* SYMBOL */
-            "<-", "\\", "def", "let", "setq", "sym",
-            /* STRING AND CHARACTER */
-            "chr", "str",
-            /* CONTROL */
-            "|>", "cond", "if", "match", "prog",
-            /* PREDICATES */
-            "chr?", "lst?", "nil?", "num?", "str?", "sym?", "tru?",
-            /* I/O */
-            "in", "out", "read", "readlines",
-            /* PRINTERS */
-            "prin", "prinl", "print", "printl",
-            /* MISC */
-            "eval", "load", "quit", "quote", "time"
-             );
+  if (!bare) {
+    lisp_preload();
+    lisp_build_argv(argc, argv);
+    lisp_build_config();
+    lisp_build_env();
   }
-  /*
-   * Scan the PRELOAD list and load the symbols it contains.
-   */
-  else {
-    FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload(1, entry));
-  }
-  /*
-   * Build ARGV, CONFIG and ENV.
-   */
-  lisp_build_argv(argc, argv);
-  lisp_build_config();
-  lisp_build_env();
   /*
    */
   atom_t result;
