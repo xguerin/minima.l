@@ -503,7 +503,7 @@
 # Main compiler entrypoint.
 #
 
-(def cc:compile (SYMB)
+(def cc:compile (SYMB . TARGET)
   "Generate the C code for the CPS function SYMB."
   (let ((cps             . (>& SYMB))
         ((args _ _ body) . cps)
@@ -513,7 +513,7 @@
         (isvalid         . (foldl (\ (acc (_ . t)) (and (<> t 'ERROR) acc)) T TYPES))
         (kvar            . (last args))
         (trgt            . (append (assoc "HOME" ENV) "/.mnml"))
-        (cout            . (append trgt "/" (str SYMB) ".c")))
+        (cout            . (<|> (eval (car TARGET)) (append trgt "/" (str SYMB) ".c"))))
     (when isvalid
       #
       # Remove the C file
@@ -542,16 +542,16 @@
         (libd . (append (assoc 'PREFIX CONFIG) "/lib"))
         (srcd . (append (assoc 'PREFIX CONFIG) "/src"))
         (flags . (list
-                   "-g3" "-shared" "-fPIC" "-fomit-frame-pointer"
+                   "-shared" "-fPIC" "-fomit-frame-pointer"
                    "-I" incd "-L" libd "-L" srcd "-lminimal"
                    "-o" oout cout)))
     (if (= osname "Linux") ($+ flags '("-flto")) flags)))
 
-(def cc:build (SYMB)
+(def cc:build (SYMB . TARGET)
   "Build the plugin for the CPS function SYMB."
   (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
         (cout . (append trgt "/" (str SYMB) ".c"))
-        (oout . (append trgt "/libminimal_function_" (str SYMB) ".so")))
+        (oout . (<|> (eval (car TARGET)) (append trgt "/libminimal_function_" (str SYMB) ".so"))))
     (when SYMB
       #
       # Remove the SO file
