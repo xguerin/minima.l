@@ -70,11 +70,17 @@
   (let (((op arg cont) . body))
     (prin (o|) "value_t R = { .number = ")
     (match op
-      (lst? . (prin "IS_PAIR("))
-      (nil? . (prin "IS_NULL("))
-      (_   . (prin " /* Unsupported predicate " op " */ ")))
-    (cc:value:atm ARGS kvar arg)
-    (prinl ") };")))
+      (lst? . (prog
+                (prin "IS_PAIR(")
+                (cc:value:atm ARGS kvar arg)
+                (prin ") || IS_NULL(")
+                (cc:value:atm ARGS kvar arg)
+                (prinl ") };")))
+      (nil? . (prog
+                (prin "IS_NULL(")
+                (cc:value:atm ARGS kvar arg)
+                (prinl ") };")))
+      (_   . (prinl " 0 }; /* Unsupported predicate " op " */")))))
 
 (def cc:op:num:two (ARGS TYPES kvar body)
   "Generate C code for binary numeric operations."
@@ -134,7 +140,8 @@
 
 (def cc:op:funcall (ARGS TYPES kvar args)
   "Generate C code for external function calls."
-  (let ((effargs  . (cc:arg:get args))
+  (let ((nvar     . (last args))
+        (effargs  . (cc:arg:get args))
         (genquot  . (\ (arg) (prog
                                (prin "lisp_cons(QUOTE, ") (cc:value:atm ARGS kvar arg) (prinl ");")
                                (when (= kvar arg) (cc:gen:x ARGS kvar arg))
@@ -153,7 +160,7 @@
         (gencall  . (\ (arg)
                       (prinl (o|) "_T = lisp_cons(" arg ", _S);")
                       (prinl (o|) "X(" arg", _S); _S = _T;")))
-        (type     . (assoc kvar TYPES)))
+        (type     . (assoc nvar TYPES)))
     (iter genargs effargs)
     (/**/ "Build the expression to evaluate.")
     (prinl (o|) "atom_t _S = UP(NIL), _T;")
@@ -187,9 +194,10 @@
   "Generate conversion from atom_t to value_t."
     (match type
       (NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
-      (ATOM   . (prinl (o|) "value_t " arg " = { .atom = UP(_" arg ") };"))
-      (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */")))
-    (prinl (o|) "X(_" arg ");"))
+      (ATOM   . (prog
+                  (prinl (o|) "value_t " arg " = { .atom = UP(_" arg ") };")
+                  (prinl (o|) "X(_" arg ");")))
+      (_      . (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))))
 
 (def cc:gen:x (ARGS kvar ref)
   "Generate X(REF)."

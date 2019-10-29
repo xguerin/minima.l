@@ -92,10 +92,13 @@
                     (and (assert:equal (+ pre 21) (test:slabdelta)))
                     ))))
   #
-  # FoldL.
+  # Folds.
   #
   ("foldl"  . (prog
-                (def _foldl (fun acc lst) (if (nil? lst) acc (_foldl fun (fun acc (car lst)) (cdr lst))))
+                (def _foldl (fun acc lst)
+                  (if (lst? lst)
+                    (if (nil? lst) acc (_foldl fun (fun acc (car lst)) (cdr lst)))
+                    (fun acc lst)))
                 (let ((res . (cc:build (cc:compile '_foldl)))
                       (bod . (|> _foldl cdr cdr cdr))
                       (pre . (test:slabdelta)))
@@ -105,6 +108,22 @@
                       (and (assert:equal 3 (_foldl (\ (acc _) (+ acc 1)) 0 '(1 2 3))))
                       (and (assert:equal 4 (_foldl (\ (acc _) (+ acc 1)) 0 '(1 2 3 4))))
                       (and (assert:equal 5 (_foldl (\ (acc _) (+ acc 1)) 0 '(1 2 3 4 5))))
+                      (and (assert:equal (+ pre 21) (test:slabdelta)))
+                      ))))
+  ("foldr"  . (prog
+                (def _foldr (fun lst acc)
+                  (if (lst? lst)
+                    (if (nil? lst) acc (fun (car lst) (_foldr fun (cdr lst) acc)))
+                    (fun lst acc)))
+                (let ((res . (cc:build (cc:compile '_foldr)))
+                      (bod . (|> _foldr cdr cdr cdr))
+                      (pre . (test:slabdelta)))
+                  (|> T
+                      (and (assert:equal '_foldr res))
+                      (and (assert:predicate 'num? bod))
+                      (and (assert:equal 3 (_foldr (\ (_ acc) (+ acc 1)) '(1 2 3) 0)))
+                      (and (assert:equal 4 (_foldr (\ (_ acc) (+ acc 1)) '(1 2 3 4) 0)))
+                      (and (assert:equal 5 (_foldr (\ (_ acc) (+ acc 1)) '(1 2 3 4 5) 0)))
                       (and (assert:equal (+ pre 21) (test:slabdelta)))
                       ))))
   #
