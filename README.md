@@ -20,7 +20,7 @@ Opinionated LISP dialect that takes some of its inspirations from [Picolisp](htt
 | [![Arch](https://builds.sr.ht/~xguerin/minima.l/arch.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/arch.yml?) | [![Debian](https://builds.sr.ht/~xguerin/minima.l/debian.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/debian.yml?) | [![OpenBSD](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml?) |
 
 ## License
-```
+```plain
 Copyright (c) 2018 Xavier R. Guérin <copyright@applepine.org>
 
 Permission to use, copy, modify, and distribute this software for any
