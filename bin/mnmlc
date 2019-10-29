@@ -1,0 +1,16 @@
+#!/usr/bin/env mnml
+
+(load "@lib/cc.l")
+
+(def usage ()
+  "Print out a usage string for this script."
+  (prinl "Usage: " (car (cdr ARGV)) " FILE.l"))
+
+(let ((fname . (car (cdr (cdr ARGV))))
+      (targt . (car (cdr (cdr (cdr ARGV)))))
+      (symb  . (load fname)))
+  (if symb
+    (= symb (cc:compile symb targt))
+    (usage)))
+
+# vim: ft=minimal:ts=2:sts=2:sw=2:et:tw=80
