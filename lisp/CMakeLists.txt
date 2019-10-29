@@ -21,7 +21,7 @@ macro(Transpile TAG SCRIPT TARGET)
   set(${TARGET} ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c)
 endmacro()
 
-set(SOURCES caar.l cadar.l cadr.l cdar.l foldl.l foldr.l)
+set(SOURCES caar.l cadar.l cadr.l cdar.l map.l foldl.l foldr.l)
 
 foreach(SOURCE ${SOURCES})
   get_filename_component(TAG ${SOURCE} NAME_WE)

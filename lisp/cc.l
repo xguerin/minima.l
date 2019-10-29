@@ -82,6 +82,16 @@
                 (prinl ") };")))
       (_   . (prinl " 0 }; /* Unsupported predicate " op " */")))))
 
+(def cc:op:num:one (ARGS TYPES kvar body)
+  "Generate C code for binary numeric operations."
+  (let (((op arg cont)  . body))
+    (prin (o|) "value_t R = { .number = ")
+    (match op
+      (not . (prin "!"))
+      (_   . (prin " /* Unsupported operation " op " */ ")))
+    (cc:value:num ARGS kvar arg)
+    (prinl " };")))
+
 (def cc:op:num:two (ARGS TYPES kvar body)
   "Generate C code for binary numeric operations."
   (let (((op arg1 arg2 cont)  . body))
@@ -97,8 +107,11 @@
       #
       # Special cases.
       #
-      (=  . (prin " == "))
-      (<> . (prin " != "))
+      (=   . (prin " == "))
+      (<>  . (prin " != "))
+      (and . (prin " && "))
+      (or  . (prin " || "))
+
       #
       # Unsupported cases.
       #
@@ -116,7 +129,7 @@
       (_   . (prin " /* Unsupported operation " op " */ ")))
     (cc:value:atm ARGS kvar arg)
     (prinl ") };")
-    (when (= kvar ref) (cc:gen:x ARGS kvar ref))))
+    (when (= kvar arg) (cc:gen:x ARGS kvar arg))))
 
 (def cc:op:lst:two (ARGS TYPES kvar body)
   "Generate C code for binary list operations."
@@ -124,12 +137,14 @@
     (prin (o|) "value_t R = { .atom = ")
     (match op
       (conc . (prin "lisp_conc("))
-      (cons . (prin "lisp_cdr("))
+      (cons . (prin "lisp_cons("))
       (_   .  (prin " /* Unsupported operation " op " */ ")))
     (cc:value:atm ARGS kvar arg0)
     (prin ", ")
     (cc:value:atm ARGS kvar arg1)
-    (prinl ") };")))
+    (prinl ") };")
+    (when (= kvar arg0) (cc:gen:x ARGS kvar arg0))
+    (when (= kvar arg1) (cc:gen:x ARGS kvar arg1))))
 
 (def cc:op:extcall (ARGS TYPES kvar (_ arg))
   "Generate C code for immediate KVAR funcall."
@@ -287,11 +302,17 @@
          (\ (acc e) (cons (cons (list e _ _) '(make last cc:op:predicate)) acc))
          NIL '(lst? nil?))
       #
+      # Unary operations.
+      #
+      ~(foldl
+         (\ (acc e) (cons (cons (list e _ _) '(make last cc:op:num:one)) acc))
+         NIL '(not))
+      #
       # Binary operations.
       #
       ~(foldl
          (\ (acc e) (cons (cons (list e _ _ _) '(make last cc:op:num:two)) acc))
-         NIL '(+ - * / = <> < <= > >=))
+         NIL '(+ - * / = <> < <= > >= and or))
       #
       # Unary list operations.
       #
@@ -544,7 +565,7 @@
         (flags . (list
                    "-shared" "-fPIC" "-fomit-frame-pointer"
                    "-I" incd "-L" libd "-L" srcd "-lminimal"
-                   "-o" oout cout)))
+                   "-g3" "-o" oout cout)))
     (if (= osname "Linux") ($+ flags '("-flto")) flags)))
 
 (def cc:build (SYMB . TARGET)

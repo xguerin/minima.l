@@ -127,4 +127,19 @@
                       (and (assert:equal (+ pre 21) (test:slabdelta)))
                       ))))
   #
+  ("map"  . (prog
+                (def _map (fun lst)
+                  (if (and (not (nil? lst)) (lst? lst))
+                    (cons (fun (car lst)) (_map fun (cdr lst)))
+                    lst))
+                (let ((res . (cc:build (cc:compile '_map)))
+                      (bod . (|> _map cdr cdr cdr))
+                      (pre . (test:slabdelta)))
+                  (|> T
+                      (and (assert:equal '_map res))
+                      (and (assert:equal '(2 3 4) (_map (\ (e) (+ e 1)) '(1 2 3))))
+                      (and (assert:equal '(0 1 2) (_map (\ (e) (- e 1)) '(1 2 3))))
+                      (and (assert:predicate 'num? bod))
+                      (and (assert:equal (+ pre 21) (test:slabdelta)))
+                      ))))
   )

@@ -138,109 +138,163 @@
     (rev (cons nvar (cdr (rev args))))
     args))
 
-(def cps:type:add (key type acc)
-  "Add TYPE to KEY in ACC."
-  (let ((value . (assoc key acc)))
-    (if value
-      (replc key (cons type value) acc)
-      (cons (cons key (cons type NIL)) acc))))
-
 (def cps:type:get (key acc)
   "Get the type of KEY in ACC."
   (cond key
     (nil? . 'ATOM)
     (num? . 'NUMBER)
     (str? . 'STRING)
-    (sym? .  (<|> (assoc key acc) 'ATOM))
+    (sym? .  (<|> (cps:type:fold1 (assoc key acc)) 'ATOM))
     (lst? . 'ATOM)
     ( _   . 'ATOM)))
 
-(def cps:type:scan (NAME ARGS CONT kvar body type alst)
-  "Scan references in BODY and mark them as TYPE in ALST."
-  (let (((_ . args) . body)
-        ((_ (nvar) next) . (last body)))
-    (foldl
-      (\ (acc e) (if (sym? e) (cps:type:add e type acc) acc))
-      (cps:type:findr NAME ARGS CONT nvar next alst)
-      (cps:replace nvar args))))
+(def cps:type:mark (key type acc)
+  "Add TYPE to KEY in ACC."
+  (if (sym? key)
+    (let ((value . (assoc key acc)))
+      (if value
+        (replc key (cons type value) acc)
+        (cons (cons key (cons type NIL)) acc)))
+    acc))
+
+(def cps:type:next (NAME ARGS CONT next type alst)
+  "Follow the next continuation and mark it as TYPE."
+  (if (sym? next)
+    (cps:type:mark next type alst)
+    (let (((_ (nvar) body) . next))
+      (|> alst
+          (cps:type:mark nvar type)
+          (cps:type:findr NAME ARGS CONT nvar body)
+          ))))
 
 (def cps:type:func (NAME ARGS symb params alst)
   "Check if SYMB is a function from ARGS."
   (if (and (has ARGS symb) (<> NAME symb))
-    (|> (foldl (\ (acc e) (cps:type:add e 'ATOM acc)) alst params)
-        (cps:type:add symb 'ATOM))
+    (cps:type:mark symb 'ATOM
+                   (foldl (\ (acc e) (cps:type:mark e 'ATOM acc)) alst params))
     alst))
 
 (def cps:type:findr (NAME ARGS CONT kvar body alst)
   "Compute the types involved in a funcall."
   (match body
     #
+    # Generate the comparators.
+    #
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ _ _)
+                          '(let (((_ arg0 arg1 next) . body))
+                             (|> alst
+                                 (cps:type:mark arg0 'UNDEF)
+                                 (cps:type:mark arg1 'UNDEF)
+                                 (cps:type:next NAME ARGS CONT next 'NUMBER)
+                                 )))
+                    acc))
+       NIL '(= <>))
+    #
+    # Generate the unary numeric operations.
+    #
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ _)
+                          '(let (((_ arg next) . body))
+                             (|> alst
+                                 (cps:type:mark arg 'NUMBER)
+                                 (cps:type:next NAME ARGS CONT next 'NUMBER)
+                                 )))
+                    acc))
+       NIL '(not))
+    #
     # Generate the binary numeric operations.
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:type:scan NAME ARGS CONT kvar body 'NUMBER alst)) acc))
-       NIL '(+ - * / = <> < <= > >=))
+                          '(let (((_ arg0 arg1 next) . body))
+                             (|> alst
+                                 (cps:type:mark arg0 'NUMBER)
+                                 (cps:type:mark arg1 'NUMBER)
+                                 (cps:type:next NAME ARGS CONT next 'NUMBER)
+                                 )))
+                    acc))
+       NIL '(+ - * / < <= > >= and or))
     #
     # Generate the list unary operations
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _)
-                          '(cps:type:scan NAME ARGS CONT kvar body 'ATOM alst)) acc))
+                          '(let (((_ arg next) . body))
+                             (|> alst
+                                 (cps:type:mark arg 'ATOM)
+                                 (cps:type:next NAME ARGS CONT next 'ATOM)
+                                 )))
+                    acc))
        NIL '(car cdr))
-    #
-    # Generate the list binary operations.
-    #
-    ~(foldl
-       (\ (acc e) (cons (cons (list e _ _ _)
-                          '(cps:type:scan NAME ARGS CONT kvar body 'ATOM alst)) acc))
-       NIL '(cons conc))
     #
     # Predicates.
     #
     ~(foldl
        (\ (acc e) (cons (cons (list e _ _)
-                          '(let (((_ arg lst) . body)
-                                 ((_ (nvar) next) . lst))
-                             (|> (cps:type:add arg 'ATOM alst)
-                                 (cps:type:add nvar 'NUMBER)
-                                 (cps:type:findr NAME ARGS CONT nvar next)))) acc))
+                          '(let (((_ arg next) . body))
+                             (|> alst
+                                 (cps:type:mark arg 'ATOM)
+                                 (cps:type:next NAME ARGS CONT next 'NUMBER)
+                                 )))
+                    acc))
        NIL '(lst? nil?))
+    #
+    # Generate the list binary operations.
+    #
+    ((conc _ _ _) . (let (((_ arg0 arg1 next) . body))
+                      (|> alst
+                          (cps:type:mark arg0 'ATOM)
+                          (cps:type:mark arg1 'ATOM)
+                          (cps:type:next NAME ARGS CONT next 'ATOM)
+                          )))
+    ((cons _ _ _) . (let (((_ arg0 arg1 next) . body))
+                      (|> alst
+                          (cps:type:mark arg0 'ATOM)
+                          (cps:type:mark arg1 'ATOM)
+                          (cps:type:next NAME ARGS CONT next 'ATOM)
+                          )))
     #
     # IF/THEN.
     #
     ((if _ _) . (let (((_ e thn) . body))
-                  (|> (cps:type:add e 'NUMBER alst)
+                  (|> alst
+                      (cps:type:mark e 'NUMBER)
                       (cps:type:findr NAME ARGS CONT kvar thn)
-                      (cps:type:add CONT 'ATOM))))
+                      (cps:type:mark CONT 'ATOM)
+                      )))
     #
     # IF/THEN/ELSE.
     #
     ((if _ _ _) . (let (((_ e thn els) . body))
-                    (|> (cps:type:add e 'NUMBER alst)
+                    (|> alst
+                        (cps:type:mark e 'NUMBER)
                         (cps:type:findr NAME ARGS CONT kvar thn)
-                        (cps:type:findr NAME ARGS CONT kvar els))))
+                        (cps:type:findr NAME ARGS CONT kvar els)
+                        )))
     #
     # KVAR funcall.
     #
     ((_ _) . (let (((var arg) . body)
-                   (atype . (assoc arg alst))
-                   (xtype . (assoc var alst)))
-               (if (|> xtype (and (not atype)))
-                 (cps:type:add arg (cps:type:fold1 xtype) alst)
-                 (if (|> atype (and (not xtype)))
-                   (cps:type:add var atype alst)
-                   (if (|> (not atype) (and (not xtype)))
-                     (|> (cps:type:add var 'UNDEF alst)
-                         (cps:type:add arg 'UNDEF))
-                     alst)))))
+                   (xtype     . (cps:type:fold1 (assoc var alst)))
+                   (atype     . (cps:type:get arg alst)))
+               (match (cons xtype atype)
+                 ((NIL . NIL) . (|> alst
+                                    (cps:type:mark var 'UNDEF)
+                                    (cps:type:mark arg 'UNDEF)
+                                    ))
+                 ((_   . NIL) . (cps:type:mark arg xtype alst))
+                 ((NIL . _  ) . (cps:type:mark var atype alst))
+                 (_           .  alst))))
     #
     # Generic method invocation case.
     #
-    ((_ . _)  . (let (((symb . args) . body)
+    ((_ . _)  . (let (((symb . args)   . body)
                       ((_ (nvar) next) . (last body)))
-                  (|> (cps:type:func NAME ARGS symb (cps:replace nvar args) alst)
-                      (cps:type:findr NAME ARGS CONT nvar next))))
+                  (|> alst
+                      (cps:type:func NAME ARGS symb (cps:replace nvar args))
+                      (cps:type:findr NAME ARGS CONT nvar next)
+                      )))
     #
     # Default case, return the association list.
     #
@@ -263,13 +317,16 @@
   "Resolve the type for KVAR if it does not have one."
   (match body
     ((if _ _)   . (let (((_ _ thn) . body))
-                    (cps:type:findl kvar thn
-                                    (cps:type:add kvar 'ATOM alst))))
+                    (|> alst
+                        (cps:type:mark kvar 'ATOM)
+                        (cps:type:findl kvar thn))))
     ((if _ _ _) . (let (((_ _ thn els) . body))
-                    (cps:type:findl kvar els (cps:type:findl kvar thn alst))))
+                    (|> alst
+                        (cps:type:findl kvar thn)
+                        (cps:type:findl kvar els))))
     ((_ _)      . (let (((op arg) . body)
-                        (atype . (cps:type:fold1 (cps:type:get arg alst))))
-                    (cps:type:add kvar atype alst)))
+                        (atype    . (cps:type:get arg alst)))
+                    (cps:type:mark kvar atype alst)))
     ((_ . _)    . (let (((_ _ next) . (last body)))
                     (cps:type:findl kvar next alst)))
     (_ . alst)))

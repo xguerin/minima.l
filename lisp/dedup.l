@@ -1,3 +1,4 @@
+(load "foldr.l")
 #
 # The comparator is expected to return a pair (CMD . VAL) where CMD is:
 # * APPEND: append VAL to the accumulator
