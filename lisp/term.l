@@ -1,5 +1,4 @@
-(load "append.l")
-(load "iter.l")
+(load "append.l" "iter.l" "len.l" "rep.l" "truncl.l" "truncr.l")
 
 #
 # Escape STR with CODE.
@@ -46,3 +45,20 @@
      ("cyan+"   . "1;36")
      ("white"   . "1;37")
      ))
+
+#
+# Padding operations.
+#
+(def term:left (WLEN STR)
+  "Pad STR to the left using WLEN length."
+  (let ((delta . (- WLEN (len STR))))
+    (if (>= delta 0)
+      ($+ STR (rep delta ^ ))
+      (truncl WLEN STR))))
+
+(def term:right (WLEN STR)
+  "Pad STR to the right using WLEN length."
+  (let ((delta . (- WLEN (len STR))))
+    (if (>= delta 0)
+      ($+ (rep delta ^ ) STR)
+      (truncr WLEN STR))))

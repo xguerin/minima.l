@@ -1,14 +1,19 @@
-(load "../../lisp/foldl.l" "../../lisp/term.l" 'slabinfo)
+(load "../../lisp/foldl.l" "../../lisp/len.l" "../../lisp/term.l" 'slabinfo)
 
 (def test:run (SUITE . TESTS)
   "Run all tests specified as a ((NAME . TEST)) list."
   (prinl (term:bold "[") (term:bold SUITE) (term:bold "]"))
-  (foldl (\ (acc (name . test))
-           (and acc
-             (cond (eval test)
-               (tru?  . (prog (prinl "✓ " name ": " (term:green "passed")) T))
-               (_     . (prog (prinl "! " name ": " (term:red "failed")) NIL)))))
-    T TESTS))
+  (let ((pad . (foldl (\ (acc (name . _))
+                        (let ((nlen . (len name)))
+                          (if (> nlen acc) nlen acc)))
+                 0 TESTS))
+        (|<- . (term:left pad)))
+    (foldl (\ (acc (name . test))
+             (and acc
+               (cond (eval test)
+                 (tru?  . (prog (prinl "✓ " (|<- name) ": " (term:green "passed")) T))
+                 (_     . (prog (prinl "! " (|<- name) ": " (term:red "failed")) NIL)))))
+      T TESTS)))
 
 (def test:slabdelta ()
   "Return the slab allocator position."
