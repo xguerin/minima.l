@@ -273,8 +273,8 @@
       (/**/ "Clean-up the closure.")
       (prinl (o|) "lisp_closure_put(&cache, C);"))))
 
-(def cc:gen:blockitem (NAME ARGS REFS TYPES CONT kvar body succ op)
-  "Common generation routing for block items."
+(def cc:gen:block-any (NAME ARGS REFS TYPES CONT kvar body succ op)
+  "Common generation routing for block items of any form."
   (let ((next . (succ body)))
     (/**/ "Build the closure.")
     (cc:gen:closure CONT next)
@@ -291,67 +291,91 @@
         (prinl "_C, _K);"))
       (prinl (o|) "return _K(E, _C, R);"))))
 
+(def cc:gen:block-ite (NAME ARGS REFS TYPES CONT kvar body then else)
+  "Common generation routing for ITE block items."
+  (let (((op _ thn els) . body)
+        (neg . (= op 'unless)))
+    (prinl (o|) "if (" (when neg "!") "V.number) {")
+    (o>)
+    (then NAME ARGS REFS TYPES CONT kvar thn)
+    (<o)
+    (prinl (o|) "} else {")
+    (o>)
+    (else NAME ARGS REFS TYPES CONT kvar els)
+    (<o)
+    (prinl (o|) "}")))
+
+(def cc:gen:default (NAME ARGS REFS TYPES CONT kvar body)
+  "Generate KVAR call with NIL."
+  (/**/ "Build the closure.")
+  (cc:gen:closure CONT CONT)
+  (/**/ "Collect the arguments.")
+  (prinl (o|) "value_t R = { .atom = UP(NIL) };")
+  (/**/ "Build the continuation.")
+  (cc:gen:callback NAME REFS CONT CONT)
+  (cc:gen:cleanup ARGS REFS TYPES CONT kvar CONT)
+  (/**/ "Call the continuation.")
+  (prinl (o|) "return _K(E, _C, R);"))
+
 (def cc:gen:block (NAME ARGS REFS TYPES CONT kvar body)
   "Generate the basic block for BODY."
-  (let ((make . (cc:gen:blockitem NAME ARGS REFS TYPES CONT kvar body)))
+  (let ((make-any . (cc:gen:block-any NAME ARGS REFS TYPES CONT kvar body))
+        (make-ite . (cc:gen:block-ite NAME ARGS REFS TYPES CONT kvar body)))
     (match body
       #
       # Predicate operations.
       #
       ~(foldl
-         (\ (acc e) (cons (cons (list e _ _) '(make last cc:op:predicate)) acc))
+         (\ (acc e) (cons (cons (list e _ _) '(make-any last cc:op:predicate)) acc))
          NIL '(lst? nil?))
       #
       # Unary operations.
       #
       ~(foldl
-         (\ (acc e) (cons (cons (list e _ _) '(make last cc:op:num:one)) acc))
+         (\ (acc e) (cons (cons (list e _ _) '(make-any last cc:op:num:one)) acc))
          NIL '(not))
       #
       # Binary operations.
       #
       ~(foldl
-         (\ (acc e) (cons (cons (list e _ _ _) '(make last cc:op:num:two)) acc))
+         (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:num:two)) acc))
          NIL '(+ - * / = <> < <= > >= and or))
       #
       # Unary list operations.
       #
       ~(foldl
-         (\ (acc e) (cons (cons (list e _ _) '(make last cc:op:lst:one)) acc))
+         (\ (acc e) (cons (cons (list e _ _) '(make-any last cc:op:lst:one)) acc))
          NIL '(car cdr))
       #
       # Binary list operations.
       #
       ~(foldl
-         (\ (acc e) (cons (cons (list e _ _ _) '(make last cc:op:lst:two)) acc))
+         (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:lst:two)) acc))
          NIL '(conc cons))
       #
       # Quote operation.
       #
       ((quote . _) . ((prinl (o|) "abort(); /* " body " */")))
       #
-      # IF/THEN/ELSE
+      # IF/THEN, UNLESS, WHEN.
       #
-      ((if _ _ _) . (let (((_ _ then else) . body))
-                      (prinl (o|) "if (V.number) {")
-                      (o>)
-                      (cc:gen:block NAME ARGS REFS TYPES CONT kvar then)
-                      (<o)
-                      (prinl (o|) "} else {")
-                      (o>)
-                      (cc:gen:block NAME ARGS REFS TYPES CONT kvar else)
-                      (<o)
-                      (prinl (o|) "}")))
+      ~(foldl
+         (\ (acc e) (cons (cons (list e _ _) '(make-ite cc:gen:block cc:gen:default)) acc))
+         NIL '(if unless when))
+      #
+      # IF/THEN/ELSE.
+      #
+      ((if _ _ _) . (make-ite cc:gen:block cc:gen:block))
       #
       # KVAR funcall.
       #
-      ((_ _) . (make car cc:op:extcall))
+      ((_ _) . (make-any car cc:op:extcall))
       #
       # Recursive behavior
       #
       ((_ . _) . (if (= NAME (car body))
-                   (make last cc:op:reccall)
-                   (make last cc:op:funcall)))
+                   (make-any last cc:op:reccall)
+                   (make-any last cc:op:funcall)))
       #
       # Unknown behavior.
       #
@@ -403,7 +427,11 @@
     #
     # IF/THEN/ELSE
     #
-    ((if _ . _) . (cc:gen:cont-ite NAME ARGS REFS TYPES CONT kvar fun))
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ . _)
+                          '(cc:gen:cont-ite NAME ARGS REFS TYPES CONT kvar fun))
+                    acc))
+       NIL '(if unless when))
     #
     # Default behavior.
     #

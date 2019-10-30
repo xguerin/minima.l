@@ -50,7 +50,46 @@
                     (and (assert:equal (+ pre 21) (test:slabdelta)))
                     ))))
   #
-  # IF/THEN/ELSE
+  # IF/THEN.
+  #
+  ("ith"  . (prog
+              (def _ith (a) (if (not (nil? a)) (cdr a)))
+              (let ((res . (cc:build (cc:compile '_ith)))
+                    (bod . (|> _ith cdr cdr cdr))
+                    (pre . (test:slabdelta)))
+                (|> T
+                    (and (assert:equal '_ith res))
+                    (and (assert:predicate 'num? bod))
+                    (and (assert:equal NIL (_ith NIL)))
+                    (and (assert:equal '(2) (_ith '(1 2))))
+                    (and (assert:equal (+ pre 21) (test:slabdelta)))
+                    ))))
+  ("unless" . (prog
+                (def _unless (a) (unless (nil? a) (cdr a)))
+                (let ((res . (cc:build (cc:compile '_unless)))
+                      (bod . (|> _unless cdr cdr cdr))
+                      (pre . (test:slabdelta)))
+                  (|> T
+                      (and (assert:equal '_unless res))
+                      (and (assert:predicate 'num? bod))
+                      (and (assert:equal NIL (_unless NIL)))
+                      (and (assert:equal '(2) (_unless '(1 2))))
+                      (and (assert:equal (+ pre 21) (test:slabdelta)))
+                      ))))
+  ("when" . (prog
+              (def _when (a) (if (not (nil? a)) (cdr a)))
+              (let ((res . (cc:build (cc:compile '_when)))
+                    (bod . (|> _when cdr cdr cdr))
+                    (pre . (test:slabdelta)))
+                (|> T
+                    (and (assert:equal '_when res))
+                    (and (assert:predicate 'num? bod))
+                    (and (assert:equal NIL (_when NIL)))
+                    (and (assert:equal '(2) (_when '(1 2))))
+                    (and (assert:equal (+ pre 21) (test:slabdelta)))
+                    ))))
+  #
+  # IF/THEN/ELSE.
   #
   ("ite"  . (prog
               (def _ite (a b) (if (< a b) a b))

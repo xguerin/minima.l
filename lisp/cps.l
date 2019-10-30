@@ -30,10 +30,10 @@
 #
 (def cps:lift-ith (kvar counter body)
   "Lift IF-BODY arguments into lambdas; use KVAR as external continuation."
-  (let (((_ stmt then)           . body)
+  (let (((op stmt then)          . body)
         ((then:next . then:body) . (cps:lift kvar counter then))
         (nbody                   . (list then:body))
-        ((stmt:next . stmt:body) . (cps:lift nbody then:next (list 'if stmt))))
+        ((stmt:next . stmt:body) . (cps:lift nbody then:next (list op stmt))))
     (cons stmt:next stmt:body)))
 
 (def cps:lift-ite (kvar counter body)
@@ -69,9 +69,16 @@
   (cond body
     (lst? . (match body
               #
-              # Control forms,
+              # IF/THEN forms,
               #
-              ((if _ _  ) . (cps:lift-ith kvar counter body))
+              ~(foldl
+                 (\ (acc e) (cons (cons (list e _ _)
+                                    '(cps:lift-ith kvar counter body))
+                              acc))
+                 NIL '(if unless when))
+              #
+              # IF/THEN/ELSE form.
+              #
               ((if _ _ _) . (cps:lift-ite kvar counter body))
               #
               # Generic form.
@@ -111,15 +118,35 @@
           acc))
       acc params)))
 
+(def cps:getrefs-any (ARGS kvar fun acc)
+  "Recursively collect placeholder reference count in any CPS form."
+  (let (((_ args body) . (last fun))
+        (nvar          . (last args)))
+    (cps:getrefs ARGS kvar (cps:refcount_r ARGS nvar body acc) fun)))
+
+(def cps:getrefs-ite (ARGS kvar fun acc)
+  "Recursively collect placeholder reference count in a CPS ITE form."
+  (let (((_ _ . ops) . fun))
+    (cps:getrefs ARGS kvar
+                 (foldr (\ (e acm) (cps:refcount_r ARGS kvar e acm)) ops acc)
+                 fun)))
+
 (def cps:refcount_r (ARGS kvar fun acc)
   "Recursively collect placeholder reference count in a CPS funcall FUN."
   (match fun
-    ((if _ . _) . (let (((_ _ . ops) . fun)
-                        (red . (\ (e acm) (cps:refcount_r ARGS kvar e acm))))
-                    (cps:getrefs ARGS kvar (foldr red ops acc) fun)))
-    ((_ . _) . (let (((_ args body) . (last fun))
-                     (nvar . (last args)))
-                 (cps:getrefs ARGS kvar (cps:refcount_r ARGS nvar body acc) fun)))
+    #
+    # Control forms
+    #
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ . _) '(cps:getrefs-ite ARGS kvar fun acc)) acc))
+       NIL '(if unless when))
+    #
+    # Any forms.
+    #
+    ((_ . _) . (cps:getrefs-any ARGS kvar fun acc))
+    #
+    # Default.
+    #
     (_ . acc)))
 
 (def cps:refcount ((ARGS _ _ body))
@@ -255,14 +282,18 @@
                           (cps:type:next NAME ARGS CONT next 'ATOM)
                           )))
     #
-    # IF/THEN.
+    # IF/THEN, UNLESS, WHEN.
     #
-    ((if _ _) . (let (((_ e thn) . body))
-                  (|> alst
-                      (cps:type:mark e 'NUMBER)
-                      (cps:type:findr NAME ARGS CONT kvar thn)
-                      (cps:type:mark CONT 'ATOM)
-                      )))
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ _)
+                          '(let (((_ e thn) . body))
+                             (|> alst
+                                 (cps:type:mark e 'NUMBER)
+                                 (cps:type:findr NAME ARGS CONT kvar thn)
+                                 (cps:type:mark CONT 'ATOM)
+                                 )))
+                    acc))
+       NIL '(if unless when))
     #
     # IF/THEN/ELSE.
     #
@@ -316,19 +347,40 @@
 (def cps:type:findl (kvar body alst)
   "Resolve the type for KVAR if it does not have one."
   (match body
-    ((if _ _)   . (let (((_ _ thn) . body))
-                    (|> alst
-                        (cps:type:mark kvar 'ATOM)
-                        (cps:type:findl kvar thn))))
+    #
+    # IF/THEN, UNLESS, WHEN.
+    #
+    ~(foldl
+       (\ (acc e) (cons (cons (list e _ _)
+                          '(let (((_ _ thn) . body))
+                             (|> alst
+                                 (cps:type:mark kvar 'ATOM)
+                                 (cps:type:findl kvar thn)
+                                 )))
+                    acc))
+       NIL '(if unless when))
+    #
+    # IF/THEN/ELSE.
+    #
     ((if _ _ _) . (let (((_ _ thn els) . body))
                     (|> alst
                         (cps:type:findl kvar thn)
-                        (cps:type:findl kvar els))))
-    ((_ _)      . (let (((op arg) . body)
-                        (atype    . (cps:type:get arg alst)))
-                    (cps:type:mark kvar atype alst)))
-    ((_ . _)    . (let (((_ _ next) . (last body)))
-                    (cps:type:findl kvar next alst)))
+                        (cps:type:findl kvar els)
+                        )))
+    #
+    # KVAR.
+    #
+    ((_ _)  . (let (((op arg) . body)
+                    (atype    . (cps:type:get arg alst)))
+                (cps:type:mark kvar atype alst)))
+    #
+    # Other.
+    #
+    ((_ . _)  . (let (((_ _ next) . (last body)))
+                  (cps:type:findl kvar next alst)))
+    #
+    # Default.
+    #
     (_ . alst)))
 
 (def cps:infer (name (args _ _ body))
@@ -340,4 +392,5 @@
     (|> NIL
         (cps:type:findr name args kvar kvar body)
         (cps:type:findl kvar body)
-        cps:type:fold)))
+        cps:type:fold
+        )))
