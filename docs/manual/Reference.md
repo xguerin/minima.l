@@ -117,6 +117,8 @@
 | `if`        | `(if 'any then [else])`       | ✓      | [If](#if) construct |
 | `match`     | `(match 'any ...)`            | ✓      | [Structural](#match) matching |
 | `prog`      | `(prog any0 [any1] ...)`      | ✓      | [Sequential](#prog) composition |
+| `unless`    | `(unless 'any . prg)`         | ✓      | Execute `prg` unless `any` is not `NIL` |
+| `when`      | `(when 'any . prg)`           | ✓      | Execute `prg` if `any` is not `NIL` |
 
 #### Input/output operations
 

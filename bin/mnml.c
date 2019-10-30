@@ -260,7 +260,7 @@ lisp_preload()
             /* STRING AND CHARACTER */
             "chr", "str",
             /* CONTROL */
-            "|>", "cond", "if", "match", "prog",
+            "|>", "cond", "if", "match", "prog", "unless", "when",
             /* PREDICATES */
             "chr?", "lst?", "nil?", "num?", "str?", "sym?", "tru?",
             /* I/O */
@@ -268,8 +268,7 @@ lisp_preload()
             /* PRINTERS */
             "prin", "prinl", "print", "printl",
             /* MISC */
-            "eval", "load", "quit", "quote", "time"
-              );
+            "eval", "load", "quit", "quote", "time");
   }
   /*
    * Scan the PRELOAD list and load the symbols it contains.

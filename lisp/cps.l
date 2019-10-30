@@ -1,6 +1,6 @@
 (load
   "append.l" "assoc.l" "foldl.l" "foldr.l" "has.l" "last.l" "len.l" "ntoa.l"
-  "orelse.l" "replc.l" "rev.l" "when.l")
+  "orelse.l" "replc.l" "rev.l")
 
 #
 # Make a symbol placeholder
