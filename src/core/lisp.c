@@ -48,7 +48,6 @@ lisp_lookup_immediate(const atom_t closure, const symbol_t sym)
 atom_t
 lisp_lookup(const atom_t closure, const atom_t sym)
 {
-  TRACE_SEXP(closure);
   /*
    * Default condition, check the global environemnt.
    */
@@ -378,34 +377,6 @@ lisp_bind_args(const atom_t closure, const atom_t env, const atom_t args,
  * Lambda evaluation.
  */
 
-#define VALID_ARGUMENTS(__a)  (IS_NULL(__a) || IS_PAIR(__a) || IS_SYMB(__a))
-#define VALID_CLOSURE(__a)    (IS_NULL(__a) || IS_PAIR(__a))
-#define VALID_CURYLIST(__a)   (IS_NULL(__a) || IS_PAIR(__a))
-
-static bool
-lisp_is_func(const atom_t cell)
-{
-  /*
-   * Make sure cell is a list.
-   */
-  if (!IS_PAIR(cell)) {
-    return false;
-  }
-  /*
-   * Check if the format is correct: (LST LST LST LST).
-   */
-  if (CDR(cell) == NIL || CDR(CDR(cell)) == NIL || CDR(CDR(CDR(cell))) == NIL) {
-    return false;
-  }
-  /*
-   * Grab the arguments and the closure, and check if they are valid.
-   */
-  atom_t args = CAR(cell);
-  atom_t clos = CAR(CDR(cell));
-  atom_t clst = CAR(CDR(CDR(cell)));
-  return VALID_ARGUMENTS(args) && VALID_CLOSURE(clos) && VALID_CURYLIST(clst);
-}
-
 /*
  * NOTE(xrg) Function evaluation rely on a closure stack. Each new context is
  * pushed on the stack before the evaluation of the function.
@@ -496,7 +467,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
   /*
    * Handle the case when CAR is a function.
    */
-  if (lisp_is_func(CAR(cell))) {
+  if (IS_FUNC(CAR(cell))) {
     rslt = lisp_eval_func(closure, cell, &rem);
   }
   /*

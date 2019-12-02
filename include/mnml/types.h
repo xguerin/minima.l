@@ -75,7 +75,21 @@ __attribute__((packed)) * atom_t;
 #define IS_NUMB(__a) ((__a)->type == T_NUMBER)
 #define IS_PAIR(__a) ((__a)->type == T_PAIR)
 #define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
-#define IS_ATOM(__a) (!IS_PAIR(__a) && !IS_NULL(__a))
+
+#define IS_LIST(__a) (IS_PAIR(__a) || IS_NULL(__a))
+#define IS_ATOM(__a) (!IS_LIST(__a))
+
+/*
+ * A function has the following format:
+ * (ARGS CLOSURE CURY BODY)
+ */
+
+#define IS_FUNC(__a)                                                                \
+  (IS_PAIR(__a) &&                                                                  \
+   !IS_NULL(CDR(__a)) && !IS_NULL(CDR(CDR(__a))) && !IS_NULL(CDR(CDR(CDR(__a)))) && \
+   (IS_LIST(CAR(__a)) || IS_SYMB(CAR(__a))) &&                                      \
+   IS_LIST(CAR(CDR(__a))) &&                                                        \
+   IS_LIST(CAR(CDR(CDR(__a)))))
 
 typedef atom_t (* function_t)(const atom_t closure, const atom_t arguments);
 
