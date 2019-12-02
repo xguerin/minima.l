@@ -43,7 +43,6 @@ lisp_debug_parse_flags()
   }
 }
 
-
 /*
  * Debug function.
  */

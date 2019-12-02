@@ -386,6 +386,12 @@ static bool
 lisp_is_func(const atom_t cell)
 {
   /*
+   * Make sure cell is a list.
+   */
+  if (!IS_PAIR(cell)) {
+    return false;
+  }
+  /*
    * Check if the format is correct: (LST LST LST LST).
    */
   if (CDR(cell) == NIL || CDR(CDR(cell)) == NIL || CDR(CDR(CDR(cell))) == NIL) {
@@ -490,7 +496,7 @@ lisp_eval_pair(const atom_t closure, const atom_t cell)
   /*
    * Handle the case when CAR is a function.
    */
-  if (IS_PAIR(CAR(cell)) && lisp_is_func(CAR(cell))) {
+  if (lisp_is_func(CAR(cell))) {
     rslt = lisp_eval_func(closure, cell, &rem);
   }
   /*
