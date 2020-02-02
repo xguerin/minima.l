@@ -21,7 +21,7 @@ Opinionated LISP dialect that takes some of its inspirations from [Picolisp](htt
 
 ## License
 ```plain
-Copyright (c) 2018 Xavier R. Guérin <copyright@applepine.org>
+Copyright (c) 2020 Xavier R. Guérin <copyright@applepine.org>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above

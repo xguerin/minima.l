@@ -90,7 +90,7 @@ def GetCompilationInfoForFile( filename ):
   return database.GetCompilationInfoForFile( filename )
 
 
-def FlagsForFile( filename, **kwargs ):
+def Settings( filename, **kwargs ):
   if not database:
     return {
       'flags': flags,
