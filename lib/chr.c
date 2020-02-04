@@ -12,6 +12,6 @@ lisp_function_chr(const atom_t closure, const atom_t arguments)
   return lisp_make_char(val);
 }
 
-LISP_PLUGIN_REGISTER(chr, chr, X)
+LISP_PLUGIN_REGISTER(chr, chr, X, NIL)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

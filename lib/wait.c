@@ -30,6 +30,6 @@ lisp_function_wait(const atom_t closure, const atom_t arguments)
   return res;
 }
 
-LISP_PLUGIN_REGISTER(wait, wait, X)
+LISP_PLUGIN_REGISTER(wait, wait, X, NIL)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

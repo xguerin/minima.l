@@ -13,6 +13,6 @@ lisp_function_str(const atom_t closure, const atom_t arguments)
   return lisp_make_string(buffer, strlen(buffer));
 }
 
-LISP_PLUGIN_REGISTER(str, str, X)
+LISP_PLUGIN_REGISTER(str, str, X, NIL)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

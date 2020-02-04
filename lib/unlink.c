@@ -27,6 +27,6 @@ lisp_function_unlink(const atom_t closure, const atom_t arguments)
   return unlink(name_buf) == 0 ? UP(TRUE) : UP(NIL);
 }
 
-LISP_PLUGIN_REGISTER(unlink, unlink, NAME)
+LISP_PLUGIN_REGISTER(unlink, unlink, NAME, NIL)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

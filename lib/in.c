@@ -15,10 +15,10 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
   char path_buf[PATH_MAX];
   char dirn_buf[PATH_MAX];
   /*
-   * Get CHAN and PROG.
+   * Get CHAN and REM.
    */
   LISP_LOOKUP(chan, arguments, CHAN);
-  LISP_LOOKUP(prog, arguments, PROG);
+  LISP_LOOKUP(prog, arguments, REM);
   /*
    * Get the working directory for the current ICHAN.
    */
@@ -93,6 +93,6 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
   return res;
 }
 
-LISP_PLUGIN_REGISTER(in, in, CHAN, PROG)
+LISP_PLUGIN_REGISTER(in, in, CHAN, REM)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

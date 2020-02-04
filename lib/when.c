@@ -6,9 +6,9 @@ static atom_t
 lisp_function_when(const atom_t closure, const atom_t arguments)
 {
   LISP_LOOKUP(cnd, arguments, COND);
-  LISP_LOOKUP(prg, arguments, PROG);
+  LISP_LOOKUP(prg, arguments, REM);
   /*
-   * Evaluate PROG branch if TRUE.
+   * Evaluate REM branch if TRUE.
    */
   if (likely(!IS_NULL(cnd))) {
     X(cnd);
@@ -21,6 +21,6 @@ lisp_function_when(const atom_t closure, const atom_t arguments)
   return UP(NIL);
 }
 
-LISP_PLUGIN_REGISTER(when, when, COND, PROG)
+LISP_PLUGIN_REGISTER(when, when, COND, REM)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

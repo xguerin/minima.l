@@ -6,7 +6,7 @@ static atom_t
 lisp_function_if(const atom_t closure, const atom_t arguments)
 {
   LISP_LOOKUP(cnd, arguments, COND);
-  LISP_LOOKUP(ops, arguments, PROG);
+  LISP_LOOKUP(ops, arguments, REM);
   /*
    * Evaluate the THEN branch if TRUE.
    */
@@ -26,6 +26,6 @@ lisp_function_if(const atom_t closure, const atom_t arguments)
   }
 }
 
-LISP_PLUGIN_REGISTER(if, if, COND, PROG)
+LISP_PLUGIN_REGISTER(if, if, COND, REM)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et
