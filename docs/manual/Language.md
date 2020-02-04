@@ -76,6 +76,14 @@ for currying. Lastly, the `BODY` element is the expression of the function. When
 defined through plugins, the body may also be a number representing the memory
 address of the native implementation of the function.
 
+### Bindings
+
+The `BINDINGS` list may be one of these form:
+
+* `NIL` or `()`: the function takes no argument
+* `SYMBOL`: the unevaluated list of arguments is associated with `SYMBOL`
+* `LIST`: arguments are evaluated and assigned to the symbols in `LIST`
+
 ### Lambdas
 
 Lambda functions are defined using the `\\` keyword. Invocation of `\\` is

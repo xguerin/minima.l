@@ -114,15 +114,14 @@ LISP_PLUGIN_REGISTER(add, add, X, Y, NIL)
 
 The argument symbols are defined as follows:
 
-| C version                                 | Minima.l equivalent     |
-|:------------------------------------------|:------------------------|
-| `LISP_PLUGIN_REGISTER(fun, fun)`            | `(def fun () ...)`        |
-| `LISP_PLUGIN_REGISTER(fun, fun, @)`         | `(def fun @ ...)`         |
-| `LISP_PLUGIN_REGISTER(fun, fun, A)`         | `(def fun (A) ...)`       |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, NIL)`    | `(def fun (A) ...)`       |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, B)`      | `(def fun (A . B) ...)`   |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, B, NIL)` | `(def fun (A B) ...)`     |
-| `LISP_PLUGIN_REGISTER(fun, fun, A, B, C)`   | `(def fun (A B . C) ...)` |
+| C version                                 | Minima.l equivalent       |
+|:------------------------------------------|:--------------------------| 
+| `LISP_PLUGIN_REGISTER(fun, fun)`            | `(def fun () ...)`          |
+| `LISP_PLUGIN_REGISTER(fun, fun, A)`         | `(def fun A ...)`           |
+| `LISP_PLUGIN_REGISTER(fun, fun, A, NIL)`    | `(def fun (A) ...)`         |
+| `LISP_PLUGIN_REGISTER(fun, fun, A, REM)`    | `(def fun (A . REM) ... )`  |
+| `LISP_PLUGIN_REGISTER(fun, fun, A, B, NIL)` | `(def fun (A B) ...)`       |
+| `LISP_PLUGIN_REGISTER(fun, fun, A, B, REM)` | `(def fun (A B . REM) ...)` |
 
 Values for the declared symbols are passed to the plugin by the interpreter
 through the `arguments` parameter. They can be retrieved using the `LISP_LOOKUP`
