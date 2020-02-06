@@ -11,7 +11,8 @@ lisp_set(const lisp_t lisp, const atom_t closure, const atom_t sym,
    * Default condition, check the global environemnt.
    */
   if (IS_NULL(closure)) {
-    FOREACH(lisp->GLOBALS, g) {
+    FOREACH(lisp->GLOBALS, g)
+    {
       atom_t car = g->car;
       if (lisp_symbol_match(CAR(car), sym)) {
         X(CDR(car));
@@ -30,7 +31,8 @@ lisp_set(const lisp_t lisp, const atom_t closure, const atom_t sym,
   /*
    * Look for the symbol up the closure stack.
    */
-  FOREACH(CAR(closure), a) {
+  FOREACH(CAR(closure), a)
+  {
     atom_t car = a->car;
     if (lisp_symbol_match(CAR(car), sym)) {
       X(CDR(car));
@@ -64,6 +66,8 @@ lisp_function_set(const lisp_t lisp, const atom_t closure,
   return lisp_set(lisp, closure, sym, val);
 }
 
+/* clang-format off */
 LISP_PLUGIN_REGISTER(set, <-, @)
+/* clang-format */
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

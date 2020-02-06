@@ -18,14 +18,16 @@
 error_handler_t lisp_parse_error_handler = NULL;
 error_handler_t lisp_syntax_error_handler = NULL;
 
-void parse_error()
+void
+parse_error()
 {
   if (lisp_parse_error_handler != NULL) {
     lisp_parse_error_handler();
   }
 }
 
-void syntax_error()
+void
+syntax_error()
 {
   if (lisp_syntax_error_handler != NULL) {
     lisp_syntax_error_handler();
@@ -48,7 +50,7 @@ lisp_set_syntax_error_handler(const error_handler_t h)
   lisp_syntax_error_handler = h;
 }
 
-const char *
+const char*
 lisp_prefix()
 {
   static bool is_set = false;
@@ -64,7 +66,7 @@ lisp_prefix()
 #else
     strcpy(buffer, libInfo.dli_fname);
 #endif
-    const char * dname = dirname(dirname(buffer));
+    const char* dname = dirname(dirname(buffer));
     strcpy(prefix, dname);
     is_set = true;
   }
@@ -232,8 +234,8 @@ lisp_is_string(const atom_t cell)
  */
 
 size_t
-lisp_make_cstring(const atom_t cell, char * const buffer,
-                  const size_t len, const size_t idx)
+lisp_make_cstring(const atom_t cell, char* const buffer, const size_t len,
+                  const size_t idx)
 {
   /*
    * Terminate the string.
@@ -275,11 +277,11 @@ lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
    */
   if (esc) {
     switch ((char)car->number) {
-      case 'n' :
+      case 'n':
         X(car);
         car = lisp_make_char('\n');
         break;
-      case 't' :
+      case 't':
         X(car);
         car = lisp_make_char('\t');
         break;
@@ -288,13 +290,11 @@ lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
     }
     nxt = lisp_append(res, car);
     nesc = false;
-  }
-  else if (car->number == '\\') {
+  } else if (car->number == '\\') {
     X(car);
     nesc = true;
     nxt = res;
-  }
-  else {
+  } else {
     nxt = lisp_append(res, car);
   }
   /*
@@ -318,8 +318,8 @@ lisp_timestamp()
   return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 
-const char *
-lisp_get_fullpath(const char * const filepath, char * const buffer)
+const char*
+lisp_get_fullpath(const char* const filepath, char* const buffer)
 {
   char expn_buf[PATH_MAX];
   char absl_buf[PATH_MAX];
@@ -353,7 +353,7 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
   /*
    * Get the fullpath.
    */
-  const char * path = realpath(absl_buf, buffer);
+  const char* path = realpath(absl_buf, buffer);
   if (path != NULL) {
     return path;
   }
@@ -361,8 +361,8 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
    * If the last entry does not exist yet, realpath is going to fail.
    * So we remove it and try to resolve the directory path.
    */
-  char * last = absl_buf, * p;
-  while((p = strstr(last, "/"))) {
+  char *last = absl_buf, *p;
+  while ((p = strstr(last, "/"))) {
     last = p + 1;
   }
   *(last - 1) = '\0';
@@ -380,7 +380,7 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
 }
 
 atom_t
-lisp_load_file(const lisp_t lisp, const char * const filepath)
+lisp_load_file(const lisp_t lisp, const char* const filepath)
 {
   char path_buf[PATH_MAX];
   char dirn_buf[PATH_MAX];
@@ -388,7 +388,7 @@ lisp_load_file(const lisp_t lisp, const char * const filepath)
   /*
    * Get the fullpath for the file.
    */
-  const char * path = lisp_get_fullpath(filepath, path_buf);
+  const char* path = lisp_get_fullpath(filepath, path_buf);
   if (path == NULL) {
     ERROR("Cannot get the full path for %s", filepath);
     return UP(NIL);
@@ -397,7 +397,7 @@ lisp_load_file(const lisp_t lisp, const char * const filepath)
    * Grab the directory of the file.
    */
   strcpy(dirn_buf, path);
-  const char * dir = dirname(dirn_buf);
+  const char* dir = dirname(dirn_buf);
   if (dir == NULL) {
     ERROR("Cannot get directory for %s", path);
     return UP(NIL);
@@ -405,7 +405,7 @@ lisp_load_file(const lisp_t lisp, const char * const filepath)
   /*
    * Get the current working directory.
    */
-  const char * const cwd = getcwd(curd_buf, PATH_MAX);
+  const char* const cwd = getcwd(curd_buf, PATH_MAX);
   if (cwd == NULL) {
     ERROR("Cannot get CWD for %s", path);
     return UP(NIL);

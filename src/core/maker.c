@@ -26,7 +26,7 @@ lisp_make_number(const int64_t num)
 }
 
 atom_t
-lisp_make_string(const char * const str, const size_t len)
+lisp_make_string(const char* const str, const size_t len)
 {
   atom_t res = UP(NIL);
   for (size_t i = 0; i < len; i += 1) {

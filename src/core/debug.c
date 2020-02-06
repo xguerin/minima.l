@@ -10,7 +10,7 @@
  * Debug flags.
  */
 
-bool MNML_DEBUG        = false;
+bool MNML_DEBUG = false;
 bool MNML_VERBOSE_BIND = false;
 bool MNML_VERBOSE_CHAN = false;
 bool MNML_VERBOSE_CONS = false;
@@ -21,7 +21,7 @@ bool MNML_VERBOSE_SLOT = false;
 bool MNML_VERBOSE_SLAB = false;
 
 static void
-lisp_debug_set_flag(const char * const flag)
+lisp_debug_set_flag(const char* const flag)
 {
   MNML_VERBOSE_BIND = MNML_VERBOSE_BIND || strcmp(flag, "BIND") == 0;
   MNML_VERBOSE_CHAN = MNML_VERBOSE_CHAN || strcmp(flag, "CHAN") == 0;
@@ -36,7 +36,7 @@ lisp_debug_set_flag(const char * const flag)
 void
 lisp_debug_parse_flags()
 {
-  const char * DEBUG = getenv("MNML_DEBUG");
+  const char* DEBUG = getenv("MNML_DEBUG");
   if (DEBUG != NULL) {
     MNML_DEBUG = true;
     FOR_EACH_TOKEN(DEBUG, ",", flag, lisp_debug_set_flag(flag));
@@ -48,7 +48,7 @@ lisp_debug_parse_flags()
  */
 
 static void
-lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
+lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
 {
   switch (atom->type) {
     case T_NIL:
@@ -90,7 +90,8 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
       /*
        * Process the list.
        */
-      if (alter) fprintf(fp, "(");
+      if (alter)
+        fprintf(fp, "(");
       /*
        * Print CAR.
        */
@@ -101,15 +102,15 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
       if (CDR(atom) != NIL) {
         if (IS_PAIR(CDR(atom))) {
           fprintf(fp, " ");
-        }
-        else {
+        } else {
           fprintf(fp, " . ");
         }
         lisp_debug_atom(fp, CDR(atom), false);
       }
       /*
-      */
-      if (alter) fprintf(fp, ")");
+       */
+      if (alter)
+        fprintf(fp, ")");
       break;
     case T_NUMBER:
 #if defined(__MACH__) || defined(__OpenBSD__)
@@ -134,7 +135,7 @@ lisp_debug_atom(FILE * const fp, const atom_t atom, bool alter)
 }
 
 void
-lisp_debug(FILE * const fp, const atom_t atom)
+lisp_debug(FILE* const fp, const atom_t atom)
 {
   if (MNML_DEBUG) {
     lisp_debug_atom(fp, atom, true);

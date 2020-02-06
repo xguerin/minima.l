@@ -16,7 +16,7 @@ lisp_function_readlines(const lisp_t lisp, const atom_t closure,
   /*
    */
   atom_t res = UP(NIL);
-  char * buffer = malloc(BUFFER_LEN), *p;
+  char *buffer = malloc(BUFFER_LEN), *p;
   /*
    * Read some data and process any lines present.
    */
@@ -32,8 +32,7 @@ lisp_function_readlines(const lisp_t lisp, const atom_t closure,
     }
     atom_t str = lisp_make_string(buffer, strlen(p));
     res = lisp_append(res, str);
-  }
-  while (p != NULL);
+  } while (p != NULL);
   /*
    * Clean-up and return the result.
    */

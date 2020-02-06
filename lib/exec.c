@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <unistd.h>
 
-extern char ** environ;
+extern char** environ;
 
 /*
  * (exec "PROG" ("ARG0" ...) ("ENV0" ...))
@@ -16,8 +16,8 @@ extern char ** environ;
 #define MAX_ARGS 128
 
 static size_t
-lisp_exec_make_strings(const atom_t cell, char ** array,
-                       const size_t len, const size_t idx)
+lisp_exec_make_strings(const atom_t cell, char** array, const size_t len,
+                       const size_t idx)
 {
   if (IS_NULL(cell) || idx == len) {
     X(cell);
@@ -53,12 +53,12 @@ lisp_function_exec(const lisp_t lisp, const atom_t closure,
   /*
    * Build the argument list.
    */
-  char * arg_str[MAX_ARGS + 1] = { [0] = strdup(buffer) };
+  char* arg_str[MAX_ARGS + 1] = { [0] = strdup(buffer) };
   lisp_exec_make_strings(args, arg_str, MAX_ARGS - 1, 1);
   /*
    * Build the environment.
    */
-  char * env_str[MAX_ARGS + 1];
+  char* env_str[MAX_ARGS + 1];
   size_t len = lisp_exec_make_strings(envp, env_str, MAX_ARGS, 0);
   X(args, envp);
   /*

@@ -45,7 +45,7 @@ lisp_function_out(const lisp_t lisp, const atom_t closure,
       /*
        * Get the fullpath for the file.
        */
-      const char * path = lisp_get_fullpath(file_buf, path_buf);
+      const char* path = lisp_get_fullpath(file_buf, path_buf);
       if (path == NULL) {
         ERROR("Cannot get the full path for %s", file_buf);
         return UP(NIL);

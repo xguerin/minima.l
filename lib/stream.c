@@ -55,6 +55,8 @@ lisp_function_stream(const lisp_t lisp, const atom_t closure,
   return lisp_stream(lisp, closure, cdr, car);
 }
 
+/* clang-format off */
 LISP_PLUGIN_REGISTER(stream, |>, @)
+/* clang-format */
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

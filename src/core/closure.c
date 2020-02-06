@@ -6,7 +6,7 @@
 #define MALLOC_SIZE(_N) (sizeof(closure_t) + (_N) * sizeof(atom_t))
 
 closure_t
-lisp_closure_get(closure_t * const $, const closure_t C, const size_t N)
+lisp_closure_get(closure_t* const $, const closure_t C, const size_t N)
 {
   closure_t result;
   /*
@@ -26,7 +26,7 @@ lisp_closure_get(closure_t * const $, const closure_t C, const size_t N)
 }
 
 void
-lisp_closure_put(closure_t * const $, const closure_t C)
+lisp_closure_put(closure_t* const $, const closure_t C)
 {
   C->C = *$;
   *$ = C;

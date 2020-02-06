@@ -25,9 +25,8 @@ lisp_function_wait(const lisp_t lisp, const atom_t closure,
   /*
    * Return the result.
    */
-  atom_t res = WIFEXITED(state) ?
-    lisp_make_number(WEXITSTATUS(state)) :
-    UP(NIL);
+  atom_t res =
+    WIFEXITED(state) ? lisp_make_number(WEXITSTATUS(state)) : UP(NIL);
   return res;
 }
 

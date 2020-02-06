@@ -7,39 +7,38 @@
  * Consumer type.
  */
 
-typedef void (* lisp_consumer_t)(const atom_t);
+typedef void (*lisp_consumer_t)(const atom_t);
 
 /*
  * Lexer type.
  */
 typedef struct _lexer
 {
-  int             cs;
-  int             act;
-  const char *    ts;
-  const char *    te;
-  size_t          depth;
-  size_t          rem;
-  lisp_t          lisp;
+  int cs;
+  int act;
+  const char* ts;
+  const char* te;
+  size_t depth;
+  size_t rem;
+  lisp_t lisp;
   lisp_consumer_t consumer;
-  void *          parser;
-}
-lexer_t;
+  void* parser;
+} lexer_t;
 
 /*
  * Lexer lifecycle.
  */
 void lisp_lexer_create(const lisp_t lisp, const lisp_consumer_t consumer,
-                       lexer_t * const lexer);
-void lisp_lexer_destroy(lexer_t * const lexer);
+                       lexer_t* const lexer);
+void lisp_lexer_destroy(lexer_t* const lexer);
 
 /*
  * Lexer parse.
  */
-void lisp_lexer_parse(lexer_t * const lexer, char * const str,
-                      const size_t len, const bool end);
+void lisp_lexer_parse(lexer_t* const lexer, char* const str, const size_t len,
+                      const bool end);
 
-bool lisp_lexer_pending(const lexer_t * const lexer);
+bool lisp_lexer_pending(const lexer_t* const lexer);
 
 /*
  * Debug macros.

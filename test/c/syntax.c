@@ -5,26 +5,25 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 
-#define INPUT(__s) (char *)__s, strlen(__s)
+#define INPUT(__s) (char*)__s, strlen(__s)
 
 /*
  * Basic tests.
  */
 
-const char * test00 = "(1 2)";
+const char* test00 = "(1 2)";
 
-const char * test01 = "'(1 (2 . 3))";
+const char* test01 = "'(1 (2 . 3))";
 
-const char * test10 =
-"(prog # This is a program  \n"
-"  (sub 1 1)                \n"
-"  (add 2 2)                \n"
-"  (quote . \"hello\")      \n"
-"   (1 2 3 4)               \n"
-"   (1 2 . 3)               \n"
-"  '(1 2 . 3)               \n"
-"  \"\"                     \n"
-")                          \n";
+const char* test10 = "(prog # This is a program  \n"
+                     "  (sub 1 1)                \n"
+                     "  (add 2 2)                \n"
+                     "  (quote . \"hello\")      \n"
+                     "   (1 2 3 4)               \n"
+                     "   (1 2 . 3)               \n"
+                     "  '(1 2 . 3)               \n"
+                     "  \"\"                     \n"
+                     ")                          \n";
 
 static lexer_t lisp_lexer;
 static atom_t lisp_result = NULL;
@@ -64,7 +63,10 @@ lisp_test_fini(const lisp_t lisp)
 {
   X(lisp->GLOBALS);
   lisp_lexer_destroy(&lisp_lexer);
-  X(WILDCARD); X(QUOTE); X(TRUE); X(NIL);
+  X(WILDCARD);
+  X(QUOTE);
+  X(TRUE);
+  X(NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   lisp_slab_destroy();
@@ -152,7 +154,8 @@ car_cdr_tests()
   X(lisp_result);
   ASSERT_TRUE(IS_NULL(car));
   ASSERT_TRUE(IS_NULL(cdr));
-  X(car); X(cdr);
+  X(car);
+  X(cdr);
   /*
    */
   lisp_test_fini(&lisp);
@@ -168,7 +171,9 @@ car_cdr_tests()
   cdr = lisp_cdr(lisp_result);
   ASSERT_TRUE(IS_NULL(car));
   ASSERT_TRUE(IS_NULL(cdr));
-  X(car); X(cdr); X(lisp_result);
+  X(car);
+  X(cdr);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -184,7 +189,9 @@ car_cdr_tests()
   cdr = lisp_cdr(lisp_result);
   ASSERT_TRUE(IS_NUMB(car) && car->number == 1);
   ASSERT_TRUE(IS_NULL(cdr));
-  X(car); X(cdr); X(lisp_result);
+  X(car);
+  X(cdr);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -203,7 +210,9 @@ car_cdr_tests()
   ASSERT_TRUE(IS_PAIR(cdr));
   lisp_lexer_parse(&lisp_lexer, INPUT("(2)"), true);
   ASSERT_TRUE(lisp_equ(cdr, lisp_result));
-  X(car); X(cdr); X(lisp_result);
+  X(car);
+  X(cdr);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -225,7 +234,9 @@ car_cdr_tests()
   X(lisp_result);
   lisp_lexer_parse(&lisp_lexer, INPUT("(2)"), true);
   ASSERT_TRUE(lisp_equ(cdr, lisp_result));
-  X(car); X(cdr); X(lisp_result);
+  X(car);
+  X(cdr);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -256,7 +267,10 @@ conc_cons_tests()
   tmp3 = lisp_conc(tmp1, lisp_result);
   lisp_lexer_parse(&lisp_lexer, INPUT("(1 . 2)"), true);
   ASSERT_TRUE(lisp_equ(tmp1, lisp_result));
-  X(tmp1); X(tmp2); X(tmp3); X(lisp_result);
+  X(tmp1);
+  X(tmp2);
+  X(tmp3);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -272,7 +286,9 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_lexer_parse(&lisp_lexer, INPUT("(2)"), true);
   tmp2 = lisp_conc(tmp1, lisp_result);
-  X(tmp1); X(tmp2); X(lisp_result);
+  X(tmp1);
+  X(tmp2);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -288,7 +304,9 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_lexer_parse(&lisp_lexer, INPUT("(2)"), true);
   tmp2 = lisp_conc(tmp1, lisp_result);
-  X(tmp1); X(tmp2); X(lisp_result);
+  X(tmp1);
+  X(tmp2);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -304,7 +322,9 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_lexer_parse(&lisp_lexer, INPUT("2"), true);
   tmp2 = lisp_cons(tmp1, lisp_result);
-  X(tmp2); X(tmp1); X(lisp_result);
+  X(tmp2);
+  X(tmp1);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -320,7 +340,9 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_lexer_parse(&lisp_lexer, INPUT("2"), true);
   tmp2 = lisp_cons(tmp1, lisp_result);
-  X(tmp2); X(tmp1); X(lisp_result);
+  X(tmp2);
+  X(tmp1);
+  X(lisp_result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -336,7 +358,9 @@ conc_cons_tests()
   tmp1 = lisp_result;
   lisp_lexer_parse(&lisp_lexer, INPUT("(2)"), true);
   tmp2 = lisp_cons(tmp1, lisp_result);
-  X(tmp2); X(tmp1); X(lisp_result);
+  X(tmp2);
+  X(tmp1);
+  X(lisp_result);
   /*
    * Clean-up.
    */
@@ -350,7 +374,7 @@ conc_cons_tests()
  */
 
 int
-main(const int argc, char ** const argv)
+main(const int argc, char** const argv)
 {
   TEST(type_tests);
   TEST(basic_tests);

@@ -7,14 +7,17 @@
  * Helper macros.
  */
 
-#define FOREACH(__c, __p)     \
-  pair_t __p = &__c->pair;    \
-  if (!IS_NULL(__c)) for (;;)
+#define FOREACH(__c, __p)  \
+  pair_t __p = &__c->pair; \
+  if (!IS_NULL(__c))       \
+    for (;;)
 
-#define NEXT(__p) {               \
-  if (!IS_PAIR(__p->cdr)) break;  \
-  __p = &__p->cdr->pair;          \
-}
+#define NEXT(__p)           \
+  {                         \
+    if (!IS_PAIR(__p->cdr)) \
+      break;                \
+    __p = &__p->cdr->pair;  \
+  }
 
 /*
  * Symbol management.
@@ -60,6 +63,6 @@ atom_t lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
 
 atom_t lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell);
-void   lisp_prin(const atom_t closure, const atom_t cell, const bool s);
+void lisp_prin(const atom_t closure, const atom_t cell, const bool s);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

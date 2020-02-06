@@ -16,14 +16,15 @@
 #ifdef LISP_ENABLE_DEBUG
 
 atom_t
-lisp_incref(const atom_t atom, const char * const name)
+lisp_incref(const atom_t atom, const char* const name)
 {
   TRACE_REFC_SEXP(atom->refs, atom->refs + 1, name, atom);
   atom->refs += 1;
   return atom;
 }
 
-atom_t lisp_decref(const atom_t atom, const char * const name)
+atom_t
+lisp_decref(const atom_t atom, const char* const name)
 {
   TRACE_REFC_SEXP(atom->refs, atom->refs - 1, name, atom);
   if (atom->refs == 0xa0a0a0a0a0a0a0aULL) {
@@ -50,8 +51,8 @@ lisp_slab_allocate()
   /*
    * Allocate the slab (64MB).
    */
-  slab.entries = (atom_t)mmap(NULL, SLAB_SIZE, PROT_NONE,
-                              MAP_ANON | MAP_PRIVATE, -1, 0);
+  slab.entries =
+    (atom_t)mmap(NULL, SLAB_SIZE, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
   if (slab.entries == MAP_FAILED) {
     ERROR("Cannot reserve %lluB of slab memory", SLAB_SIZE);
     return false;

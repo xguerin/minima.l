@@ -9,7 +9,7 @@
 /*
  * Interpreter life cycle.
  */
-typedef void (* error_handler_t)();
+typedef void (*error_handler_t)();
 
 void lisp_set_parse_error_handler(const error_handler_t h);
 void lisp_set_syntax_error_handler(const error_handler_t h);
@@ -20,7 +20,7 @@ void lisp_fini();
 /*
  * Installation information.
  */
-const char * lisp_prefix();
+const char* lisp_prefix();
 
 /*
  * Return the length of a list.
@@ -50,13 +50,14 @@ bool lisp_is_string(const atom_t cell);
 /*
  * Make a C string from a list of characters.
  */
-size_t lisp_make_cstring(const atom_t cell, char * const buffer,
+size_t lisp_make_cstring(const atom_t cell, char* const buffer,
                          const size_t len, const size_t idx);
 
 /*
  * Process escapes in a list of characters.
  */
-atom_t lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res);
+atom_t lisp_process_escapes(const atom_t cell, const bool esc,
+                            const atom_t res);
 
 /*
  * Get a timestamp in nanoseconds.
@@ -66,48 +67,57 @@ uint64_t lisp_timestamp();
 /*
  * Get the full path of a file according to the current ICHAN context.
  */
-const char * lisp_get_fullpath(const char * const filepath, char * const buffer);
+const char* lisp_get_fullpath(const char* const filepath, char* const buffer);
 
 /*
  * Load a file.
  */
-atom_t lisp_load_file(const lisp_t lisp, const char * const filepath);
+atom_t lisp_load_file(const lisp_t lisp, const char* const filepath);
 
 /*
  * IO context helpers.
  */
-#define PUSH_IO_CONTEXT(__c, __d, __p) {          \
-  atom_t p = lisp_make_string(__p, strlen(__p));  \
-  atom_t x = lisp_cons(p, NIL);                   \
-  atom_t n = lisp_make_number((int64_t)__d);      \
-  atom_t y = lisp_cons(n, x);                     \
-  atom_t o = __c;                                 \
-  __c = lisp_cons(y, o);                          \
-  X(o); X(y); X(n); X(x); X(p);                   \
-}
+#define PUSH_IO_CONTEXT(__c, __d, __p)             \
+  {                                                \
+    atom_t p = lisp_make_string(__p, strlen(__p)); \
+    atom_t x = lisp_cons(p, NIL);                  \
+    atom_t n = lisp_make_number((int64_t)__d);     \
+    atom_t y = lisp_cons(n, x);                    \
+    atom_t o = __c;                                \
+    __c = lisp_cons(y, o);                         \
+    X(o);                                          \
+    X(y);                                          \
+    X(n);                                          \
+    X(x);                                          \
+    X(p);                                          \
+  }
 
-#define POP_IO_CONTEXT(__c) { \
-  atom_t old = __c;           \
-  __c = UP(CDR(__c));         \
-  X(old);                     \
-}
+#define POP_IO_CONTEXT(__c) \
+  {                         \
+    atom_t old = __c;       \
+    __c = UP(CDR(__c));     \
+    X(old);                 \
+  }
 
 /*
  * Scan PATH-like string format.
  */
-#define FOR_EACH_TOKEN(__s, __d, __e, BLOCK) {  \
-  char * copy = strdup(__s);                    \
-  char * haystack = copy, * p, * __e;           \
-  while ((p = strstr(haystack, __d)) != NULL) { \
-    *p = 0;                                     \
-    __e = haystack;                             \
-    haystack = p + 1;                           \
-    if (strlen(__e) > 0) BLOCK;                 \
-  }                                             \
-  __e = haystack;                               \
-    if (strlen(__e) > 0) BLOCK;                 \
-  free(copy);                                   \
-}
+#define FOR_EACH_TOKEN(__s, __d, __e, BLOCK)      \
+  {                                               \
+    char* copy = strdup(__s);                     \
+    char *haystack = copy, *p, *__e;              \
+    while ((p = strstr(haystack, __d)) != NULL) { \
+      *p = 0;                                     \
+      __e = haystack;                             \
+      haystack = p + 1;                           \
+      if (strlen(__e) > 0)                        \
+        BLOCK;                                    \
+    }                                             \
+    __e = haystack;                               \
+    if (strlen(__e) > 0)                          \
+      BLOCK;                                      \
+    free(copy);                                   \
+  }
 
 /*
  * Symbol matching.

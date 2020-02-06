@@ -18,13 +18,13 @@ static atom_t PLUGINS;
  * Helper functions.
  */
 
-static const char *
+static const char*
 lisp_library_prefix()
 {
   static bool is_set = false;
   static char buffer[PATH_MAX];
   if (!is_set) {
-    const char * prefix = lisp_prefix();
+    const char* prefix = lisp_prefix();
     strcpy(buffer, prefix);
     strcat(buffer, "/lib");
     is_set = true;
@@ -32,7 +32,7 @@ lisp_library_prefix()
   return buffer;
 }
 
-static const char *
+static const char*
 lisp_usercache_prefix()
 {
   static bool is_set = false;
@@ -45,7 +45,7 @@ lisp_usercache_prefix()
   return buffer;
 }
 
-static char *
+static char*
 lisp_plugin_paths()
 {
   static bool is_set = false;
@@ -127,10 +127,11 @@ lisp_plugin_init()
 void
 lisp_plugin_fini()
 {
-  FOREACH(PLUGINS, p) {
+  FOREACH(PLUGINS, p)
+  {
     atom_t car = p->car;
     atom_t hnd = CAR(CDR(car));
-    dlclose((void *)hnd);
+    dlclose((void*)hnd);
     NEXT(p);
   }
   X(PLUGINS);
@@ -140,22 +141,22 @@ lisp_plugin_fini()
  * Plugin load.
  */
 
-static void *
-lisp_plugin_load_at_path(const char * const path, const char * const name)
+static void*
+lisp_plugin_load_at_path(const char* const path, const char* const name)
 {
   /*
    * Load the file.
    */
 #ifdef __MACH__
-  void * handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL | RTLD_FIRST);
+  void* handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL | RTLD_FIRST);
 #else
-  void * handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
+  void* handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
 #endif
   if (handle == NULL) {
     ERROR("cannot open library: %s, %s", path, dlerror());
     return NULL;
   }
-  const char * (* get_name)() = dlsym(handle, "lisp_plugin_name");
+  const char* (*get_name)() = dlsym(handle, "lisp_plugin_name");
   if (get_name == NULL) {
     ERROR("%s is not a plugin", path);
     return NULL;
@@ -163,7 +164,7 @@ lisp_plugin_load_at_path(const char * const path, const char * const name)
   /*
    * Check if the symbol is the one we are looking for.
    */
-  const char * pname = get_name();
+  const char* pname = get_name();
   if (strcmp(pname, name) == 0) {
     return handle;
   }
@@ -174,13 +175,13 @@ lisp_plugin_load_at_path(const char * const path, const char * const name)
   return NULL;
 }
 
-static void *
-lisp_plugin_find_at_path(const char * const dirpath, const char * const name)
+static void*
+lisp_plugin_find_at_path(const char* const dirpath, const char* const name)
 {
   /*
    * Open the directory pointed by entry.
    */
-  DIR * dir = opendir(dirpath);
+  DIR* dir = opendir(dirpath);
   if (dir == NULL) {
     ERROR("cannot open directory: %s", dirpath);
     return NULL;
@@ -188,7 +189,7 @@ lisp_plugin_find_at_path(const char * const dirpath, const char * const name)
   /*
    * Scan the directory.
    */
-  struct dirent * de = NULL;
+  struct dirent* de = NULL;
   while ((de = readdir(dir)) != NULL) {
     /*
      * Check the format of the directory entry's name.
@@ -204,7 +205,7 @@ lisp_plugin_find_at_path(const char * const dirpath, const char * const name)
 #else
     size_t plen = strlen(dirpath) + strlen(de->d_name) + 2;
 #endif
-    char * path = alloca(plen);
+    char* path = alloca(plen);
     memset(path, 0, plen);
     strcpy(path, dirpath);
     strcat(path, "/");
@@ -212,7 +213,7 @@ lisp_plugin_find_at_path(const char * const dirpath, const char * const name)
     /*
      * Load the file.
      */
-    void * result = lisp_plugin_load_at_path(path, name);
+    void* result = lisp_plugin_load_at_path(path, name);
     if (result != NULL) {
       closedir(dir);
       return result;
@@ -225,8 +226,8 @@ lisp_plugin_find_at_path(const char * const dirpath, const char * const name)
   return NULL;
 }
 
-static void *
-lisp_plugin_find(const char * const paths, const atom_t sym)
+static void*
+lisp_plugin_find(const char* const paths, const atom_t sym)
 {
   /*
    * Extract the symbol name.
@@ -236,9 +237,10 @@ lisp_plugin_find(const char * const paths, const atom_t sym)
   /*
    * Scan libraries in the path.
    */
-  void * result = NULL;
-  FOR_EACH_TOKEN(paths, ":", entry, result = result == NULL ?
-                 lisp_plugin_find_at_path(entry, bsym) : result)
+  void* result = NULL;
+  FOR_EACH_TOKEN(paths, ":", entry,
+                 result = result == NULL ? lisp_plugin_find_at_path(entry, bsym)
+                                         : result)
   return result;
 }
 
@@ -248,11 +250,11 @@ lisp_plugin_load(const lisp_t lisp, const atom_t cell)
   /*
    * Load the environment variable.
    */
-  char * paths = lisp_plugin_paths();
+  char* paths = lisp_plugin_paths();
   /*
    * Find the plugin for the symbol.
    */
-  void * handle = lisp_plugin_find(paths, cell);
+  void* handle = lisp_plugin_find(paths, cell);
   free(paths);
   if (handle == NULL) {
     return UP(NIL);
@@ -260,7 +262,7 @@ lisp_plugin_load(const lisp_t lisp, const atom_t cell)
   /*
    * Grab the function.
    */
-  atom_t (* get_atom)(const lisp_t) = dlsym(handle, "lisp_plugin_register");
+  atom_t (*get_atom)(const lisp_t) = dlsym(handle, "lisp_plugin_register");
   if (get_atom == NULL) {
     dlclose(handle);
     return UP(NIL);
