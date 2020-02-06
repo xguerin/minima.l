@@ -5,17 +5,18 @@ mechanism. A _plugin_ is a shared library that must export the following
 interface:
 ```c
 const char * lisp_plugin_name();
-atom_t lisp_plugin_register();
+atom_t lisp_plugin_register(const lisp_t lisp);
 ```
 The `lisp_plugin_register` function returns an `atom_t` value that points to a
 list definition as follows:
 ```lisp
-(AGUMENTS NIL . INTEGER)
+(ARGUMENTS NIL . INTEGER)
 ```
 The integer part represents a pointer to a function with the following
 signature:
 ```c
-atom_t lisp_function_NAME(const atom_t closure);
+atom_t
+lisp_function_NAME(const lisp_t lisp, const atom_t closure, const atom_t args);
 ```
 ## Example
 
@@ -27,10 +28,10 @@ file called `add.c`:
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_add(const atom_t closure, const atom_t arguments)
+lisp_function_add(const lisp_t lisp, const atom_t closure, const atom_t args)
 {
-  LISP_LOOKUP(x, arguments, X);
-  LISP_LOOKUP(y, arguments, Y);
+  LISP_LOOKUP(x, args, X);
+  LISP_LOOKUP(y, args, Y);
   /*
    * Make sure the arguments are numbers.
    */
@@ -103,7 +104,7 @@ The first argument `__s` is the suffix of the function. The second argument
 argument symbols. For instance, the function `add` is defined as follow:
 ```c
 static atom_t
-lisp_function_add(const atom_t closure)
+lisp_function_add(const lisp_t lisp, const atom_t closure, const atom_t args)
 {
   /* ... */
 }
@@ -124,11 +125,11 @@ The argument symbols are defined as follows:
 | `LISP_PLUGIN_REGISTER(fun, fun, A, B, REM)` | `(def fun (A B . REM) ...)` |
 
 Values for the declared symbols are passed to the plugin by the interpreter
-through the `arguments` parameter. They can be retrieved using the `LISP_LOOKUP`
+through the `args` parameter. They can be retrieved using the `LISP_LOOKUP`
 macro:
 ```c
 #define LISP_LOOKUP(_v, _c, _x)
 ```
 The first argument is a name to use for the variable to be assigned the value.
-The second argument is the name of the `arguments` parameter. The last argument
+The second argument is the name of the `args` parameter. The last argument
 is the name of the symbol to look up.
