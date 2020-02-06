@@ -145,15 +145,17 @@ void lisp_debug(FILE * fp, const atom_t atom);
 
 #else
 
+#define ERROR(__fmt, ...)
+
 #define TRACE(__fmt, ...)
-#define TRACE_BIND(__c)
-#define TRACE_CHAN(__c)
-#define TRACE_CONS(__c)
-#define TRACE_MAKE(__c)
-#define TRACE_PLUG(__c)
-#define TRACE_REFC(__c)
-#define TRACE_SLAB(__c)
-#define TRACE_SLOT(__c)
+#define TRACE_BIND(__c, ...)
+#define TRACE_CHAN(__c, ...)
+#define TRACE_CONS(__c, ...)
+#define TRACE_MAKE(__c, ...)
+#define TRACE_PLUG(__c, ...)
+#define TRACE_REFC(__c, ...)
+#define TRACE_SLAB(__c, ...)
+#define TRACE_SLOT(__c, ...)
 
 #define TRACE_SEXP(__c)
 #define TRACE_BIND_SEXP(__c)

@@ -52,6 +52,9 @@ option(MNML_ENABLE_DEBUG  "Enable debug output"         ON)
 option(MNML_ENABLE_SSE41  "Enable SSE4.1 optimizations" ON)
 option(MNML_ENABLE_TESTS  "Build and run tests"         ON)
 
+option(MNML_WITH_STDLIB  "Build stdlib"             OFF)
+option(MNML_WITH_TRANSC  "Transpile LISP functions" OFF)
+
 #
 # Global definitions
 #
@@ -134,9 +137,16 @@ find_package(Ragel REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
-add_subdirectory(lib)
-add_subdirectory(lisp)
 add_subdirectory(src)
+
+if(MNML_WITH_TRANSC)
+  add_subdirectory(lisp)
+  set(MNML_WITH_STDLIB ON)
+endif()
+
+if(MNML_WITH_STDLIB)
+  add_subdirectory(lib)
+endif()
 
 if(MNML_ENABLE_DEBUG)
   enable_testing()
