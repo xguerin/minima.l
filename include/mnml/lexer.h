@@ -20,6 +20,7 @@ typedef struct _lexer
   const char *    te;
   size_t          depth;
   size_t          rem;
+  lisp_t          lisp;
   lisp_consumer_t consumer;
   void *          parser;
 }
@@ -28,7 +29,8 @@ lexer_t;
 /*
  * Lexer lifecycle.
  */
-void lisp_lexer_create(const lisp_consumer_t consumer, lexer_t * const lexer);
+void lisp_lexer_create(const lisp_t lisp, const lisp_consumer_t consumer,
+                       lexer_t * const lexer);
 void lisp_lexer_destroy(lexer_t * const lexer);
 
 /*

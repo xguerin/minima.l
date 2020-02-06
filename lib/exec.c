@@ -36,7 +36,8 @@ lisp_exec_make_strings(const atom_t cell, char ** array,
 }
 
 static atom_t
-lisp_function_exec(const atom_t closure, const atom_t arguments)
+lisp_function_exec(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   /*
    * Get the arguments.

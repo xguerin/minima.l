@@ -8,7 +8,8 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_in(const atom_t closure, const atom_t arguments)
+lisp_function_in(const lisp_t lisp, const atom_t closure,
+                 const atom_t arguments)
 {
   int fd = 0;
   char file_buf[PATH_MAX];
@@ -84,7 +85,7 @@ lisp_function_in(const atom_t closure, const atom_t arguments)
    * Push the context, eval the prog, pop the context.
    */
   PUSH_IO_CONTEXT(ICHAN, handle, dirn_buf);
-  atom_t res = lisp_prog(closure, prog, UP(NIL));
+  atom_t res = lisp_prog(lisp, closure, prog, UP(NIL));
   POP_IO_CONTEXT(ICHAN);
   /*
    * Close the FD if necessary and return the value.

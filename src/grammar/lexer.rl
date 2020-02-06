@@ -24,7 +24,7 @@ static void
 lisp_consume_token(const lexer_t * const lexer)
 {
   if (lexer->depth == 0) {
-    Parse(lexer->parser, 0, 0, lexer->consumer);
+    Parse(lexer->parser, 0, 0, lexer);
   }
 }
 
@@ -46,7 +46,7 @@ action parse_error
 
 action tok_popen
 {
-  Parse(lexer->parser, POPEN, 0, NULL);
+  Parse(lexer->parser, POPEN, 0, lexer);
   lexer->depth += 1;
 }
 
@@ -56,29 +56,29 @@ action tok_pclose
     parse_error();
     fhold; fgoto purge;
   }
-  Parse(lexer->parser, PCLOSE, 0, NULL);
+  Parse(lexer->parser, PCLOSE, 0, lexer);
   lexer->depth -= 1;
   lisp_consume_token(lexer);
 }
 
 action tok_dot
 {
-  Parse(lexer->parser, DOT, 0, NULL);
+  Parse(lexer->parser, DOT, 0, lexer);
 }
 
 action tok_quote
 {
-  Parse(lexer->parser, CQUOTE, 0, NULL);
+  Parse(lexer->parser, CQUOTE, 0, lexer);
 }
 
 action tok_backt
 {
-  Parse(lexer->parser, BACKTICK, 0, NULL);
+  Parse(lexer->parser, BACKTICK, 0, lexer);
 }
 
 action tok_tilde
 {
-  Parse(lexer->parser, TILDE, 0, NULL);
+  Parse(lexer->parser, TILDE, 0, lexer);
 }
 
 action tok_number
@@ -89,7 +89,7 @@ action tok_number
   strncpy(val, start, len);
   val[len] = 0;
   int64_t value = strtoll(val, NULL, 10);
-  Parse(lexer->parser, NUMBER, (void *)value, NULL);
+  Parse(lexer->parser, NUMBER, (void *)value, lexer);
   lisp_consume_token(lexer);
 }
 
@@ -121,7 +121,7 @@ action tok_char
   }
   /*
    */
-  Parse(lexer->parser, CHAR, (void *)val, NULL);
+  Parse(lexer->parser, CHAR, (void *)val, lexer);
   lisp_consume_token(lexer);
 }
 
@@ -133,25 +133,25 @@ action tok_string
   char * val = strndup(start, len);
   /*
    */
-  Parse(lexer->parser, STRING, val, NULL);
+  Parse(lexer->parser, STRING, val, lexer);
   lisp_consume_token(lexer);
 }
 
 action tok_nil
 { 
-  Parse(lexer->parser, C_NIL, 0, NULL);
+  Parse(lexer->parser, C_NIL, 0, lexer);
   lisp_consume_token(lexer);
 }
 
 action tok_true
 { 
-  Parse(lexer->parser, C_TRUE, 0, NULL);
+  Parse(lexer->parser, C_TRUE, 0, lexer);
   lisp_consume_token(lexer);
 }
 
 action tok_wildcard
 { 
-  Parse(lexer->parser, C_WILDCARD, 0, NULL);
+  Parse(lexer->parser, C_WILDCARD, 0, lexer);
   lisp_consume_token(lexer);
 }
 
@@ -160,7 +160,7 @@ action tok_symbol
   const char * start = UNPREFIX(ts);
   size_t len = te - start;
   MAKE_SYMBOL_DYNAMIC(sym, start, len);
-  Parse(lexer->parser, SYMBOL, sym, NULL);
+  Parse(lexer->parser, SYMBOL, sym, lexer);
   lisp_consume_token(lexer);
 }
 
@@ -230,12 +230,14 @@ typedef struct _region
 * region_t;
 
 void
-lisp_lexer_create(const lisp_consumer_t consumer, lexer_t * const lexer)
+lisp_lexer_create(const lisp_t lisp, const lisp_consumer_t consumer,
+                  lexer_t * const lexer)
 {
   %% write init;
-  lexer->consumer = consumer;
   lexer->depth = 0;
   lexer->rem = 0;
+  lexer->lisp = lisp;
+  lexer->consumer = consumer;
   lexer->parser = ParseAlloc(malloc);
 }
 

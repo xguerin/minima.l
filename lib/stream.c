@@ -4,14 +4,15 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_stream(const atom_t closure, const atom_t cell, const atom_t expr)
+lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
+            const atom_t expr)
 {
   TRACE_SEXP(cell);
   TRACE_SEXP(expr);
   /*
    * Evaluate the result.
    */
-  atom_t res = lisp_eval(closure, expr);
+  atom_t res = lisp_eval(lisp, closure, expr);
   /*
    * Return the evaluated result if CELL is NIL.
    */
@@ -35,11 +36,12 @@ lisp_stream(const atom_t closure, const atom_t cell, const atom_t expr)
   /*
    * Call recursively.
    */
-  return lisp_stream(closure, cdr, nxt);
+  return lisp_stream(lisp, closure, cdr, nxt);
 }
 
 static atom_t
-lisp_function_stream(const atom_t closure, const atom_t arguments)
+lisp_function_stream(const lisp_t lisp, const atom_t closure,
+                     const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
   /*
@@ -50,7 +52,7 @@ lisp_function_stream(const atom_t closure, const atom_t arguments)
   X(cell);
   /*
    */
-  return lisp_stream(closure, cdr, car);
+  return lisp_stream(lisp, closure, cdr, car);
 }
 
 LISP_PLUGIN_REGISTER(stream, |>, @)

@@ -4,7 +4,8 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_quit(const atom_t closure, const atom_t arguments)
+lisp_function_quit(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   kill(getpid(), SIGQUIT);
   return UP(TRUE);

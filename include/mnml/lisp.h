@@ -20,7 +20,6 @@
  * Symbol management.
  */
 
-extern atom_t GLOBALS;
 extern atom_t ICHAN;
 extern atom_t OCHAN;
 extern atom_t NIL;
@@ -29,7 +28,7 @@ extern atom_t QUOTE;
 extern atom_t WILDCARD;
 
 atom_t lisp_lookup_immediate(const atom_t closure, const symbol_t sym);
-atom_t lisp_lookup(const atom_t closure, const atom_t sym);
+atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t sym);
 
 /*
  * Lisp basic functions.
@@ -49,16 +48,18 @@ atom_t lisp_conc(const atom_t a, const atom_t b);
  * Evaluation and closure functions.
  */
 
-atom_t lisp_bind(const atom_t closure, const atom_t args, const atom_t vals);
+atom_t lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t args,
+                 const atom_t vals);
 atom_t lisp_setq(const atom_t closure, const atom_t pair);
-atom_t lisp_prog(const atom_t closure, const atom_t cell, const atom_t rslt);
+atom_t lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
+                 const atom_t rslt);
 
 /*
  * Read, eval, print functions.
  */
 
-atom_t lisp_read(const atom_t closure, const atom_t cell);
-atom_t lisp_eval(const atom_t closure, const atom_t cell);
+atom_t lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell);
+atom_t lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell);
 void   lisp_prin(const atom_t closure, const atom_t cell, const bool s);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

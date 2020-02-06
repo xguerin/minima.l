@@ -1,4 +1,4 @@
-%extra_argument { lisp_consumer_t consumer }
+%extra_argument { const lexer_t * lexer }
 
 %token_type { void * }
 %type list  { atom_t }
@@ -27,7 +27,7 @@ extern void syntax_error();
 
 root ::= prefix(A).
 {
-  consumer(A);
+  lexer->consumer(A);
 }
 
 list(A) ::= POPEN PCLOSE.
@@ -59,7 +59,7 @@ items(A) ::= items(B) prefix(C).
 
 items(A) ::= items(B) TILDE prefix(C).
 {
-  C = lisp_eval(NIL, C);
+  C = lisp_eval(lexer->lisp, NIL, C);
   A = lisp_conc(B, C);
   X(B, C);
 }
@@ -77,7 +77,7 @@ prefix(A) ::= CQUOTE item(B).
 
 prefix(A) ::= BACKTICK item(B).
 {
-  A = lisp_eval(NIL, B);
+  A = lisp_eval(lexer->lisp, NIL, B);
 }
 
 item(A) ::= NUMBER(B).

@@ -4,7 +4,7 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_list(const atom_t closure, const atom_t cell)
+lisp_list(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   TRACE_SEXP(cell);
   /*
@@ -19,8 +19,8 @@ lisp_list(const atom_t closure, const atom_t cell)
     /*
      * Recursively get the result.
      */
-    atom_t res = lisp_list(closure, cdr);
-    atom_t evl = lisp_eval(closure, car);
+    atom_t res = lisp_list(lisp, closure, cdr);
+    atom_t evl = lisp_eval(lisp, closure, car);
     atom_t con = lisp_cons(evl, res);
     X(evl, res);
     return con;
@@ -31,10 +31,11 @@ lisp_list(const atom_t closure, const atom_t cell)
 }
 
 static atom_t
-lisp_function_list(const atom_t closure, const atom_t arguments)
+lisp_function_list(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
-  return lisp_list(closure, cell);
+  return lisp_list(lisp, closure, cell);
 }
 
 LISP_PLUGIN_REGISTER(list, list, @)

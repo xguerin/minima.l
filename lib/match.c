@@ -25,7 +25,8 @@ atom_match(const atom_t a, const atom_t b)
 }
 
 static atom_t
-lisp_match(const atom_t closure, const atom_t cell, const atom_t match)
+lisp_match(const lisp_t lisp, const atom_t closure, const atom_t cell,
+           const atom_t match)
 {
   /*
    * Sanity checks.
@@ -51,22 +52,23 @@ lisp_match(const atom_t closure, const atom_t cell, const atom_t match)
    */
   if (atom_match(args, cell)) {
     X(args, cdr, cell);
-    return lisp_eval(closure, prog);
+    return lisp_eval(lisp, closure, prog);
   }
   /*
    */
   X(args, prog);
-  return lisp_match(closure, cell, cdr);
+  return lisp_match(lisp, closure, cell, cdr);
 }
 
 static atom_t
-lisp_function_match(const atom_t closure, const atom_t arguments)
+lisp_function_match(const lisp_t lisp, const atom_t closure,
+                    const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
-  atom_t car = lisp_eval(closure, lisp_car(cell));
+  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   X(cell);
-  return lisp_match(closure, car, cdr);
+  return lisp_match(lisp, closure, car, cdr);
 }
 
 LISP_PLUGIN_REGISTER(match, match, @)

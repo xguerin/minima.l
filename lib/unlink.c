@@ -5,7 +5,8 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_unlink(const atom_t closure, const atom_t arguments)
+lisp_function_unlink(const lisp_t lisp, const atom_t closure,
+                     const atom_t arguments)
 {
   LISP_LOOKUP(name, arguments, NAME);
   /*

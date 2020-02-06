@@ -9,7 +9,8 @@
 #define BUFFER_LEN 1024
 
 static atom_t
-lisp_function_readlines(const atom_t closure, const atom_t arguments)
+lisp_function_readlines(const lisp_t lisp, const atom_t closure,
+                        const atom_t arguments)
 {
   FILE* handle = (FILE*)CAR(CAR(ICHAN))->number;
   /*

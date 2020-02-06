@@ -3,10 +3,11 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_eval(const atom_t closure, const atom_t arguments)
+lisp_function_eval(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   LISP_LOOKUP(car, arguments, X);
-  return lisp_eval(closure, car);
+  return lisp_eval(lisp, closure, car);
 }
 
 LISP_PLUGIN_REGISTER(eval, eval, X, NIL)

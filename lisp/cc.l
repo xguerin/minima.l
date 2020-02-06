@@ -181,7 +181,7 @@
     (prinl (o|) "atom_t _S = UP(NIL), _T;")
     (iter gencall (rev effargs))
     (/**/ "Evaluate the expression.")
-    (prinl (o|) "atom_t _R = lisp_eval(E, _S);")
+    (prinl (o|) "atom_t _R = lisp_eval(lisp, E, _S);")
     (/**/ "Convert the atom_t result to value_t.")
     (cc:gen:value type 'R)))
 
@@ -286,10 +286,10 @@
     (/**/ "Call the continuation.")
     (if (= NAME (car body))
       (prog
-        (prin (o|) "return _mnml_" NAME "(E, ")
+        (prin (o|) "return _mnml_" NAME "(lisp, E, ")
         (iter (\ (e) (prin e ", ")) ARGS)
         (prinl "_C, _K);"))
-      (prinl (o|) "return _K(E, _C, R);"))))
+      (prinl (o|) "return _K(lisp, E, _C, R);"))))
 
 (def cc:gen:block-ite (NAME ARGS REFS TYPES CONT kvar body then else)
   "Common generation routing for ITE block items."
@@ -315,7 +315,7 @@
   (cc:gen:callback NAME REFS CONT CONT)
   (cc:gen:cleanup ARGS REFS TYPES CONT kvar CONT)
   (/**/ "Call the continuation.")
-  (prinl (o|) "return _K(E, _C, R);"))
+  (prinl (o|) "return _K(lisp, E, _C, R);"))
 
 (def cc:gen:block (NAME ARGS REFS TYPES CONT kvar body)
   "Generate the basic block for BODY."
@@ -383,7 +383,7 @@
 
 (def cc:gen:function (NAME ARGS REFS TYPES CONT kvar body)
   "Generate a continuation KVAR with BODY."
-  (prinl "static atom_t _mnml_" NAME kvar "(const atom_t E, closure_t C, value_t V) {")
+  (prinl "static atom_t _mnml_" NAME kvar "(const lisp_t lisp, const atom_t E, closure_t C, value_t V) {")
   (o>)
   (if (> (assoc kvar REFS) 0)
     (prog
@@ -477,7 +477,7 @@
 
 (def cc:gen:identity (TYPES kvar)
   "Generate C code for the identity continuation."
-  (prinl "static atom_t identity(const atom_t E, closure_t C, value_t V) {")
+  (prinl "static atom_t identity(const lisp_t lisp, const atom_t E, closure_t C, value_t V) {")
   (o>)
   (cc:gen:retval TYPES kvar)
   (<o)
@@ -490,14 +490,14 @@
 
 (def cc:gen:prototype (NAME ARGS)
   "Generate C code function prototype."
-  (prin "static atom_t _mnml_" NAME "(const atom_t E, ");
+  (prin "static atom_t _mnml_" NAME "(const lisp_t lisp, const atom_t E, ");
   (iter (\ (e) (prin "value_t " e ", ")) ARGS)
   (prinl "closure_t C, callback_t K);");
   (prinl))
 
 (def cc:gen:main (NAME ARGS REFS kvar)
   "Generate C code for the main function."
-  (prin "static atom_t _mnml_" NAME "(const atom_t E, ")
+  (prin "static atom_t _mnml_" NAME "(const lisp_t lisp, const atom_t E, ")
   (o>)
   (iter (\ (e) (prin "value_t " e ", ")) ARGS)
   (prinl "closure_t C, callback_t K) {");
@@ -511,7 +511,7 @@
   (/**/ "Generate the continuation argument.")
   (prinl (o|) "value_t R = { .callback = K };");
   (/**/ "Call the continuation.")
-  (prinl (o|) "return _K(E, _C, R);")
+  (prinl (o|) "return _K(lisp, E, _C, R);")
   (<o)
   (prinl "}")
   (prinl))
@@ -527,7 +527,7 @@
 
 (def cc:gen:plugin (NAME ARGS TYPES)
   "Generate C code for the plugin."
-  (prinl "static atom_t lisp_function_" NAME "(const atom_t env, const atom_t arguments) {")
+  (prinl "static atom_t lisp_function_" NAME "(const lisp_t lisp, const atom_t env, const atom_t arguments) {")
   (o>)
   (/**/ "Grab the arguments.")
   (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
@@ -535,7 +535,7 @@
   (prinl (o|) "closure_t _C = NULL;")
   (prinl (o|) "callback_t _K = identity;")
   (/**/ "Call the main function.")
-  (prin (o|) "atom_t R = _mnml_" NAME "(env, ")
+  (prin (o|) "atom_t R = _mnml_" NAME "(lisp, env, ")
   (iter (\ (e) (prin e ", ")) ARGS)
   (prinl "_C, _K);")
   (/**/ "Clear the closure cache and return.")

@@ -3,7 +3,8 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_setq(const atom_t closure, const atom_t arguments)
+lisp_function_setq(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
   /*
@@ -11,7 +12,7 @@ lisp_function_setq(const atom_t closure, const atom_t arguments)
    */
   atom_t sym = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
-  atom_t res = lisp_eval(closure, lisp_car(cdr));
+  atom_t res = lisp_eval(lisp, closure, lisp_car(cdr));
   X(cell, cdr);
   /*
    * Don't set anything if NIL.
@@ -23,7 +24,7 @@ lisp_function_setq(const atom_t closure, const atom_t arguments)
   /*
    * Call SETQ.
    */
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(sym, res));
+  lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(sym, res));
   X(sym);
   return res;
 }

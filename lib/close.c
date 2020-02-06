@@ -4,14 +4,15 @@
 #include <unistd.h>
 
 static bool
-lisp_close(const atom_t closure, const atom_t cell, const bool res)
+lisp_close(const lisp_t lisp, const atom_t closure, const atom_t cell,
+           const bool res)
 {
   if (!IS_NULL(cell)) {
-    atom_t car = lisp_eval(closure, lisp_car(cell));
+    atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
     atom_t cdr = lisp_cdr(cell);
     int s = close(car->number);
     X(car, cell);
-    return lisp_close(closure, cdr, res && s == 0);
+    return lisp_close(lisp, closure, cdr, res && s == 0);
   }
   /*
    */
@@ -20,10 +21,11 @@ lisp_close(const atom_t closure, const atom_t cell, const bool res)
 }
 
 static atom_t
-lisp_function_close(const atom_t closure, const atom_t arguments)
+lisp_function_close(const lisp_t lisp, const atom_t closure,
+                    const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
-  bool res = lisp_close(closure, cell, true);
+  bool res = lisp_close(lisp, closure, cell, true);
   return UP(res ? TRUE : NIL);
 }
 

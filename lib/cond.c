@@ -3,7 +3,8 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_cond(const atom_t closure, const atom_t cell, const atom_t match)
+lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
+          const atom_t match)
 {
   TRACE_SEXP(cell);
   /*
@@ -30,35 +31,36 @@ lisp_cond(const atom_t closure, const atom_t cell, const atom_t match)
    */
   if (IS_WILD(args)) {
     X(args, cdr, cell);
-    return lisp_eval(closure, prog);
+    return lisp_eval(lisp, closure, prog);
   }
   /*
    * Evaluate the predicate.
    */
   atom_t con = lisp_cons(cell, NIL);
   atom_t evl = lisp_cons(args, con);
-  atom_t res = lisp_eval(closure, evl);
+  atom_t res = lisp_eval(lisp, closure, evl);
   X(con, res, args);
   /*
    */
   if (IS_TRUE(res)) {
     X(cdr, cell);
-    return lisp_eval(closure, prog);
+    return lisp_eval(lisp, closure, prog);
   }
   /*
    */
   X(prog);
-  return lisp_cond(closure, cell, cdr);
+  return lisp_cond(lisp, closure, cell, cdr);
 }
 
 static atom_t
-lisp_function_cond(const atom_t closure, const atom_t arguments)
+lisp_function_cond(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
   atom_t car = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
   X(cell);
-  return lisp_cond(closure, car, cdr);
+  return lisp_cond(lisp, closure, car, cdr);
 }
 
 LISP_PLUGIN_REGISTER(cond, cond, @)

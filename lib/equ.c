@@ -31,7 +31,8 @@ lisp_equ(const atom_t a, const atom_t b)
 }
 
 static atom_t
-lisp_function_equ(const atom_t closure, const atom_t arguments)
+lisp_function_equ(const lisp_t lisp, const atom_t closure,
+                  const atom_t arguments)
 {
   LISP_LOOKUP(vl0, arguments, X);
   LISP_LOOKUP(vl1, arguments, Y);

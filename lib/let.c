@@ -5,7 +5,8 @@
 #include <mnml/utils.h>
 
 static atom_t
-lisp_let_bind(const atom_t closure, const atom_t env, const atom_t cell)
+lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
+              const atom_t cell)
 {
   TRACE_SEXP(cell);
   /*
@@ -34,17 +35,17 @@ lisp_let_bind(const atom_t closure, const atom_t env, const atom_t cell)
    */
   atom_t tmp = lisp_cons(env, closure);
   atom_t arg = lisp_car(car);
-  atom_t val = lisp_eval(tmp, lisp_cdr(car));
+  atom_t val = lisp_eval(lisp, tmp, lisp_cdr(car));
   X(tmp, car);
   /*
    * Bind the result to the environment and process the remainder.
    */
-  atom_t next = lisp_bind(env, arg, val);
-  return lisp_let_bind(closure, next, cdr);
+  atom_t next = lisp_bind(lisp, env, arg, val);
+  return lisp_let_bind(lisp, closure, next, cdr);
 }
 
 static atom_t
-lisp_let(const atom_t closure, const atom_t cell)
+lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   TRACE_SEXP(cell);
   /*
@@ -56,22 +57,23 @@ lisp_let(const atom_t closure, const atom_t cell)
   /*
    * Recursively apply the bind list and queue it up in the closure list.
    */
-  atom_t next = lisp_let_bind(closure, UP(NIL), bind);
+  atom_t next = lisp_let_bind(lisp, closure, UP(NIL), bind);
   atom_t clo = lisp_cons(next, closure);
   X(next);
   /*
    * Evaluate the prog with the new bind list.
    */
-  atom_t res = lisp_prog(clo, prog, UP(NIL));
+  atom_t res = lisp_prog(lisp, clo, prog, UP(NIL));
   X(clo);
   return res;
 }
 
 static atom_t
-lisp_function_let(const atom_t closure, const atom_t arguments)
+lisp_function_let(const lisp_t lisp, const atom_t closure,
+                  const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
-  return lisp_let(closure, cell);
+  return lisp_let(lisp, closure, cell);
 }
 
 LISP_PLUGIN_REGISTER(let, let, @)

@@ -3,9 +3,10 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_read(const atom_t closure, const atom_t arguments)
+lisp_function_read(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
-  atom_t result = lisp_read(closure, UP(NIL));
+  atom_t result = lisp_read(lisp, closure, UP(NIL));
   return result == NULL ? UP(NIL) : result;
 }
 

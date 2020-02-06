@@ -4,7 +4,8 @@
 #include <unistd.h>
 
 static atom_t
-lisp_printl_all(const atom_t closure, const atom_t cell, const atom_t result)
+lisp_printl_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
+                const atom_t result)
 {
   if (unlikely(IS_NULL(cell))) {
     X(cell);
@@ -12,21 +13,22 @@ lisp_printl_all(const atom_t closure, const atom_t cell, const atom_t result)
   }
   /*
    */
-  atom_t car = lisp_eval(closure, lisp_car(cell));
+  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   lisp_prin(closure, car, true);
   if (!IS_NULL(cdr)) {
     fwrite(" ", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   }
   X(cell, result);
-  return lisp_printl_all(closure, cdr, car);
+  return lisp_printl_all(lisp, closure, cdr, car);
 }
 
 static atom_t
-lisp_function_printl(const atom_t closure, const atom_t arguments)
+lisp_function_printl(const lisp_t lisp, const atom_t closure,
+                     const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
-  atom_t res = lisp_printl_all(closure, cell, UP(NIL));
+  atom_t res = lisp_printl_all(lisp, closure, cell, UP(NIL));
   fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   return res;
 }

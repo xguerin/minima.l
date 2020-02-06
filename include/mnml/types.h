@@ -80,6 +80,16 @@ __attribute__((packed)) * atom_t;
 #define IS_ATOM(__a) (!IS_LIST(__a))
 
 /*
+ * Lisp context type.
+ */
+
+typedef struct lisp
+{
+  atom_t GLOBALS;
+}
+* lisp_t;
+
+/*
  * A function has the following format:
  * (ARGS CLOSURE CURY BODY)
  */
@@ -91,6 +101,6 @@ __attribute__((packed)) * atom_t;
    IS_LIST(CAR(CDR(__a))) &&                                                        \
    IS_LIST(CAR(CDR(CDR(__a)))))
 
-typedef atom_t (* function_t)(const atom_t closure, const atom_t arguments);
+typedef atom_t (* function_t)(const lisp_t, const atom_t, const atom_t);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

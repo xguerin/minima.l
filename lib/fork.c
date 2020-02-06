@@ -5,7 +5,8 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_fork(const atom_t closure, const atom_t arguments)
+lisp_function_fork(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   pid_t pid = fork();
   return lisp_make_number(pid < 0 ? errno : pid);

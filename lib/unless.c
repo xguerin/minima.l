@@ -3,7 +3,8 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_unless(const atom_t closure, const atom_t arguments)
+lisp_function_unless(const lisp_t lisp, const atom_t closure,
+                     const atom_t arguments)
 {
   LISP_LOOKUP(cnd, arguments, COND);
   LISP_LOOKUP(prg, arguments, REM);
@@ -12,7 +13,7 @@ lisp_function_unless(const atom_t closure, const atom_t arguments)
    */
   if (likely(IS_NULL(cnd))) {
     X(cnd);
-    return lisp_prog(closure, prg, UP(NIL));
+    return lisp_prog(lisp, closure, prg, UP(NIL));
   }
   /*
    * Or return NIL;

@@ -3,7 +3,8 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_def(const atom_t closure, const atom_t arguments)
+lisp_function_def(const lisp_t lisp, const atom_t closure,
+                  const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
   /*
@@ -48,7 +49,7 @@ lisp_function_def(const atom_t closure, const atom_t arguments)
   /*
    * Set the symbol's value.
    */
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(symb, con2));
+  lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(symb, con2));
   X(con2);
   return symb;
 }

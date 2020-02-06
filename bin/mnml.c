@@ -27,18 +27,18 @@ signal_handler(const int sigid)
  */
 
 static atom_t
-run(stage_t pread, const stage_t pdone, const void * data)
+run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void * data)
 {
   atom_t input, result = UP(NIL);
   while (keep_running) {
     X(result);
     pread(NIL, data);
-    input = lisp_read(NIL, UP(NIL));
+    input = lisp_read(lisp, NIL, UP(NIL));
     if (input == NULL) {
       result = UP(NIL);
       break;
     }
-    result = lisp_eval(NIL, input);
+    result = lisp_eval(lisp, NIL, input);
     pdone(result, data);
   }
   return result;
@@ -96,7 +96,7 @@ lisp_pop()
  */
 
 static void
-lisp_build_argv(const int argc, char ** const argv)
+lisp_build_argv(const lisp_t lisp, const int argc, char ** const argv)
 {
   atom_t res = UP(NIL);
   /*
@@ -112,7 +112,7 @@ lisp_build_argv(const int argc, char ** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(var);
-    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
+    lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
     X(key); X(res);
   }
   else {
@@ -121,7 +121,7 @@ lisp_build_argv(const int argc, char ** const argv)
 }
 
 static void
-lisp_build_config()
+lisp_build_config(const lisp_t lisp)
 {
   atom_t key, val, con, nxt;
   atom_t res = UP(NIL);
@@ -180,12 +180,12 @@ lisp_build_config()
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(env);
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
+  lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
   X(key); X(res);
 }
 
 static void
-lisp_build_env()
+lisp_build_env(const lisp_t lisp)
 {
   extern char ** environ;
   atom_t res = UP(NIL);
@@ -209,7 +209,7 @@ lisp_build_env()
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(env);
-    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
+    lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
     X(key); X(res);
   }
   else {
@@ -222,7 +222,7 @@ lisp_build_env()
  */
 
 static void
-lisp_preload_plugins(const size_t n, ...)
+lisp_preload_plugins(const lisp_t lisp, const size_t n, ...)
 {
   va_list args;
   va_start(args, n);
@@ -230,7 +230,7 @@ lisp_preload_plugins(const size_t n, ...)
     const char * const symbol = va_arg(args, const char *);
     MAKE_SYMBOL_STATIC(s, symbol, LISP_SYMBOL_LENGTH);
     atom_t cell = lisp_make_symbol(s);
-    atom_t func = lisp_plugin_load(cell);
+    atom_t func = lisp_plugin_load(lisp, cell);
     if (IS_NULL(func)) {
       ERROR("Loading plugin %s failed", symbol);
     }
@@ -240,14 +240,15 @@ lisp_preload_plugins(const size_t n, ...)
 }
 
 #define NUMARGS(...)  (sizeof((char *[]){__VA_ARGS__})/sizeof(char *))
-#define PRELOAD(...)  lisp_preload_plugins(NUMARGS(__VA_ARGS__), __VA_ARGS__)
+#define PRELOAD(_l, ...)  lisp_preload_plugins(_l, NUMARGS(__VA_ARGS__), __VA_ARGS__)
 
 static void
-lisp_preload()
+lisp_preload(const lisp_t lisp)
 {
   const char * PRELOAD = getenv("MNML_PRELOAD");
   if (PRELOAD == NULL) {
-    PRELOAD(/* COMPARATORS */
+    PRELOAD(lisp,
+            /* COMPARATORS */
             "=", "<>", "<", ">", "<=", ">=",
             /* ARITHMETICS */
             "+", "-", "*", "/", "%",
@@ -274,7 +275,7 @@ lisp_preload()
    * Scan the PRELOAD list and load the symbols it contains.
    */
   else {
-    FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload(1, entry));
+    FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload_plugins(lisp, 1, entry));
   }
 }
 
@@ -354,13 +355,17 @@ main(const int argc, char ** const argv)
     return __LINE__;
   }
   /*
+   * Create a lisp context.
+   */
+  struct lisp lisp = { .GLOBALS = UP(NIL) };
+  /*
    * Preload plugins, build ARGV, CONFIG and ENV.
    */
   if (!bare) {
-    lisp_preload();
-    lisp_build_argv(argc, argv);
-    lisp_build_config();
-    lisp_build_env();
+    lisp_preload(&lisp);
+    lisp_build_argv(&lisp, argc, argv);
+    lisp_build_config(&lisp);
+    lisp_build_env(&lisp);
   }
   /*
    */
@@ -369,7 +374,7 @@ main(const int argc, char ** const argv)
     lisp_set_parse_error_handler(repl_parse_error_handler);
     PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    result = run(stage_prompt, stage_newline, cwd);
+    result = run(&lisp, stage_prompt, stage_newline, cwd);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   }
@@ -383,7 +388,7 @@ main(const int argc, char ** const argv)
      */
     lexer_t lexer;
     size_t len = strlen(expr);
-    lisp_lexer_create(lisp_push, &lexer);
+    lisp_lexer_create(&lisp, lisp_push, &lexer);
     lisp_lexer_parse(&lexer, expr, len, true);
     lisp_lexer_destroy(&lexer);
     /*
@@ -402,7 +407,7 @@ main(const int argc, char ** const argv)
         result = car;
         break;
       }
-      result = lisp_eval(NIL, car);
+      result = lisp_eval(&lisp, NIL, car);
     }
     /*
      * Pop the IO context.
@@ -415,7 +420,7 @@ main(const int argc, char ** const argv)
     X(PAIRS);
   } else {
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    result = lisp_load_file(argv[1]);
+    result = lisp_load_file(&lisp, argv[1]);
     POP_IO_CONTEXT(OCHAN);
   }
   /*
@@ -423,6 +428,10 @@ main(const int argc, char ** const argv)
    */
   int status = IS_NULL(result) ? -1 : 0;
   X(result);
+  /*
+   * Clean-up the lisp context.
+   */
+  X(lisp.GLOBALS);
   /*
    */
   lisp_fini();

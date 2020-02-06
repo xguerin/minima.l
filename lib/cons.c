@@ -3,7 +3,8 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_cons(const atom_t closure, const atom_t arguments)
+lisp_function_cons(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   LISP_LOOKUP(fst, arguments, X);
   LISP_LOOKUP(snd, arguments, Y);

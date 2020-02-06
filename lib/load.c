@@ -7,21 +7,21 @@
 #include <unistd.h>
 
 static atom_t
-lisp_load(const atom_t closure, const atom_t cell)
+lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   atom_t res;
   TRACE_SEXP(cell);
   /*
    * Get CAR/CDR.
    */
-  atom_t car = lisp_eval(closure, lisp_car(cell));
+  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   X(cell);
   /*
    * If it's a symbol, load it from plugins.
    */
   if (IS_SYMB(car)) {
-    res = lisp_plugin_load(car);
+    res = lisp_plugin_load(lisp, car);
     X(car);
   }
   /*
@@ -33,7 +33,7 @@ lisp_load(const atom_t closure, const atom_t cell)
      */
     char buffer[PATH_MAX + 1];
     lisp_make_cstring(car, buffer, PATH_MAX, 0);
-    res = lisp_load_file(buffer);
+    res = lisp_load_file(lisp, buffer);
     X(car);
   }
   /*
@@ -47,14 +47,15 @@ lisp_load(const atom_t closure, const atom_t cell)
    * Return the next evaluation otherwise.
    */
   X(res);
-  return lisp_load(closure, cdr);
+  return lisp_load(lisp, closure, cdr);
 }
 
 static atom_t
-lisp_function_load(const atom_t closure, const atom_t arguments)
+lisp_function_load(const lisp_t lisp, const atom_t closure,
+                   const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
-  return lisp_load(closure, cell);
+  return lisp_load(lisp, closure, cell);
 }
 
 LISP_PLUGIN_REGISTER(load, load, @)

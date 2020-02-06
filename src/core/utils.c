@@ -88,11 +88,10 @@ lisp_init()
   lisp_make_quote();
   lisp_make_wildcard();
   /*
-   * Create the GLOBALS.
+   * Create the channels.
    */
-  GLOBALS = UP(NIL);
-  ICHAN   = UP(NIL);
-  OCHAN   = UP(NIL);
+  ICHAN = UP(NIL);
+  OCHAN = UP(NIL);
   /*
    * Setup the debug variables.
    */
@@ -115,7 +114,7 @@ lisp_fini()
   /*
    * Destroy the global variables.
    */
-  X(OCHAN, ICHAN, GLOBALS, WILDCARD, QUOTE, TRUE, NIL);
+  X(OCHAN, ICHAN, WILDCARD, QUOTE, TRUE, NIL);
   /*
    * Destroy the slab allocator.
    */
@@ -381,7 +380,7 @@ lisp_get_fullpath(const char * const filepath, char * const buffer)
 }
 
 atom_t
-lisp_load_file(const char * const filepath)
+lisp_load_file(const lisp_t lisp, const char * const filepath)
 {
   char path_buf[PATH_MAX];
   char dirn_buf[PATH_MAX];
@@ -428,9 +427,9 @@ lisp_load_file(const char * const filepath)
    * Load all the entries
    */
   atom_t input, res = UP(NIL);
-  while ((input = lisp_read(NIL, UP(NIL))) != NULL) {
+  while ((input = lisp_read(lisp, NIL, UP(NIL))) != NULL) {
     X(res);
-    res = lisp_eval(NIL, input);
+    res = lisp_eval(lisp, NIL, input);
   }
   /*
    * Pop the context and return the value.

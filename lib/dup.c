@@ -5,15 +5,16 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_dup(const atom_t closure, const atom_t arguments)
+lisp_function_dup(const lisp_t lisp, const atom_t closure,
+                  const atom_t arguments)
 {
   LISP_LOOKUP(cell, arguments, @);
   /*
    * Grab the arguments.
    */
-  atom_t car = lisp_eval(closure, lisp_car(cell));
+  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
-  atom_t tgt = lisp_eval(closure, lisp_car(cdr));
+  atom_t tgt = lisp_eval(lisp, closure, lisp_car(cdr));
   X(cdr, cell);
   /*
    * Call DUP if target is NIL.

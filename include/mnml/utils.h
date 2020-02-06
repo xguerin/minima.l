@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mnml/maker.h>
+#include <mnml/lisp.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -70,7 +71,7 @@ const char * lisp_get_fullpath(const char * const filepath, char * const buffer)
 /*
  * Load a file.
  */
-atom_t lisp_load_file(const char * const filepath);
+atom_t lisp_load_file(const lisp_t lisp, const char * const filepath);
 
 /*
  * IO context helpers.

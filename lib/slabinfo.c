@@ -5,7 +5,8 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_slabinfo(const atom_t closure, const atom_t arguments)
+lisp_function_slabinfo(const lisp_t lisp, const atom_t closure,
+                       const atom_t arguments)
 {
   atom_t car = lisp_make_number(slab.n_alloc);
   atom_t cdr = lisp_make_number(slab.n_free);

@@ -243,7 +243,7 @@ lisp_plugin_find(const char * const paths, const atom_t sym)
 }
 
 atom_t
-lisp_plugin_load(const atom_t cell)
+lisp_plugin_load(const lisp_t lisp, const atom_t cell)
 {
   /*
    * Load the environment variable.
@@ -260,7 +260,7 @@ lisp_plugin_load(const atom_t cell)
   /*
    * Grab the function.
    */
-  atom_t (* get_atom)() = dlsym(handle, "lisp_plugin_register");
+  atom_t (* get_atom)(const lisp_t) = dlsym(handle, "lisp_plugin_register");
   if (get_atom == NULL) {
     dlclose(handle);
     return UP(NIL);
@@ -271,7 +271,7 @@ lisp_plugin_load(const atom_t cell)
   atom_t hnd = lisp_make_number((uint64_t)handle);
   PLUGINS = lisp_setq(PLUGINS, lisp_cons(cell, hnd));
   X(hnd);
-  return get_atom();
+  return get_atom(lisp);
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et
