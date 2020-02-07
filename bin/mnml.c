@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (* stage_t)(const atom_t, const void * const data);
+typedef void (*stage_t)(const atom_t, const void* const data);
 
 static bool keep_running = true;
 
@@ -27,7 +27,7 @@ signal_handler(const int sigid)
  */
 
 static atom_t
-run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void * data)
+run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
 {
   atom_t input, result = UP(NIL);
   while (keep_running) {
@@ -54,7 +54,7 @@ repl_parse_error_handler()
 }
 
 static void
-stage_prompt(const atom_t cell, const void * const data)
+stage_prompt(const atom_t cell, const void* const data)
 {
   if (CDR(CDR(CAR(ICHAN))) == NIL) {
     fwrite(": ", 1, 2, stdout);
@@ -62,9 +62,9 @@ stage_prompt(const atom_t cell, const void * const data)
 }
 
 static void
-stage_newline(const atom_t cell, const void * const data)
+stage_newline(const atom_t cell, const void* const data)
 {
-  fwrite("> " , 1, 2, stdout);
+  fwrite("> ", 1, 2, stdout);
   lisp_prin(NIL, cell, true);
   fwrite("\n", 1, 1, stdout);
 }
@@ -96,7 +96,7 @@ lisp_pop()
  */
 
 static void
-lisp_build_argv(const lisp_t lisp, const int argc, char ** const argv)
+lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
 {
   atom_t res = UP(NIL);
   /*
@@ -113,9 +113,9 @@ lisp_build_argv(const lisp_t lisp, const int argc, char ** const argv)
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(var);
     lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
-    X(key); X(res);
-  }
-  else {
+    X(key);
+    X(res);
+  } else {
     X(res);
   }
 }
@@ -181,26 +181,28 @@ lisp_build_config(const lisp_t lisp)
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(env);
   lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
-  X(key); X(res);
+  X(key);
+  X(res);
 }
 
 static void
 lisp_build_env(const lisp_t lisp)
 {
-  extern char ** environ;
+  extern char** environ;
   atom_t res = UP(NIL);
   /*
    * Parse environ and build the variable list.
    */
-  for (char ** p = environ; *p != NULL; p += 1) {
-    char * n = strstr(*p, "=");
+  for (char** p = environ; *p != NULL; p += 1) {
+    char* n = strstr(*p, "=");
     if (n != NULL && *(n + 1) != 0) {
       size_t len = n - *p;
       atom_t key = lisp_make_string(*p, len);
       atom_t val = lisp_make_string(n + 1, strlen(n + 1));
       atom_t con = lisp_cons(key, val);
       res = lisp_append(res, con);
-      X(key); X(val);
+      X(key);
+      X(val);
     }
   }
   /*
@@ -210,9 +212,9 @@ lisp_build_env(const lisp_t lisp)
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(env);
     lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
-    X(key); X(res);
-  }
-  else {
+    X(key);
+    X(res);
+  } else {
     X(res);
   }
 }
@@ -227,25 +229,27 @@ lisp_preload_plugins(const lisp_t lisp, const size_t n, ...)
   va_list args;
   va_start(args, n);
   for (size_t i = 0; i < n; i += 1) {
-    const char * const symbol = va_arg(args, const char *);
+    const char* const symbol = va_arg(args, const char*);
     MAKE_SYMBOL_STATIC(s, symbol, LISP_SYMBOL_LENGTH);
     atom_t cell = lisp_make_symbol(s);
     atom_t func = lisp_plugin_load(lisp, cell);
     if (IS_NULL(func)) {
       ERROR("Loading plugin %s failed", symbol);
     }
-    X(cell); X(func);
+    X(cell);
+    X(func);
   }
   va_end(args);
 }
 
-#define NUMARGS(...)  (sizeof((char *[]){__VA_ARGS__})/sizeof(char *))
-#define PRELOAD(_l, ...)  lisp_preload_plugins(_l, NUMARGS(__VA_ARGS__), __VA_ARGS__)
+#define NUMARGS(...) (sizeof((char*[]){ __VA_ARGS__ }) / sizeof(char*))
+#define PRELOAD(_l, ...) \
+  lisp_preload_plugins(_l, NUMARGS(__VA_ARGS__), __VA_ARGS__)
 
 static void
 lisp_preload(const lisp_t lisp)
 {
-  const char * PRELOAD = getenv("MNML_PRELOAD");
+  const char* PRELOAD = getenv("MNML_PRELOAD");
   if (PRELOAD == NULL) {
     PRELOAD(lisp,
             /* COMPARATORS */
@@ -284,11 +288,12 @@ lisp_preload(const lisp_t lisp)
  */
 
 static void
-lisp_help(const char * const name)
+lisp_help(const char* const name)
 {
   fprintf(stderr, "Usage: %s [-b|-h|-v] [-e EXPR | FILE.L]\n", name);
   fprintf(stderr, "Options:\n");
-  fprintf(stderr, "\t-b: bare mode (no preloads, no ARGV, no CONFIG, no ENV)\n");
+  fprintf(stderr,
+          "\t-b: bare mode (no preloads, no ARGV, no CONFIG, no ENV)\n");
   fprintf(stderr, "\t-e: evaluate EXPR\n");
   fprintf(stderr, "\t-h: print this help\n");
   fprintf(stderr, "\t-v: show Minima.l runtime information\n");
@@ -299,14 +304,14 @@ lisp_help(const char * const name)
  */
 
 int
-main(const int argc, char ** const argv)
+main(const int argc, char** const argv)
 {
   /*
    * Parse arguments.
    */
   int c;
   bool bare = false;
-  char * expr = NULL;
+  char* expr = NULL;
   while ((c = getopt(argc, argv, "bhve:")) != -1) {
     switch (c) {
       case 'b':
@@ -329,7 +334,7 @@ main(const int argc, char ** const argv)
   /*
    * Grab any extraneous options and use that as input files.
    */
-  const char * filename = NULL;
+  const char* filename = NULL;
   if (optind < argc) {
     filename = argv[optind];
   }
@@ -349,7 +354,7 @@ main(const int argc, char ** const argv)
    * Get the current working dsirectory.
    */
   char cwd_buf[PATH_MAX];
-  const char * const cwd = getcwd(cwd_buf, PATH_MAX);
+  const char* const cwd = getcwd(cwd_buf, PATH_MAX);
   if (cwd == NULL) {
     fprintf(stderr, "Cannot get current directory: %s", strerror(errno));
     return __LINE__;
@@ -377,8 +382,7 @@ main(const int argc, char ** const argv)
     result = run(&lisp, stage_prompt, stage_newline, cwd);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
-  }
-  else if (filename == NULL) {
+  } else if (filename == NULL) {
     /*
      * Setup the PAIRS to NIL.
      */
@@ -401,12 +405,12 @@ main(const int argc, char ** const argv)
      */
     result = UP(NIL);
     while (keep_running) {
-      X(result);
       atom_t car = lisp_pop();
       if (car == NIL) {
-        result = car;
+        X(car);
         break;
       }
+      X(result);
       result = lisp_eval(&lisp, NIL, car);
     }
     /*
