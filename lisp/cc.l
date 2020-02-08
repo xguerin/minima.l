@@ -594,7 +594,10 @@
                    "-shared" "-fPIC" "-fomit-frame-pointer"
                    "-I" incd "-L" libd "-L" srcd "-lminimal"
                    "-g3" "-o" oout cout)))
-    (if (= osname "Linux") ($+ flags '("-flto")) flags)))
+    (if (or (= osname "Linux") (= osname "Darwin"))
+      ($+ flags '("-flto"))
+      flags
+      )))
 
 (def cc:build (SYMB . TARGET)
   "Build the plugin for the CPS function SYMB."
