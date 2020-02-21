@@ -23,16 +23,18 @@ endmacro()
 
 set(SOURCES caar.l cadar.l cadr.l cdar.l foldl.l foldr.l map.l rep.l truncl.l)
 
-foreach(SOURCE ${SOURCES})
-  get_filename_component(TAG ${SOURCE} NAME_WE)
-  Transpile(${TAG} ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE} TARGET)
-  add_library(minimal_function_${TAG} SHARED ${TARGET})
-  target_link_libraries(minimal_function_${TAG} PUBLIC minimal)
-  set_property(TARGET minimal_function_${TAG} PROPERTY C_STANDARD 99)
-  #
-  if(MNML_HAS_IPO)
-    set_property(TARGET minimal_function_${TAG} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  endif()
-  #
-  install(TARGETS minimal_function_${TAG} LIBRARY DESTINATION lib)
-endforeach()
+if(MNML_WITH_TRANSFN)
+  foreach(SOURCE ${SOURCES})
+    get_filename_component(TAG ${SOURCE} NAME_WE)
+    Transpile(${TAG} ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE} TARGET)
+    add_library(minimal_function_${TAG} SHARED ${TARGET})
+    target_link_libraries(minimal_function_${TAG} PUBLIC minimal)
+    set_property(TARGET minimal_function_${TAG} PROPERTY C_STANDARD 99)
+    #
+    if(MNML_HAS_IPO)
+      set_property(TARGET minimal_function_${TAG} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endif()
+    #
+    install(TARGETS minimal_function_${TAG} LIBRARY DESTINATION lib)
+  endforeach()
+endif()

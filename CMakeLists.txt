@@ -53,7 +53,7 @@ option(MNML_ENABLE_SSE41  "Enable SSE4.1 optimizations" ON)
 option(MNML_ENABLE_TESTS  "Build and run tests"         ON)
 
 option(MNML_WITH_PLUGINS "Build plugins"            ON)
-option(MNML_WITH_TRANSFN "Transpile LISP functions" OFF)
+option(MNML_WITH_TRANSFN "Transpile LISP functions" ON)
 
 #
 # Global definitions
@@ -138,9 +138,9 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
 add_subdirectory(src)
+add_subdirectory(lisp)
 
 if(MNML_WITH_TRANSFN)
-  add_subdirectory(lisp)
   set(MNML_WITH_PLUGINS ON)
 endif()
 
