@@ -1,6 +1,7 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
+#include <stdio.h>
 #include <unistd.h>
 
 static atom_t

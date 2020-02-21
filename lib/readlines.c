@@ -4,6 +4,7 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <errno.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #define BUFFER_LEN 1024

@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
+#include <stdio.h>
 #include <unistd.h>
 
 static atom_t
