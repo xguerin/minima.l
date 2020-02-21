@@ -391,35 +391,29 @@ lisp_bind_args(const lisp_t lisp, const atom_t closure, const atom_t env,
  */
 
 static atom_t
-lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t cell,
-               atom_t* const rem)
+lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
+               const atom_t vals)
 {
   atom_t rslt;
-  TRACE_SEXP(cell);
-  /*
-   * Grab lambda and values.
-   */
-  atom_t lbda = lisp_car(cell);
-  atom_t vals = lisp_cdr(cell);
-  X(cell);
+  TRACE_SEXP(func);
   /*
    * Grab the arguments, the closure and the body of the lambda.
    */
-  atom_t args = lisp_car(lbda);
-  atom_t cdr0 = lisp_cdr(lbda);
+  atom_t args = lisp_car(func);
+  atom_t cdr0 = lisp_cdr(func);
   atom_t clos = lisp_car(cdr0);
   atom_t cdr1 = lisp_cdr(cdr0);
   atom_t clst = lisp_car(cdr1);
   atom_t body = lisp_cdr(cdr1);
-  X(lbda, cdr0, cdr1);
+  X(func, cdr0, cdr1);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda
    * is used as the run environment and augmented with the arguments'
    * values. The call-site closure is used for the evaluation of the
    * arguments.
    */
-  atom_t narg;
-  atom_t next = lisp_bind_args(lisp, closure, clst, args, vals, &narg, rem);
+  atom_t narg, nval;
+  atom_t next = lisp_bind_args(lisp, closure, clst, args, vals, &narg, &nval);
   /*
    * If the list of remaining arguments is not NIL, handle partial
    * application.
@@ -456,8 +450,17 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t cell,
     X(con1);
   }
   /*
+   * If there is any remaining values, append them.
+   */
+  if (!IS_NULL(nval)) {
+    atom_t tmp = lisp_eval(lisp, closure, lisp_cons(rslt, nval));
+    X(rslt);
+    rslt = tmp;
+  }
+  /*
    */
   TRACE_SEXP(rslt);
+  X(nval);
   return rslt;
 }
 
@@ -468,45 +471,54 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t
 lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
-  atom_t rslt, rem;
+  atom_t rslt;
   TRACE_SEXP(cell);
+  /*
+   * Evaluate CAR.
+   */
+  atom_t car = lisp_car(cell);
+  atom_t nxt = lisp_eval(lisp, closure, UP(car));
+  atom_t cdr = lisp_cdr(cell);
+  X(cell);
   /*
    * Handle the case when CAR is a function.
    */
-  if (IS_FUNC(CAR(cell))) {
-    rslt = lisp_eval_func(lisp, closure, cell, &rem);
+  if (IS_FUNC(nxt)) {
+    TRACE("IS_FUNC");
+    rslt = lisp_eval_func(lisp, closure, nxt, cdr);
+    TRACE_SEXP(rslt);
+  }
+  /*
+   * If CAR and CNR are the same, recompose the list.
+   */
+  else if (lisp_equ(car, nxt)) {
+    TRACE("IS_EQUAL");
+    rslt = lisp_cons(nxt, cdr);
+    X(nxt, cdr);
+    TRACE_SEXP(rslt);
   }
   /*
    * If it's a symbol, re-evaluate cell.
    */
-  else if (IS_SYMB(CAR(cell))) {
-    rslt = lisp_eval(lisp, closure, cell);
-    rem = UP(NIL);
+  else if (IS_SYMB(nxt) || IS_PAIR(nxt)) {
+    TRACE("IS_SYMB/IS_PAIR");
+    rslt = lisp_eval(lisp, closure, lisp_cons(nxt, cdr));
+    X(nxt, cdr);
+    TRACE_SEXP(rslt);
   }
   /*
-   * Otherwise, just return the cell.
+   * Otherwise, recompose the list.
    */
   else {
-    rslt = cell;
-    rem = UP(NIL);
-  }
-  /*
-   * Check if there is any remainder arguments.
-   */
-  if (IS_NULL(rem)) {
-    X(rem);
+    TRACE("IS_OTHER");
+    rslt = lisp_cons(nxt, cdr);
+    X(nxt, cdr);
     TRACE_SEXP(rslt);
-    return rslt;
   }
   /*
-   * Apply the result to the remainder arguments.
    */
-  atom_t old = rslt;
-  rslt = lisp_cons(old, rem);
-  X(old, rem);
-  /*
-   */
-  return lisp_eval_pair(lisp, closure, rslt);
+  X(car);
+  return rslt;
 }
 
 /*
@@ -522,21 +534,7 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   switch (cell->type) {
     case T_PAIR: {
-      /*
-       * Evaluate CAR.
-       */
-      atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
-      atom_t cdr = lisp_cdr(cell);
-      X(cell);
-      /*
-       * Build the new value.
-       */
-      atom_t new = lisp_cons(car, cdr);
-      X(car, cdr);
-      /*
-       * Evaluate the list.
-       */
-      rslt = lisp_eval_pair(lisp, closure, new);
+      rslt = lisp_eval_pair(lisp, closure, cell);
       break;
     }
     case T_SYMBOL: {

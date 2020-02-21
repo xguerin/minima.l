@@ -33,6 +33,11 @@ size_t lisp_len(const atom_t cell);
 atom_t lisp_append(const atom_t lst, const atom_t elt);
 
 /*
+ * Compare A and B.
+ */
+bool lisp_equ(const atom_t a, const atom_t b);
+
+/*
  * Shallow duplicate: 1(1X 1X ...) -> 1(2X 2X ...).
  */
 atom_t lisp_dup(const atom_t cell);

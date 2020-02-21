@@ -161,6 +161,39 @@ lisp_append(const atom_t lst, const atom_t elt)
 }
 
 /*
+ * Compare A and B.
+ */
+
+bool
+lisp_equ(const atom_t a, const atom_t b)
+{
+  /*
+   * Make sure A and B are of the same type.
+   */
+  if (a->type != b->type) {
+    return false;
+  }
+  /*
+   * Compare depending on the type.
+   */
+  switch (a->type) {
+    case T_NIL:
+    case T_TRUE:
+    case T_WILDCARD:
+      return true;
+    case T_CHAR:
+    case T_NUMBER:
+      return a->number == b->number;
+    case T_PAIR:
+      return lisp_equ(CAR(a), CAR(b)) && lisp_equ(CDR(a), CDR(b));
+    case T_SYMBOL:
+      return lisp_symbol_match(a, b);
+    default:
+      return false;
+  }
+}
+
+/*
  * Shallow duplicate: 1(1X 1X ...) -> 1(2X 2X ...).
  */
 

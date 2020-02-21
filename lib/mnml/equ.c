@@ -1,34 +1,7 @@
 #include <mnml/lisp.h>
 #include <mnml/plugin.h>
 #include <mnml/slab.h>
-
-static bool lisp_equ(const atom_t a, const atom_t b);
-
-static bool
-atom_equ(const atom_t a, const atom_t b)
-{
-  switch (a->type) {
-    case T_NIL:
-    case T_TRUE:
-    case T_WILDCARD:
-      return true;
-    case T_CHAR:
-    case T_NUMBER:
-      return a->number == b->number;
-    case T_PAIR:
-      return lisp_equ(CAR(a), CAR(b)) && lisp_equ(CDR(a), CDR(b));
-    case T_SYMBOL:
-      return lisp_symbol_match(a, b);
-    default:
-      return false;
-  }
-}
-
-static bool
-lisp_equ(const atom_t a, const atom_t b)
-{
-  return a->type == b->type && atom_equ(a, b);
-}
+#include <mnml/utils.h>
 
 static atom_t
 lisp_function_equ(const lisp_t lisp, const atom_t closure,
