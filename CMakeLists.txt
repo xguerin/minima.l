@@ -53,7 +53,10 @@ option(MNML_ENABLE_SSE41  "Enable SSE4.1 optimizations" ON)
 option(MNML_ENABLE_TESTS  "Build and run tests"         ON)
 
 option(MNML_WITH_PLUGINS "Build plugins"            ON)
-option(MNML_WITH_TRANSFN "Transpile LISP functions" ON)
+option(MNML_WITH_TRANSFN "Transpile LISP functions" OFF)
+
+message(STATUS "Build plugins: " ${MNML_WITH_PLUGINS})
+message(STATUS "Transpile functions: " ${MNML_WITH_TRANSFN})
 
 #
 # Global definitions

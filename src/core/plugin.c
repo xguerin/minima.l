@@ -58,6 +58,7 @@ lisp_plugin_paths()
      * Set the system prefix first.
      */
     strcpy(buffer, lisp_library_prefix());
+    strcat(buffer, "/mnml");
     /*
      * Then, append the user cache path.
      */
