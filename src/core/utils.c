@@ -352,7 +352,8 @@ lisp_timestamp()
 }
 
 const char*
-lisp_get_fullpath(const char* const filepath, char* const buffer)
+lisp_get_fullpath(const char* const cwd, const char* const filepath,
+                  char* const buffer)
 {
   char expn_buf[PATH_MAX];
   char absl_buf[PATH_MAX];
@@ -377,7 +378,7 @@ lisp_get_fullpath(const char* const filepath, char* const buffer)
    * If the expanded path is not absolute, prepend the current CWD.
    */
   if (expn_buf[0] != '/' && !IS_NULL(ICHAN)) {
-    lisp_make_cstring(CAR(CDR(CAR(ICHAN))), absl_buf, PATH_MAX, 0);
+    strcpy(absl_buf, cwd);
     strcat(absl_buf, "/");
     strcat(absl_buf, expn_buf);
   } else {
@@ -415,13 +416,22 @@ lisp_get_fullpath(const char* const filepath, char* const buffer)
 atom_t
 lisp_load_file(const lisp_t lisp, const char* const filepath)
 {
+  char absl_buf[PATH_MAX];
   char path_buf[PATH_MAX];
   char dirn_buf[PATH_MAX];
   char curd_buf[PATH_MAX];
   /*
+   * Get CWD.
+   */
+  if (IS_NULL(ICHAN)) {
+    strcpy(absl_buf, getenv("PWD"));
+  } else {
+    lisp_make_cstring(CAR(CDR(CAR(ICHAN))), absl_buf, PATH_MAX, 0);
+  }
+  /*
    * Get the fullpath for the file.
    */
-  const char* path = lisp_get_fullpath(filepath, path_buf);
+  const char* path = lisp_get_fullpath(absl_buf, filepath, path_buf);
   if (path == NULL) {
     ERROR("Cannot get the full path for %s", filepath);
     return UP(NIL);

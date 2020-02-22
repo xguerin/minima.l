@@ -72,7 +72,8 @@ uint64_t lisp_timestamp();
 /*
  * Get the full path of a file according to the current ICHAN context.
  */
-const char* lisp_get_fullpath(const char* const filepath, char* const buffer);
+const char* lisp_get_fullpath(const char* const cwd, const char* const filepath,
+                              char* const buffer);
 
 /*
  * Load a file.

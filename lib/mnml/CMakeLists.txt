@@ -30,8 +30,7 @@ macro(Transpile TAG SCRIPT TARGET)
   add_custom_command(
     COMMAND
     MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lisp
-    ${CMAKE_BINARY_DIR}/bin/mnml ${CMAKE_SOURCE_DIR}/bin/mnmlc
-    ${SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
+    ${CMAKE_BINARY_DIR}/bin/mnml ${CMAKE_SOURCE_DIR}/bin/mnmlc -c ${SCRIPT} -o ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
     MAIN_DEPENDENCY ${SCRIPT}
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
     DEPENDS mnml minimal_plugins)

@@ -23,9 +23,10 @@ lisp_function_out(const lisp_t lisp, const atom_t closure,
   LISP_LOOKUP(chan, arguments, CHAN);
   LISP_LOOKUP(prog, arguments, REM);
   /*
-   * Get the working directory for the current ICHAN.
+   * Get the current working directory. Output files are expected to be relative
+   * to where the program is run, not where the program is located.
    */
-  lisp_make_cstring(CAR(CDR(CAR(ICHAN))), dirn_buf, PATH_MAX, 0);
+  strcpy(dirn_buf, getenv("PWD"));
   /*
    * Process the CHAN.
    */
@@ -46,7 +47,7 @@ lisp_function_out(const lisp_t lisp, const atom_t closure,
       /*
        * Get the fullpath for the file.
        */
-      const char* path = lisp_get_fullpath(file_buf, path_buf);
+      const char* path = lisp_get_fullpath(dirn_buf, file_buf, path_buf);
       if (path == NULL) {
         ERROR("Cannot get the full path for %s", file_buf);
         return UP(NIL);

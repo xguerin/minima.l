@@ -1,16 +1,26 @@
 #!/usr/bin/env mnml
 
-(load "@lib/cc.l")
+(load "@lib/args.l" "@lib/cc.l")
 
 (def usage ()
   "Print out a usage string for this script."
-  (prinl "Usage: " (car (cdr ARGV)) " FILE.l"))
+  (prinl "Usage: " (car (cdr ARGV)) " -c FILE.l -o FILE.c"))
 
-(let ((fname . (car (cdr (cdr ARGV))))
-      (targt . (car (cdr (cdr (cdr ARGV)))))
-      (symb  . (load fname)))
-  (if symb
-    (= symb (cc:compile symb targt))
-    (usage)))
+(setq options
+  '(("-c" . (\ (SRC) (setq SRC SRC)))
+    ("-o" . (\ (DST) (setq DST DST)))
+    ("-v" . (\ () (setq VERBOSE T)))
+    ("-h" . usage)))
+
+(if (args:parse usage options)
+  (let ((symb . (load SRC)))
+    (if symb
+      (prog
+        (when VERBOSE (prinl "Transpiling '" symb " to " DST))
+        (= symb (cc:compile symb DST)))
+      (prog
+        (prinl "Failed to load: " SRC)
+        (usage))))
+  (usage))
 
 # vim: ft=minimal:ts=2:sts=2:sw=2:et:tw=80
