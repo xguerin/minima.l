@@ -1,4 +1,4 @@
-(load "test.l")
+(load "@lib/test.l")
 
 (def deconstruct (LST)
   "Deconstruct LST."

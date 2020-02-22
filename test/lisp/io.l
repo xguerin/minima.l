@@ -1,4 +1,4 @@
-(load "test.l" "../../lisp/append.l" "../../lisp/ntoa.l" 'time 'unlink)
+(load "@lib/test.l" "@lib/append.l" "@lib/ntoa.l" 'time 'unlink)
 
 (test:run
   "I/O operations"

@@ -1,4 +1,4 @@
-(load "../../lisp/foldl.l" "../../lisp/len.l" "../../lisp/term.l" 'slabinfo)
+(load "@lib/foldl.l" "@lib/len.l" "@lib/term.l" 'slabinfo)
 
 (def test:run (SUITE . TESTS)
   "Run all tests specified as a ((NAME . TEST)) list."

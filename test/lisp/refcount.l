@@ -1,4 +1,4 @@
-(load "test.l" "../../lisp/cps.l")
+(load "@lib/test.l" "@lib/cps.l")
 
 (test:run
   "CPS reference counting"

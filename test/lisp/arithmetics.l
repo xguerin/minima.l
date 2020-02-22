@@ -1,4 +1,4 @@
-(load "test.l")
+(load "@lib/test.l")
 
 (test:run
   "Arithmetic operations"

@@ -1,4 +1,4 @@
-(load "test.l" "../../lisp/cc.l")
+(load "@lib/test.l" "@lib/cc.l")
 
 (test:run
   "Compiler operations"
