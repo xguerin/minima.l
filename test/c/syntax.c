@@ -82,7 +82,7 @@ type_tests()
 static bool
 basic_tests()
 {
-  struct lisp lisp;
+  struct _lisp lisp;
   /*
    * TEST 00.
    */
@@ -140,7 +140,7 @@ basic_tests()
 static bool
 car_cdr_tests()
 {
-  struct lisp lisp;
+  struct _lisp lisp;
   atom_t car = NULL, cdr = NULL;
   /*
    * TEST_00.
@@ -251,7 +251,7 @@ car_cdr_tests()
 static bool
 conc_cons_tests()
 {
-  struct lisp lisp;
+  struct _lisp lisp;
   atom_t tmp1 = NULL, tmp2 = NULL, tmp3 = NULL;
   /*
    * TEST_00.

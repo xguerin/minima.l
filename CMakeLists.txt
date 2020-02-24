@@ -52,10 +52,10 @@ option(MNML_ENABLE_DEBUG  "Enable debug output"         ON)
 option(MNML_ENABLE_SSE41  "Enable SSE4.1 optimizations" ON)
 option(MNML_ENABLE_TESTS  "Build and run tests"         ON)
 
-option(MNML_WITH_PLUGINS "Build plugins"            ON)
+option(MNML_WITH_MODULES "Build modules"            ON)
 option(MNML_WITH_TRANSFN "Transpile LISP functions" OFF)
 
-message(STATUS "Build plugins: " ${MNML_WITH_PLUGINS})
+message(STATUS "Build modules: " ${MNML_WITH_MODULES})
 message(STATUS "Transpile functions: " ${MNML_WITH_TRANSFN})
 
 #
@@ -144,10 +144,10 @@ add_subdirectory(src)
 add_subdirectory(lisp)
 
 if(MNML_WITH_TRANSFN)
-  set(MNML_WITH_PLUGINS ON)
+  set(MNML_WITH_MODULES ON)
 endif()
 
-if(MNML_WITH_PLUGINS)
+if(MNML_WITH_MODULES)
   add_subdirectory(lib)
 endif()
 
@@ -165,7 +165,7 @@ set(HEADERS
   include/mnml/debug.h
   include/mnml/lisp.h
   include/mnml/maker.h
-  include/mnml/plugin.h
+  include/mnml/module.h
   include/mnml/slab.h
   include/mnml/types.h
   include/mnml/utils.h)
@@ -195,7 +195,7 @@ install(
   include/mnml/debug.h
   include/mnml/lisp.h
   include/mnml/maker.h
-  include/mnml/plugin.h
+  include/mnml/module.h
   include/mnml/slab.h
   include/mnml/types.h
   include/mnml/utils.h

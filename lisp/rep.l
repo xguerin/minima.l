@@ -1,3 +1,5 @@
+(load '(math > -) '(std cons if))
+
 (def rep (n atm)
   "Create a list of ATM repeated N times"
   (if (> n 0)

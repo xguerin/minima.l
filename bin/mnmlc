@@ -1,6 +1,10 @@
 #!/usr/bin/env mnml
 
-(load "@lib/args.l" "@lib/cc.l")
+(load
+  "@lib/args.l" "@lib/cc.l" "@lib/has.l"
+  '(io prinl)
+  '(logic and =)
+  '(std car cdr setq let if prog when))
 
 (def usage ()
   "Print out a usage string for this script."
@@ -12,15 +16,17 @@
     ("-v" . (\ () (setq VERBOSE T)))
     ("-h" . usage)))
 
-(if (args:parse usage options)
-  (let ((symb . (load SRC)))
-    (if symb
-      (prog
-        (when VERBOSE (prinl "Transpiling '" symb " to " DST))
-        (= symb (cc:compile symb DST)))
-      (prog
-        (prinl "Failed to load: " SRC)
-        (usage))))
-  (usage))
+(let ((args . (args:parse options)))
+  (if (and (has args "-c") (has args "-o"))
+    (let ((symb . (load SRC)))
+      (if symb
+        (prog
+          (when VERBOSE (prinl "Transpiling '" symb " to " DST))
+          (= symb (cc:compile symb DST)))
+        (prog
+          (prinl "Failed to load: " SRC)
+          (usage))))
+    (if (not (has args "-h"))
+      (usage))))
 
 # vim: ft=minimal:ts=2:sts=2:sw=2:et:tw=80

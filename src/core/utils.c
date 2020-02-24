@@ -1,6 +1,6 @@
 #include <mnml/debug.h>
 #include <mnml/maker.h>
-#include <mnml/plugin.h>
+#include <mnml/module.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <dirent.h>
@@ -103,7 +103,7 @@ lisp_init()
   /*
    * Initialize the plugins.
    */
-  return lisp_plugin_init();
+  return lisp_module_init();
 }
 
 void
@@ -112,7 +112,7 @@ lisp_fini()
   /*
    * Clean-up the plugins.
    */
-  lisp_plugin_fini();
+  lisp_module_fini();
   /*
    * Destroy the global variables.
    */

@@ -1,4 +1,9 @@
-(load 'close 'dup 'exec 'fork 'pipe 'wait "append.l" "map.l")
+(load
+  "append.l" "map.l"
+  '(io in readlines)
+  '(logic =)
+  '(std let \ cons prog)
+  '(unix . T))
 
 #
 # Run process at PATH with arguments ARG and environment ENV:

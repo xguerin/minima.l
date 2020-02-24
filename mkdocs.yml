@@ -11,7 +11,7 @@ nav:
     - Manual:
         - Language: manual/Language.md
         - Interpreter: manual/Interpreter.md
-        - Plugins: manual/Plugins.md
+        - Modules: manual/Modules.md
         - Reference: manual/Reference.md
     - Notes:
         - Closures: notes/Closures.md

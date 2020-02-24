@@ -10,3 +10,4 @@ if(MNML_HAS_IPO)
 endif()
 
 install(TARGETS mnml RUNTIME DESTINATION bin)
+install(PROGRAMS mnmlc DESTINATION bin)

@@ -1,3 +1,5 @@
+(load '(std if lst? nil? car cdr))
+
 (def foldl (fun acc lst)
   "Left-fold FUN over LST with ACC as the default accumulator value."
   (if (lst? lst)

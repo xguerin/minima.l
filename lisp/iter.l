@@ -1,3 +1,5 @@
+(load '(std if let car cdr))
+
 (def iter (fun lst)
   "Iterate over list LST and call FUN on each item."
   (if lst

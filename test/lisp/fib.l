@@ -1,4 +1,4 @@
-(load "@lib/test.l" "@lib/map.l")
+(load "@lib/test.l" "@lib/map.l" '(math <= + -) '(std if list))
 
 (def fib (N)
   (if (<= N 1) N (+ (fib (- N 1)) (fib (- N 2)))))

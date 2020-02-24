@@ -1,6 +1,5 @@
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
-#include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <errno.h>
@@ -220,80 +219,14 @@ lisp_build_env(const lisp_t lisp)
 }
 
 /*
- * Plugin preload.
- */
-
-static void
-lisp_preload_plugins(const lisp_t lisp, const size_t n, ...)
-{
-  va_list args;
-  va_start(args, n);
-  for (size_t i = 0; i < n; i += 1) {
-    const char* const symbol = va_arg(args, const char*);
-    MAKE_SYMBOL_STATIC(s, symbol, LISP_SYMBOL_LENGTH);
-    atom_t cell = lisp_make_symbol(s);
-    atom_t func = lisp_plugin_load(lisp, cell);
-    if (IS_NULL(func)) {
-      ERROR("Loading plugin %s failed", symbol);
-    }
-    X(cell);
-    X(func);
-  }
-  va_end(args);
-}
-
-#define NUMARGS(...) (sizeof((char*[]){ __VA_ARGS__ }) / sizeof(char*))
-#define PRELOAD(_l, ...) \
-  lisp_preload_plugins(_l, NUMARGS(__VA_ARGS__), __VA_ARGS__)
-
-static void
-lisp_preload(const lisp_t lisp)
-{
-  const char* PRELOAD = getenv("MNML_PRELOAD");
-  if (PRELOAD == NULL) {
-    PRELOAD(lisp,
-            /* COMPARATORS */
-            "=", "<>", "<", ">", "<=", ">=",
-            /* ARITHMETICS */
-            "+", "-", "*", "/", "%",
-            /* LOGIC */
-            "and", "or", "not",
-            /* LIST */
-            "car", "cdr", "conc", "cons", "list",
-            /* SYMBOL */
-            "<-", "\\", "def", "let", "setq", "sym",
-            /* STRING AND CHARACTER */
-            "chr", "str",
-            /* CONTROL */
-            "|>", "cond", "if", "match", "prog", "unless", "when",
-            /* PREDICATES */
-            "chr?", "lst?", "nil?", "num?", "str?", "sym?", "tru?",
-            /* I/O */
-            "in", "out", "read", "readlines",
-            /* PRINTERS */
-            "prin", "prinl", "print", "printl",
-            /* MISC */
-            "eval", "load", "quit", "quote", "time");
-  }
-  /*
-   * Scan the PRELOAD list and load the symbols it contains.
-   */
-  else {
-    FOR_EACH_TOKEN(PRELOAD, ",", entry, lisp_preload_plugins(lisp, 1, entry));
-  }
-}
-
-/*
  * Help.
  */
 
 static void
 lisp_help(const char* const name)
 {
-  fprintf(stderr, "Usage: %s [-b|-h|-v] [-e EXPR | FILE.L]\n", name);
+  fprintf(stderr, "Usage: %s [-h|-v] [-e EXPR | FILE.L]\n", name);
   fprintf(stderr, "Options:\n");
-  fprintf(stderr,
-          "\t-b: bare mode (no preloads, no ARGV, no CONFIG, no ENV)\n");
   fprintf(stderr, "\t-e: evaluate EXPR\n");
   fprintf(stderr, "\t-h: print this help\n");
   fprintf(stderr, "\t-v: show Minima.l runtime information\n");
@@ -362,16 +295,13 @@ main(const int argc, char** const argv)
   /*
    * Create a lisp context.
    */
-  struct lisp lisp = { .GLOBALS = UP(NIL) };
+  lisp_t lisp = lisp_make_context();
   /*
-   * Preload plugins, build ARGV, CONFIG and ENV.
+   * Build ARGV, CONFIG and ENV.
    */
-  if (!bare) {
-    lisp_preload(&lisp);
-    lisp_build_argv(&lisp, argc, argv);
-    lisp_build_config(&lisp);
-    lisp_build_env(&lisp);
-  }
+  lisp_build_argv(lisp, argc, argv);
+  lisp_build_config(lisp);
+  lisp_build_env(lisp);
   /*
    */
   atom_t result;
@@ -379,7 +309,7 @@ main(const int argc, char** const argv)
     lisp_set_parse_error_handler(repl_parse_error_handler);
     PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    result = run(&lisp, stage_prompt, stage_newline, cwd);
+    result = run(lisp, stage_prompt, stage_newline, cwd);
     POP_IO_CONTEXT(ICHAN);
     POP_IO_CONTEXT(OCHAN);
   } else if (filename == NULL) {
@@ -392,7 +322,7 @@ main(const int argc, char** const argv)
      */
     lexer_t lexer;
     size_t len = strlen(expr);
-    lisp_lexer_create(&lisp, lisp_push, &lexer);
+    lisp_lexer_create(lisp, lisp_push, &lexer);
     lisp_lexer_parse(&lexer, expr, len, true);
     lisp_lexer_destroy(&lexer);
     /*
@@ -411,7 +341,7 @@ main(const int argc, char** const argv)
         break;
       }
       X(result);
-      result = lisp_eval(&lisp, NIL, car);
+      result = lisp_eval(lisp, NIL, car);
     }
     /*
      * Pop the IO context.
@@ -424,7 +354,7 @@ main(const int argc, char** const argv)
     X(PAIRS);
   } else {
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    result = lisp_load_file(&lisp, argv[1]);
+    result = lisp_load_file(lisp, argv[1]);
     POP_IO_CONTEXT(OCHAN);
   }
   /*
@@ -435,7 +365,7 @@ main(const int argc, char** const argv)
   /*
    * Clean-up the lisp context.
    */
-  X(lisp.GLOBALS);
+  lisp_delete_context(lisp);
   /*
    */
   lisp_fini();

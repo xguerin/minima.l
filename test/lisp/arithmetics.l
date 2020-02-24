@@ -1,4 +1,6 @@
-(load "@lib/test.l")
+(load
+  "@lib/test.l"
+  '(math + - * /))
 
 (test:run
   "Arithmetic operations"

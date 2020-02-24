@@ -1,6 +1,6 @@
 (load
   "append.l" "assoc.l" "foldl.l" "foldr.l" "has.l" "last.l" "len.l" "ntoa.l"
-  "orelse.l" "replc.l" "rev.l")
+  "orelse.l" "replc.l" "rev.l" '(logic . T) '(math . T)'(std . T))
 
 #
 # Make a symbol placeholder

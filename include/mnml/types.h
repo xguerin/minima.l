@@ -80,7 +80,7 @@ typedef struct _atom
  * Lisp context type.
  */
 
-typedef struct lisp
+typedef struct _lisp
 {
   atom_t GLOBALS;
 } * lisp_t;

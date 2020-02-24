@@ -1,4 +1,4 @@
-(load "foldl.l")
+(load "foldl.l" '(logic = or) '(std \))
 
 (def has (LST X)
   "Check if X is in LST"

@@ -1,7 +1,11 @@
 add_subdirectory(core)
 add_subdirectory(grammar)
+add_subdirectory(module)
 
-add_library(minimal SHARED $<TARGET_OBJECTS:minimal_core> $<TARGET_OBJECTS:minimal_grammar>)
+add_library(minimal SHARED
+  $<TARGET_OBJECTS:minimal_core>
+  $<TARGET_OBJECTS:minimal_grammar>
+  $<TARGET_OBJECTS:minimal_module>)
 set_property(TARGET minimal PROPERTY C_STANDARD 99)
 target_link_libraries(minimal PUBLIC ${CMAKE_DL_LIBS})
 

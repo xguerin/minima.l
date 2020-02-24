@@ -1,4 +1,9 @@
-(load "@lib/test.l" "@lib/append.l" "@lib/ntoa.l" 'time 'unlink)
+(load
+  "@lib/test.l" "@lib/append.l" "@lib/ntoa.l"
+  '(io out in read print)
+  '(std let)
+  '(sys time)
+  '(unix unlink))
 
 (test:run
   "I/O operations"

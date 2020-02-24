@@ -1,4 +1,4 @@
-(load "foldr.l")
+(load "foldr.l" '(logic =) '(std \ if cons))
 
 (def replc (k v lst)
   (foldr

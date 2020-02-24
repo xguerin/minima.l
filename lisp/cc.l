@@ -1,6 +1,19 @@
 (load
-  "assoc.l" "aton.l" "cps.l" "filter.l" "foldl.l" "foldr.l" "iter.l" "iter2.l"
-  "last.l" "map.l" "rev.l" "run.l" 'unlink)
+  "append.l"
+  "assoc.l"
+  "aton.l"
+  "cps.l"
+  "filter.l"
+  "foldl.l"
+  "foldr.l"
+  "iter.l"
+  "iter2.l"
+  "last.l"
+  "map.l"
+  "rev.l"
+  "run.l"
+  '(io . T) '(logic . T) '(math . T) '(std . T)
+  '(sys . T) '(unix . T))
 
 #
 # Indentation management.
@@ -446,7 +459,7 @@
   (prinl "#include <mnml/closure.h>")
   (prinl "#include <mnml/lisp.h>")
   (prinl "#include <mnml/maker.h>")
-  (prinl "#include <mnml/plugin.h>")
+  (prinl "#include <mnml/module.h>")
   (prinl "#include <mnml/slab.h>")
   (prinl "#include <mnml/types.h>")
   (prinl)
@@ -517,7 +530,7 @@
   (prinl))
 
 #
-# Plugin.
+# Module.
 #
 
 (def cc:gen:argument (TYPES arg)
@@ -525,8 +538,8 @@
   (prinl (o|) "LISP_LOOKUP(_" arg ", arguments, " arg ");")
     (cc:gen:value (assoc arg TYPES) arg))
 
-(def cc:gen:plugin (NAME ARGS TYPES)
-  "Generate C code for the plugin."
+(def cc:gen:module (NAME ARGS TYPES)
+  "Generate C code for the module."
   (prinl "static atom_t lisp_function_" NAME "(const lisp_t lisp, const atom_t env, const atom_t arguments) {")
   (o>)
   (/**/ "Grab the arguments.")
@@ -544,9 +557,20 @@
   (<o)
   (prinl "}")
   (prinl)
-  (prin "LISP_PLUGIN_REGISTER(" NAME ", " NAME)
+  (prin "LISP_MODULE_SETUP(" NAME ", " NAME)
   (iter (\ (e) (prin ", " e)) ARGS)
-  (prinl ", NIL);"))
+  (prinl ", NIL);")
+  (prinl)
+  (prinl "module_entry_t ENTRIES[] = {")
+  (prinl "  LISP_MODULE_REGISTER(" NAME "),")
+  (prinl "  { NULL, NULL }")
+  (prinl "};")
+  (prinl)
+  (prinl "const char * lisp_module_name() { return \"" NAME "\"; }")
+  (prinl)
+  (prinl "const module_entry_t * lisp_module_entries() {")
+  (prinl "  return ENTRIES;")
+  (prinl "}"))
 
 #
 # Main compiler entrypoint.
@@ -577,33 +601,37 @@
         (cc:gen:identity TYPES kvar)
         (cc:gen:cont SYMB ARGS REFS TYPES kvar kvar body)
         (cc:gen:main SYMB ARGS REFS kvar)
-        (cc:gen:plugin SYMB ARGS TYPES))
+        (cc:gen:module SYMB ARGS TYPES))
       #
       # Return then symbol passed as argument.
       #
       SYMB
       )))
 
+(def cc:ext ()
+  "Get the library extension depending on the OS name."
+  (let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV)))
+    (if (= osname "Darwin") ".dylib" ".so")))
+
 (def cc:flags ()
   "Generate the build flags based on the OS name."
   (let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV))
         (incd . (append (assoc 'PREFIX CONFIG) "/include"))
         (libd . (append (assoc 'PREFIX CONFIG) "/lib"))
-        (srcd . (append (assoc 'PREFIX CONFIG) "/src"))
         (flags . (list
                    "-shared" "-fPIC" "-fomit-frame-pointer"
-                   "-I" incd "-L" libd "-L" srcd "-lminimal"
-                   "-g3" "-o" oout cout)))
+                   "-I" incd "-L" libd "-lminimal"
+                   "-O3" "-g3" "-o" oout cout)))
     (if (or (= osname "Linux") (= osname "Darwin"))
       ($+ flags '("-flto"))
       flags
       )))
 
 (def cc:build (SYMB . TARGET)
-  "Build the plugin for the CPS function SYMB."
+  "Build the module for the CPS function SYMB."
   (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
         (cout . (append trgt "/" (str SYMB) ".c"))
-        (oout . (<|> (eval (car TARGET)) (append trgt "/libminimal_function_" (str SYMB) ".so"))))
+        (oout . (<|> (eval (car TARGET)) (append trgt "/lib" (str SYMB) (cc:ext)))))
     (when SYMB
       #
       # Remove the SO file
@@ -613,4 +641,4 @@
       # Build the SO file
       #
       (let (((status . messages) . (run "/usr/bin/cc" (cc:flags) ENV)))
-        (if (= 0 status) (load SYMB))))))
+        (if (= 0 status) (load (list SYMB SYMB)))))))

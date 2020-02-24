@@ -1,4 +1,4 @@
-(load "foldl.l")
+(load "foldl.l" '(std \ cons))
 
 (def rev (lst)
   "Reverse LST."

@@ -1,4 +1,4 @@
-(load "@lib/test.l")
+(load "@lib/test.l" '(std let cons))
 
 (def deconstruct (LST)
   "Deconstruct LST."

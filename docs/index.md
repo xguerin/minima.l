@@ -3,6 +3,8 @@
 Opinionated LISP dialect that takes some of its inspirations from [Picolisp](https://picolisp.com),
 [CHICKEN Scheme](http://call-cc.org), and other great languages. The source code is located [here](https://git.sr.ht/~xguerin/minima.l).
 ```lisp
+(load '(math + - <=) '(io prinl) '(std if))
+
 (def fib (N)
   (if (<= N 1)
     N

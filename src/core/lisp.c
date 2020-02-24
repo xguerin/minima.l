@@ -1,7 +1,6 @@
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/lisp.h>
-#include <mnml/plugin.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <signal.h>

@@ -163,4 +163,11 @@ void lisp_make_true();
 void lisp_make_quote();
 void lisp_make_wildcard();
 
+/*
+ * Context maker.
+ */
+
+lisp_t lisp_make_context();
+void lisp_delete_context(lisp_t lisp);
+
 // vim: tw=80:sw=2:ts=2:sts=2:et

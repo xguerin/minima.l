@@ -1,4 +1,8 @@
-(load "append.l" "iter.l" "len.l" "rep.l" "truncl.l" "truncr.l")
+(load
+  "append.l" "iter.l" "len.l" "rep.l" "truncl.l" "truncr.l"
+  '(math >=)
+  '(std |> if sym list eval cons chr \)
+  )
 
 #
 # Escape STR with CODE.

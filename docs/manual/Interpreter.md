@@ -13,10 +13,11 @@ It can be used as a _shebang_ interpreter:
 ```
 #!/usr/bin/env mnml
 
+(load '(math +))
 (+ 1 2)
 ```
-By default, the interpreter preload most common [plugins](#native-functions) out of the box. What
-is loaded can be altered by the `MNML_PRELOAD` variable.
+By default, only the symbols `def`, `load`, and `quote` from the `std` module are
+available. Scripts are strongly encouraged to load what they use.
 
 ## Environment variables
 
@@ -30,37 +31,29 @@ names:
 * `CHAN`: I/O channel operations
 * `CONS`: list construction operations
 * `MAKE`: atom creation operations
-`* PLUG`: plugin operations
+`* MODL`: module operations
 * `REFC`: reference counting operations
 * `SLOT`: slot allocator operations
 * `SLAB`: slab allocator operations
 ```
-$ MNML_DEBUG=PLUG,SLOT mnml
+$ MNML_DEBUG=MODL,SLOT mnml
 ```
 The variable can be left empty to restrict debug output to `eval`.
 
-### MNML_PRELOAD
+### MNML_MODULE_PATH
 
-This variable controls which plugin is preloaded by the interpreter. It accepts
-a comman-separated list of symbols:
+This variable controls where to look for modules, the default being the
+`lib/mnml` directory in the installation prefix. It accepts a colon-separated
+list of paths:
 ```
-$ MNML_PRELOAD=load,quit mnml
-```
-Although it can be used empty, you may want to at least preload `load`. 
-
-### MNML_PLUGIN_PATH
-
-This variable controls where to look for plugins, the default being the
-installation prefix. It accepts a colon-separated list of paths:
-```
-$ MNML_PLUGIN_PATH=/some/path:/some/other/path mnml
+$ MNML_MODULE_PATH=/some/path:/some/other/path mnml
 ```
 ### MNML_SCRIPT_PATH
 
 This variable controls where to look for lisp scripts, the default being
-`share/mnml` in the installation prefix:
+`share/mnml` in the installation prefix. It accepts a colon-separated
+list of paths:
 ```
-$ MNML_SCRIPT_PATH=/some/path mnml
+$ MNML_SCRIPT_PATH=/some/path:/some/other/path mnml
 ```
-When set, that path is use to replace occurences of `@lib` in `(load)`
-statements.
+When set, that path is used to match occurences of `@lib` in `(load)` statements.

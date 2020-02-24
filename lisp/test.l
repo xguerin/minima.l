@@ -1,4 +1,10 @@
-(load "@lib/foldl.l" "@lib/len.l" "@lib/term.l" 'slabinfo)
+(load
+  "foldl.l" "len.l" "term.l"
+  '(io prin printl prinl)
+  '(logic = and)
+  '(math >)
+  '(std let if eval cond prog car tru?)
+  '(sys slabinfo))
 
 (def test:run (SUITE . TESTS)
   "Run all tests specified as a ((NAME . TEST)) list."
