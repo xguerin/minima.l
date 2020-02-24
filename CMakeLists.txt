@@ -140,7 +140,7 @@ find_package(Ragel REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
-add_subdirectory(src)
+add_subdirectory(lib)
 add_subdirectory(lisp)
 
 if(MNML_WITH_TRANSFN)
@@ -148,7 +148,7 @@ if(MNML_WITH_TRANSFN)
 endif()
 
 if(MNML_WITH_MODULES)
-  add_subdirectory(lib)
+  add_subdirectory(modules)
 endif()
 
 if(MNML_ENABLE_DEBUG)

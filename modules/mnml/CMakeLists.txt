@@ -32,6 +32,7 @@ add_custom_target(minimal_plugins DEPENDS ${MODULES})
 macro(Transpile TAG SCRIPT TARGET)
   add_custom_command(
     COMMAND
+    MNML_MODULE_PATH=${CMAKE_BINARY_DIR}/modules/mnml
     MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lisp
     ${CMAKE_BINARY_DIR}/bin/mnml ${CMAKE_SOURCE_DIR}/bin/mnmlc -c ${SCRIPT} -o ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
     MAIN_DEPENDENCY ${SCRIPT}
