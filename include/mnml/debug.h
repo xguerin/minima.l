@@ -16,6 +16,7 @@ extern bool MNML_DEBUG;
 extern bool MNML_VERBOSE_BIND;
 extern bool MNML_VERBOSE_CHAN;
 extern bool MNML_VERBOSE_CONS;
+extern bool MNML_VERBOSE_EVAL;
 extern bool MNML_VERBOSE_MAKE;
 extern bool MNML_VERBOSE_MODL;
 extern bool MNML_VERBOSE_REFC;
@@ -100,6 +101,8 @@ void lisp_debug_parse_flags();
   TRACE_CATG(MNML_VERBOSE_CHAN, __fmt, ##__VA_ARGS__)
 #define TRACE_CONS(__fmt, ...) \
   TRACE_CATG(MNML_VERBOSE_CONS, __fmt, ##__VA_ARGS__)
+#define TRACE_EVAL(__fmt, ...) \
+  TRACE_CATG(MNML_VERBOSE_EVAL, __fmt, ##__VA_ARGS__)
 #define TRACE_MAKE(__fmt, ...) \
   TRACE_CATG(MNML_VERBOSE_MAKE, __fmt, ##__VA_ARGS__)
 #define TRACE_MODL(__fmt, ...) \
@@ -131,6 +134,7 @@ void lisp_debug_parse_flags();
 #define TRACE_BIND_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_BIND, __c)
 #define TRACE_CHAN_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_CHAN, __c)
 #define TRACE_CONS_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_CONS, __c)
+#define TRACE_EVAL_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_EVAL, __c)
 #define TRACE_MAKE_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_MAKE, __c)
 #define TRACE_MODL_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_MODL, __c)
 #define TRACE_SLAB_SEXP(__c) TRACE_CATG_SEXP(MNML_VERBOSE_SLAB, __c)
@@ -161,6 +165,7 @@ void lisp_debug(FILE* fp, const atom_t atom);
 #define TRACE_BIND(__c, ...)
 #define TRACE_CHAN(__c, ...)
 #define TRACE_CONS(__c, ...)
+#define TRACE_EVAL(__c, ...)
 #define TRACE_MAKE(__c, ...)
 #define TRACE_REFC(__c, ...)
 #define TRACE_SLAB(__c, ...)
@@ -170,6 +175,7 @@ void lisp_debug(FILE* fp, const atom_t atom);
 #define TRACE_BIND_SEXP(__c)
 #define TRACE_CHAN_SEXP(__c)
 #define TRACE_CONS_SEXP(__c)
+#define TRACE_EVAL_SEXP(__c)
 #define TRACE_MAKE_SEXP(__c)
 #define TRACE_MODL_SEXP(__c)
 #define TRACE_REFC_SEXP(__c)

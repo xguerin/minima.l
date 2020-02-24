@@ -281,9 +281,6 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
           const atom_t val)
 {
   atom_t ret;
-  TRACE_BIND_SEXP(closure);
-  TRACE_BIND_SEXP(arg);
-  TRACE_BIND_SEXP(val);
   /*
    */
   switch (arg->type) {
@@ -306,6 +303,8 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
       break;
     }
     case T_SYMBOL: {
+      TRACE_BIND_SEXP(arg);
+      TRACE_BIND_SEXP(val);
       ret = lisp_setq(closure, lisp_cons(arg, val));
       X(arg, val);
       TRACE_BIND_SEXP(ret);
@@ -319,7 +318,6 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
   }
   /*
    */
-  TRACE_BIND_SEXP(ret);
   return ret;
 }
 
@@ -328,10 +326,6 @@ lisp_bind_args(const lisp_t lisp, const atom_t closure, const atom_t env,
                const atom_t args, const atom_t vals, atom_t* const narg,
                atom_t* const nval)
 {
-  TRACE_BIND_SEXP(closure);
-  TRACE_BIND_SEXP(env);
-  TRACE_BIND_SEXP(args);
-  TRACE_BIND_SEXP(vals);
   /*
    * Return if we run out of arguments.
    */
@@ -394,7 +388,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
                const atom_t vals)
 {
   atom_t rslt;
-  TRACE_SEXP(func);
+  TRACE_EVAL_SEXP(func);
   /*
    * Grab the arguments, the closure and the body of the lambda.
    */
@@ -458,8 +452,8 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
   }
   /*
    */
-  TRACE_SEXP(rslt);
   X(nval);
+  TRACE_EVAL_SEXP(rslt);
   return rslt;
 }
 
@@ -471,7 +465,7 @@ static atom_t
 lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   atom_t rslt;
-  TRACE_SEXP(cell);
+  TRACE_EVAL_SEXP(cell);
   /*
    * Evaluate CAR.
    */
@@ -483,40 +477,33 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * Handle the case when CAR is a function.
    */
   if (IS_FUNC(nxt)) {
-    TRACE("IS_FUNC");
     rslt = lisp_eval_func(lisp, closure, nxt, cdr);
-    TRACE_SEXP(rslt);
   }
   /*
    * If CAR and CNR are the same, recompose the list.
    */
   else if (lisp_equ(car, nxt)) {
-    TRACE("IS_EQUAL");
     rslt = lisp_cons(nxt, cdr);
     X(nxt, cdr);
-    TRACE_SEXP(rslt);
   }
   /*
    * If it's a symbol, re-evaluate cell.
    */
   else if (IS_SYMB(nxt) || IS_PAIR(nxt)) {
-    TRACE("IS_SYMB/IS_PAIR");
     rslt = lisp_eval(lisp, closure, lisp_cons(nxt, cdr));
     X(nxt, cdr);
-    TRACE_SEXP(rslt);
   }
   /*
    * Otherwise, recompose the list.
    */
   else {
-    TRACE("IS_OTHER");
     rslt = lisp_cons(nxt, cdr);
     X(nxt, cdr);
-    TRACE_SEXP(rslt);
   }
   /*
    */
   X(car);
+  TRACE_EVAL_SEXP(rslt);
   return rslt;
 }
 
@@ -528,7 +515,7 @@ atom_t
 lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   atom_t rslt;
-  TRACE_SEXP(cell);
+  TRACE_EVAL_SEXP(cell);
   /*
    */
   switch (cell->type) {
@@ -548,7 +535,7 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
   }
   /*
    */
-  TRACE_SEXP(rslt);
+  TRACE_EVAL_SEXP(rslt);
   return rslt;
 }
 

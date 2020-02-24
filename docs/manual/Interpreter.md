@@ -30,6 +30,7 @@ names:
 * `BIND`: argument binding operations
 * `CHAN`: I/O channel operations
 * `CONS`: list construction operations
+* `EVAL`: expression evaluation
 * `MAKE`: atom creation operations
 `* MODL`: module operations
 * `REFC`: reference counting operations

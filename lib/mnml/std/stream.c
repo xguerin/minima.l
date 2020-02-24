@@ -7,8 +7,6 @@ static atom_t
 lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
             const atom_t expr)
 {
-  TRACE_SEXP(cell);
-  TRACE_SEXP(expr);
   /*
    * Evaluate the result.
    */

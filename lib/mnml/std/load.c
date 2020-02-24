@@ -10,7 +10,6 @@ static atom_t
 lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   atom_t res;
-  TRACE_SEXP(cell);
   /*
    * Get CAR/CDR.
    */

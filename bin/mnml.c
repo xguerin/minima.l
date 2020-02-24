@@ -243,13 +243,9 @@ main(const int argc, char** const argv)
    * Parse arguments.
    */
   int c;
-  bool bare = false;
   char* expr = NULL;
-  while ((c = getopt(argc, argv, "bhve:")) != -1) {
+  while ((c = getopt(argc, argv, "hve:")) != -1) {
     switch (c) {
-      case 'b':
-        bare = true;
-        break;
       case 'e':
         expr = optarg;
         break;

@@ -8,7 +8,6 @@ static atom_t
 lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
               const atom_t cell)
 {
-  TRACE_SEXP(cell);
   /*
    * Check if the cell is a pair.
    */
@@ -27,7 +26,6 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
    */
   if (unlikely(!IS_PAIR(car))) {
     X(car, cdr);
-    TRACE_SEXP(env);
     return env;
   }
   /*
@@ -47,7 +45,6 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
 static atom_t
 lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
-  TRACE_SEXP(cell);
   /*
    * Get the bind list and the prog.
    */

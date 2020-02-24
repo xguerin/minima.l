@@ -6,7 +6,6 @@
 static atom_t
 lisp_list(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
-  TRACE_SEXP(cell);
   /*
    */
   if (likely(IS_PAIR(cell))) {

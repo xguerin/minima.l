@@ -6,7 +6,6 @@ static atom_t
 lisp_set(const lisp_t lisp, const atom_t closure, const atom_t sym,
          const atom_t val)
 {
-  TRACE_SEXP(closure);
   /*
    * Default condition, check the global environemnt.
    */

@@ -6,7 +6,6 @@ static atom_t
 lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
           const atom_t match)
 {
-  TRACE_SEXP(cell);
   /*
    * Sanity checks.
    */
