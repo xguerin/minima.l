@@ -4,12 +4,10 @@
   "aton.l"
   "cps.l"
   "filter.l"
-  "foldl.l"
-  "foldr.l"
   "iter.l"
   "iter2.l"
+  "iterators.l"
   "last.l"
-  "map.l"
   "rev.l"
   "run.l"
   '(io . T) '(logic . T) '(math . T) '(std . T)
@@ -454,7 +452,7 @@
 # Prologue and identity.
 #
 
-(def cc:gen:prologue (SYMB CPS TYPES kvar)
+(def cc:gen:prologue ()
   "Generate C code prologue."
   (prinl "#include <mnml/closure.h>")
   (prinl "#include <mnml/lisp.h>")
@@ -463,19 +461,6 @@
   (prinl "#include <mnml/slab.h>")
   (prinl "#include <mnml/types.h>")
   (prinl)
-  #
-  # Generate some information
-  #
-  (prinl "/*")
-  (prin  " * FUNCTION   : ") (printl SYMB)
-  (prin  " * DEFINITION : ") (printl (eval SYMB))
-  (prin  " * CPS        : ") (printl CPS)
-  (prin  " * TYPES      : ") (printl TYPES)
-  (prinl " */")
-  (prinl)
-  #
-  # Generate the closure cache.
-  #
   (prinl "static closure_t cache = NULL;")
   (prinl))
 
@@ -488,9 +473,9 @@
       (_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
       )))
 
-(def cc:gen:identity (TYPES kvar)
+(def cc:gen:identity (NAME TYPES kvar)
   "Generate C code for the identity continuation."
-  (prinl "static atom_t identity(const lisp_t lisp, const atom_t E, closure_t C, value_t V) {")
+  (prinl "static atom_t _mnml_" NAME "_identity(const lisp_t lisp, const atom_t E, closure_t C, value_t V) {")
   (o>)
   (cc:gen:retval TYPES kvar)
   (<o)
@@ -500,6 +485,16 @@
 #
 # Main function.
 #
+
+(def cc:gen:info (SYMB CPS TYPES)
+  "Generate CPS code information."
+  (prinl "/*")
+  (prin  " * FUNCTION   : ") (printl SYMB)
+  (prin  " * DEFINITION : ") (printl (eval SYMB))
+  (prin  " * CPS        : ") (printl CPS)
+  (prin  " * TYPES      : ") (printl TYPES)
+  (prinl " */")
+  (prinl))
 
 (def cc:gen:prototype (NAME ARGS)
   "Generate C code function prototype."
@@ -538,15 +533,15 @@
   (prinl (o|) "LISP_LOOKUP(_" arg ", arguments, " arg ");")
     (cc:gen:value (assoc arg TYPES) arg))
 
-(def cc:gen:module (NAME ARGS TYPES)
-  "Generate C code for the module."
+(def cc:gen:entry (NAME ARGS TYPES)
+  "Generate C code for the NAME entry point."
   (prinl "static atom_t lisp_function_" NAME "(const lisp_t lisp, const atom_t env, const atom_t arguments) {")
   (o>)
   (/**/ "Grab the arguments.")
   (iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
   (/**/ "Define the default closure and callback.")
   (prinl (o|) "closure_t _C = NULL;")
-  (prinl (o|) "callback_t _K = identity;")
+  (prinl (o|) "callback_t _K = _mnml_" NAME "_identity;")
   (/**/ "Call the main function.")
   (prin (o|) "atom_t R = _mnml_" NAME "(lisp, env, ")
   (iter (\ (e) (prin e ", ")) ARGS)
@@ -560,13 +555,16 @@
   (prin "LISP_MODULE_SETUP(" NAME ", " NAME)
   (iter (\ (e) (prin ", " e)) ARGS)
   (prinl ", NIL);")
-  (prinl)
+  (prinl))
+
+(def cc:gen::module(MODULE NAMES)
+  "Generate C code for the module."
   (prinl "module_entry_t ENTRIES[] = {")
-  (prinl "  LISP_MODULE_REGISTER(" NAME "),")
+  (iter (\ (NAME) (prinl "  LISP_MODULE_REGISTER(" NAME "),")) NAMES)
   (prinl "  { NULL, NULL }")
   (prinl "};")
   (prinl)
-  (prinl "const char * lisp_module_name() { return \"" NAME "\"; }")
+  (prinl "const char * lisp_module_name() { return \"" MODULE "\"; }")
   (prinl)
   (prinl "const module_entry_t * lisp_module_entries() {")
   (prinl "  return ENTRIES;")
@@ -576,7 +574,7 @@
 # Main compiler entrypoint.
 #
 
-(def cc:compile (SYMB . TARGET)
+(def cc:compile1 (SYMB)
   "Generate the C code for the CPS function SYMB."
   (let ((cps             . (>& SYMB))
         ((args _ _ body) . cps)
@@ -584,29 +582,40 @@
         (REFS            . (cps:refcount cps))
         (TYPES           . (cps:infer NAME cps))
         (isvalid         . (foldl (\ (acc (_ . t)) (and (<> t 'ERROR) acc)) T TYPES))
-        (kvar            . (last args))
-        (trgt            . (append (assoc "HOME" ENV) "/.mnml"))
-        (cout            . (<|> (eval (car TARGET)) (append trgt "/" (str SYMB) ".c"))))
+        (kvar            . (last args)))
     (when isvalid
-      #
-      # Remove the C file
-      #
-      (unlink cout)
       #
       # Generate the C file
       #
-      (out cout
-        (cc:gen:prologue SYMB cps TYPES kvar)
-        (cc:gen:prototype SYMB ARGS)
-        (cc:gen:identity TYPES kvar)
-        (cc:gen:cont SYMB ARGS REFS TYPES kvar kvar body)
-        (cc:gen:main SYMB ARGS REFS kvar)
-        (cc:gen:module SYMB ARGS TYPES))
+      (cc:gen:info SYMB cps TYPES)
+      (cc:gen:identity SYMB TYPES kvar)
+      (cc:gen:prototype SYMB ARGS)
+      (cc:gen:cont SYMB ARGS REFS TYPES kvar kvar body)
+      (cc:gen:main SYMB ARGS REFS kvar)
+      (cc:gen:entry SYMB ARGS TYPES)
       #
       # Return then symbol passed as argument.
       #
       SYMB
       )))
+
+(def cc:compile (MODULE SYMBS . TARGET)
+  "Generate the C code for the CPS functions SYMBS."
+  (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
+        (cout . (<|> (eval (car TARGET)) (append trgt "/" (str MODULE) ".c"))))
+    #
+    # Remove the C file
+    #
+    (unlink cout)
+    #
+    # Generate the C file
+    #
+    (out cout
+      (cc:gen:prologue)
+      (let ((result . (filter nil? (map cc:compile1 SYMBS))))
+        (cc:gen::module MODULE result)
+        result))
+    ))
 
 (def cc:ext ()
   "Get the library extension depending on the OS name."
@@ -627,12 +636,12 @@
       flags
       )))
 
-(def cc:build (SYMB . TARGET)
+(def cc:build (MODULE SYMBS . TARGET)
   "Build the module for the CPS function SYMB."
   (let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
-        (cout . (append trgt "/" (str SYMB) ".c"))
-        (oout . (<|> (eval (car TARGET)) (append trgt "/lib" (str SYMB) (cc:ext)))))
-    (when SYMB
+        (cout . (append trgt "/" (str MODULE) ".c"))
+        (oout . (<|> (eval (car TARGET)) (append trgt "/lib" (str MODULE) (cc:ext)))))
+    (when SYMBS
       #
       # Remove the SO file
       #
@@ -641,4 +650,4 @@
       # Build the SO file
       #
       (let (((status . messages) . (run "/usr/bin/cc" (cc:flags) ENV)))
-        (if (= 0 status) (load (list SYMB SYMB)))))))
+        (if (= 0 status) (load (cons MODULE SYMBS)))))))

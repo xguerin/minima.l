@@ -1,7 +1,11 @@
 (load "@lib/test.l" "@lib/cc.l"
   '(logic and not)
   '(math + - * / <=)
-  '(std cdr prog let |> num? nil? unless))
+  '(std cdr prog let list |> num? nil? unless))
+
+(def test:build (SYM)
+  "Compile and build SYM."
+  (cc:build SYM (cc:compile SYM (list SYM))))
 
 (test:run
   "Compiler operations"
@@ -10,7 +14,7 @@
   #
   ("add"  . (prog
               (def _add (a b) (+ a b))
-              (let ((res . (cc:build (cc:compile '_add)))
+              (let ((res . (test:build '_add))
                     (bod . (|> _add cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -21,7 +25,7 @@
                     ))))
   ("sub"  . (prog
               (def _sub (a b) (- a b))
-              (let ((res . (cc:build (cc:compile '_sub)))
+              (let ((res . (test:build '_sub))
                     (bod . (|> _sub cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -32,7 +36,7 @@
                     ))))
   ("mul"  . (prog
               (def _mul (a b) (* a b))
-              (let ((res . (cc:build (cc:compile '_mul)))
+              (let ((res . (test:build '_mul))
                     (bod . (|> _mul cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -43,7 +47,7 @@
                     ))))
   ("div"  . (prog
               (def _div (a b) (/ a b))
-              (let ((res . (cc:build (cc:compile '_div)))
+              (let ((res . (test:build '_div))
                     (bod . (|> _div cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -57,7 +61,7 @@
   #
   ("ith"  . (prog
               (def _ith (a) (if (not (nil? a)) (cdr a)))
-              (let ((res . (cc:build (cc:compile '_ith)))
+              (let ((res . (test:build '_ith))
                     (bod . (|> _ith cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -69,7 +73,7 @@
                     ))))
   ("unless" . (prog
                 (def _unless (a) (unless (nil? a) (cdr a)))
-                (let ((res . (cc:build (cc:compile '_unless)))
+                (let ((res . (test:build '_unless))
                       (bod . (|> _unless cdr cdr cdr))
                       (pre . (test:slabdelta)))
                   (|> T
@@ -81,7 +85,7 @@
                       ))))
   ("when" . (prog
               (def _when (a) (if (not (nil? a)) (cdr a)))
-              (let ((res . (cc:build (cc:compile '_when)))
+              (let ((res . (test:build '_when))
                     (bod . (|> _when cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -96,7 +100,7 @@
   #
   ("ite"  . (prog
               (def _ite (a b) (if (< a b) a b))
-              (let ((res . (cc:build (cc:compile '_ite)))
+              (let ((res . (test:build '_ite))
                     (bod . (|> _ite cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -108,7 +112,7 @@
                     ))))
   ("ite_nested" . (prog
                     (def _ite_nested (a b c) (if (< a b) (if (> b c) b c) a))
-                    (let ((res . (cc:build (cc:compile '_ite_nested)))
+                    (let ((res . (test:build '_ite_nested))
                           (bod . (|> _ite_nested cdr cdr cdr))
                           (pre . (test:slabdelta)))
                       (|> T
@@ -124,7 +128,7 @@
   #
   ("fib"  . (prog
               (def _fib (N) (if (<= N 1) N (+ (_fib (- N 1)) (_fib (- N 2)))))
-              (let ((res . (cc:build (cc:compile '_fib)))
+              (let ((res . (test:build '_fib))
                     (bod . (|> _fib cdr cdr cdr))
                     (pre . (test:slabdelta)))
                 (|> T
@@ -141,7 +145,7 @@
                   (if (lst? lst)
                     (if (nil? lst) acc (_foldl fun (fun acc (car lst)) (cdr lst)))
                     (fun acc lst)))
-                (let ((res . (cc:build (cc:compile '_foldl)))
+                (let ((res . (test:build '_foldl))
                       (bod . (|> _foldl cdr cdr cdr))
                       (pre . (test:slabdelta)))
                   (|> T
@@ -157,7 +161,7 @@
                   (if (lst? lst)
                     (if (nil? lst) acc (fun (car lst) (_foldr fun (cdr lst) acc)))
                     (fun lst acc)))
-                (let ((res . (cc:build (cc:compile '_foldr)))
+                (let ((res . (test:build '_foldr))
                       (bod . (|> _foldr cdr cdr cdr))
                       (pre . (test:slabdelta)))
                   (|> T
@@ -174,7 +178,7 @@
                   (if (and (not (nil? lst)) (lst? lst))
                     (cons (fun (car lst)) (_map fun (cdr lst)))
                     lst))
-                (let ((res . (cc:build (cc:compile '_map)))
+                (let ((res . (test:build '_map))
                       (bod . (|> _map cdr cdr cdr))
                       (pre . (test:slabdelta)))
                   (|> T

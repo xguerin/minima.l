@@ -1,5 +1,5 @@
 (load
-  "assoc.l" "len.l" "truncl.l"
+  "assoc.l" "len.l" "manips.l"
   '(logic or =)
   '(io prinl)
   '(math - >)

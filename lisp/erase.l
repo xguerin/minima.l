@@ -1,4 +1,4 @@
-(load "foldr.l" '(logic =) '(std \ if cons))
+(load "iterators.l" '(logic =) '(std \ if cons))
 
 (def erase (k lst)
   (foldr

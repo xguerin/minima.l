@@ -1,8 +1,11 @@
 (load
-  "append.l" "iter.l" "len.l" "rep.l" "truncl.l" "truncr.l"
-  '(math >=)
-  '(std |> if sym list eval cons chr \)
-  )
+  "append.l"
+  "iter.l"
+  "len.l"
+  "truncr.l"
+  '(manips rep truncl)
+  '(math >= -)
+  '(std |> if sym list eval cons chr \))
 
 #
 # Escape STR with CODE.

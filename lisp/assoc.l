@@ -1,4 +1,4 @@
-(load "caar.l" "cdar.l" '(logic =) '(std cdr if))
+(load "manips.l" '(logic =) '(std cdr if))
 
 (def assoc (k lst)
   "Return the value for K in the association list LST."

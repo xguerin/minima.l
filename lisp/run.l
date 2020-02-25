@@ -1,5 +1,6 @@
 (load
-  "append.l" "map.l"
+  "append.l"
+  "iterators.l"
   '(io in readlines)
   '(logic =)
   '(std let \ cons prog)

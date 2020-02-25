@@ -1,4 +1,4 @@
-(load "foldl.l" '(math + - *) '(std \))
+(load "iterators.l" '(math + - *) '(std \))
 
 (def aton (STR)
   "Convert a string STR to a (positive) number."

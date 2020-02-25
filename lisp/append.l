@@ -1,4 +1,4 @@
-(load "foldl.l" "foldr.l" '(std \ eval cons))
+(load "iterators.l" '(std \ eval cons))
 
 (def append (x . @)
   "Non-destructively concatenate multiple strings."

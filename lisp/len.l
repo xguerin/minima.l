@@ -1,4 +1,4 @@
-(load "foldl.l" '(math +) '(std \))
+(load "iterators.l" '(math +) '(std \))
 
 (def len (lst)
   "Return the length of LST."

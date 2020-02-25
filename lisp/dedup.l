@@ -1,4 +1,4 @@
-(load "foldr.l" '(std \ if nil? cons let car match cons cdr))
+(load "iterators.l" '(std \ if nil? cons let car match cons cdr))
 
 #
 # The comparator is expected to return a pair (CMD . VAL) where CMD is:
