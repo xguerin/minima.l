@@ -1,14 +1,21 @@
 #!/usr/bin/env mnml
 
 (load
-  "@lib/args.l" "@lib/cc.l" "@lib/has.l"
+  "@lib/args.l" "@lib/cc.l" "@lib/has.l" "@lib/rev.l" "@lib/split.l"
   '(io prinl)
   '(logic and =)
   '(std car cdr setq let if prog when))
 
 (def usage ()
   "Print out a usage string for this script."
-  (prinl "Usage: " (car (cdr ARGV)) " -c FILE.l -o FILE.c"))
+  (let ((arg0 . (car (cdr ARGV)))
+        (prgn . (car (rev (split arg0 ^/)))))
+    (prinl "Usage: " prgn " -c FILE.l -o FILE.c")
+    (prinl)
+    (prinl "  -c  Minima.l source file")
+    (prinl "  -o  Target C file")
+    (prinl "  -h  Print this help")
+    ))
 
 (setq options
   '(("-c" . (\ (SRC) (setq SRC SRC)))

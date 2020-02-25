@@ -1,5 +1,5 @@
 (load
-  "assoc.l" "len.l"
+  "assoc.l" "len.l" "truncl.l"
   '(logic or =)
   '(io prinl)
   '(math - >)
@@ -10,12 +10,6 @@
   (if (or (= 0 LEN) (nil? LST))
     LST
     (args:skip (cdr LST) (- LEN 1))))
-
-(def args:sublist (LST LEN)
-  "Extract sublist of LEN from LST."
-  (if (or (= 0 LEN) (nil? LST))
-    NIL
-    (cons (car LST) (args:sublist (cdr LST) (- LEN 1)))))
 
 (def args:parse_r (SCHEMA LST RES)
   "Recursively match flags in LST with SCHEMA."
@@ -34,7 +28,7 @@
             (prinl "Not enough values for flag: " hd)
             NIL)
           (prog
-            (eval (cons (cons 'quote fun) (args:sublist tl sze)))
+            (eval (cons (cons 'quote fun) (truncl sze tl)))
             (args:parse_r SCHEMA nxt (cons hd RES)))
           )))))
 
