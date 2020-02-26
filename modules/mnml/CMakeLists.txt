@@ -31,6 +31,8 @@ add_custom_target(minimal_plugins DEPENDS ${MODULES})
 
 macro(Transpile TAG SYMBOLS)
   add_custom_command(
+    DEPENDS
+    ${CMAKE_SOURCE_DIR}/bin/mnmlc ${CMAKE_SOURCE_DIR}/lisp/cc.l ${CMAKE_SOURCE_DIR}/lisp/cps.l
     COMMAND
     MNML_MODULE_PATH=${CMAKE_BINARY_DIR}/modules/mnml
     MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lisp
@@ -45,8 +47,8 @@ set(MODULES iterators manips)
 
 if(MNML_WITH_TRANSFN)
   #
-  Transpile(iterators "foldl,foldr,map")
-  Transpile(manips "caar,cadar,caddr,cadr,cdar,rep,truncl")
+  Transpile(iterators "foldl,foldr,map,map2")
+  Transpile(manips "assoc,caar,cadar,caddr,cadr,cdar,rep,truncl")
   #
   foreach(MODULE ${MODULES})
     add_library(${MODULE} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.c)

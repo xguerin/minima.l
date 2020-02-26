@@ -7,13 +7,13 @@
 # * SKIP: skip VAL
 #
 (def dedup (cmp lst)
-  "Deduplicate list LST using comparator CMP."
-  (foldr (\ (elt acc)
-           (if (nil? acc)
-             (cons elt acc)
-             (let (((cmd . val) . (cmp elt (car acc))))
-               (match cmd
-                 (APPEND  . (cons val acc))
-                 (REPLACE . (cons val (cdr acc)))
-                 (SKIP    . acc)))))
-    lst NIL))
+	"Deduplicate list LST using comparator CMP."
+	(foldr (\ (elt acc)
+					 (if (nil? acc)
+						 (cons elt acc)
+						 (let (((cmd . val) . (cmp elt (car acc))))
+							 (match cmd
+								 (APPEND	. (cons val acc))
+								 (REPLACE . (cons val (cdr acc)))
+								 (SKIP		. acc)))))
+		lst NIL))
