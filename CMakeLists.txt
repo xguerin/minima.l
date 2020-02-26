@@ -141,14 +141,10 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(bin)
 add_subdirectory(lib)
-add_subdirectory(lisp)
+add_subdirectory(share)
 
 if(MNML_WITH_TRANSFN)
   set(MNML_WITH_MODULES ON)
-endif()
-
-if(MNML_WITH_MODULES)
-  add_subdirectory(modules)
 endif()
 
 if(MNML_ENABLE_DEBUG)

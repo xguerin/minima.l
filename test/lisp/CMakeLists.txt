@@ -7,9 +7,5 @@ foreach(LTEST ${LTESTS})
   set_property(TEST minimal_test_${TAG}
     APPEND
     PROPERTY
-    ENVIRONMENT MNML_MODULE_PATH=${CMAKE_BINARY_DIR}/modules/mnml)
-  set_property(TEST minimal_test_${TAG}
-    APPEND
-    PROPERTY
-    ENVIRONMENT MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lisp)
+    ENVIRONMENT MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/share/mnml)
 endforeach()

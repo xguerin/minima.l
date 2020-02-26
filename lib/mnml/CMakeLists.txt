@@ -23,7 +23,7 @@ foreach(MODULE ${MODULES})
   install(TARGETS ${MODULE} LIBRARY DESTINATION lib/mnml)
 endforeach()
 
-add_custom_target(minimal_plugins DEPENDS ${MODULES})
+add_custom_target(minimal_modules DEPENDS ${MODULES})
 
 #
 # Transpiled plugins.
@@ -32,15 +32,16 @@ add_custom_target(minimal_plugins DEPENDS ${MODULES})
 macro(Transpile TAG SYMBOLS)
   add_custom_command(
     DEPENDS
-    ${CMAKE_SOURCE_DIR}/bin/mnmlc ${CMAKE_SOURCE_DIR}/lisp/cc.l ${CMAKE_SOURCE_DIR}/lisp/cps.l
+    ${CMAKE_SOURCE_DIR}/bin/mnmlc
+    ${CMAKE_SOURCE_DIR}/share/mnml/cc.l
+    ${CMAKE_SOURCE_DIR}/share/mnml/cps.l
     COMMAND
-    MNML_MODULE_PATH=${CMAKE_BINARY_DIR}/modules/mnml
-    MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/lisp
+    MNML_SCRIPT_PATH=${CMAKE_SOURCE_DIR}/share/mnml
     ${CMAKE_BINARY_DIR}/bin/mnml ${CMAKE_SOURCE_DIR}/bin/mnmlc
-    -c ${CMAKE_SOURCE_DIR}/lisp/${TAG}.l -m ${TAG} -s ${SYMBOLS} -o ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
+    -c ${CMAKE_SOURCE_DIR}/share/mnml/${TAG}.l -m ${TAG} -s ${SYMBOLS} -o ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
     MAIN_DEPENDENCY ${SCRIPT}
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${TAG}.c
-    DEPENDS mnml minimal_plugins)
+    DEPENDS mnml minimal_modules)
 endmacro()
 
 set(MODULES iterators manips)

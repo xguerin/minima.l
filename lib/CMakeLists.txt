@@ -2,6 +2,10 @@ add_subdirectory(core)
 add_subdirectory(grammar)
 add_subdirectory(module)
 
+if(MNML_WITH_MODULES)
+  add_subdirectory(mnml)
+endif()
+
 add_library(minimal SHARED
   $<TARGET_OBJECTS:minimal_core>
   $<TARGET_OBJECTS:minimal_grammar>
