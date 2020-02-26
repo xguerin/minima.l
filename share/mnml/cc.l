@@ -1,6 +1,5 @@
 (load
 	"append.l"
-	"assoc.l"
 	"aton.l"
 	"cps.l"
 	"filter.l"
@@ -8,6 +7,7 @@
 	"iter2.l"
 	"iterators.l"
 	"last.l"
+	"manips.l"
 	"rev.l"
 	"run.l"
 	'(io . T) '(logic . T) '(math . T) '(std . T)
@@ -118,15 +118,14 @@
 			#
 			# Special cases.
 			#
-			(=	 . (prin " == "))
-			(<>	. (prin " != "))
-			(and . (prin " && "))
-			(or	. (prin " || "))
-
+			(=		. (prin " == "))
+			(<>		. (prin " != "))
+			(and	. (prin " && "))
+			(or		. (prin " || "))
 			#
 			# Unsupported cases.
 			#
-			(_	. (prin " /* Unsupported operation " op " */ ")))
+			(_		. (prin " /* Unsupported operation " op " */ ")))
 		(cc:value:num ARGS kvar arg2)
 		(prinl " };")))
 
@@ -144,18 +143,55 @@
 
 (def cc:op:lst:two (ARGS TYPES kvar body)
 	"Generate C code for binary list operations."
-	(let (((op arg0 arg1 cont)	. body))
+	(let (((op arg1 arg2 cont)	. body))
 		(prin (o|) "value_t R = { .atom = ")
 		(match op
 			(conc . (prin "lisp_conc("))
 			(cons . (prin "lisp_cons("))
-			(_	 .	(prin " /* Unsupported operation " op " */ ")))
-		(cc:value:atm ARGS kvar arg0)
-		(prin ", ")
+			(_		.	(prin " /* Unsupported operation " op " */ ")))
 		(cc:value:atm ARGS kvar arg1)
+		(prin ", ")
+		(cc:value:atm ARGS kvar arg2)
 		(prinl ") };")
-		(when (= kvar arg0) (cc:gen:x ARGS kvar arg0))
-		(when (= kvar arg1) (cc:gen:x ARGS kvar arg1))))
+		(when (= kvar arg1) (cc:gen:x ARGS kvar arg1))
+		(when (= kvar arg2) (cc:gen:x ARGS kvar arg2))))
+
+(def cc:op:atm:two (ARGS TYPES kvar body)
+	"Generate C code for binary ATOM operations."
+	(let (((op arg1 arg2 cont)	. body)
+				(typ1 . (assoc arg1 TYPES))
+				(typ2 . (assoc arg2 TYPES)))
+		(prin (o|) "value_t R = { .number = ")
+		(match (cons typ1 typ2)
+			((NUMBER . NUMBER)	. (prog
+															(cc:value:num ARGS kvar arg1)
+															(match op
+																(=	. (prin " == "))
+																(<>	. (prin " != "))
+																(_	. (prin " /* Unsupported operation " op " */ ")))
+															(cc:value:num ARGS kvar arg2)
+															))
+			((ATOM . ATOM)	.	(match op
+													(=	. (prog
+																	(prin "lisp_equ(")
+																	(cc:value:atm ARGS kvar arg1)
+																	(prin ", ")
+																	(cc:value:atm ARGS kvar arg2)
+																	(prin ")")
+																	))
+													(<>	. (prog
+																	(prin "lisp_neq(")
+																	(cc:value:atm ARGS kvar arg1)
+																	(prin ", ")
+																	(cc:value:atm ARGS kvar arg2)
+																	(prin ")")
+																	))
+													(_	. (prin " 0 /* Unsupported operation " op " */ "))
+													))
+			(_	. (prin " 0 /* Unsupported types (" typ1 ", " typ2 ") */ ")))
+		(prinl " };")
+		(when (= kvar arg1) (cc:gen:x ARGS kvar arg1))
+		(when (= kvar arg2) (cc:gen:x ARGS kvar arg2))))
 
 (def cc:op:extcall (ARGS TYPES kvar (_ arg))
 	"Generate C code for immediate KVAR funcall."
@@ -170,15 +206,20 @@
 				(effargs	. (cc:arg:get args))
 				(genquot	. (\ (arg)
 											(prog
-												(prin "lisp_cons(QUOTE, ") (cc:value:atm ARGS kvar arg) (prinl ");")
+												(prin (o|) "atom_t " arg " = lisp_cons(QUOTE, ")
+												(cc:value:atm ARGS kvar arg)
+												(prinl ");")
 												(when (= kvar arg) (cc:gen:x ARGS kvar arg))
 												)))
+				(gensymb	. (\ (arg)
+											(prinl (o|) "MAKE_SYMBOL_STATIC(s_" arg ", \"" arg "\", " (len (str arg)) ");")
+											(prinl (o|) "atom_t " arg " = lisp_make_symbol(s_" arg ");")
+											))
 				(genargs	. (\ (arg)
 											(let ((type . (assoc arg TYPES)))
-												(prin (o|) "atom_t " arg " = ")
 												(match type
 													(NUMBER . (prog
-																			(prin "lisp_make_number(")
+																			(prin (o|) "atom_t " arg " = lisp_make_number(")
 																			(cc:value:num ARGS kvar arg)
 																			(prinl ");")))
 													#
@@ -187,12 +228,17 @@
 													# immediate values and not symbols.
 													#
 													(ATOM . (genquot arg))
-													(_		. (prinl "UP(NIL); /* Unsupported type " (str type) " */"))
+													#
+													# NOTE If no type was found for the ATOM, assume it's
+													# a function symbol.
+													#
+													(NIL	. (gensymb arg))
+													(_		. (prinl (o|) "atom_t " arg " = UP(NIL); /* Unsupported type " (str type) " */"))
 													))))
 				(gencall	. (\ (arg)
 											(prinl (o|) "_T = lisp_cons(" arg ", _S);")
 											(prinl (o|) "X(" arg", _S); _S = _T;")))
-				(type		 . (assoc nvar TYPES)))
+				(type			. (assoc nvar TYPES)))
 		(iter genargs effargs)
 		(/**/ "Build the expression to evaluate.")
 		(prinl (o|) "atom_t _S = UP(NIL), _T;")
@@ -224,12 +270,12 @@
 
 (def cc:gen:value (type arg)
 	"Generate conversion from atom_t to value_t."
+	(prin (o|) "value_t " arg " = ")
 	(match type
-		(NUMBER . (prinl (o|) "value_t " arg " = { .number = _" arg "->number };"))
-		(ATOM	 . (prog
-							 (prinl (o|) "value_t " arg " = { .atom = UP(_" arg ") };")
-							 (prinl (o|) "X(_" arg ");")))
-		(_			. (prinl (o|) "value_t " arg " = { .number = 0 }; /* Unsupported type " (str atype) " */"))))
+		(NUMBER . (prinl "{ .number = _" arg "->number };"))
+		(ATOM		. (prinl "{ .atom = UP(_" arg ") };"))
+		(_			. (prinl "{ .number = 0 }; /* Unsupported type " (str atype) " */")))
+	(prinl (o|) "X(_" arg ");"))
 
 (def cc:gen:x (ARGS kvar ref)
 	"Generate X(REF)."
@@ -356,7 +402,13 @@
 			#
 			~(foldl
 				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:num:two)) acc))
-				 NIL '(+ - * / = <> < <= > >= and or))
+				 NIL '(+ - * / < <= > >= and or))
+			#
+			# Equality operations.
+			#
+			~(foldl
+				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:atm:two)) acc))
+				 NIL '(= <>))
 			#
 			# Unary list operations.
 			#
@@ -495,10 +547,10 @@
 (def cc:gen:info (SYMB CPS TYPES)
 	"Generate CPS code information."
 	(prinl "/*")
-	(prin	" * FUNCTION	 : ") (printl SYMB)
+	(prin	" * FUNCTION   : ") (printl SYMB)
 	(prin	" * DEFINITION : ") (printl (eval SYMB))
-	(prin	" * CPS				: ") (printl CPS)
-	(prin	" * TYPES			: ") (printl TYPES)
+	(prin	" * CPS        : ") (printl CPS)
+	(prin	" * TYPES      : ") (printl TYPES)
 	(prinl " */")
 	(prinl))
 

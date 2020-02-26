@@ -188,4 +188,19 @@
                       (and (assert:predicate 'num? bod))
                       (and (assert:equal (+ pre 21) (test:slabdelta)))
                       ))))
+	#
+	# Func calls.
+	#
+	("func"	. (prog
+							(def _add (A B) (+ A B))
+							(def _fnc (A B) (_add A B))
+							(let ((res . (test:build '_fnc))
+										(bod . (|> _map cdr cdr cdr))
+										(pre . (test:slabdelta)))
+								(|> T
+										(and (assert:equal '(_fnc) res))
+										(and (assert:equal 2  (_fnc 1 1)))
+										(and (assert:predicate 'num? bod))
+										(and (assert:equal (+ pre 21) (test:slabdelta)))
+										))))
   )

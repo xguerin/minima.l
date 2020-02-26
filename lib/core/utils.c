@@ -161,7 +161,7 @@ lisp_append(const atom_t lst, const atom_t elt)
 }
 
 /*
- * Compare A and B.
+ * Equality A and B.
  */
 
 bool
@@ -190,6 +190,33 @@ lisp_equ(const atom_t a, const atom_t b)
       return lisp_symbol_match(a, b);
     default:
       return false;
+  }
+}
+
+/*
+ * Inequality A and B.
+ */
+
+bool
+lisp_neq(const atom_t a, const atom_t b)
+{
+  /*
+   * Check if types match.
+   */
+  bool mismatch = a->type != b->type;
+  /*
+   * Compare depending on the type.
+   */
+  switch (a->type) {
+    case T_CHAR:
+    case T_NUMBER:
+      return mismatch || a->number != b->number;
+    case T_PAIR:
+      return mismatch || lisp_neq(CAR(a), CAR(b)) || lisp_neq(CDR(a), CDR(b));
+    case T_SYMBOL:
+      return mismatch || !lisp_symbol_match(a, b);
+    default:
+      return mismatch;
   }
 }
 

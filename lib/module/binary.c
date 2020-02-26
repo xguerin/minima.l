@@ -152,13 +152,22 @@ lisp_module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
    */
   if (IS_TRUE(cell)) {
     atom_t result = UP(NIL);
+    /*
+     * Compute available entries.
+     */
+    size_t count = 0;
     const module_entry_t* e = &entries[0];
-    while (e->name != NULL) {
+    for (count = 0; e->name != NULL; count++) {
+      e++;
+    }
+    /*
+     * Scan backward and build the result.
+     */
+    for (size_t i = 0; i < count; i += 1) {
       /*
        * Load the function.
        */
-      atom_t sym = e->load(lisp);
-      e++;
+      atom_t sym = entries[count - i - 1].load(lisp);
       /*
        * Enqueue the new function name in the result list.
        */
