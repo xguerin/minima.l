@@ -49,7 +49,7 @@ set(MODULES iterators manips)
 if(MNML_WITH_TRANSFN)
   #
   Transpile(iterators "foldl,foldr,map,map2")
-  Transpile(manips "assoc,caar,cadar,caddr,cadr,cdar,rep,truncl")
+  Transpile(manips "assoc,caar,cadar,caddr,cadr,cdar,last,rep,truncl")
   #
   foreach(MODULE ${MODULES})
     add_library(${MODULE} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.c)

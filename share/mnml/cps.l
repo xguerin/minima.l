@@ -2,7 +2,6 @@
 	"append.l"
 	"has.l"
 	"iterators.l"
-	"last.l"
 	"len.l"
 	"manips.l"
 	"ntoa.l"

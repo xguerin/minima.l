@@ -27,6 +27,12 @@
 	"Call CAR CDR on X."
 	(cdr (car x)))
 
+(def last (lst)
+	"Return the last item of LST."
+	(if (nil? (cadr lst))
+		(car lst)
+		(last (cdr lst))))
+
 (def rep (n atm)
 	"Create a list of ATM repeated N times"
 	(if (> n 0)
