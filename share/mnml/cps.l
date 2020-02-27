@@ -8,7 +8,6 @@
 	"orelse.l"
 	"replc.l"
 	"rev.l"
-	"zip.l"
 	'(logic . T) '(math . T)'(std . T))
 
 #

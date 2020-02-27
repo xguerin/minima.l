@@ -183,7 +183,7 @@ lisp_module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
    */
   if (!IS_LIST(cell)) {
     X(cell);
-    return false;
+    return UP(NIL);
   }
   /*
    * Load the element of the list.

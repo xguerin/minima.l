@@ -48,7 +48,7 @@ set(MODULES iterators manips)
 
 if(MNML_WITH_TRANSFN)
   #
-  Transpile(iterators "foldl,foldr,map,map2")
+  Transpile(iterators "foldl,foldr,map,map2,zip")
   Transpile(manips "assoc,caar,cadar,caddr,cadr,cdar,last,rep,truncl")
   #
   foreach(MODULE ${MODULES})

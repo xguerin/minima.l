@@ -226,7 +226,9 @@
 													# reevaluated because the what we manipulates are
 													# immediate values and not symbols.
 													#
-													(ATOM . (genquot arg))
+													(ATOM . (if (cc:ref:idx ARGS arg)
+																		(genquot arg)
+																		(gensymb arg)))
 													#
 													# NOTE If no type was found for the ATOM, assume it's
 													# a function symbol.
@@ -331,6 +333,7 @@
 					(filter (\ ((arg . _		)) (let ((idx . (cc:ref:idx ARGS arg)))
 																			 (and (>= idx cnt) (< idx pos)))))
 					(filter (\ ((arg . _		)) (<> 'ATOM (assoc arg TYPES))))
+					(filter (\ ((arg . _		)) (not (cc:ref:idx ARGS arg))))
 					(iter	 (\ ((arg . _		)) (cc:gen:x ARGS NIL arg))))
 			(/**/ "Clean-up the closure.")
 			(prinl (o|) "lisp_closure_put(&cache, C);"))))

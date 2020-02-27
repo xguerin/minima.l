@@ -32,3 +32,7 @@
 		(cons
 			(fun (car lst1) (car lst2))
 			(map2 fun (cdr lst1) (cdr lst2)))))
+
+(def zip (lst1 lst2)
+	"Sequentially pair-up elements from LST1 and LST2."
+	(map2 cons lst1 lst2))
