@@ -87,18 +87,16 @@ typedef struct _lisp
 
 /*
  * A function has the following format:
- * (ARGS CLOSURE CURY BODY)
+ * (ARGS CLOSURE BODY)
  */
 
 #define IS_ARGS(__a) (IS_PAIR(__a) && (IS_LIST(CAR(__a)) || IS_SYMB(CAR(__a))))
 #define IS_CLOS(__a) (!IS_NULL(__a) && IS_PAIR(__a) && IS_LIST(CAR(__a)))
-#define IS_CURY(__a) (!IS_NULL(__a) && IS_PAIR(__a) && IS_LIST(CAR(__a)))
 #define IS_BODY(__a) (!IS_NULL(__a) && (IS_PAIR(__a) || IS_NUMB(__a)))
 
-#define IS_FUNC(__a)                                              \
-  (IS_ARGS(__a) && IS_CLOS(CDR(__a)) && IS_CURY(CDR(CDR(__a))) && \
-   IS_BODY(CDR(CDR(CDR(__a)))))
+#define IS_FUNC(__a) \
+  (IS_ARGS(__a) && IS_CLOS(CDR(__a)) && IS_BODY(CDR(CDR(__a))))
 
-typedef atom_t (*function_t)(const lisp_t, const atom_t, const atom_t);
+typedef atom_t (*function_t)(const lisp_t, const atom_t);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

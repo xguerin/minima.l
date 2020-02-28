@@ -55,10 +55,10 @@ Expression take the following form: `(FUNCTION ARGS ...)`. The `FUNCTION` can be
 The forms 1, 2, and 3 are mutually interchangeable:
 ```lisp
 : (def add (a b) (+ a b))
-> ((a b) NIL NIL (+ a b))
+> ((a b) NIL (+ a b))
 : (add 1 2) # Form 1
 > 3
-: ('((a b) NIL NIL (+ a b)) 1 2) # Form 2
+: ('((a b) NIL (+ a b)) 1 2) # Form 2
 > 3
 : ((\ (a b) (+ a b)) 1 2) # Form 3
 > 3
@@ -67,14 +67,14 @@ The forms 1, 2, and 3 are mutually interchangeable:
 
 Functions are represented internally as the following 3-uple:
 ```lisp
-(ARGUMENTS CLOSURE BINDINGS . BODY)
+(ARGUMENTS CLOSURE . BODY)
 ```
 The `ARGUMENTS` element is a list of symbols representing the arguments of the
 functions. The `CLOSURE` element is an association list that contains the
-context of the function at the definition site. The `BINDINGS` element is used
-for currying. Lastly, the `BODY` element is the expression of the function. When
-defined through plugins, the body may also be a number representing the memory
-address of the native implementation of the function.
+context of the function at the definition site. Lastly, the `BODY` element is
+the expression of the function. When defined through plugins, the body may also
+be a number representing the memory address of the native implementation of the
+function.
 
 ### Bindings
 
@@ -100,9 +100,9 @@ Minima.l supports currying. It uses the function's closure to store the curried
 arguments. Curryring is available to all `lisp` and native functions. For example:
 ```lisp
 : (def add (a b) (+ a b))
-> ((a b) NIL NIL (+ a b))
+> ((a b) NIL (+ a b))
 : (setq +1 (add 1))
-> ((b) NIL NIL ((a . 1)) (+ a b))
+> ((b) ((a . 1)) (+ a b))
 : (+1 2)
 > 3
 ```

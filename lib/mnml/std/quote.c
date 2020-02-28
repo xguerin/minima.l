@@ -3,10 +3,9 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_quote(const lisp_t lisp, const atom_t closure,
-                    const atom_t arguments)
+lisp_function_quote(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, arguments, @);
+  LISP_LOOKUP(cell, closure, @);
   return cell;
 }
 

@@ -1,8 +1,8 @@
 (load
+	"iterators.l"
 	"len.l"
 	"term.l"
 	'(io prin printl prinl)
-	'(iterators foldl)
 	'(logic = and)
 	'(math >)
 	'(std let if eval cond prog car tru?)

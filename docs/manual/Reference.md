@@ -64,7 +64,6 @@
 
 | Name      | Syntax                      | Module | Description |
 |:----------|:----------------------------|:------:|:------------|
-| `<-`        | `(<- sym 'any)`               | `std`    | [Set](#set) `sym` to `any` |
 | `def`       | `(def sym args [str] prg)`    | `std`    | [Define](#def) a function |
 | `let`       | `(let lst . prg)`             | `std`    | [Let](#let)-binding symbols |
 | `setq`      | `(setq sym 'any)`             | `std`    | [Bind](#setq) a symbols |
@@ -659,32 +658,6 @@ output of the command as list of lines (see [`readlines`](#readlines)).
 ```lisp
 : (run "/bin/hostname" NIL NIL)
 > (0 (^E ^n ^c ^e ^l ^a ^d ^u ^s))
-```
-****
-### SET
-
-#### Invocation
-```lisp
-(<- 'sym 'any)
-```
-#### Description
-
-Set an existing symbol `sym` to `any`.
-
-#### Return value
-
-Return the value associated to the symbol.
-
-#### Example
-```lisp
-: (<- A (+ 1 2))
-> NIL 
-: (setq A (+ 1 2))
-> 3
-: (<- A 4)
-> 4
-: A
-> 4
 ```
 ****
 ### SETQ

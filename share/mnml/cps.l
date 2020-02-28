@@ -99,12 +99,12 @@
 #
 (def >& (fsym)
 	"Convert FSYM into its continuation-passing style."
-	(let (((args closure clst body) . (eval fsym))
-				(arglen									 . (len args))
-				(kvar										 . (list (sym (cons ^_ (ntoa arglen)))))
-				(fargs										. (append args kvar))
-				((_ . lifted)						 . (cps:lift kvar (+ arglen 1) body)))
-		(cons fargs (cons closure (cons clst (list lifted))))))
+	(let (((args closure body)	. (eval fsym))
+				(arglen								. (len args))
+				(kvar									. (list (sym (cons ^_ (ntoa arglen)))))
+				(fargs								. (append args kvar))
+				((_ . lifted)					. (cps:lift kvar (+ arglen 1) body)))
+		(cons fargs (cons closure (list lifted)))))
 
 #
 # Collect the usage count for each placeholder variable. The first symbol in the
@@ -157,7 +157,7 @@
 		#
 		(_ . acc)))
 
-(def cps:refcount ((ARGS _ _ body))
+(def cps:refcount ((ARGS _ body))
 	"Collect placeholder reference count in a CPS function FUN."
 	(if (lst? body)
 		(let ((xvar . (last ARGS)))
@@ -409,7 +409,7 @@
 		#
 		(_ . alst)))
 
-(def cps:infer (name (args _ _ body))
+(def cps:infer (name (args _ body))
 	"Infer the types of a CPS function FUN with name NAME."
 	(let ((kvar . (last args)))
 		#

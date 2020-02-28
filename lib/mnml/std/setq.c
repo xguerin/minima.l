@@ -3,10 +3,9 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_setq(const lisp_t lisp, const atom_t closure,
-                   const atom_t arguments)
+lisp_function_setq(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, arguments, @);
+  LISP_LOOKUP(cell, closure, @);
   /*
    * Extract the symbol and the value.
    */
@@ -24,8 +23,9 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure,
   /*
    * Call SETQ.
    */
+  atom_t tmp = lisp->GLOBALS;
   lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(sym, res));
-  X(sym);
+  X(sym, tmp);
   return res;
 }
 

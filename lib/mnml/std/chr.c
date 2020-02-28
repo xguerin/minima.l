@@ -4,10 +4,9 @@
 #include <mnml/utils.h>
 
 static atom_t
-lisp_function_chr(const lisp_t lisp, const atom_t closure,
-                  const atom_t arguments)
+lisp_function_chr(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, arguments, X);
+  LISP_LOOKUP(car, closure, X);
   char val = car->number;
   X(car);
   return lisp_make_char(val);

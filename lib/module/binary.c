@@ -245,8 +245,9 @@ lisp_module_load_binary(const char* const path, const lisp_t lisp,
   if (add_to_cache) {
     atom_t hnd = lisp_make_number((uint64_t)handle);
     atom_t val = lisp_cons(name, hnd);
-    X(hnd);
+    atom_t tmp = MODULES;
     MODULES = lisp_setq(MODULES, val);
+    X(hnd, tmp);
   }
   /*
    * Return the result.

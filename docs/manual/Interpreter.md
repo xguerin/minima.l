@@ -29,6 +29,7 @@ names:
 
 * `BIND`: argument binding operations
 * `CHAN`: I/O channel operations
+* `CLOS`: evaluation closures
 * `CONS`: list construction operations
 * `EVAL`: expression evaluation
 * `MAKE`: atom creation operations

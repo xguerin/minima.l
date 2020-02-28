@@ -2,8 +2,8 @@
 	"append.l"
 	"iter.l"
 	"len.l"
+	"manips.l"
 	"truncr.l"
-	'(manips rep truncl)
 	'(math >= -)
 	'(std |> if sym list eval cons chr \))
 

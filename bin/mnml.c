@@ -111,9 +111,9 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(var);
+    atom_t tmp = lisp->GLOBALS;
     lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
-    X(key);
-    X(res);
+    X(key, res, tmp);
   } else {
     X(res);
   }
@@ -179,9 +179,9 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(env);
+  atom_t tmp = lisp->GLOBALS;
   lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
-  X(key);
-  X(res);
+  X(key, res, tmp);
 }
 
 static void
@@ -200,8 +200,7 @@ lisp_build_env(const lisp_t lisp)
       atom_t val = lisp_make_string(n + 1, strlen(n + 1));
       atom_t con = lisp_cons(key, val);
       res = lisp_append(res, con);
-      X(key);
-      X(val);
+      X(key, val);
     }
   }
   /*
@@ -210,9 +209,9 @@ lisp_build_env(const lisp_t lisp)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(env);
+    atom_t tmp = lisp->GLOBALS;
     lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
-    X(key);
-    X(res);
+    X(key, res, tmp);
   } else {
     X(res);
   }

@@ -25,7 +25,6 @@ LISP_MODULE_DECL(match);
 LISP_MODULE_DECL(prog);
 LISP_MODULE_DECL(quit);
 LISP_MODULE_DECL(quote);
-LISP_MODULE_DECL(set);
 LISP_MODULE_DECL(setq);
 LISP_MODULE_DECL(str);
 LISP_MODULE_DECL(stream);
@@ -33,39 +32,24 @@ LISP_MODULE_DECL(sym);
 LISP_MODULE_DECL(unless);
 LISP_MODULE_DECL(when);
 
-module_entry_t ENTRIES[] = { LISP_MODULE_REGISTER(car),
-                             LISP_MODULE_REGISTER(cdr),
-                             LISP_MODULE_REGISTER(chr),
-                             LISP_MODULE_REGISTER(conc),
-                             LISP_MODULE_REGISTER(cond),
-                             LISP_MODULE_REGISTER(cons),
-                             LISP_MODULE_REGISTER(def),
-                             LISP_MODULE_REGISTER(eval),
-                             LISP_MODULE_REGISTER(if),
-                             LISP_MODULE_REGISTER(isatm),
-                             LISP_MODULE_REGISTER(ischr),
-                             LISP_MODULE_REGISTER(islst),
-                             LISP_MODULE_REGISTER(isnil),
-                             LISP_MODULE_REGISTER(isnum),
-                             LISP_MODULE_REGISTER(isstr),
-                             LISP_MODULE_REGISTER(issym),
-                             LISP_MODULE_REGISTER(istru),
-                             LISP_MODULE_REGISTER(lambda),
-                             LISP_MODULE_REGISTER(let),
-                             LISP_MODULE_REGISTER(list),
-                             LISP_MODULE_REGISTER(load),
-                             LISP_MODULE_REGISTER(match),
-                             LISP_MODULE_REGISTER(prog),
-                             LISP_MODULE_REGISTER(quit),
-                             LISP_MODULE_REGISTER(quote),
-                             LISP_MODULE_REGISTER(set),
-                             LISP_MODULE_REGISTER(setq),
-                             LISP_MODULE_REGISTER(str),
-                             LISP_MODULE_REGISTER(stream),
-                             LISP_MODULE_REGISTER(sym),
-                             LISP_MODULE_REGISTER(unless),
-                             LISP_MODULE_REGISTER(when),
-                             { NULL, NULL } };
+module_entry_t ENTRIES[] = {
+  LISP_MODULE_REGISTER(car),   LISP_MODULE_REGISTER(cdr),
+  LISP_MODULE_REGISTER(chr),   LISP_MODULE_REGISTER(conc),
+  LISP_MODULE_REGISTER(cond),  LISP_MODULE_REGISTER(cons),
+  LISP_MODULE_REGISTER(def),   LISP_MODULE_REGISTER(eval),
+  LISP_MODULE_REGISTER(if),    LISP_MODULE_REGISTER(isatm),
+  LISP_MODULE_REGISTER(ischr), LISP_MODULE_REGISTER(islst),
+  LISP_MODULE_REGISTER(isnil), LISP_MODULE_REGISTER(isnum),
+  LISP_MODULE_REGISTER(isstr), LISP_MODULE_REGISTER(issym),
+  LISP_MODULE_REGISTER(istru), LISP_MODULE_REGISTER(lambda),
+  LISP_MODULE_REGISTER(let),   LISP_MODULE_REGISTER(list),
+  LISP_MODULE_REGISTER(load),  LISP_MODULE_REGISTER(match),
+  LISP_MODULE_REGISTER(prog),  LISP_MODULE_REGISTER(quit),
+  LISP_MODULE_REGISTER(quote), LISP_MODULE_REGISTER(setq),
+  LISP_MODULE_REGISTER(str),   LISP_MODULE_REGISTER(stream),
+  LISP_MODULE_REGISTER(sym),   LISP_MODULE_REGISTER(unless),
+  LISP_MODULE_REGISTER(when),  { NULL, NULL }
+};
 
 const char*
 lisp_module_name()

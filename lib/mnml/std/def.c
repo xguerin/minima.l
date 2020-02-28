@@ -3,10 +3,9 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_def(const lisp_t lisp, const atom_t closure,
-                  const atom_t arguments)
+lisp_function_def(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, arguments, @);
+  LISP_LOOKUP(cell, closure, @);
   /*
    * Grab the symbol.
    */
@@ -40,17 +39,17 @@ lisp_function_def(const lisp_t lisp, const atom_t closure,
   }
   X(doc);
   /*
-   * Append an empty currying list and closure.
+   * Append an empty closure.
    */
   atom_t con0 = lisp_cons(NIL, prog);
-  atom_t con1 = lisp_cons(NIL, con0);
-  atom_t con2 = lisp_cons(args, con1);
-  X(prog, args, con0, con1);
+  atom_t con1 = lisp_cons(args, con0);
+  X(prog, args, con0);
   /*
    * Set the symbol's value.
    */
-  lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(symb, con2));
-  X(con2);
+  atom_t tmp = lisp->GLOBALS;
+  lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(symb, con1));
+  X(tmp, con1);
   return symb;
 }
 

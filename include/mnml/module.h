@@ -53,12 +53,11 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
     uintptr_t fun = (uintptr_t)lisp_function_##__s;       \
     atom_t adr = lisp_make_number(fun);                   \
     atom_t cn0 = lisp_cons(NIL, adr);                     \
-    atom_t cn1 = lisp_cons(NIL, cn0);                     \
-    atom_t val = lisp_cons(arg, cn1);                     \
+    atom_t val = lisp_cons(arg, cn0);                     \
     atom_t cns = lisp_cons(sym, val);                     \
-    TRACE_MODL_SEXP(cns);                                 \
+    atom_t tmp = lisp->GLOBALS;                           \
     lisp->GLOBALS = lisp_setq(lisp->GLOBALS, cns);        \
-    X(adr, cn0, cn1, arg, val);                           \
+    X(adr, cn0, arg, val, tmp);                           \
     return sym;                                           \
   }
 
@@ -75,43 +74,39 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
  */
 
 #define PREDICATE_GEN(_n, _o, _x)                                    \
-  static atom_t lisp_function_is##_n(const lisp_t l, const atom_t c, \
-                                     const atom_t args)              \
+  static atom_t lisp_function_is##_n(const lisp_t l, const atom_t c) \
   {                                                                  \
-    LISP_LOOKUP(car, args, _x);                                      \
+    LISP_LOOKUP(car, c, _x);                                         \
     atom_t res = _o(car) ? TRUE : NIL;                               \
     X(car);                                                          \
     return UP(res);                                                  \
   }
 
 #define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                         \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c, \
-                                   const atom_t args)              \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
-    LISP_LOOKUP(vl0, args, _x);                                    \
-    LISP_LOOKUP(vl1, args, _y);                                    \
+    LISP_LOOKUP(vl0, c, _x);                                       \
+    LISP_LOOKUP(vl1, c, _y);                                       \
     atom_t res = (!IS_NULL(vl0))_o(!IS_NULL(vl1)) ? TRUE : NIL;    \
     X(vl0, vl1);                                                   \
     return UP(res);                                                \
   }
 
 #define BINARY_NUMBER_GEN(_n, _o, _x, _y)                          \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c, \
-                                   const atom_t args)              \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
-    LISP_LOOKUP(vl0, args, _x);                                    \
-    LISP_LOOKUP(vl1, args, _y);                                    \
+    LISP_LOOKUP(vl0, c, _x);                                       \
+    LISP_LOOKUP(vl1, c, _y);                                       \
     atom_t res = lisp_make_number(vl0->number _o vl1->number);     \
     X(vl0, vl1);                                                   \
     return res;                                                    \
   }
 
 #define BINARY_COMPARE_GEN(_n, _o, _x, _y)                         \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c, \
-                                   const atom_t args)              \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
-    LISP_LOOKUP(vl0, args, _x);                                    \
-    LISP_LOOKUP(vl1, args, _y);                                    \
+    LISP_LOOKUP(vl0, c, _x);                                       \
+    LISP_LOOKUP(vl1, c, _y);                                       \
     atom_t res = vl0->number _o vl1->number ? TRUE : NIL;          \
     X(vl0, vl1);                                                   \
     return UP(res);                                                \

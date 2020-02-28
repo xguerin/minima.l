@@ -10,8 +10,7 @@
 #include <unistd.h>
 
 static atom_t
-lisp_function_out(const lisp_t lisp, const atom_t closure,
-                  const atom_t arguments)
+lisp_function_out(const lisp_t lisp, const atom_t closure)
 {
   int fd = 1;
   char file_buf[PATH_MAX];
@@ -20,8 +19,8 @@ lisp_function_out(const lisp_t lisp, const atom_t closure,
   /*
    * Get CHAN and REM.
    */
-  LISP_LOOKUP(chan, arguments, CHAN);
-  LISP_LOOKUP(prog, arguments, REM);
+  LISP_LOOKUP(chan, closure, CHAN);
+  LISP_LOOKUP(prog, closure, REM);
   /*
    * Get the current working directory. Output files are expected to be relative
    * to where the program is run, not where the program is located.

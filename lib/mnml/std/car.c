@@ -3,10 +3,9 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_car(const lisp_t lisp, const atom_t closure,
-                  const atom_t arguments)
+lisp_function_car(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(arg, arguments, X);
+  LISP_LOOKUP(arg, closure, X);
   atom_t res = lisp_car(arg);
   X(arg);
   return res;

@@ -4,8 +4,7 @@
 #include <unistd.h>
 
 atom_t
-lisp_function_pipe(const lisp_t lisp, const atom_t closure,
-                   const atom_t arguments)
+lisp_function_pipe(const lisp_t lisp, const atom_t closure)
 {
   int fd[2] = { 0 };
   if (pipe(fd) != 0) {

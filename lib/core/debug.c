@@ -11,28 +11,30 @@
  */
 
 bool MNML_DEBUG = false;
-bool MNML_VERBOSE_BIND = false;
-bool MNML_VERBOSE_CHAN = false;
-bool MNML_VERBOSE_CONS = false;
-bool MNML_VERBOSE_EVAL = false;
-bool MNML_VERBOSE_MAKE = false;
-bool MNML_VERBOSE_MODL = false;
-bool MNML_VERBOSE_REFC = false;
-bool MNML_VERBOSE_SLOT = false;
-bool MNML_VERBOSE_SLAB = false;
+bool MNML_DEBUG_BIND = false;
+bool MNML_DEBUG_CHAN = false;
+bool MNML_DEBUG_CLOS = false;
+bool MNML_DEBUG_CONS = false;
+bool MNML_DEBUG_EVAL = false;
+bool MNML_DEBUG_MAKE = false;
+bool MNML_DEBUG_MODL = false;
+bool MNML_DEBUG_REFC = false;
+bool MNML_DEBUG_SLOT = false;
+bool MNML_DEBUG_SLAB = false;
 
 static void
 lisp_debug_set_flag(const char* const flag)
 {
-  MNML_VERBOSE_BIND = MNML_VERBOSE_BIND || strcmp(flag, "BIND") == 0;
-  MNML_VERBOSE_CHAN = MNML_VERBOSE_CHAN || strcmp(flag, "CHAN") == 0;
-  MNML_VERBOSE_CONS = MNML_VERBOSE_CONS || strcmp(flag, "CONS") == 0;
-  MNML_VERBOSE_EVAL = MNML_VERBOSE_EVAL || strcmp(flag, "EVAL") == 0;
-  MNML_VERBOSE_MAKE = MNML_VERBOSE_MAKE || strcmp(flag, "MAKE") == 0;
-  MNML_VERBOSE_MODL = MNML_VERBOSE_MODL || strcmp(flag, "MODL") == 0;
-  MNML_VERBOSE_REFC = MNML_VERBOSE_REFC || strcmp(flag, "REFC") == 0;
-  MNML_VERBOSE_SLAB = MNML_VERBOSE_SLAB || strcmp(flag, "SLAB") == 0;
-  MNML_VERBOSE_SLOT = MNML_VERBOSE_SLOT || strcmp(flag, "SLOT") == 0;
+  MNML_DEBUG_BIND = MNML_DEBUG_BIND || strcmp(flag, "BIND") == 0;
+  MNML_DEBUG_CHAN = MNML_DEBUG_CHAN || strcmp(flag, "CHAN") == 0;
+  MNML_DEBUG_CLOS = MNML_DEBUG_CLOS || strcmp(flag, "CLOS") == 0;
+  MNML_DEBUG_CONS = MNML_DEBUG_CONS || strcmp(flag, "CONS") == 0;
+  MNML_DEBUG_EVAL = MNML_DEBUG_EVAL || strcmp(flag, "EVAL") == 0;
+  MNML_DEBUG_MAKE = MNML_DEBUG_MAKE || strcmp(flag, "MAKE") == 0;
+  MNML_DEBUG_MODL = MNML_DEBUG_MODL || strcmp(flag, "MODL") == 0;
+  MNML_DEBUG_REFC = MNML_DEBUG_REFC || strcmp(flag, "REFC") == 0;
+  MNML_DEBUG_SLAB = MNML_DEBUG_SLAB || strcmp(flag, "SLAB") == 0;
+  MNML_DEBUG_SLOT = MNML_DEBUG_SLOT || strcmp(flag, "SLOT") == 0;
 }
 
 void

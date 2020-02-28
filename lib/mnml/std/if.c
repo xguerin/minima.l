@@ -3,27 +3,28 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_if(const lisp_t lisp, const atom_t closure,
-                 const atom_t arguments)
+lisp_function_if(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cnd, arguments, COND);
-  LISP_LOOKUP(ops, arguments, REM);
+  LISP_LOOKUP(cnd, closure, COND);
+  LISP_LOOKUP(ops, closure, REM);
   /*
    * Evaluate the THEN branch if TRUE.
    */
   if (unlikely(IS_NULL(cnd))) {
     atom_t cd1 = lisp_cdr(ops);
     atom_t els = lisp_car(cd1);
+    atom_t res = lisp_eval(lisp, closure, els);
     X(cnd, ops, cd1);
-    return lisp_eval(lisp, closure, els);
+    return res;
   }
   /*
    * Or evaluate the ELSE branch.
    */
   else {
     atom_t thn = lisp_car(ops);
+    atom_t res = lisp_eval(lisp, closure, thn);
     X(cnd, ops);
-    return lisp_eval(lisp, closure, thn);
+    return res;
   }
 }
 

@@ -38,10 +38,9 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
 }
 
 static atom_t
-lisp_function_stream(const lisp_t lisp, const atom_t closure,
-                     const atom_t arguments)
+lisp_function_stream(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, arguments, @);
+  LISP_LOOKUP(cell, closure, @);
   /*
    * Grab CAR/CDR.
    */

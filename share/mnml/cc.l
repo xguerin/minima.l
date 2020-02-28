@@ -467,9 +467,9 @@
 
 (def cc:gen:cont-any (NAME ARGS REFS TYPES CONT kvar fun)
 	"Generate the C code for any type of funcall FUN."
-	(let ((cont					. (last fun))
-				((_ args body) . cont)
-				(nvar					. (last args)))
+	(let ((cont						. (last fun))
+				((_ args body)	. cont)
+				(nvar						. (last args)))
 		(if (lst? cont)
 			(prog
 				(cc:gen:cont NAME ARGS REFS TYPES CONT nvar body)
@@ -479,9 +479,9 @@
 (def cc:gen:cont-ite (NAME ARGS REFS TYPES CONT kvar fun)
 	"Generate the C code for the IF/THEN/ELSE funcall FUN."
 	(let (((symb cnd . ite) . fun)
-				(first	. (map (\ (e) (let ((cont					 . (last e))
+				(first	. (map (\ (e) (let ((cont						. (last e))
 																		((_ args body)	. cont)
-																		(nvar					 . (last args)))
+																		(nvar						. (last args)))
 																(if (lst? cont) (cc:replace nvar e) e)))
 										ite))
 				(clist	. (map (\ (e) (let ((cont . (last e)))
@@ -528,9 +528,9 @@
 	"Generate the return value conversion."
 	(let ((rtype . (assoc kvar TYPES)))
 		(match rtype
-			(NUMBER . (prinl (o|) "return lisp_make_number(V.number);"))
-			(ATOM	 . (prinl (o|) "return V.atom;"))
-			(_ . (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
+			(NUMBER	. (prinl (o|) "return lisp_make_number(V.number);"))
+			(ATOM		. (prinl (o|) "return V.atom;"))
+			(_			. (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
 			)))
 
 (def cc:gen:identity (NAME TYPES kvar)
@@ -590,12 +590,12 @@
 
 (def cc:gen:argument (TYPES arg)
 	"Generate the argument extraction."
-	(prinl (o|) "LISP_LOOKUP(_" arg ", arguments, " arg ");")
+	(prinl (o|) "LISP_LOOKUP(_" arg ", closure, " arg ");")
 	(cc:gen:value (assoc arg TYPES) arg))
 
 (def cc:gen:entry (NAME ARGS TYPES)
 	"Generate C code for the NAME entry point."
-	(prinl "static atom_t lisp_function_" NAME "(const lisp_t lisp, const atom_t env, const atom_t arguments) {")
+	(prinl "static atom_t lisp_function_" NAME "(const lisp_t lisp, const atom_t closure) {")
 	(o>)
 	(/**/ "Grab the arguments.")
 	(iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
@@ -603,7 +603,7 @@
 	(prinl (o|) "closure_t _C = NULL;")
 	(prinl (o|) "callback_t _K = _mnml_" NAME "_identity;")
 	(/**/ "Call the main function.")
-	(prin (o|) "atom_t R = _mnml_" NAME "(lisp, env, ")
+	(prin (o|) "atom_t R = _mnml_" NAME "(lisp, closure, ")
 	(iter (\ (e) (prin e ", ")) ARGS)
 	(prinl "_C, _K);")
 	(/**/ "Clear the closure cache and return.")
@@ -636,12 +636,12 @@
 
 (def cc:compile1 (SYMB)
 	"Generate the C code for the CPS function SYMB."
-	(let ((cps						 . (>& SYMB))
-				((args _ _ body) . cps)
+	(let ((cps						. (>& SYMB))
+				((args _ body)	. cps)
 				(ARGS						. (cc:arg:get args))
 				(REFS						. (cps:refcount cps))
-				(TYPES					 . (cps:infer NAME cps))
-				(isvalid				 . (foldl (\ (acc (_ . t)) (and (<> t 'ERROR) acc)) T TYPES))
+				(TYPES					. (cps:infer NAME cps))
+				(isvalid				. (foldl (\ (acc (_ . t)) (and (<> t 'ERROR) acc)) T TYPES))
 				(kvar						. (last args)))
 		(when isvalid
 			#
@@ -685,12 +685,12 @@
 (def cc:flags ()
 	"Generate the build flags based on the OS name."
 	(let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV))
-				(incd . (append (assoc 'PREFIX CONFIG) "/include"))
-				(libd . (append (assoc 'PREFIX CONFIG) "/lib"))
-				(flags . (list
-									 "-shared" "-fPIC" "-fomit-frame-pointer"
-									 "-I" incd "-L" libd "-lminimal"
-									 "-O3" "-g3" "-o" oout cout)))
+				(incd				. (append (assoc 'PREFIX CONFIG) "/include"))
+				(libd				. (append (assoc 'PREFIX CONFIG) "/lib"))
+				(flags			. (list
+												"-shared" "-fPIC" "-fomit-frame-pointer"
+												"-I" incd "-L" libd "-lminimal"
+												"-O3" "-g3" "-o" oout cout)))
 		(if (or (= osname "Linux") (= osname "Darwin"))
 			($+ flags '("-flto"))
 			flags
@@ -698,7 +698,7 @@
 
 (def cc:build (MODULE SYMBS . TARGET)
 	"Build the module for the CPS function SYMB."
-	(let ((trgt . (append (assoc "HOME" ENV) "/.mnml"))
+	(let ((trgt	. (append (assoc "HOME" ENV) "/.mnml"))
 				(cout . (append trgt "/" (str MODULE) ".c"))
 				(oout . (<|> (eval (car TARGET)) (append trgt "/lib" (str MODULE) (cc:ext)))))
 		(when SYMBS

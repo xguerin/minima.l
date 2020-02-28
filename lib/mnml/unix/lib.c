@@ -9,15 +9,12 @@ LISP_MODULE_DECL(time);
 LISP_MODULE_DECL(unlink);
 LISP_MODULE_DECL(wait);
 
-module_entry_t ENTRIES[] = { LISP_MODULE_REGISTER(close),
-                             LISP_MODULE_REGISTER(dup),
-                             LISP_MODULE_REGISTER(exec),
-                             LISP_MODULE_REGISTER(fork),
-                             LISP_MODULE_REGISTER(pipe),
-                             LISP_MODULE_REGISTER(time),
-                             LISP_MODULE_REGISTER(unlink),
-                             LISP_MODULE_REGISTER(wait),
-                             { NULL, NULL } };
+module_entry_t ENTRIES[] = {
+  LISP_MODULE_REGISTER(close), LISP_MODULE_REGISTER(dup),
+  LISP_MODULE_REGISTER(exec),  LISP_MODULE_REGISTER(fork),
+  LISP_MODULE_REGISTER(pipe),  LISP_MODULE_REGISTER(unlink),
+  LISP_MODULE_REGISTER(wait),  { NULL, NULL }
+};
 
 const char*
 lisp_module_name()

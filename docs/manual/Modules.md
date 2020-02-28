@@ -32,10 +32,10 @@ file called `add.c`:
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_add(const lisp_t lisp, const atom_t closure, const atom_t args)
+lisp_function_add(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(x, args, X);
-  LISP_LOOKUP(y, args, Y);
+  LISP_LOOKUP(x, closure, X);
+  LISP_LOOKUP(y, closure, Y);
   /*
    * Make sure the arguments are numbers.
    */
@@ -108,7 +108,7 @@ The first argument `__s` is the suffix of the function. The second argument
 argument symbols. For instance, the function `add` is defined as follow:
 ```c
 static atom_t
-lisp_function_add(const lisp_t lisp, const atom_t closure, const atom_t args)
+lisp_function_add(const lisp_t lisp, const atom_t closure)
 {
   /* ... */
 }

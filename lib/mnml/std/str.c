@@ -4,10 +4,9 @@
 #include <mnml/utils.h>
 
 static atom_t
-lisp_function_str(const lisp_t lisp, const atom_t closure,
-                  const atom_t arguments)
+lisp_function_str(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, arguments, X);
+  LISP_LOOKUP(car, closure, X);
   char buffer[17] = { 0 };
   strncpy(buffer, car->symbol.val, LISP_SYMBOL_LENGTH);
   X(car);

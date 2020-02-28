@@ -36,15 +36,14 @@ lisp_exec_make_strings(const atom_t cell, char** array, const size_t len,
 }
 
 static atom_t
-lisp_function_exec(const lisp_t lisp, const atom_t closure,
-                   const atom_t arguments)
+lisp_function_exec(const lisp_t lisp, const atom_t closure)
 {
   /*
    * Get the arguments.
    */
-  LISP_LOOKUP(path, arguments, PATH);
-  LISP_LOOKUP(args, arguments, ARGS);
-  LISP_LOOKUP(envp, arguments, ENVP);
+  LISP_LOOKUP(path, closure, PATH);
+  LISP_LOOKUP(args, closure, ARGS);
+  LISP_LOOKUP(envp, closure, ENVP);
   /*
    * Build the path string.
    */

@@ -3,17 +3,17 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_unless(const lisp_t lisp, const atom_t closure,
-                     const atom_t arguments)
+lisp_function_unless(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cnd, arguments, COND);
-  LISP_LOOKUP(prg, arguments, REM);
+  LISP_LOOKUP(cnd, closure, COND);
+  LISP_LOOKUP(prg, closure, REM);
   /*
    * Evaluate REM branch if TRUE.
    */
   if (likely(IS_NULL(cnd))) {
+    atom_t res = lisp_prog(lisp, closure, prg, UP(NIL));
     X(cnd);
-    return lisp_prog(lisp, closure, prg, UP(NIL));
+    return res;
   }
   /*
    * Or return NIL;

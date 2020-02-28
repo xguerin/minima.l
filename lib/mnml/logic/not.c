@@ -3,10 +3,9 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_not(const lisp_t lisp, const atom_t closure,
-                  const atom_t arguments)
+lisp_function_not(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, arguments, X);
+  LISP_LOOKUP(car, closure, X);
   atom_t res = IS_NULL(car) ? TRUE : NIL;
   X(car);
   return UP(res);

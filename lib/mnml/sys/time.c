@@ -4,10 +4,9 @@
 #include <mnml/utils.h>
 
 static atom_t
-lisp_function_time(const lisp_t lisp, const atom_t closure,
-                   const atom_t arguments)
+lisp_function_time(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(arg, arguments, @);
+  LISP_LOOKUP(arg, closure, @);
   uint64_t result;
   uint64_t begin = lisp_timestamp();
   if (IS_NULL(arg)) {
