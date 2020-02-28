@@ -207,7 +207,7 @@ lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell)
 }
 
 /*
- * SETQ. Arguments pair is consumed.
+ * SETQ. PAIR is consumed.
  */
 
 atom_t
@@ -251,7 +251,7 @@ lisp_setq(const atom_t closure, const atom_t pair)
 }
 
 /*
- * PROG.
+ * PROG. CELL and RESULT are consumed.
  */
 
 atom_t
@@ -276,7 +276,7 @@ lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
 }
 
 /*
- * Argument bindings. RC rules: all arguments are consumed.
+ * Argument bindings. CLOSURE, ARG and VAL are consumed.
  */
 
 atom_t
@@ -325,54 +325,65 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
 }
 
 static atom_t
-lisp_bind_args(const lisp_t lisp, const atom_t closure, const atom_t env,
-               const atom_t args, const atom_t vals, atom_t* const narg,
-               atom_t* const nval)
+lisp_bind_args(const lisp_t lisp, const atom_t cl0, const atom_t cl1,
+               const atom_t args, const atom_t vals)
 {
-  TRACE_BIND_SEXP(env);
+  TRACE_BIND_SEXP(args);
+  TRACE_BIND_SEXP(vals);
   /*
    * Return if we run out of arguments.
    */
   if (IS_NULL(args)) {
-    *narg = args;
-    *nval = vals;
-    TRACE_BIND_SEXP(env);
-    return env;
-  }
-  /*
-   * If args is a single symbol, bind the unevaluated values to it.
-   */
-  if (IS_SYMB(args)) {
-    atom_t res = lisp_bind(lisp, env, args, vals);
-    *narg = UP(NIL);
-    *nval = UP(NIL);
+    atom_t cns = lisp_cons(args, vals);
+    atom_t res = lisp_cons(cl1, cns);
+    X(cl1, cns, args, vals);
     TRACE_BIND_SEXP(res);
     return res;
+  }
+  /*
+   * If ARGS is a single symbol, bind the unevaluated values to it.
+   */
+  if (IS_SYMB(args)) {
+    atom_t tail = lisp_cons(NIL, NIL);
+    atom_t head = lisp_bind(lisp, cl1, args, vals);
+    atom_t rslt = lisp_cons(head, tail);
+    X(head, tail);
+    TRACE_BIND_SEXP(rslt);
+    return rslt;
   }
   /*
    * Return if we run out of values.
    */
   if (IS_NULL(vals)) {
-    *narg = args;
-    *nval = vals;
-    TRACE_BIND_SEXP(env);
-    return env;
+    atom_t cns = lisp_cons(args, vals);
+    atom_t res = lisp_cons(cl1, cns);
+    X(cl1, cns, args, vals);
+    TRACE_BIND_SEXP(res);
+    return res;
   }
   /*
-   * Grab the CARs, evaluate the value and bind them.
+   * Grab CAR and CDR.
    */
   atom_t sym = lisp_car(args);
-  atom_t val = lisp_eval(lisp, closure, lisp_car(vals));
-  atom_t cl0 = lisp_bind(lisp, env, sym, val);
-  /*
-   * Grab the CDRs and recursively bind them.
-   */
+  atom_t val = lisp_eval(lisp, cl0, lisp_car(vals));
   atom_t oth = lisp_cdr(args);
   atom_t rem = lisp_cdr(vals);
   X(args, vals);
   /*
+   * Recursive descent.
    */
-  return lisp_bind_args(lisp, closure, cl0, oth, rem, narg, nval);
+  atom_t next = lisp_bind_args(lisp, cl0, cl1, oth, rem);
+  atom_t head = lisp_car(next);
+  atom_t tail = lisp_cdr(next);
+  X(next);
+  /*
+   * Bind and return the result.
+   */
+  atom_t updt = lisp_bind(lisp, head, sym, val);
+  atom_t rslt = lisp_cons(updt, tail);
+  X(updt, tail);
+  TRACE_BIND_SEXP(rslt);
+  return rslt;
 }
 
 /*
@@ -400,8 +411,12 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
    * used as the run environment and augmented with the arguments' values.  The
    * call-site closure is used for the evaluation of the arguments.
    */
-  atom_t narg, nval;
-  atom_t next = lisp_bind_args(lisp, closure, fcls, args, vals, &narg, &nval);
+  atom_t bind = lisp_bind_args(lisp, closure, fcls, args, vals);
+  atom_t next = lisp_car(bind);
+  atom_t cdr1 = lisp_cdr(bind);
+  atom_t narg = lisp_car(cdr1);
+  atom_t nval = lisp_cdr(cdr1);
+  X(bind, cdr1);
   /*
    * If some arguments remain, handle partial application.
    */
