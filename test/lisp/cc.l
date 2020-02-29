@@ -7,7 +7,7 @@
 	"Compile and build SYM."
 	(cc:build SYM (cc:compile SYM (list SYM))))
 
-(setq DELTA 118)
+(setq DELTA 133)
 
 (test:run
 	"Compiler operations"
@@ -197,7 +197,7 @@
 							(def _add (A B) (+ A B))
 							(def _fnc (A B) (_add A B))
 							(let ((res	. (test:build '_fnc))
-										(bod	. (|> _map cdr cdr))
+										(bod	. (|> _fnc cdr cdr))
 										(pre	. (test:slabdelta)))
 								(|> T
 										(and (assert:equal '(_fnc) res))
