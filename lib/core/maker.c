@@ -91,13 +91,15 @@ lisp_make_wildcard()
 }
 
 lisp_t
-lisp_make_context()
+lisp_make_context(const atom_t ichan, const atom_t ochan)
 {
   /*
    * Create the context.
    */
   lisp_t lisp = (lisp_t)malloc(sizeof(struct _lisp));
   lisp->GLOBALS = UP(NIL);
+  lisp->ICHAN = UP(ichan);
+  lisp->OCHAN = UP(ochan);
   /*
    * Load a default set of functions.
    */
@@ -124,6 +126,8 @@ lisp_make_context()
 void
 lisp_delete_context(lisp_t lisp)
 {
+  X(lisp->OCHAN);
+  X(lisp->ICHAN);
   X(lisp->GLOBALS);
   free(lisp);
 }

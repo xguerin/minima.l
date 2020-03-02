@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (*stage_t)(const atom_t, const void* const data);
+typedef void (*stage_t)(const lisp_t, const atom_t, const void* const data);
 
 static bool keep_running = true;
 
@@ -31,40 +31,40 @@ run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
   atom_t input, result = UP(NIL);
   while (keep_running) {
     X(result);
-    pread(NIL, data);
+    pread(lisp, NIL, data);
     input = lisp_read(lisp, NIL, UP(NIL));
     if (input == NULL) {
       result = UP(NIL);
       break;
     }
     result = lisp_eval(lisp, NIL, input);
-    pdone(result, data);
+    pdone(lisp, result, data);
   }
   return result;
 }
 
 static void
-repl_parse_error_handler()
+repl_parse_error_handler(const lisp_t lisp)
 {
   write(1, "^ parse error\n", 14);
-  if (CDR(CDR(CAR(ICHAN))) == NIL) {
+  if (CDR(CDR(CAR(lisp->ICHAN))) == NIL) {
     fwrite(": ", 1, 2, stdout);
   }
 }
 
 static void
-stage_prompt(const atom_t cell, const void* const data)
+stage_prompt(const lisp_t lisp, const atom_t cell, const void* const data)
 {
-  if (CDR(CDR(CAR(ICHAN))) == NIL) {
+  if (CDR(CDR(CAR(lisp->ICHAN))) == NIL) {
     fwrite(": ", 1, 2, stdout);
   }
 }
 
 static void
-stage_newline(const atom_t cell, const void* const data)
+stage_newline(const lisp_t lisp, const atom_t cell, const void* const data)
 {
   fwrite("> ", 1, 2, stdout);
-  lisp_prin(NIL, cell, true);
+  lisp_prin(lisp, NIL, cell, true);
   fwrite("\n", 1, 1, stdout);
 }
 
@@ -75,7 +75,7 @@ stage_newline(const atom_t cell, const void* const data)
 static atom_t PAIRS;
 
 static void
-lisp_push(const atom_t cell)
+lisp_push(const lisp_t lisp, const atom_t cell)
 {
   PAIRS = lisp_append(PAIRS, cell);
 }
@@ -290,7 +290,7 @@ main(const int argc, char** const argv)
   /*
    * Create a lisp context.
    */
-  lisp_t lisp = lisp_make_context();
+  lisp_t lisp = lisp_make_context(NIL, NIL);
   /*
    * Build ARGV, CONFIG and ENV.
    */
@@ -302,11 +302,11 @@ main(const int argc, char** const argv)
   atom_t result;
   if (filename == NULL && expr == NULL) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp->ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(lisp->OCHAN, stdout, cwd);
     result = run(lisp, stage_prompt, stage_newline, cwd);
-    POP_IO_CONTEXT(ICHAN);
-    POP_IO_CONTEXT(OCHAN);
+    POP_IO_CONTEXT(lisp->ICHAN);
+    POP_IO_CONTEXT(lisp->OCHAN);
   } else if (filename == NULL) {
     /*
      * Setup the PAIRS to NIL.
@@ -323,8 +323,8 @@ main(const int argc, char** const argv)
     /*
      * Push the IO context.
      */
-    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp->ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(lisp->OCHAN, stdout, cwd);
     /*
      * Evaluate the parsed expressions.
      */
@@ -341,16 +341,16 @@ main(const int argc, char** const argv)
     /*
      * Pop the IO context.
      */
-    POP_IO_CONTEXT(ICHAN);
-    POP_IO_CONTEXT(OCHAN);
+    POP_IO_CONTEXT(lisp->ICHAN);
+    POP_IO_CONTEXT(lisp->OCHAN);
     /*
      * Clear the PAIRS.
      */
     X(PAIRS);
   } else {
-    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp->OCHAN, stdout, cwd);
     result = lisp_load_file(lisp, argv[1]);
-    POP_IO_CONTEXT(OCHAN);
+    POP_IO_CONTEXT(lisp->OCHAN);
   }
   /*
    * Compute the return status.

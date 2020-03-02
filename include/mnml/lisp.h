@@ -23,8 +23,6 @@
  * Symbol management.
  */
 
-extern atom_t ICHAN;
-extern atom_t OCHAN;
 extern atom_t NIL;
 extern atom_t TRUE;
 extern atom_t QUOTE;
@@ -62,6 +60,7 @@ atom_t lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
 
 atom_t lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell);
 atom_t lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell);
-void lisp_prin(const atom_t closure, const atom_t cell, const bool s);
+void lisp_prin(const lisp_t lisp, const atom_t closure, const atom_t cell,
+               const bool s);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

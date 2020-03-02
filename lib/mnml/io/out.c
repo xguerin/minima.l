@@ -46,7 +46,7 @@ lisp_function_out(const lisp_t lisp, const atom_t closure)
       /*
        * Get the fullpath for the file.
        */
-      const char* path = lisp_get_fullpath(dirn_buf, file_buf, path_buf);
+      const char* path = lisp_get_fullpath(lisp, dirn_buf, file_buf, path_buf);
       if (path == NULL) {
         ERROR("Cannot get the full path for %s", file_buf);
         return UP(NIL);
@@ -79,9 +79,9 @@ lisp_function_out(const lisp_t lisp, const atom_t closure)
   /*
    * Push the context, eval the prog, pop the context.
    */
-  PUSH_IO_CONTEXT(OCHAN, handle, dirn_buf);
+  PUSH_IO_CONTEXT(lisp->OCHAN, handle, dirn_buf);
   atom_t res = lisp_prog(lisp, closure, prog, UP(NIL));
-  POP_IO_CONTEXT(OCHAN);
+  POP_IO_CONTEXT(lisp->OCHAN);
   /*
    * Close the FD if necessary and return the value.
    */

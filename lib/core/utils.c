@@ -19,18 +19,18 @@ error_handler_t lisp_parse_error_handler = NULL;
 error_handler_t lisp_syntax_error_handler = NULL;
 
 void
-parse_error()
+parse_error(const lisp_t lisp)
 {
   if (lisp_parse_error_handler != NULL) {
-    lisp_parse_error_handler();
+    lisp_parse_error_handler(lisp);
   }
 }
 
 void
-syntax_error()
+syntax_error(const lisp_t lisp)
 {
   if (lisp_syntax_error_handler != NULL) {
-    lisp_syntax_error_handler();
+    lisp_syntax_error_handler(lisp);
   }
 }
 
@@ -90,11 +90,6 @@ lisp_init()
   lisp_make_quote();
   lisp_make_wildcard();
   /*
-   * Create the channels.
-   */
-  ICHAN = UP(NIL);
-  OCHAN = UP(NIL);
-  /*
    * Setup the debug variables.
    */
 #ifdef LISP_ENABLE_DEBUG
@@ -116,7 +111,7 @@ lisp_fini()
   /*
    * Destroy the global variables.
    */
-  X(OCHAN, ICHAN, WILDCARD, QUOTE, TRUE, NIL);
+  X(WILDCARD, QUOTE, TRUE, NIL);
   /*
    * Destroy the slab allocator.
    */
@@ -383,8 +378,8 @@ lisp_timestamp()
  */
 
 const char*
-lisp_get_fullpath(const char* const cwd, const char* const filepath,
-                  char* const buffer)
+lisp_get_fullpath(const lisp_t lisp, const char* const cwd,
+                  const char* const filepath, char* const buffer)
 {
   char expn_buf[PATH_MAX];
   char absl_buf[PATH_MAX];
@@ -408,7 +403,7 @@ lisp_get_fullpath(const char* const cwd, const char* const filepath,
   /*
    * If the expanded path is not absolute, prepend the current CWD.
    */
-  if (expn_buf[0] != '/' && !IS_NULL(ICHAN)) {
+  if (expn_buf[0] != '/' && !IS_NULL(lisp->ICHAN)) {
     strcpy(absl_buf, cwd);
     strcat(absl_buf, "/");
     strcat(absl_buf, expn_buf);
@@ -454,15 +449,15 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   /*
    * Get CWD.
    */
-  if (IS_NULL(ICHAN)) {
+  if (IS_NULL(lisp->ICHAN)) {
     strcpy(absl_buf, getenv("PWD"));
   } else {
-    lisp_make_cstring(CAR(CDR(CAR(ICHAN))), absl_buf, PATH_MAX, 0);
+    lisp_make_cstring(CAR(CDR(CAR(lisp->ICHAN))), absl_buf, PATH_MAX, 0);
   }
   /*
    * Get the fullpath for the file.
    */
-  const char* path = lisp_get_fullpath(absl_buf, filepath, path_buf);
+  const char* path = lisp_get_fullpath(lisp, absl_buf, filepath, path_buf);
   if (path == NULL) {
     ERROR("Cannot get the full path for %s", filepath);
     return UP(NIL);
@@ -496,7 +491,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
    * Push the context.
    */
   TRACE("Loading %s", path);
-  PUSH_IO_CONTEXT(ICHAN, handle, dir);
+  PUSH_IO_CONTEXT(lisp->ICHAN, handle, dir);
   /*
    * Load all the entries
    */
@@ -508,7 +503,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   /*
    * Pop the context and return the value.
    */
-  POP_IO_CONTEXT(ICHAN);
+  POP_IO_CONTEXT(lisp->ICHAN);
   fclose(handle);
   return res;
 }

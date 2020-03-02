@@ -12,7 +12,7 @@
 static atom_t
 lisp_function_readlines(const lisp_t lisp, const atom_t closure)
 {
-  FILE* handle = (FILE*)CAR(CAR(ICHAN))->number;
+  FILE* handle = (FILE*)CAR(CAR(lisp->ICHAN))->number;
   /*
    */
   atom_t res = UP(NIL);

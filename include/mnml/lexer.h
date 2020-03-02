@@ -7,7 +7,7 @@
  * Consumer type.
  */
 
-typedef void (*lisp_consumer_t)(const atom_t);
+typedef void (*lisp_consumer_t)(const lisp_t lisp, const atom_t);
 
 /*
  * Lexer type.

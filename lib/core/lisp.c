@@ -13,8 +13,6 @@
  * Global symbols.
  */
 
-atom_t ICHAN = NULL;
-atom_t OCHAN = NULL;
 atom_t NIL = NULL;
 atom_t TRUE = NULL;
 atom_t QUOTE = NULL;
@@ -120,46 +118,46 @@ lisp_conc(const atom_t car, const atom_t cdr)
 #define RBUFLEN 1024
 
 static void
-lisp_consumer(const atom_t cell)
+lisp_consumer(const lisp_t lisp, const atom_t cell)
 {
-  atom_t chn = CAR(ICHAN);
+  atom_t chn = CAR(lisp->ICHAN);
   CDR(chn) = lisp_append(CDR(chn), cell);
 }
 
 static atom_t
-lisp_read_pop()
+lisp_read_pop(const lisp_t lisp)
 {
-  TRACE_CHAN_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(lisp->ICHAN);
   /*
    * ((CHN0 PWD V1 V2) (CHN1 PWD V1 V2) ...).
    */
-  atom_t chn = CAR(ICHAN);
+  atom_t chn = CAR(lisp->ICHAN);
   atom_t vls = CDR(CDR(chn));
   atom_t res = UP(CAR(vls));
   CDR(CDR(chn)) = UP(CDR(vls));
   X(vls);
   /*
    */
-  TRACE_CHAN_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(lisp->ICHAN);
   return res;
 }
 
 atom_t
 lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
-  TRACE_CHAN_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(lisp->ICHAN);
   X(cell);
   /*
    * Grab the channel, the path and the content.
    */
-  atom_t chn = CAR(ICHAN);
+  atom_t chn = CAR(lisp->ICHAN);
   atom_t hnd = CAR(chn);
   atom_t val = CDR(CDR(chn));
   /*
    * Check if there is any value in the channel's buffer.
    */
   if (!IS_NULL(val)) {
-    return lisp_read_pop();
+    return lisp_read_pop(lisp);
   }
   /*
    * Read from the file descriptor.
@@ -178,12 +176,12 @@ lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell)
     size_t len = strlen(p);
     lisp_lexer_parse(&lexer, buffer, lexer.rem + len,
                      lexer.rem + len < RBUFLEN);
-  } while (CDR(CDR(CAR(ICHAN))) == NIL || lisp_lexer_pending(&lexer));
+  } while (CDR(CDR(CAR(lisp->ICHAN))) == NIL || lisp_lexer_pending(&lexer));
   /*
    * Grab the result and return it.
    */
   lisp_lexer_destroy(&lexer);
-  return CDR(CDR(chn)) != NIL ? lisp_read_pop() : NULL;
+  return CDR(CDR(chn)) != NIL ? lisp_read_pop(lisp) : NULL;
 }
 
 /*
@@ -657,9 +655,10 @@ lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
 }
 
 void
-lisp_prin(const atom_t closure, const atom_t cell, const bool s)
+lisp_prin(const lisp_t lisp, const atom_t closure, const atom_t cell,
+          const bool s)
 {
-  FILE* handle = (FILE*)CAR(CAR(OCHAN))->number;
+  FILE* handle = (FILE*)CAR(CAR(lisp->OCHAN))->number;
   char buffer[IO_BUFFER_LEN];
   size_t idx = lisp_prin_atom(handle, buffer, 0, closure, cell, s);
   lisp_flush(handle, buffer, idx);

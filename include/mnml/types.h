@@ -83,6 +83,8 @@ typedef struct _atom
 typedef struct _lisp
 {
   atom_t GLOBALS;
+  atom_t ICHAN;
+  atom_t OCHAN;
 } * lisp_t;
 
 /*

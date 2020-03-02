@@ -29,7 +29,7 @@ static lexer_t lisp_lexer;
 static atom_t lisp_result = NULL;
 
 static void
-lisp_consumer(const atom_t cell)
+lisp_consumer(const lisp_t lisp, const atom_t cell)
 {
   lisp_result = cell;
 }

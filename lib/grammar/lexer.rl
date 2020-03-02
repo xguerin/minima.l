@@ -18,7 +18,7 @@
 
 #define UNPREFIX(_ts) (*(_ts) == '\'' || *(_ts) == '`' ? (_ts) + 1 : (_ts))
 
-extern void parse_error();
+extern void parse_error(const lisp_t lisp);
 
 static void
 lisp_consume_token(const lexer_t * const lexer)
@@ -34,13 +34,13 @@ machine minimal;
 
 action err_prefix
 {
-  parse_error();
+  parse_error(lexer->lisp);
   fhold; fgoto purge;
 }
 
 action parse_error
 {
-  parse_error();
+  parse_error(lexer->lisp);
   fhold; fgoto purge;
 }
 
@@ -53,7 +53,7 @@ action tok_popen
 action tok_pclose
 {
   if (lexer->depth == 0) {
-    parse_error();
+    parse_error(lexer->lisp);
     fhold; fgoto purge;
   }
   Parse(lexer->parser, PCLOSE, 0, lexer);

@@ -9,7 +9,7 @@
 /*
  * Interpreter life cycle.
  */
-typedef void (*error_handler_t)();
+typedef void (*error_handler_t)(const lisp_t lisp);
 
 void lisp_set_parse_error_handler(const error_handler_t h);
 void lisp_set_syntax_error_handler(const error_handler_t h);
@@ -77,8 +77,8 @@ uint64_t lisp_timestamp();
 /*
  * Get the full path of a file according to the current ICHAN context.
  */
-const char* lisp_get_fullpath(const char* const cwd, const char* const filepath,
-                              char* const buffer);
+const char* lisp_get_fullpath(const lisp_t lisp, const char* const cwd,
+                              const char* const filepath, char* const buffer);
 
 /*
  * Load a file.

@@ -167,7 +167,7 @@ void lisp_make_wildcard();
  * Context maker.
  */
 
-lisp_t lisp_make_context();
+lisp_t lisp_make_context(const atom_t ichan, const atom_t ochan);
 void lisp_delete_context(lisp_t lisp);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

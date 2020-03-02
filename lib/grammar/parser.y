@@ -27,7 +27,7 @@ extern void syntax_error();
 
 root ::= prefix(A).
 {
-  lexer->consumer(A);
+  lexer->consumer(lexer->lisp, A);
 }
 
 list(A) ::= POPEN PCLOSE.

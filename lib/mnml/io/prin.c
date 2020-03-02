@@ -14,7 +14,7 @@ lisp_prin_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
    */
   atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
-  lisp_prin(closure, car, false);
+  lisp_prin(lisp, closure, car, false);
   X(cell, result);
   return lisp_prin_all(lisp, closure, cdr, car);
 }
