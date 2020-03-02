@@ -23,7 +23,7 @@ lisp_close(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t
 lisp_function_close(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, closure, @);
+  LISP_LOOKUP(lisp, cell, closure, @);
   bool res = lisp_close(lisp, closure, cell, true);
   return UP(res ? TRUE : NIL);
 }

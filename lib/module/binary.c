@@ -73,7 +73,7 @@ lisp_module_find_from_cache(const atom_t sym)
   FOREACH(MODULES, m)
   {
     atom_t car = m->car;
-    if (lisp_symbol_match(CAR(car), sym)) {
+    if (lisp_symbol_match(CAR(car), &sym->symbol)) {
       void* handle = (void*)CDR(car)->number;
       return handle;
     }

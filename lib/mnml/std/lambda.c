@@ -5,7 +5,7 @@
 static atom_t
 lisp_function_lambda(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, closure, @);
+  LISP_LOOKUP(lisp, cell, closure, @);
   /*
    * Extract the arguments and the PROG of the lambda.
    */

@@ -6,7 +6,7 @@
 static atom_t
 lisp_function_chr(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, closure, X);
+  LISP_LOOKUP(lisp, car, closure, X);
   char val = car->number;
   X(car);
   return lisp_make_char(val);

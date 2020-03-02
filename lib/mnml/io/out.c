@@ -19,8 +19,8 @@ lisp_function_out(const lisp_t lisp, const atom_t closure)
   /*
    * Get CHAN and REM.
    */
-  LISP_LOOKUP(chan, closure, CHAN);
-  LISP_LOOKUP(prog, closure, REM);
+  LISP_LOOKUP(lisp, chan, closure, CHAN);
+  LISP_LOOKUP(lisp, prog, closure, REM);
   /*
    * Get the current working directory. Output files are expected to be relative
    * to where the program is run, not where the program is located.

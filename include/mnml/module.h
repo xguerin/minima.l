@@ -65,9 +65,9 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
  * Closure lookup macro.
  */
 
-#define LISP_LOOKUP(_v, _c, _x)                       \
+#define LISP_LOOKUP(_l, _v, _c, _x)                   \
   MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_SYMBOL_LENGTH); \
-  atom_t _v = lisp_lookup_immediate(_c, _##_v)
+  atom_t _v = lisp_lookup(_l, _c, _##_v)
 
 /*
  * Module generators.
@@ -76,7 +76,7 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
 #define PREDICATE_GEN(_n, _o, _x)                                    \
   static atom_t lisp_function_is##_n(const lisp_t l, const atom_t c) \
   {                                                                  \
-    LISP_LOOKUP(car, c, _x);                                         \
+    LISP_LOOKUP(l, car, c, _x);                                      \
     atom_t res = _o(car) ? TRUE : NIL;                               \
     X(car);                                                          \
     return UP(res);                                                  \
@@ -85,8 +85,8 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
 #define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                         \
   static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
-    LISP_LOOKUP(vl0, c, _x);                                       \
-    LISP_LOOKUP(vl1, c, _y);                                       \
+    LISP_LOOKUP(l, vl0, c, _x);                                    \
+    LISP_LOOKUP(l, vl1, c, _y);                                    \
     atom_t res = (!IS_NULL(vl0))_o(!IS_NULL(vl1)) ? TRUE : NIL;    \
     X(vl0, vl1);                                                   \
     return UP(res);                                                \
@@ -95,8 +95,8 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
 #define BINARY_NUMBER_GEN(_n, _o, _x, _y)                          \
   static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
-    LISP_LOOKUP(vl0, c, _x);                                       \
-    LISP_LOOKUP(vl1, c, _y);                                       \
+    LISP_LOOKUP(l, vl0, c, _x);                                    \
+    LISP_LOOKUP(l, vl1, c, _y);                                    \
     atom_t res = lisp_make_number(vl0->number _o vl1->number);     \
     X(vl0, vl1);                                                   \
     return res;                                                    \
@@ -105,8 +105,8 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
 #define BINARY_COMPARE_GEN(_n, _o, _x, _y)                         \
   static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
-    LISP_LOOKUP(vl0, c, _x);                                       \
-    LISP_LOOKUP(vl1, c, _y);                                       \
+    LISP_LOOKUP(l, vl0, c, _x);                                    \
+    LISP_LOOKUP(l, vl1, c, _y);                                    \
     atom_t res = vl0->number _o vl1->number ? TRUE : NIL;          \
     X(vl0, vl1);                                                   \
     return UP(res);                                                \

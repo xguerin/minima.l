@@ -5,8 +5,8 @@
 static atom_t
 lisp_function_neq(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(vl0, closure, X);
-  LISP_LOOKUP(vl1, closure, Y);
+  LISP_LOOKUP(lisp, vl0, closure, X);
+  LISP_LOOKUP(lisp, vl1, closure, Y);
   atom_t res = lisp_neq(vl0, vl1) ? TRUE : NIL;
   X(vl0, vl1);
   return UP(res);

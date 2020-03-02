@@ -5,7 +5,7 @@
 static atom_t
 lisp_function_quote(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, closure, @);
+  LISP_LOOKUP(lisp, cell, closure, @);
   return cell;
 }
 

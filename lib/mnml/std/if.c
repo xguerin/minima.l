@@ -5,8 +5,8 @@
 static atom_t
 lisp_function_if(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cnd, closure, COND);
-  LISP_LOOKUP(ops, closure, REM);
+  LISP_LOOKUP(lisp, cnd, closure, COND);
+  LISP_LOOKUP(lisp, ops, closure, REM);
   /*
    * Evaluate the THEN branch if TRUE.
    */

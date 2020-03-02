@@ -5,7 +5,7 @@
 static atom_t
 lisp_function_eval(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, closure, X);
+  LISP_LOOKUP(lisp, car, closure, X);
   return lisp_eval(lisp, closure, car);
 }
 

@@ -6,7 +6,7 @@
 static atom_t
 lisp_function_time(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(arg, closure, @);
+  LISP_LOOKUP(lisp, arg, closure, @);
   uint64_t result;
   uint64_t begin = lisp_timestamp();
   if (IS_NULL(arg)) {

@@ -41,9 +41,9 @@ lisp_function_exec(const lisp_t lisp, const atom_t closure)
   /*
    * Get the arguments.
    */
-  LISP_LOOKUP(path, closure, PATH);
-  LISP_LOOKUP(args, closure, ARGS);
-  LISP_LOOKUP(envp, closure, ENVP);
+  LISP_LOOKUP(lisp, path, closure, PATH);
+  LISP_LOOKUP(lisp, args, closure, ARGS);
+  LISP_LOOKUP(lisp, envp, closure, ENVP);
   /*
    * Build the path string.
    */

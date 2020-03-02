@@ -7,7 +7,7 @@
 static atom_t
 lisp_function_unlink(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(name, closure, NAME);
+  LISP_LOOKUP(lisp, name, closure, NAME);
   /*
    * Make sure the argument is a string.
    */

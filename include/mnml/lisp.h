@@ -30,8 +30,7 @@ extern atom_t TRUE;
 extern atom_t QUOTE;
 extern atom_t WILDCARD;
 
-atom_t lisp_lookup_immediate(const atom_t closure, const symbol_t sym);
-atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t sym);
+atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym);
 
 /*
  * Lisp basic functions.

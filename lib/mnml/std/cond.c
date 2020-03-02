@@ -54,7 +54,7 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t
 lisp_function_cond(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, closure, @);
+  LISP_LOOKUP(lisp, cell, closure, @);
   atom_t car = lisp_car(cell);
   atom_t cdr = lisp_cdr(cell);
   atom_t res = lisp_cond(lisp, closure, car, cdr);

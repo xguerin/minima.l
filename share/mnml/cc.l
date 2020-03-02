@@ -590,7 +590,7 @@
 
 (def cc:gen:argument (TYPES arg)
 	"Generate the argument extraction."
-	(prinl (o|) "LISP_LOOKUP(_" arg ", closure, " arg ");")
+	(prinl (o|) "LISP_LOOKUP(lisp, _" arg ", closure, " arg ");")
 	(cc:gen:value (assoc arg TYPES) arg))
 
 (def cc:gen:entry (NAME ARGS TYPES)

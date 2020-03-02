@@ -5,8 +5,8 @@
 static atom_t
 lisp_function_when(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cnd, closure, COND);
-  LISP_LOOKUP(prg, closure, REM);
+  LISP_LOOKUP(lisp, cnd, closure, COND);
+  LISP_LOOKUP(lisp, prg, closure, REM);
   /*
    * Evaluate REM branch if TRUE.
    */

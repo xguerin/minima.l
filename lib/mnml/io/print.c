@@ -27,7 +27,7 @@ lisp_print_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t
 lisp_function_print(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, closure, @);
+  LISP_LOOKUP(lisp, cell, closure, @);
   return lisp_print_all(lisp, closure, cell, UP(NIL));
 }
 

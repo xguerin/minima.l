@@ -187,7 +187,7 @@ lisp_equ(const atom_t a, const atom_t b)
     case T_PAIR:
       return lisp_equ(CAR(a), CAR(b)) && lisp_equ(CDR(a), CDR(b));
     case T_SYMBOL:
-      return lisp_symbol_match(a, b);
+      return lisp_symbol_match(a, &b->symbol);
     default:
       return false;
   }
@@ -214,7 +214,7 @@ lisp_neq(const atom_t a, const atom_t b)
     case T_PAIR:
       return mismatch || lisp_neq(CAR(a), CAR(b)) || lisp_neq(CDR(a), CDR(b));
     case T_SYMBOL:
-      return mismatch || !lisp_symbol_match(a, b);
+      return mismatch || !lisp_symbol_match(a, &b->symbol);
     default:
       return mismatch;
   }
@@ -378,6 +378,10 @@ lisp_timestamp()
   return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 
+/*
+ * Lisp load file.
+ */
+
 const char*
 lisp_get_fullpath(const char* const cwd, const char* const filepath,
                   char* const buffer)
@@ -507,6 +511,21 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   POP_IO_CONTEXT(ICHAN);
   fclose(handle);
   return res;
+}
+
+/*
+ * Symbol matching.
+ */
+
+inline bool
+lisp_symbol_match(const atom_t a, const symbol_t b)
+{
+#ifdef LISP_ENABLE_SSE41
+  register __m128i res = _mm_xor_si128(a->symbol.tag, b->tag);
+  return _mm_test_all_zeros(res, res);
+#else
+  return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH) == 0;
+#endif
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

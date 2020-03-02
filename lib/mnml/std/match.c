@@ -18,7 +18,7 @@ atom_match(const atom_t a, const atom_t b)
     case T_PAIR:
       return atom_match(CAR(a), CAR(b)) && atom_match(CDR(a), CDR(b));
     case T_SYMBOL:
-      return lisp_symbol_match(a, b);
+      return lisp_symbol_match(a, &b->symbol);
     default:
       return true;
   }
@@ -63,7 +63,7 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t
 lisp_function_match(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(cell, closure, @);
+  LISP_LOOKUP(lisp, cell, closure, @);
   atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
   atom_t res = lisp_match(lisp, closure, car, cdr);

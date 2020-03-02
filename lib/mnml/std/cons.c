@@ -5,8 +5,8 @@
 static atom_t
 lisp_function_cons(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(fst, closure, X);
-  LISP_LOOKUP(snd, closure, Y);
+  LISP_LOOKUP(lisp, fst, closure, X);
+  LISP_LOOKUP(lisp, snd, closure, Y);
   atom_t res = lisp_cons(fst, snd);
   X(fst, snd);
   return res;

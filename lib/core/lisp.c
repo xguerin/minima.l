@@ -25,30 +25,10 @@ atom_t WILDCARD = NULL;
  */
 
 atom_t
-lisp_lookup_immediate(const atom_t closure, const symbol_t sym)
+lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
 {
   /*
    * Look for the symbol the closure.
-   */
-  FOREACH(closure, a)
-  {
-    atom_t car = a->car;
-    if (lisp_symbol_match_immediate(CAR(car), sym)) {
-      return UP(CDR(car));
-    }
-    NEXT(a);
-  }
-  /*
-   * Nothing found.
-   */
-  return UP(NIL);
-}
-
-atom_t
-lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t sym)
-{
-  /*
-   * Look for the symbol in the closure.
    */
   FOREACH(closure, a)
   {
@@ -236,7 +216,7 @@ lisp_setq(const atom_t closure, const atom_t pair)
   /*
    * Replace car if its symbol matches pair's.
    */
-  if (lisp_symbol_match(CAR(car), CAR(pair))) {
+  if (lisp_symbol_match(CAR(car), &CAR(pair)->symbol)) {
     atom_t res = lisp_cons(pair, cdr);
     X(pair, cdr, car);
     return res;
@@ -535,7 +515,7 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
       break;
     }
     case T_SYMBOL: {
-      rslt = lisp_lookup(lisp, closure, cell);
+      rslt = lisp_lookup(lisp, closure, &cell->symbol);
       X(cell);
       break;
     }

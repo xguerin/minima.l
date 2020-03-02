@@ -18,8 +18,8 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
   /*
    * Get CHAN and REM.
    */
-  LISP_LOOKUP(chan, closure, CHAN);
-  LISP_LOOKUP(prog, closure, REM);
+  LISP_LOOKUP(lisp, chan, closure, CHAN);
+  LISP_LOOKUP(lisp, prog, closure, REM);
   /*
    * Get the working directory for the current ICHAN.
    */

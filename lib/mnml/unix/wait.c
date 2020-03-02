@@ -8,7 +8,7 @@
 static atom_t
 lisp_function_wait(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, closure, X);
+  LISP_LOOKUP(lisp, car, closure, X);
   /*
    * Get the PID.
    */

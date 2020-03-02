@@ -5,7 +5,7 @@
 static atom_t
 lisp_function_not(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(car, closure, X);
+  LISP_LOOKUP(lisp, car, closure, X);
   atom_t res = IS_NULL(car) ? TRUE : NIL;
   X(car);
   return UP(res);
