@@ -235,6 +235,14 @@ lisp_help(const char* const name)
  * Main.
  */
 
+#if defined(__linux__)
+#define GETOPT(_c, _v, _o) getopt(_c, _v, "+" _o)
+#elif defined(__MACH__) || defined(__OpenBSD__)
+#define GETOPT(_c, _v, _o) getopt(_c, _v, _o)
+#else
+#error "Operating system not supported"
+#endif
+
 int
 main(const int argc, char** const argv)
 {
@@ -243,7 +251,7 @@ main(const int argc, char** const argv)
    */
   int c;
   char* expr = NULL;
-  while ((c = getopt(argc, argv, "hve:")) != -1) {
+  while ((c = GETOPT(argc, argv, "hve:")) != -1) {
     switch (c) {
       case 'e':
         expr = optarg;
