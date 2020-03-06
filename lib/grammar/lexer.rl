@@ -21,7 +21,7 @@
 extern void parse_error(const lisp_t lisp);
 
 static void
-lisp_consume_token(const lexer_t * const lexer)
+lisp_consume_token(const lexer_t lexer)
 {
   if (lexer->depth == 0) {
     Parse(lexer->parser, 0, 0, lexer);
@@ -229,28 +229,29 @@ typedef struct _region
 }
 * region_t;
 
-void
-lisp_lexer_create(const lisp_t lisp, const lisp_consumer_t consumer,
-                  lexer_t * const lexer)
+lexer_t
+lexer_create(const lisp_t lisp, const lisp_consumer_t consumer)
 {
+  lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer));
   %% write init;
   lexer->depth = 0;
   lexer->rem = 0;
   lexer->lisp = lisp;
   lexer->consumer = consumer;
   lexer->parser = ParseAlloc(malloc);
+  return lexer;
 }
 
 void
-lisp_lexer_destroy(lexer_t * const lexer)
+lexer_destroy(const lexer_t lexer)
 {
   ParseFree(lexer->parser, free);
-  memset(lexer, 0xA, sizeof(lexer_t));
+  free(lexer);
 }
 
 void
-lisp_lexer_parse(lexer_t * const lexer, char * const str,
-                 const size_t len, const bool end)
+lexer_parse(const lexer_t lexer, char * const str, const size_t len,
+                 const bool end)
 {
   const char* p = str + lexer->rem;
   const char* pe = str + len;
@@ -269,7 +270,7 @@ lisp_lexer_parse(lexer_t * const lexer, char * const str,
 }
 
 bool
-lisp_lexer_pending(const lexer_t * const lexer)
+lexer_pending(const lexer_t lexer)
 {
   return lexer->depth != 0 || lexer->rem > 0;
 }

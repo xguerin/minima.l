@@ -45,7 +45,7 @@ lisp_usercache_prefix()
 }
 
 static char*
-lisp_module_paths()
+module_paths()
 {
   static bool is_set = false;
   static char buffer[8192];
@@ -84,7 +84,7 @@ lisp_module_paths()
  */
 
 bool
-lisp_module_init()
+module_init()
 {
   /*
    * Reset the MODULES variable.
@@ -116,7 +116,7 @@ lisp_module_init()
   /*
    * Report the known load path.
    */
-  TRACE_MODL("Module load path: %s", lisp_module_paths());
+  TRACE_MODL("Module load path: %s", module_paths());
   /*
    * Good to go.
    */
@@ -124,7 +124,7 @@ lisp_module_init()
 }
 
 void
-lisp_module_fini()
+module_fini()
 {
   FOREACH(MODULES, p)
   {
@@ -141,7 +141,7 @@ lisp_module_fini()
  */
 
 atom_t
-lisp_module_load(const lisp_t lisp, const atom_t cell)
+module_load(const lisp_t lisp, const atom_t cell)
 {
   TRACE_MODL_SEXP(cell);
   /*
@@ -160,12 +160,12 @@ lisp_module_load(const lisp_t lisp, const atom_t cell)
   /*
    * Load the environment variable.
    */
-  char* paths = lisp_module_paths();
+  char* paths = module_paths();
   /*
    * Find the module for the symbol. Returns where the module was found.
    */
   char path[PATH_MAX];
-  bool found = lisp_module_find(paths, module_name, path);
+  bool found = module_find(paths, module_name, path);
   free(paths);
   if (!found) {
     X(module_name, symbol_list);
@@ -174,7 +174,7 @@ lisp_module_load(const lisp_t lisp, const atom_t cell)
   /*
    * Load the symbols in the module.
    */
-  atom_t syms = lisp_module_load_binary(path, lisp, module_name, symbol_list);
+  atom_t syms = module_load_binary(path, lisp, module_name, symbol_list);
   /*
    * Clean-up and return.
    */

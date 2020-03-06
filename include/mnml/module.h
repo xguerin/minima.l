@@ -10,8 +10,8 @@
  * Lifecycle management.
  */
 
-bool lisp_module_init();
-void lisp_module_fini();
+bool module_init();
+void module_fini();
 
 /*
  * Module entry.
@@ -26,7 +26,7 @@ typedef struct _module_entry
   module_load_t load;
 } module_entry_t;
 
-atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
+atom_t module_load(const lisp_t lisp, const atom_t cell);
 
 /*
  * Initialization macros.
@@ -55,8 +55,8 @@ atom_t lisp_module_load(const lisp_t lisp, const atom_t cell);
     atom_t cn0 = lisp_cons(NIL, adr);                     \
     atom_t val = lisp_cons(arg, cn0);                     \
     atom_t cns = lisp_cons(sym, val);                     \
-    atom_t tmp = lisp->GLOBALS;                           \
-    lisp->GLOBALS = lisp_setq(lisp->GLOBALS, cns);        \
+    atom_t tmp = GLOBALS;                                 \
+    GLOBALS = lisp_setq(GLOBALS, cns);                    \
     X(adr, cn0, arg, val, tmp);                           \
     return sym;                                           \
   }

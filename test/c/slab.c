@@ -15,7 +15,7 @@ alloc_free_test()
   /*
    * Allocate the slab allocator.
    */
-  lisp_slab_allocate();
+  slab_allocate();
   atom_t cells[16];
   /*
    * Allocate 16 cells.
@@ -44,7 +44,7 @@ alloc_free_test()
   /*
    * Free the slab allocator.
    */
-  lisp_slab_destroy();
+  slab_destroy();
   OK;
 }
 
@@ -54,7 +54,7 @@ alloc_full_test()
   /*
    * Allocate the slab allocator.
    */
-  lisp_slab_allocate();
+  slab_allocate();
   atom_t cells[CELL_COUNT];
   /*
    * Allocate all cells.
@@ -83,7 +83,7 @@ alloc_full_test()
   /*
    * Free the slab allocator.
    */
-  lisp_slab_destroy();
+  slab_destroy();
   OK;
 }
 
@@ -93,7 +93,7 @@ alloc_xpnd_test()
   /*
    * Allocate the slab allocator.
    */
-  lisp_slab_allocate();
+  slab_allocate();
   const size_t count = 2 * CELL_COUNT;
   atom_t cells[count];
   /*
@@ -123,7 +123,7 @@ alloc_xpnd_test()
   /*
    * Free the slab allocator.
    */
-  lisp_slab_destroy();
+  slab_destroy();
   OK;
 }
 

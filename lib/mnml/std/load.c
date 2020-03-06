@@ -39,7 +39,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * Otherwise load the binary module.
    */
   else {
-    res = lisp_module_load(lisp, car);
+    res = module_load(lisp, car);
   }
   /*
    * If CDR is NIL, return the result.

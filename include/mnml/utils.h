@@ -102,11 +102,7 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
     atom_t y = lisp_cons(n, x);                    \
     atom_t o = __c;                                \
     __c = lisp_cons(y, o);                         \
-    X(o);                                          \
-    X(y);                                          \
-    X(n);                                          \
-    X(x);                                          \
-    X(p);                                          \
+    X(o, y, n, x, p);                              \
   }
 
 #define POP_IO_CONTEXT(__c) \

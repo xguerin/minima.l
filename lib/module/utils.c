@@ -14,8 +14,8 @@
  */
 
 static bool
-lisp_module_find_at_path(const char* const dirpath, const char* const name,
-                         char* const path)
+module_find_at_path(const char* const dirpath, const char* const name,
+                    char* const path)
 {
   TRACE_MODL("Searching module %s in %s", name, dirpath);
   /*
@@ -79,7 +79,7 @@ lisp_module_find_at_path(const char* const dirpath, const char* const name,
 }
 
 bool
-lisp_module_find(const char* const paths, const atom_t sym, char* const path)
+module_find(const char* const paths, const atom_t sym, char* const path)
 {
   bool result = false;
   /*
@@ -92,8 +92,8 @@ lisp_module_find(const char* const paths, const atom_t sym, char* const path)
    * Scan libraries in the path.
    */
   FOR_EACH_TOKEN(paths, ":", entry,
-                 result = !result ? lisp_module_find_at_path(entry, bsym, path)
-                                  : result);
+                 result =
+                   !result ? module_find_at_path(entry, bsym, path) : result);
   return result;
 }
 

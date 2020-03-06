@@ -65,9 +65,9 @@ typedef struct _atom
 #define CAR(__a) ((__a)->pair.car)
 #define CDR(__a) ((__a)->pair.cdr)
 
-#define IS_NULL(__a) ((__a) == NIL)
-#define IS_TRUE(__a) ((__a) == TRUE)
-#define IS_WILD(__a) ((__a) == WILDCARD)
+#define IS_NULL(__a) ((__a)->type == T_NIL)
+#define IS_TRUE(__a) ((__a)->type == T_TRUE)
+#define IS_WILD(__a) ((__a)->type == T_WILDCARD)
 #define IS_CHAR(__a) ((__a)->type == T_CHAR)
 #define IS_NUMB(__a) ((__a)->type == T_NUMBER)
 #define IS_PAIR(__a) ((__a)->type == T_PAIR)
@@ -75,17 +75,6 @@ typedef struct _atom
 
 #define IS_LIST(__a) (IS_PAIR(__a) || IS_NULL(__a))
 #define IS_ATOM(__a) (!IS_LIST(__a))
-
-/*
- * Lisp context type.
- */
-
-typedef struct _lisp
-{
-  atom_t GLOBALS;
-  atom_t ICHAN;
-  atom_t OCHAN;
-} * lisp_t;
 
 /*
  * A function has the following format:
@@ -98,7 +87,5 @@ typedef struct _lisp
 
 #define IS_FUNC(__a) \
   (IS_ARGS(__a) && IS_CLOS(CDR(__a)) && IS_BODY(CDR(CDR(__a))))
-
-typedef atom_t (*function_t)(const lisp_t, const atom_t);
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

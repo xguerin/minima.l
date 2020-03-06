@@ -1,6 +1,7 @@
 #pragma once
 
-#include <mnml/lisp.h>
+#include <mnml/types.h>
+#include <stdbool.h>
 
 /*
  * Slab types.
@@ -49,8 +50,8 @@ atom_t lisp_decref(const atom_t, const char* const name);
  * Slab functions.
  */
 
-bool lisp_slab_allocate();
-void lisp_slab_destroy();
+bool slab_allocate();
+void slab_destroy();
 
 atom_t lisp_allocate();
 void lisp_deallocate(const atom_t cell);

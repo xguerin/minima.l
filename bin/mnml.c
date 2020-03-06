@@ -1,5 +1,6 @@
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
+#include <mnml/module.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <errno.h>
@@ -47,7 +48,7 @@ static void
 repl_parse_error_handler(const lisp_t lisp)
 {
   write(1, "^ parse error\n", 14);
-  if (CDR(CDR(CAR(lisp->ICHAN))) == NIL) {
+  if (IS_NULL(CDR(CDR(CAR(ICHAN))))) {
     fwrite(": ", 1, 2, stdout);
   }
 }
@@ -55,7 +56,7 @@ repl_parse_error_handler(const lisp_t lisp)
 static void
 stage_prompt(const lisp_t lisp, const atom_t cell, const void* const data)
 {
-  if (CDR(CDR(CAR(lisp->ICHAN))) == NIL) {
+  if (IS_NULL(CDR(CDR(CAR(ICHAN))))) {
     fwrite(": ", 1, 2, stdout);
   }
 }
@@ -111,8 +112,8 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(var);
-    atom_t tmp = lisp->GLOBALS;
-    lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
+    atom_t tmp = GLOBALS;
+    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
     X(key, res, tmp);
   } else {
     X(res);
@@ -179,8 +180,8 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(env);
-  atom_t tmp = lisp->GLOBALS;
-  lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
+  atom_t tmp = GLOBALS;
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
   X(key, res, tmp);
 }
 
@@ -209,12 +210,38 @@ lisp_build_env(const lisp_t lisp)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(env);
-    atom_t tmp = lisp->GLOBALS;
-    lisp->GLOBALS = lisp_setq(lisp->GLOBALS, lisp_cons(key, res));
+    atom_t tmp = GLOBALS;
+    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
     X(key, res, tmp);
   } else {
     X(res);
   }
+}
+
+/*
+ * Default symbol loader.
+ */
+
+static void
+lisp_load_defaults(const lisp_t lisp)
+{
+  /*
+   * Load a default set of functions.
+   */
+  MAKE_SYMBOL_STATIC(std, "std", 6);
+  MAKE_SYMBOL_STATIC(lod, "load", 4);
+  MAKE_SYMBOL_STATIC(qte, "quote", 5);
+  MAKE_SYMBOL_STATIC(def, "def", 3);
+  atom_t mod = lisp_make_symbol(std);
+  atom_t sy0 = lisp_make_symbol(lod);
+  atom_t sy1 = lisp_make_symbol(qte);
+  atom_t sy2 = lisp_make_symbol(def);
+  atom_t cn0 = lisp_cons(sy0, NIL);
+  atom_t cn1 = lisp_cons(sy1, cn0);
+  atom_t cn2 = lisp_cons(sy2, cn1);
+  atom_t cn3 = lisp_cons(mod, cn2);
+  atom_t tmp = module_load(lisp, cn3);
+  X(mod, sy0, sy1, sy2, cn0, cn1, cn2, tmp);
 }
 
 /*
@@ -298,7 +325,8 @@ main(const int argc, char** const argv)
   /*
    * Create a lisp context.
    */
-  lisp_t lisp = lisp_make_context(NIL, NIL);
+  lisp_t lisp = lisp_new(NIL, NIL);
+  lisp_load_defaults(lisp);
   /*
    * Build ARGV, CONFIG and ENV.
    */
@@ -310,11 +338,11 @@ main(const int argc, char** const argv)
   atom_t result;
   if (filename == NULL && expr == NULL) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    PUSH_IO_CONTEXT(lisp->ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(lisp->OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
     result = run(lisp, stage_prompt, stage_newline, cwd);
-    POP_IO_CONTEXT(lisp->ICHAN);
-    POP_IO_CONTEXT(lisp->OCHAN);
+    POP_IO_CONTEXT(ICHAN);
+    POP_IO_CONTEXT(OCHAN);
   } else if (filename == NULL) {
     /*
      * Setup the PAIRS to NIL.
@@ -323,23 +351,22 @@ main(const int argc, char** const argv)
     /*
      * Parse the expression.
      */
-    lexer_t lexer;
+    lexer_t lexer = lexer_create(lisp, lisp_push);
     size_t len = strlen(expr);
-    lisp_lexer_create(lisp, lisp_push, &lexer);
-    lisp_lexer_parse(&lexer, expr, len, true);
-    lisp_lexer_destroy(&lexer);
+    lexer_parse(lexer, expr, len, true);
+    lexer_destroy(lexer);
     /*
      * Push the IO context.
      */
-    PUSH_IO_CONTEXT(lisp->ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(lisp->OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
     /*
      * Evaluate the parsed expressions.
      */
     result = UP(NIL);
     while (keep_running) {
       atom_t car = lisp_pop();
-      if (car == NIL) {
+      if (IS_NULL(car)) {
         X(car);
         break;
       }
@@ -349,16 +376,16 @@ main(const int argc, char** const argv)
     /*
      * Pop the IO context.
      */
-    POP_IO_CONTEXT(lisp->ICHAN);
-    POP_IO_CONTEXT(lisp->OCHAN);
+    POP_IO_CONTEXT(ICHAN);
+    POP_IO_CONTEXT(OCHAN);
     /*
      * Clear the PAIRS.
      */
     X(PAIRS);
   } else {
-    PUSH_IO_CONTEXT(lisp->OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
     result = lisp_load_file(lisp, argv[1]);
-    POP_IO_CONTEXT(lisp->OCHAN);
+    POP_IO_CONTEXT(OCHAN);
   }
   /*
    * Compute the return status.
@@ -368,7 +395,7 @@ main(const int argc, char** const argv)
   /*
    * Clean-up the lisp context.
    */
-  lisp_delete_context(lisp);
+  lisp_delete(lisp);
   /*
    */
   lisp_fini();

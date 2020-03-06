@@ -23,7 +23,7 @@
  */
 
 static void*
-lisp_module_load_at_path(const char* const path, const char* const name)
+module_load_at_path(const char* const path, const char* const name)
 {
   TRACE_MODL("Loading module %s from %s", name, path);
   /*
@@ -59,7 +59,7 @@ lisp_module_load_at_path(const char* const path, const char* const name)
 }
 
 static void*
-lisp_module_find_from_cache(const atom_t sym)
+module_find_from_cache(const atom_t sym)
 {
   /*
    * Check if modules is NIL.
@@ -86,8 +86,8 @@ lisp_module_find_from_cache(const atom_t sym)
 }
 
 static atom_t
-lisp_module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
-                              const atom_t cell)
+module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
+                         const atom_t cell)
 {
   TRACE_MODL_SEXP(cell);
   /*
@@ -105,7 +105,7 @@ lisp_module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Process the remainder.
    */
-  atom_t nxt = lisp_module_load_symbols_list(entries, lisp, cdr);
+  atom_t nxt = module_load_symbols_list(entries, lisp, cdr);
   /*
    * If CAR is a symbol, try to load it.
    */
@@ -138,8 +138,8 @@ lisp_module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
 }
 
 static atom_t
-lisp_module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
-                         const atom_t cell)
+module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
+                    const atom_t cell)
 {
   /*
    * Check if cell is NIL.
@@ -188,19 +188,19 @@ lisp_module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Load the element of the list.
    */
-  return lisp_module_load_symbols_list(entries, lisp, cell);
+  return module_load_symbols_list(entries, lisp, cell);
 }
 
 atom_t
-lisp_module_load_binary(const char* const path, const lisp_t lisp,
-                        const atom_t name, const atom_t symbols)
+module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
+                   const atom_t symbols)
 {
   bool add_to_cache = false;
   void* handle;
   /*
    * Check if the module is in the cache.
    */
-  handle = lisp_module_find_from_cache(name);
+  handle = module_find_from_cache(name);
   /*
    * If it was not in the cache, load it from the filesystem.
    */
@@ -213,7 +213,7 @@ lisp_module_load_binary(const char* const path, const lisp_t lisp,
     /*
      * Load the library.
      */
-    handle = lisp_module_load_at_path(path, bsym);
+    handle = module_load_at_path(path, bsym);
     if (handle == NULL) {
       return UP(NIL);
     }
@@ -234,7 +234,7 @@ lisp_module_load_binary(const char* const path, const lisp_t lisp,
    * Load all the symbols from the list.
    */
   const module_entry_t* e = entries();
-  const atom_t syms = lisp_module_load_symbols(e, lisp, symbols);
+  const atom_t syms = module_load_symbols(e, lisp, symbols);
   if (IS_NULL(syms)) {
     DLCLOSE(add_to_cache, handle);
     return syms;

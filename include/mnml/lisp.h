@@ -20,6 +20,30 @@
   }
 
 /*
+ * Lisp context type.
+ */
+
+typedef struct _lisp
+{
+  atom_t globals;
+  atom_t ichan;
+  atom_t ochan;
+} * lisp_t;
+
+lisp_t lisp_new(const atom_t ichan, const atom_t ochan);
+void lisp_delete(lisp_t lisp);
+
+#define GLOBALS lisp->globals
+#define ICHAN lisp->ichan
+#define OCHAN lisp->ochan
+
+/*
+ * Native function type.
+ */
+
+typedef atom_t (*function_t)(const lisp_t, const atom_t);
+
+/*
  * Symbol management.
  */
 

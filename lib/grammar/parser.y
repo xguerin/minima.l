@@ -1,4 +1,4 @@
-%extra_argument { const lexer_t * lexer }
+%extra_argument { lexer_t lexer }
 
 %token_type { void * }
 %type list  { atom_t }

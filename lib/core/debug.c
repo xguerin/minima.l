@@ -103,7 +103,7 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
       /*
        * Print CDR.
        */
-      if (CDR(atom) != NIL) {
+      if (!IS_NULL(CDR(atom))) {
         if (IS_PAIR(CDR(atom))) {
           fprintf(fp, " ");
         } else {

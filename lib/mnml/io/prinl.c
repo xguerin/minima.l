@@ -26,7 +26,7 @@ lisp_function_prinl(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);
   atom_t res = lisp_prinl_all(lisp, closure, cell, UP(NIL));
-  fwrite("\n", 1, 1, (FILE*)CAR(CAR(lisp->OCHAN))->number);
+  fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   return res;
 }
 

@@ -23,22 +23,21 @@ typedef struct _lexer
   lisp_t lisp;
   lisp_consumer_t consumer;
   void* parser;
-} lexer_t;
+} * lexer_t;
 
 /*
  * Lexer lifecycle.
  */
-void lisp_lexer_create(const lisp_t lisp, const lisp_consumer_t consumer,
-                       lexer_t* const lexer);
-void lisp_lexer_destroy(lexer_t* const lexer);
+lexer_t lexer_create(const lisp_t lisp, const lisp_consumer_t consumer);
+void lexer_destroy(const lexer_t lexer);
 
 /*
  * Lexer parse.
  */
-void lisp_lexer_parse(lexer_t* const lexer, char* const str, const size_t len,
-                      const bool end);
+void lexer_parse(const lexer_t lexer, char* const str, const size_t len,
+                 const bool end);
 
-bool lisp_lexer_pending(const lexer_t* const lexer);
+bool lexer_pending(const lexer_t lexer);
 
 /*
  * Debug macros.

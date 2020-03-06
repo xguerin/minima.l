@@ -44,7 +44,7 @@ lisp_decref(const atom_t atom, const char* const name)
 slab_t slab = { 0 };
 
 bool
-lisp_slab_allocate()
+slab_allocate()
 {
   memset(&slab, 0, sizeof(slab_t));
   slab.n_pages = 16;
@@ -78,7 +78,7 @@ lisp_slab_allocate()
 }
 
 static bool
-lisp_slab_expand()
+slab_expand()
 {
   const size_t size = (slab.n_pages << 1) * PAGE_SIZE;
   TRACE_SLAB("0x%lx", (uintptr_t)slab.entries);
@@ -106,8 +106,10 @@ lisp_slab_expand()
 }
 
 void
-lisp_slab_destroy()
+slab_destroy()
 {
+  TRACE("D %ld", slab.n_alloc - slab.n_free);
+  LISP_COLLECT();
   munmap(slab.entries, SLAB_SIZE);
 }
 
@@ -122,7 +124,7 @@ lisp_allocate()
    * Expand if necessary. Die if we can't.
    */
   if (unlikely(slab.first == END_MK)) {
-    if (!lisp_slab_expand()) {
+    if (!slab_expand()) {
       TRACE("Out-of-memory error");
       abort();
     }
