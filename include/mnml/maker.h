@@ -11,13 +11,13 @@
   symbol_t __v = (union _symbol*)alloca(sizeof(union _symbol)); \
   __v->word[0] = 0;                                             \
   __v->word[1] = 0;                                             \
-  strncpy(__v->val, __s, __n);
+  strncpy(__v->val, __s, __n)
 
 #define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                      \
   symbol_t __v = (union _symbol*)malloc(sizeof(union _symbol)); \
   __v->word[0] = 0;                                             \
   __v->word[1] = 0;                                             \
-  strncpy(__v->val, __s, __n);
+  strncpy(__v->val, __s, __n)
 
 /*
  * CONS helpers.

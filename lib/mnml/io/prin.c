@@ -19,7 +19,7 @@ lisp_prin_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
   return lisp_prin_all(lisp, closure, cdr, car);
 }
 
-static atom_t
+static atom_t USED
 lisp_function_prin(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);

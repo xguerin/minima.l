@@ -3,16 +3,14 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
-static atom_t
+static atom_t USED
 lisp_function_out(const lisp_t lisp, const atom_t closure)
 {
-  int fd = 1;
+  int fd;
   char file_buf[PATH_MAX];
   char path_buf[PATH_MAX];
   char dirn_buf[PATH_MAX];

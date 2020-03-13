@@ -4,9 +4,8 @@
 #include <mnml/utils.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <unistd.h>
 
-static atom_t
+static atom_t USED
 lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
 {
   atom_t res;

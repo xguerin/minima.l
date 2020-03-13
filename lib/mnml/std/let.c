@@ -1,4 +1,3 @@
-#include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -64,7 +63,7 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
   return res;
 }
 
-static atom_t
+static atom_t USED
 lisp_function_let(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);

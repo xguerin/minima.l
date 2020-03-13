@@ -3,9 +3,8 @@
 #include <mnml/slab.h>
 #include <errno.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
-static atom_t
+static atom_t USED
 lisp_function_wait(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, car, closure, X);

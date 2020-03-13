@@ -14,9 +14,11 @@
  */
 
 #define DLCLOSE(__b, __h) \
-  if (__b) {              \
-    dlclose(__h);         \
-  }
+  do {                    \
+    if (__b) {            \
+      dlclose(__h);       \
+    }                     \
+  } while (0)
 
 /*
  * Binary module load.

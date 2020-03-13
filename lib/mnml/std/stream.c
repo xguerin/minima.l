@@ -37,7 +37,7 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
   return lisp_stream(lisp, closure, cdr, nxt);
 }
 
-static atom_t
+static atom_t USED
 lisp_function_stream(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);

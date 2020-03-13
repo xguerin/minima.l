@@ -1,4 +1,3 @@
-#include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -35,7 +34,7 @@ lisp_exec_make_strings(const atom_t cell, char** array, const size_t len,
   return lisp_exec_make_strings(cdr, array, len, idx + 1);
 }
 
-static atom_t
+static atom_t USED
 lisp_function_exec(const lisp_t lisp, const atom_t closure)
 {
   /*

@@ -3,8 +3,8 @@
 #include <signal.h>
 #include <unistd.h>
 
-static atom_t
-lisp_function_quit(const lisp_t lisp, const atom_t closure)
+static atom_t USED
+lisp_function_quit(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
 {
   kill(getpid(), SIGQUIT);
   return UP(TRUE);

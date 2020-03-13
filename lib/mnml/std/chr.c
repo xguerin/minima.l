@@ -3,7 +3,7 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 
-static atom_t
+static atom_t USED
 lisp_function_chr(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, car, closure, X);

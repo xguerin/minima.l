@@ -3,12 +3,11 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
 #include <unistd.h>
 
-static atom_t
+static atom_t USED
 lisp_function_in(const lisp_t lisp, const atom_t closure)
 {
   int fd = 0;

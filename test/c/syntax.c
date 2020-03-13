@@ -29,7 +29,7 @@ static lexer_t lexer;
 static atom_t result = NULL;
 
 static void
-lisp_consumer(const lisp_t lisp, const atom_t cell)
+lisp_consumer(UNUSED const lisp_t lisp, const atom_t cell)
 {
   result = cell;
 }
@@ -73,13 +73,6 @@ lisp_test_fini(const lisp_t lisp)
 }
 
 static bool
-type_tests()
-{
-  ASSERT_EQUAL(sizeof(struct _atom), 32);
-  OK;
-}
-
-static bool
 basic_tests()
 {
   struct _lisp lisp;
@@ -105,7 +98,7 @@ basic_tests()
   /*
    * Run the tests.
    */
-  lexer_parse(lexer, INPUT(test00), true);
+  lexer_parse(lexer, INPUT(test01), true);
   TRACE_SEXP(result);
   X(result);
   /*
@@ -374,9 +367,8 @@ conc_cons_tests()
  */
 
 int
-main(const int argc, char** const argv)
+main(UNUSED const int argc, UNUSED char** const argv)
 {
-  TEST(type_tests);
   TEST(basic_tests);
   TEST(car_cdr_tests);
   TEST(conc_cons_tests);

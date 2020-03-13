@@ -2,7 +2,6 @@
 #include <mnml/module.h>
 #include <mnml/slab.h>
 #include <stdio.h>
-#include <unistd.h>
 
 static atom_t
 lisp_prinl_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
@@ -21,7 +20,7 @@ lisp_prinl_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
   return lisp_prinl_all(lisp, closure, cdr, car);
 }
 
-static atom_t
+static atom_t USED
 lisp_function_prinl(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);

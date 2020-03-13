@@ -17,7 +17,7 @@ typedef void (*stage_t)(const lisp_t, const atom_t, const void* const data);
 static bool keep_running = true;
 
 static void
-signal_handler(const int sigid)
+signal_handler(UNUSED const int sigid)
 {
   keep_running = false;
 }
@@ -54,7 +54,8 @@ repl_parse_error_handler(const lisp_t lisp)
 }
 
 static void
-stage_prompt(const lisp_t lisp, const atom_t cell, const void* const data)
+stage_prompt(const lisp_t lisp, UNUSED const atom_t cell,
+             UNUSED const void* const data)
 {
   if (IS_NULL(CDR(CDR(CAR(ICHAN))))) {
     fwrite(": ", 1, 2, stdout);
@@ -62,7 +63,8 @@ stage_prompt(const lisp_t lisp, const atom_t cell, const void* const data)
 }
 
 static void
-stage_newline(const lisp_t lisp, const atom_t cell, const void* const data)
+stage_newline(const lisp_t lisp, const atom_t cell,
+              UNUSED const void* const data)
 {
   fwrite("> ", 1, 2, stdout);
   lisp_prin(lisp, NIL, cell, true);
@@ -76,7 +78,7 @@ stage_newline(const lisp_t lisp, const atom_t cell, const void* const data)
 static atom_t PAIRS;
 
 static void
-lisp_push(const lisp_t lisp, const atom_t cell)
+lisp_push(UNUSED const lisp_t lisp, const atom_t cell)
 {
   PAIRS = lisp_append(PAIRS, cell);
 }

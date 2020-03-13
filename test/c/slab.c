@@ -1,5 +1,6 @@
 #include "primitives.h"
 #include <mnml/slab.h>
+#include <mnml/utils.h>
 
 void
 syntax_error()
@@ -132,7 +133,7 @@ alloc_xpnd_test()
  */
 
 int
-main(const int argc, char** const argv)
+main(UNUSED const int argc, UNUSED char** const argv)
 {
   TEST(alloc_free_test);
   TEST(alloc_full_test);

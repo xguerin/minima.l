@@ -1,6 +1,5 @@
 #include <mnml/debug.h>
 #include <mnml/maker.h>
-#include <mnml/module.h>
 #include <mnml/slab.h>
 #include <mnml/types.h>
 #include <mnml/utils.h>

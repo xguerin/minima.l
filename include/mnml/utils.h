@@ -95,7 +95,7 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
  * IO context helpers.
  */
 #define PUSH_IO_CONTEXT(__c, __d, __p)             \
-  {                                                \
+  do {                                             \
     atom_t p = lisp_make_string(__p, strlen(__p)); \
     atom_t x = lisp_cons(p, NIL);                  \
     atom_t n = lisp_make_number((int64_t)__d);     \
@@ -103,20 +103,20 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
     atom_t o = __c;                                \
     __c = lisp_cons(y, o);                         \
     X(o, y, n, x, p);                              \
-  }
+  } while (0)
 
 #define POP_IO_CONTEXT(__c) \
-  {                         \
+  do {                      \
     atom_t old = __c;       \
     __c = UP(CDR(__c));     \
     X(old);                 \
-  }
+  } while (0)
 
 /*
  * Scan PATH-like string format.
  */
 #define FOR_EACH_TOKEN(__s, __d, __e, BLOCK)      \
-  {                                               \
+  do {                                            \
     char* copy = strdup(__s);                     \
     char *haystack = copy, *p, *__e;              \
     while ((p = strstr(haystack, __d)) != NULL) { \
@@ -130,6 +130,12 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
     if (strlen(__e) > 0)                          \
       BLOCK;                                      \
     free(copy);                                   \
-  }
+  } while (0)
+
+/*
+ * Compiler macros.
+ */
+#define USED __attribute__((used))
+#define UNUSED __attribute__((unused))
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

@@ -3,8 +3,8 @@
 #include <mnml/slab.h>
 #include <unistd.h>
 
-atom_t
-lisp_function_pipe(const lisp_t lisp, const atom_t closure)
+atom_t USED
+lisp_function_pipe(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
 {
   int fd[2] = { 0 };
   if (pipe(fd) != 0) {

@@ -2,7 +2,7 @@
 #include <mnml/module.h>
 #include <mnml/slab.h>
 
-static atom_t
+static atom_t USED
 lisp_function_prog(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);

@@ -3,8 +3,6 @@
 #include <mnml/lisp.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
-#include <signal.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,7 +58,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
     NEXT(a);
   }
   /*
-   * Check the global environemnt.
+   * Check the global environment.
    */
   FOREACH(GLOBALS, g)
   {
@@ -166,7 +164,7 @@ lisp_read_pop(const lisp_t lisp)
 }
 
 atom_t
-lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell)
+lisp_read(const lisp_t lisp, UNUSED const atom_t closure, const atom_t cell)
 {
   TRACE_CHAN_SEXP(ICHAN);
   X(cell);

@@ -1,16 +1,13 @@
-#include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
 #include <mnml/utils.h>
-#include <errno.h>
 #include <stdio.h>
-#include <unistd.h>
 
 #define BUFFER_LEN 1024
 
-static atom_t
-lisp_function_readlines(const lisp_t lisp, const atom_t closure)
+static atom_t USED
+lisp_function_readlines(const lisp_t lisp, UNUSED const atom_t closure)
 {
   FILE* handle = (FILE*)CAR(CAR(ICHAN))->number;
   /*

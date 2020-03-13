@@ -1,7 +1,6 @@
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/slab.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>

@@ -60,7 +60,7 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t cell,
   return lisp_match(lisp, closure, cell, cdr);
 }
 
-static atom_t
+static atom_t USED
 lisp_function_match(const lisp_t lisp, const atom_t closure)
 {
   LISP_LOOKUP(lisp, cell, closure, @);

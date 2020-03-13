@@ -104,7 +104,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # C flags preferences
 #
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -Wno-unused-parameter")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Werror")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
 
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")

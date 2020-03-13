@@ -4,8 +4,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-static atom_t
-lisp_function_fork(const lisp_t lisp, const atom_t closure)
+static atom_t USED
+lisp_function_fork(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
 {
   pid_t pid = fork();
   return lisp_make_number(pid < 0 ? errno : pid);

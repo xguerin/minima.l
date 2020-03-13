@@ -4,8 +4,8 @@
 #include <errno.h>
 #include <unistd.h>
 
-static atom_t
-lisp_function_slabinfo(const lisp_t lisp, const atom_t closure)
+static atom_t USED
+lisp_function_slabinfo(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
 {
   atom_t car = lisp_make_number(slab.n_alloc);
   atom_t cdr = lisp_make_number(slab.n_free);
