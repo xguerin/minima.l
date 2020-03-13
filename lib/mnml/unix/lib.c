@@ -16,13 +16,13 @@ module_entry_t ENTRIES[] = {
   LISP_MODULE_REGISTER(wait),  { NULL, NULL }
 };
 
-const char*
+const char* USED
 lisp_module_name()
 {
   return "unix";
 }
 
-const module_entry_t*
+const module_entry_t* USED
 lisp_module_entries()
 {
   return ENTRIES;

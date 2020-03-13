@@ -7,13 +7,13 @@ module_entry_t ENTRIES[] = { LISP_MODULE_REGISTER(slabinfo),
                              LISP_MODULE_REGISTER(time),
                              { NULL, NULL } };
 
-const char*
+const char* USED
 lisp_module_name()
 {
   return "sys";
 }
 
-const module_entry_t*
+const module_entry_t* USED
 lisp_module_entries()
 {
   return ENTRIES;

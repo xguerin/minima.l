@@ -12,12 +12,10 @@
   if (!IS_NULL(__c))       \
     for (;;)
 
-#define NEXT(__p)           \
-  {                         \
-    if (!IS_PAIR(__p->cdr)) \
-      break;                \
-    __p = &__p->cdr->pair;  \
-  }
+#define NEXT(__p)         \
+  if (!IS_PAIR(__p->cdr)) \
+    break;                \
+  __p = &__p->cdr->pair
 
 /*
  * Lisp context type.

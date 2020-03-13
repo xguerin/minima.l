@@ -19,13 +19,13 @@ module_entry_t ENTRIES[] = { LISP_MODULE_REGISTER(in),
                              LISP_MODULE_REGISTER(readlines),
                              { NULL, NULL } };
 
-const char*
+const char* USED
 lisp_module_name()
 {
   return "io";
 }
 
-const module_entry_t*
+const module_entry_t* USED
 lisp_module_entries()
 {
   return ENTRIES;

@@ -12,13 +12,13 @@ module_entry_t ENTRIES[] = {
   LISP_MODULE_REGISTER(or),  { NULL, NULL }
 };
 
-const char*
+const char* USED
 lisp_module_name()
 {
   return "logic";
 }
 
-const module_entry_t*
+const module_entry_t* USED
 lisp_module_entries()
 {
   return ENTRIES;

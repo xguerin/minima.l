@@ -30,6 +30,7 @@ syn keyword MinimalFuncs
       \ -
       \ /
       \ <
+      \ <-
       \ <=
       \ <>
       \ <\|>

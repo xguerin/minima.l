@@ -18,13 +18,13 @@ module_entry_t ENTRIES[] = {
   LISP_MODULE_REGISTER(sub), { NULL, NULL }
 };
 
-const char*
+const char* USED
 lisp_module_name()
 {
   return "math";
 }
 
-const module_entry_t*
+const module_entry_t* USED
 lisp_module_entries()
 {
   return ENTRIES;
