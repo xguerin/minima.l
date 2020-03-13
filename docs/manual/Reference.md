@@ -119,6 +119,7 @@
 | `prog`      | `(prog any0 [any1] ...)`      | `std`    | [Sequential](#prog) composition |
 | `unless`    | `(unless 'any . prg)`         | `std`    | Execute `prg` unless `any` is not `NIL` |
 | `when`      | `(when 'any . prg)`           | `std`    | Execute `prg` if `any` is not `NIL` |
+| `while`     | `(while 'any . prg)`          | `std`    | Execute `prg` while `any` is not `NIL` |
 
 #### Input/output operations
 
