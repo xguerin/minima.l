@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifdef __OpenBSD__
+#include <sys/stat.h>
+#endif
+
 static atom_t USED
 lisp_function_out(const lisp_t lisp, const atom_t closure)
 {
