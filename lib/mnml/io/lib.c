@@ -7,7 +7,7 @@ LISP_MODULE_DECL(prinl);
 LISP_MODULE_DECL(print);
 LISP_MODULE_DECL(printl);
 LISP_MODULE_DECL(read);
-LISP_MODULE_DECL(readlines);
+LISP_MODULE_DECL(readline);
 
 module_entry_t ENTRIES[] = { LISP_MODULE_REGISTER(in),
                              LISP_MODULE_REGISTER(out),
@@ -16,7 +16,7 @@ module_entry_t ENTRIES[] = { LISP_MODULE_REGISTER(in),
                              LISP_MODULE_REGISTER(print),
                              LISP_MODULE_REGISTER(printl),
                              LISP_MODULE_REGISTER(read),
-                             LISP_MODULE_REGISTER(readlines),
+                             LISP_MODULE_REGISTER(readline),
                              { NULL, NULL } };
 
 const char* USED

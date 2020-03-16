@@ -54,6 +54,7 @@ syn keyword MinimalFuncs
       \ cdr
       \ chr
       \ chr?
+      \ close
       \ conc
       \ cond
       \ cons
@@ -96,7 +97,7 @@ syn keyword MinimalFuncs
       \ quote
       \ read
       \ replc
-      \ readlines
+      \ readline
       \ rep
       \ rev
       \ setq
@@ -127,6 +128,6 @@ hi default link MinimalFuncs      Function
 hi default link MinimalOperator   Operator
 
 set lisp
-set lispwords=%,*,+,-,/,<,<-,<=,<>,<\|>,=,>,>=,>&,\\,\|>,$+,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr,chr?,conc,cond,cons,dedup,def,dup,eval,filter,flatten,foldl,foldr,has,if,in,insert,iter,iter2,last,len,let,list,load,lst?,map,map2,match,merge,nil?,not,ntoa,num?,or,out,prin,prinl,print,printl,prog,quit,quote,read,readlines,rep,rev,setq,split,str,str?,sym,sym?,time,truncl,truncr,unless,unlink,tru?,when,while,zip
+set lispwords=%,*,+,-,/,<,<-,<=,<>,<\|>,=,>,>=,>&,\\,\|>,$+,and,append,assoc,atm?,caar,cadar,caddr,cadr,car,cdar,cdr,chr,chr?,close,conc,cond,cons,dedup,def,dup,eval,filter,flatten,foldl,foldr,has,if,in,insert,iter,iter2,last,len,let,list,load,lst?,map,map2,match,merge,nil?,not,ntoa,num?,or,out,prin,prinl,print,printl,prog,quit,quote,read,readline,rep,rev,setq,split,str,str?,sym,sym?,time,truncl,truncr,unless,unlink,tru?,when,while,zip
 
 let b:current_syntax = "minimal"

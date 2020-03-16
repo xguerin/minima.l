@@ -1,10 +1,19 @@
 (load
 	"append.l"
 	"iterators.l"
-	'(io in readlines)
+	"rev.l"
+	'(io in readline)
 	'(logic =)
-	'(std let \ cons prog)
+	'(std let \ if cons prog)
 	'(unix . T))
+
+(def readlines (result)
+	"Read all lines from FD."
+	(let ((line . (readline)))
+		(if (= line 'EOF)
+			(rev result)
+			(readlines (cons line result))
+			)))
 
 #
 # Run process at PATH with arguments ARG and environment ENV:
@@ -25,7 +34,7 @@
 				(exec path args fenv))
 			(prog
 				(close pout)
-				(let ((lines . (in pin (readlines)))
+				(let ((lines . (in pin (readlines NIL)))
 							(code	. (wait pid)))
 					(close pin)
 					(cons code lines))

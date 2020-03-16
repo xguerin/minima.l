@@ -87,6 +87,7 @@ lisp_function_out(const lisp_t lisp, const atom_t closure)
   /*
    * Close the FD if necessary and return the value.
    */
+  fflush(handle);
   fclose(handle);
   return res;
 }

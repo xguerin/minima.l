@@ -132,7 +132,7 @@
 | `print`     | `(print 'any ...)`            | `io`     | [Literal print](#print) of a list of `any` |
 | `printl`    | `(printl 'any ...)`           | `io`     | [Literal print](#print) of a list of `any`, with new line |
 | `read`      | `(read)`                      | `io`     | [Read a token](#read) from the current input stream |
-| `readlines` | `(readlines)`                 | `io`     | [Read all lines](#readlines) from the current input stream |
+| `readline`  | `(readline)`                  | `io`     | [Read one line](#readline) from the current input stream |
 
 #### Core operations
 
@@ -144,15 +144,24 @@
 | `quit`      | `(quit)`                      | `std`    | Quit the interpreter loop |
 | `quote`     | `(quote . any)`               | `std`    | Quote `any` |
 
+#### Socket functions
+
+| Name      | Syntax                      | Module | Description |
+|:----------|:----------------------------|:------:|:------------|
+| `accept`    | `(accept 'num)`             | `unix`   | Accept a connection from server descriptor `num` |
+| `connect`   | `(connect 'dns 'svc)`       | `unix`   | Connect to `dns` on service port `svc` |
+| `listen`    | `(listen 'num)`             | `unix`   | Listen for connections on port `num` |
+
 #### System functions
 
 | Name      | Syntax                      | Module | Description |
 |:----------|:----------------------------|:------:|:------------|
-| `close`     | `(dup 'num)`                  | `unix`   | Close afile descriptor `num` |
+| `close`     | `(dup 'num)`                  | `unix`   | Close a file descriptor `num` |
 | `dup`       | `(dup 'num ['num])`           | `unix`   | Duplicate a file descriptor `num` |
 | `exec`      | `(exec 'str 'lst 'lst)`       | `unix`   | Execute an image at path with arguments and environment |
 | `fork`      | `(fork)`                      | `unix`   | Fork the current process |
 | `run`       | `(run 'str 'lst 'alst)`       |        | [Run](#run) a external program `str` |
+| `select`    | `(select 'fds 'rcb 'ecb)`     | `unix`   | Wait for available data on descriptors `fds` |
 | `unlink`    | `(unlink 'str)`               | `unix`   | Unlink the file pointed by `str` |
 | `wait`      | `(wait 'num)`                 | `unix`   | Wait for PID `num` |
 
@@ -622,19 +631,19 @@ The current input stream is also altered by the [`in`](#in) command.
 Return a valid token or `NIL` if the stream is closed or invalid.
 
 ****
-### READLINES
+### READLINE
 
 #### Invocation
 ```lisp
-(readlines)
+(readline)
 ```
 #### Description
 
-Read all lines from the current input stream. Stop on `EOF`.
+Read one line from the current input stream. Stop on `EOF`.
 
 #### Return value
 
-Return all lines as a list of string trimmed of any carry return.
+Return a line as a string trimmed of any carry return. `NIL` in case of `EOF`.
 
 ****
 ### RUN
@@ -654,7 +663,7 @@ provide a handy way to run external binaries in a single shot.
 #### Return value
 
 Return a pair with `CAR` as the status code of the binary and `CDR` the
-output of the command as list of lines (see [`readlines`](#readlines)).
+output of the command as list of lines.
 
 #### Example
 ```lisp

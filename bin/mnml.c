@@ -4,10 +4,8 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <signal.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,8 +15,9 @@ typedef void (*stage_t)(const lisp_t, const atom_t, const void* const data);
 static bool keep_running = true;
 
 static void
-signal_handler(UNUSED const int sigid)
+signal_handler(const int sigid)
 {
+  TRACE("Caught signal: %d", sigid);
   keep_running = false;
 }
 
@@ -315,6 +314,10 @@ main(const int argc, char** const argv)
    */
   signal(SIGQUIT, signal_handler);
   signal(SIGTERM, signal_handler);
+  /*
+   * Ignore other annoying signals.
+   */
+  signal(SIGPIPE, SIG_IGN);
   /*
    * Get the current working dsirectory.
    */
