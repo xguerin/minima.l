@@ -76,11 +76,12 @@
 |:----------|:----------------------------|:------:|:------------|
 | `append`    | `(append 'lst . any)`         |        | Recursively append `any` to `lst` |
 | `car`       | `(car 'lst)`                  | `std`    | Get the head element of `lst` |
-| `cadr`      | `(cdr 'lst)`                  |        | Get the 2nd element of `lst` |
-| `caddr`     | `(caddr 'lst)`                |        | Get the 3rd element of `lst` |
-| `caar`      | `(caar 'lst)`                 |        | Get the 1st element of the head of `lst` |
-| `cadar`     | `(cadar 'lst)`                |        | Get the 2nd element of the head of `lst` |
-| `cdar`      | `(cdar 'lst)`                 |        | Get the tail of the head of `lst` |
+| `cadr`      | `(cadr 'lst)`                 | `manips` | Get the 2nd element of `lst` |
+| `cddr`      | `(cddr 'lst)`                 | `manips` | Get the tail of the tail of `lst` |
+| `caddr`     | `(caddr 'lst)`                | `manips` | Get the 3rd element of `lst` |
+| `caar`      | `(caar 'lst)`                 | `manips` | Get the 1st element of the head of `lst` |
+| `cadar`     | `(cadar 'lst)`                | `manips` | Get the 2nd element of the head of `lst` |
+| `cdar`      | `(cdar 'lst)`                 | `manips` | Get the tail of the head of `lst` |
 | `cdr`       | `(cdr 'lst)`                  | `std`    | Get the tail of `lst` |
 | `chr`       | `(chr 'num)`                  | `std`    | Get the character for ASCII numner `num` |
 | `conc`      | `(conc 'lst 'lst)`            | `std`    | [Concatenate](#conc) two lists into one |

@@ -11,6 +11,10 @@
 	"Call CAR CAR on X."
 	(car (car x)))
 
+(def cddr (x)
+	"Call CDR CDR on X."
+	(cdr (cdr x)))
+
 (def cadar (x)
 	"Call CAR CDR CAR on X."
 	(car (cdr (car x))))

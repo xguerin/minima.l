@@ -50,7 +50,7 @@ if(MNML_WITH_TRANSFN)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
   #
   Transpile(iterators "foldl,foldr,map,map2,zip")
-  Transpile(manips "assoc,caar,cadar,caddr,cadr,cdar,last,rep,truncl")
+  Transpile(manips "assoc,caar,cddr,cadar,caddr,cadr,cdar,last,rep,truncl")
   #
   foreach(MODULE ${MODULES})
     add_library(${MODULE} SHARED ${CMAKE_CURRENT_BINARY_DIR}/${MODULE}.c)
