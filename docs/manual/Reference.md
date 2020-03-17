@@ -57,8 +57,10 @@
 | Name      | Syntax                      | Module | Description |
 |:----------|:----------------------------|:------:|:------------|
 | `ntoa`      | `(ntoa 'num)`                 |        | Convert `num` into a string |
+| `join`      | `(join 'lst 'chr)`            |        | Join `lst` of strings into a `chr`-separted string |
 | `split`     | `(split 'str 'chr)`           |        | Split `str` of `chr`-separted tokens |
 | `str`       | `(str 'sym)`                  | `std`    | Make a string out of `sym` |
+| `trim`      | `(trim 'str)`                 |        | Trim `str` of leading and trailing white spaces |
 
 #### Symbol definition
 
