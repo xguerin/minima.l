@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Closures - Minima.l</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Closures";
+    var mkdocs_page_input_path = "notes/Closures.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Minima.l</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Manual</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Language/">Language</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Interpreter/">Interpreter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Modules/">Modules</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Reference/">Reference</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Notes</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Closures</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#example">Example</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#problem-definition">Problem definition</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#closure-stack">Closure stack</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../Continuations/">Continuations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../Inference/">Type Inference</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Minima.l</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Notes &raquo;</li>
+        
+      
+    
+    <li>Closures</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="closures">Closures</h1>
+<p>Minima.l implement lexical scope closures using stack-oriented association
+lists. These lists are created by symbol-binding operations and are carried over
+by functions and lambdas.</p>
+<h2 id="example">Example</h2>
+<p>Let's consider the following <code>let</code> operation:</p>
+<pre><code class="lisp">(let ((a . 1) (b . 2)) PRG)
+</code></pre>
+
+<p>The closure made available to <code>PRG</code> is:</p>
+<pre><code class="lisp">(((a . 1) (b . 2)))
+</code></pre>
+
+<h2 id="problem-definition">Problem definition</h2>
+<p>Symbol binding operations are operations that associate a value to a symbol.
+This association can either happen at the <em>global</em> scope or at the <em>local</em> scope.</p>
+<p>Operations that impact the global scope are <code>def</code>, <code>setq</code> and <code>&lt;-</code> to the extent
+that it only <em>alters</em> existing symbols.</p>
+<p>Operations that impact the local scope are <code>let</code> and <code>&lt;-</code>. The <code>let</code> operation
+actually creates a local scope and can be used to define lambdas as local
+functions: </p>
+<pre><code class="lisp">(let ((fn . (\ (a b) (+ a b)))) (fn 1 2))
+</code></pre>
+
+<p>These local scopes can be nested, and so can be these local functions:</p>
+<pre><code class="lisp">(let ((fn0 . (\ (a b) (+ a b))))
+  (let ((fn1 . (\ (a b) (- b a))))
+    (fn1 (fn0 2 2) (fn0 1 1))))
+</code></pre>
+
+<p>Local functions need to be shielded from nesting operations that redefine
+symbols. For instance:</p>
+<pre><code class="lisp">(let ((a . 1)                  # Level 0 scope
+      (fn0 . (\ (x) (+ x a)))) #
+  (let ((a . 2))               # Level 1 scope
+    (fn0 3)))                  #
+</code></pre>
+
+<p>This expression is expected to return the value <code>4</code> as symbol <code>a</code> was assigned
+the value <code>1</code> when the lambda was <em>defined</em>. To ensure that behavior, the lambda
+assigned to <code>fn0</code> must save the closure available at its <em>definition site</em>.</p>
+<h2 id="closure-stack">Closure stack</h2>
+<p>The solution implemented in Minima.l to achieve this is a closure stack. 
+At the bottom level of the stack is the global scope. Then, each nested local
+scope pushes its closure on the stack.</p>
+<p>When symbols are resolved, Minima.l crawls up the stack of closure to find the
+first match. The global scope is always checked at the last resort.</p>
+<p>When a function is defined at the global scope using <code>def</code>, its closure capture
+is empty. When a function is defined at the local scope using <code>let</code> and a
+lambda, the <code>lambda</code> function captures the closure into the generated function
+definition.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Continuations/" class="btn btn-neutral float-right" title="Continuations">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../manual/Reference/" class="btn btn-neutral" title="Reference"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../../manual/Reference/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../Continuations/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

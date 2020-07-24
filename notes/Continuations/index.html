@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Continuations - Minima.l</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Continuations";
+    var mkdocs_page_input_path = "notes/Continuations.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Minima.l</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Manual</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Language/">Language</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Interpreter/">Interpreter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Modules/">Modules</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../manual/Reference/">Reference</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Notes</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../Closures/">Closures</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Continuations</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#principle">Principle</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#function-with-one-arguments">Function with one arguments</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#function-with-two-arguments">Function with two arguments</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#singly-nested-functions">Singly-nested functions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#doubly-nested-functions">Doubly-nested functions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#control-structures">Control structures</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#if-then-else">If-Then-Else</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#evaluation">Evaluation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#function-with-two-arguments_1">Function with two arguments</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#tree-view">Tree view</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#abi-view">ABI view</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#types">Types</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#basic-functions">Basic functions</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#continuations_1">Continuations</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#top-and-main">Top and main</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../Inference/">Type Inference</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Minima.l</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Notes &raquo;</li>
+        
+      
+    
+    <li>Continuations</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="continuations">Continuations</h1>
+<p>We use the greek letter κ (0x03BA) to represent the current continuation.</p>
+<h2 id="principle">Principle</h2>
+<h3 id="function-with-one-arguments">Function with one arguments</h3>
+<pre><code class="scheme">; Normal style
+(not T)
+
+; Continuation-passing style
+(define (notcps v κ) (k (not v)))
+</code></pre>
+
+<h3 id="function-with-two-arguments">Function with two arguments</h3>
+<pre><code class="scheme">; Normal style
+(add 1 2)
+
+; Continuation-passing style
+(define (add a b κ) (κ (+ a b)))
+</code></pre>
+
+<h3 id="singly-nested-functions">Singly-nested functions</h3>
+<pre><code class="scheme">; Normal style
+(define (fn) (add (mul 1 2) 3)
+
+; Continuation-passing style
+(define (add a b κ) (k (+ a b)))
+(define (mul a b κ) (k (* a b)))
+
+(define (fn κ) (mul 1 2 (lambda (x) (add x 3 κ)))
+</code></pre>
+
+<h3 id="doubly-nested-functions">Doubly-nested functions</h3>
+<pre><code class="scheme">; Normal style
+(define (fn) (add (mul 1 2) (div 3 4)))
+
+; Continuation-passing style
+(define (add a b κ) (k (+ a b)))
+(define (mul a b κ) (k (* a b)))
+(define (div a b κ) (k (/ a b)))
+
+(define (fn κ) (mul 1 2 (lambda (x) (div 4 2 (lambda (y) (add x y κ))))))
+</code></pre>
+
+<h3 id="control-structures">Control structures</h3>
+<h4 id="if-then-else">If-Then-Else</h4>
+<pre><code class="scheme">; Normal style
+(define (fn v)
+    (if (equ v 0)
+        (add v 1)
+        (sub v 1)))
+
+; Continuation-passing style
+(define (fn v κ)
+    (equ v 0 (lambda (x)
+        (if x
+            (add v 1 κ)
+            (sub v 1 κ)))
+</code></pre>
+
+<h2 id="evaluation">Evaluation</h2>
+<p>The continuation-passing style represent a function call as a chain of
+continuation-accepting functions <code>f(..., κ)</code> where the function of rank
+<code>N-1</code> is used as the continuation of the function of rank <code>N</code>.</p>
+<h3 id="function-with-two-arguments_1">Function with two arguments</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Step</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">1</td>
+<td align="left">Apply current continuation to the result</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">Lift the second argument</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">Lift the first argument</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tree-view">Tree view</h3>
+<pre><code>(define (fn κ)
+    (mul
+        1   ; immediate
+        2   ; immediate
+        (kappa (x) (div     ;.......................................................&lt; continuation_2
+                        4   ; immediate                                             |
+                        2   ; immediate                                             |
+                        (kappa (y) (add     ;....................&lt; continuation_1   |
+                                        x   ; closure variable   |                  |
+                                        y   ; argument variable  |                  |               
+                                        κ   ; closure variable   |                  |
+                        )))                                      |                  |
+                    ))                                                              |
+    ))
+</code></pre>
+
+<h3 id="abi-view">ABI view</h3>
+<h4 id="types">Types</h4>
+<pre><code class="c">struct _continuation_t;
+
+typedef union _value_t {
+  int64_t integer;
+  char * string;
+  void (*continuation)(union _value_t * environment, union _value_t result);
+}
+value_t;
+
+typedef value_t environment_t[16];
+
+typedef void (*continuation_t)(environment_t environment, value_t result);
+</code></pre>
+
+<h4 id="basic-functions">Basic functions</h4>
+<pre><code class="c">void fn_add(environment_t E, value_t A0, value_t A1, continuation_t K) {
+  const register value_t result = { .integer = A0.integer + A1.integer };
+  K(E, result);
+}
+
+void fn_mul(environment_t E, value_t A0, value_t A1, continuation_t K) {
+  const register value_t result = { .integer = A0.integer * A1.integer };
+  K(E, result);
+}
+
+void fn_div(environment_t E, value_t A0, value_t A1, continuation_t K) {
+  const register value_t result = { .integer = A0.integer / A1.integer };
+  K(E, result);
+}
+</code></pre>
+
+<h4 id="continuations_1">Continuations</h4>
+<pre><code class="c">void cont_1(environment_t E, value_t Y) {
+  fn_add(E, E[1], Y, E[0].continuation);
+}
+
+void cont_2(environment_t E, value_t X) {
+  register const value_t A0 = { .integer = 4 };
+  register const value_t A1 = { .integer = 2 };
+  E[1] = X;
+  fn_div(E, A0, A1, cont_1);
+}
+
+void print(environment_t E, value_t X) {
+  printf(&quot;Hello %lld\n&quot;, X.integer);
+}
+</code></pre>
+
+<h4 id="top-and-main">Top and main</h4>
+<pre><code class="c">void fn(environment_t E, continuation_t K) {
+  register const value_t A0 = { .integer = 1 };
+  register const value_t A1 = { .integer = 2 };
+  E[0].continuation = K;
+  fn_mul(E, A0, A1, cont_2);
+}
+
+int main(const int argc, char ** const argv) {
+  /*
+   * Create an empty environment.
+   */
+  environment_t env;
+  memset(env, 0, sizeof(env));
+  /*
+   * Call the function.
+   */
+  fn(env, print);
+  return 0;
+}
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Inference/" class="btn btn-neutral float-right" title="Type Inference">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../Closures/" class="btn btn-neutral" title="Closures"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../Closures/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../Inference/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

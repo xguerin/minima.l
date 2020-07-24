@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Language - Minima.l</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Language";
+    var mkdocs_page_input_path = "manual/Language.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/c.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Minima.l</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Manual</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Language</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#source-encoding">Source encoding</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#comment">Comment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#types">Types</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#table">Table</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#symbols">Symbols</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#strings">Strings</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#expression-evaluation">Expression evaluation</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#generic-rules">Generic rules</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#expressions">Expressions</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#bindings">Bindings</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#lambdas">Lambdas</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#currying">Currying</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#recursion">Recursion</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#argument-assignation">Argument assignation</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#global-variables">Global variables</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#argv">ARGV</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#config">CONFIG</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#env">ENV</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../Interpreter/">Interpreter</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../Modules/">Modules</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../Reference/">Reference</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Closures/">Closures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Continuations/">Continuations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Inference/">Type Inference</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Minima.l</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Manual &raquo;</li>
+        
+      
+    
+    <li>Language</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="language">Language</h1>
+<h2 id="source-encoding">Source encoding</h2>
+<p>The source encoding is UTF-8.</p>
+<h2 id="comment">Comment</h2>
+<pre><code class="lisp"># This is a comment
+</code></pre>
+
+<h2 id="types">Types</h2>
+<h3 id="table">Table</h3>
+<table>
+<thead>
+<tr>
+<th align="left">Name</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">List</td>
+<td align="left"><code>( ... )</code></td>
+</tr>
+<tr>
+<td align="left">Number</td>
+<td align="left">Positive and negative 64-bit integers</td>
+</tr>
+<tr>
+<td align="left">Symbol</td>
+<td align="left">16-character string</td>
+</tr>
+<tr>
+<td align="left">Character</td>
+<td align="left">A <code>^</code>-prefixed printable character</td>
+</tr>
+<tr>
+<td align="left"><code>T</code></td>
+<td align="left">Stands for <code>true</code></td>
+</tr>
+<tr>
+<td align="left"><code>NIL</code></td>
+<td align="left">The empty list, also stands for <code>false</code></td>
+</tr>
+<tr>
+<td align="left"><code>_</code></td>
+<td align="left">Wildcard, used as a placeholder during deconstruction</td>
+</tr>
+</tbody>
+</table>
+<h3 id="symbols">Symbols</h3>
+<p>Symbols are bound to values. Undefined symbols are unbound and resolve to <code>NIL</code>.
+Symbols can be created or altered globally using the <code>def</code> and <code>setq</code> functions.
+Symbols can also be defined locally using the <code>let</code> function.</p>
+<h3 id="strings">Strings</h3>
+<p>The grammar supports the <em>string</em> type. Represented as a <code>"</code>-delimited string of
+characters, it is internally stored as a list of characters. For example:</p>
+<pre><code class="lisp">: &quot;hello&quot;
+&gt; (^h ^e ^l ^l ^o)
+</code></pre>
+
+<h2 id="expression-evaluation">Expression evaluation</h2>
+<h3 id="generic-rules">Generic rules</h3>
+<ul>
+<li>Numbers, strings, <code>NIL</code>, <code>T</code>, and <code>_</code> evaluate to themselves</li>
+<li>Symbols are dereferenced to their bound values</li>
+<li>Lists are evaluated as expressions</li>
+</ul>
+<h3 id="expressions">Expressions</h3>
+<p>Expression take the following form: <code>(FUNCTION ARGS ...)</code>. The <code>FUNCTION</code> can be:</p>
+<ol>
+<li>A symbol that must resolve to a function definition</li>
+<li>A quoted function definition</li>
+<li>A lambda definition</li>
+</ol>
+<p>The forms 1, 2, and 3 are mutually interchangeable:</p>
+<pre><code class="lisp">: (def add (a b) (+ a b))
+&gt; ((a b) NIL (+ a b))
+: (add 1 2) # Form 1
+&gt; 3
+: ('((a b) NIL (+ a b)) 1 2) # Form 2
+&gt; 3
+: ((\ (a b) (+ a b)) 1 2) # Form 3
+&gt; 3
+</code></pre>
+
+<h2 id="functions">Functions</h2>
+<p>Functions are represented internally as the following 3-uple:</p>
+<pre><code class="lisp">(ARGUMENTS CLOSURE . BODY)
+</code></pre>
+
+<p>The <code>ARGUMENTS</code> element is a list of symbols representing the arguments of the
+functions. The <code>CLOSURE</code> element is an association list that contains the
+context of the function at the definition site. Lastly, the <code>BODY</code> element is
+the expression of the function. When defined through plugins, the body may also
+be a number representing the memory address of the native implementation of the
+function.</p>
+<h3 id="bindings">Bindings</h3>
+<p>The <code>BINDINGS</code> list may be one of these form:</p>
+<ul>
+<li><code>NIL</code> or <code>()</code>: the function takes no argument</li>
+<li><code>SYMBOL</code>: the unevaluated list of arguments is associated with <code>SYMBOL</code></li>
+<li><code>LIST</code>: arguments are evaluated and assigned to the symbols in <code>LIST</code></li>
+</ul>
+<h3 id="lambdas">Lambdas</h3>
+<p>Lambda functions are defined using the <code>\\</code> keyword. Invocation of <code>\\</code> is
+similar to <code>def</code>:</p>
+<pre><code class="lisp">: ((\ (x y) (+ x y)) 1 1)
+&gt; 2
+: ((\ (x) (map (\ (n) (+ n 1)) x)) '(1 2 3 4))
+&gt; (2 3 4 5)
+</code></pre>
+
+<h3 id="currying">Currying</h3>
+<p>Minima.l supports currying. It uses the function's closure to store the curried
+arguments. Curryring is available to all <code>lisp</code> and native functions. For example:</p>
+<pre><code class="lisp">: (def add (a b) (+ a b))
+&gt; ((a b) NIL (+ a b))
+: (setq +1 (add 1))
+&gt; ((b) ((a . 1)) (+ a b))
+: (+1 2)
+&gt; 3
+</code></pre>
+
+<h3 id="recursion">Recursion</h3>
+<p>A function defined using <code>def</code> can be recursive. When functions are defined,
+symbols with their name are not resolved in their closure and are resolved
+dynamically in the symbol domain instead. There is a caveat however: since the
+function symbols are resolved dynamically, redefining these symbols will lead to
+undefined behavior.</p>
+<h3 id="argument-assignation">Argument assignation</h3>
+<p>Assignation of arguments in <code>def</code>, <code>lamda</code>, or <code>let</code> functions support
+deconstruction. For instance, with <code>def</code>:</p>
+<pre><code class="lisp">: (def sum3 ((a b c)) (+ (+ a b) c))
+&gt; sum3
+: (sum3 (list 1 2 3))
+&gt; 6
+</code></pre>
+
+<p>Or with a lambda:</p>
+<pre><code class="lisp">: (setq data '((&quot;hello&quot; . 1) (&quot;world&quot; . 2)))
+&gt; ((&quot;hello&quot; . 1) (&quot;world&quot; . 2))
+: (foldl (\ (acc (_ . v))(+ acc v)) 0 data)
+&gt; 3
+</code></pre>
+
+<h2 id="global-variables">Global variables</h2>
+<h3 id="argv">ARGV</h3>
+<p>When <code>mnml</code> is executed as a <code>#!</code> interpreter, the <code>ARGV</code> global contains the
+argument vector  of the script.</p>
+<h3 id="config">CONFIG</h3>
+<p>The <code>CONFIG</code> global contains the current runtime of the interpreter. It contains
+the installation <code>PREFIX</code>, the interpreter <code>VERSION</code>, its build timestamp
+<code>BUILD_TS</code>, and the name <code>COMPNAME</code> and version <code>COMPVER</code> of the compiler used to
+build it.</p>
+<h3 id="env">ENV</h3>
+<p>The <code>ENV</code> global contains the environment at the time of the invocation of the
+interpreter.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Interpreter/" class="btn btn-neutral float-right" title="Interpreter">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../.." class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../.." style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../Interpreter/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
