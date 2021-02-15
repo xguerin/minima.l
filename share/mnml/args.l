@@ -3,7 +3,7 @@
 	'(logic or =)
 	'(io prinl)
 	'(math - >)
-	'(std if nil? cdr cons car eval prog))
+	'(std if nil? cdr cons car eval let prog))
 
 (def args:skip (LST LEN)
 	"Extract sublist of LEN from LST."
@@ -34,4 +34,4 @@
 
 (def args:parse (SCHEMA)
 	"Parse ARGV according to SCHEMA."
-	(args:parse_r SCHEMA (cdr (cdr ARGV)) NIL))
+	(args:parse_r SCHEMA (cdr ARGV) NIL))

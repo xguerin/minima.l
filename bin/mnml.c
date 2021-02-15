@@ -254,6 +254,7 @@ lisp_help(const char* const name)
 {
   fprintf(stderr, "Usage: %s [-h|-v] [-e EXPR | FILE.L]\n", name);
   fprintf(stderr, "Options:\n");
+  fprintf(stderr, "\t-d: return non-zero status if slab is not empty\n");
   fprintf(stderr, "\t-e: evaluate EXPR\n");
   fprintf(stderr, "\t-h: print this help\n");
   fprintf(stderr, "\t-v: show Minima.l runtime information\n");
@@ -278,9 +279,13 @@ main(const int argc, char** const argv)
    * Parse arguments.
    */
   int c;
+  bool check_slab = false;
   char* expr = NULL;
-  while ((c = GETOPT(argc, argv, "hve:")) != -1) {
+  while ((c = GETOPT(argc, argv, "hvde:")) != -1) {
     switch (c) {
+      case 'd':
+        check_slab = true;
+        break;
       case 'e':
         expr = optarg;
         break;
@@ -335,7 +340,7 @@ main(const int argc, char** const argv)
   /*
    * Build ARGV, CONFIG and ENV.
    */
-  lisp_build_argv(lisp, argc, argv);
+  lisp_build_argv(lisp, argc - optind, &argv[optind]);
   lisp_build_config(lisp);
   lisp_build_env(lisp);
   /*
@@ -389,7 +394,7 @@ main(const int argc, char** const argv)
     X(PAIRS);
   } else {
     PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
-    result = lisp_load_file(lisp, argv[1]);
+    result = lisp_load_file(lisp, filename);
     POP_IO_CONTEXT(OCHAN);
   }
   /*
@@ -401,8 +406,14 @@ main(const int argc, char** const argv)
    * Clean-up the lisp context.
    */
   lisp_delete(lisp);
+  lisp_fini();
+  /*
+   * Check the slab and update the status accordingly.
+   */
+  if (check_slab && slab.n_alloc != slab.n_free) {
+    status = -2;
+  }
   /*
    */
-  lisp_fini();
   return status;
 }
