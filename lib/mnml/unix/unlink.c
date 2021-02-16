@@ -5,22 +5,20 @@
 #include <unistd.h>
 
 static atom_t USED
-lisp_function_unlink(const lisp_t lisp, const atom_t closure)
+lisp_function_unlink(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, name, closure, NAME);
+  LISP_ARGS(closure, C, NAME);
   /*
    * Make sure the argument is a string.
    */
-  if (!lisp_is_string(name)) {
-    X(name);
+  if (!lisp_is_string(NAME)) {
     return UP(NIL);
   }
   /*
    * Convert the argument.
    */
   char name_buf[PATH_MAX];
-  lisp_make_cstring(name, name_buf, PATH_MAX, 0);
-  X(name);
+  lisp_make_cstring(NAME, name_buf, PATH_MAX, 0);
   /*
    * Call unlink().
    */

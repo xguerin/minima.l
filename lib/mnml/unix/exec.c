@@ -1,3 +1,4 @@
+#include "mnml/debug.h"
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -35,30 +36,29 @@ lisp_exec_make_strings(const atom_t cell, char** array, const size_t len,
 }
 
 static atom_t USED
-lisp_function_exec(const lisp_t lisp, const atom_t closure)
+lisp_function_exec(UNUSED const lisp_t lisp, const atom_t closure)
 {
+  TRACE_CLOS_SEXP(closure);
   /*
    * Get the arguments.
    */
-  LISP_LOOKUP(lisp, path, closure, PATH);
-  LISP_LOOKUP(lisp, args, closure, ARGS);
-  LISP_LOOKUP(lisp, envp, closure, ENVP);
+  LISP_ARGS(closure, C, PATH, ARGS, ENVP);
   /*
    * Build the path string.
    */
   char buffer[PATH_MAX + 1];
-  lisp_make_cstring(path, buffer, PATH_MAX, 0);
+  lisp_make_cstring(PATH, buffer, PATH_MAX, 0);
+  TRACE_EVAL("%s", buffer);
   /*
    * Build the argument list.
    */
   char* arg_str[MAX_ARGS + 1] = { [0] = strdup(buffer) };
-  lisp_exec_make_strings(args, arg_str, MAX_ARGS - 1, 1);
+  lisp_exec_make_strings(UP(ARGS), arg_str, MAX_ARGS - 1, 1);
   /*
    * Build the environment.
    */
   char* env_str[MAX_ARGS + 1];
-  size_t len = lisp_exec_make_strings(envp, env_str, MAX_ARGS, 0);
-  X(args, envp);
+  size_t len = lisp_exec_make_strings(UP(ENVP), env_str, MAX_ARGS, 0);
   /*
    * Call execve.
    */

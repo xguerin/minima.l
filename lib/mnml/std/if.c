@@ -1,3 +1,4 @@
+#include "mnml/debug.h"
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -5,26 +6,22 @@
 static atom_t USED
 lisp_function_if(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cnd, closure, COND);
-  LISP_LOOKUP(lisp, ops, closure, REM);
+  LISP_ARGS(closure, C, COND, REM);
   /*
    * Evaluate the THEN branch if TRUE.
    */
-  if (unlikely(IS_NULL(cnd))) {
-    atom_t cd1 = lisp_cdr(ops);
+  if (unlikely(IS_NULL(COND))) {
+    atom_t cd1 = lisp_cdr(REM);
     atom_t els = lisp_car(cd1);
-    atom_t res = lisp_eval(lisp, closure, els);
-    X(cnd, ops, cd1);
-    return res;
+    X(cd1);
+    return lisp_eval(lisp, C, els);
   }
   /*
    * Or evaluate the ELSE branch.
    */
   else {
-    atom_t thn = lisp_car(ops);
-    atom_t res = lisp_eval(lisp, closure, thn);
-    X(cnd, ops);
-    return res;
+    atom_t thn = lisp_car(REM);
+    return lisp_eval(lisp, C, thn);
   }
 }
 

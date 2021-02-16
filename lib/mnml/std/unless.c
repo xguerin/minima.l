@@ -5,20 +5,16 @@
 static atom_t USED
 lisp_function_unless(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cnd, closure, COND);
-  LISP_LOOKUP(lisp, prg, closure, REM);
+  LISP_ARGS(closure, C, COND, REM);
   /*
    * Evaluate REM branch if TRUE.
    */
-  if (likely(IS_NULL(cnd))) {
-    atom_t res = lisp_prog(lisp, closure, prg, UP(NIL));
-    X(cnd);
-    return res;
+  if (likely(IS_NULL(COND))) {
+    return lisp_prog(lisp, C, UP(REM), UP(NIL));
   }
   /*
    * Or return NIL;
    */
-  X(cnd, prg);
   return UP(NIL);
 }
 

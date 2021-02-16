@@ -6,6 +6,7 @@
 	"iter.l"
 	"iter2.l"
 	"iterators.l"
+	"join.l"
 	"manips.l"
 	"rev.l"
 	"run.l"
@@ -247,7 +248,7 @@
 		(/**/ "Evaluate the expression.")
 		(prinl (o|) "atom_t _R = lisp_eval(lisp, E, _S);")
 		(/**/ "Convert the atom_t result to value_t.")
-		(cc:gen:value type 'R)))
+		(cc:gen:value type T 'R)))
 
 (def cc:op:reccall (ARGS TYPES kvar body)
 	"Generate C code for recursive calls."
@@ -269,14 +270,14 @@
 		(prin "V")
 		(prin "C->V[" (cc:ref:idx ARGS ref) "]")))
 
-(def cc:gen:value (type arg)
+(def cc:gen:value (type x arg)
 	"Generate conversion from atom_t to value_t."
 	(prin (o|) "value_t " arg " = ")
 	(match type
 		(NUMBER . (prinl "{ .number = _" arg "->number };"))
 		(ATOM		. (prinl "{ .atom = UP(_" arg ") };"))
 		(_			. (prinl "{ .number = 0 }; /* Unsupported type " (str atype) " */")))
-	(prinl (o|) "X(_" arg ");"))
+	(if x (prinl (o|) "X(_" arg ");")))
 
 (def cc:gen:x (ARGS kvar ref)
 	"Generate X(REF)."
@@ -588,17 +589,19 @@
 # Module.
 #
 
-(def cc:gen:argument (TYPES arg)
+(def cc:gen:argument (TYPES ARGS)
 	"Generate the argument extraction."
-	(prinl (o|) "LISP_LOOKUP(lisp, _" arg ", closure, " arg ");")
-	(cc:gen:value (assoc arg TYPES) arg))
+	(prin (o|) "LISP_ARGS(closure, C")
+	(iter (\ (e) (prin ", _" e)) ARGS)
+	(prinl ");")
+	(iter (\ (e) (cc:gen:value (assoc e TYPES) NIL e)) ARGS))
 
 (def cc:gen:entry (NAME ARGS TYPES)
 	"Generate C code for the NAME entry point."
 	(prinl "static atom_t lisp_function_" NAME "(const lisp_t lisp, const atom_t closure) {")
 	(o>)
 	(/**/ "Grab the arguments.")
-	(iter (\ (e) (cc:gen:argument TYPES e)) ARGS)
+	(cc:gen:argument TYPES ARGS)
 	(/**/ "Define the default closure and callback.")
 	(prinl (o|) "closure_t _C = NULL;")
 	(prinl (o|) "callback_t _K = _mnml_" NAME "_identity;")
@@ -613,7 +616,7 @@
 	(prinl "}")
 	(prinl)
 	(prin "LISP_MODULE_SETUP(" NAME ", " NAME)
-	(iter (\ (e) (prin ", " e)) ARGS)
+	(iter (\ (e) (prin ", _" e)) ARGS)
 	(prinl ", NIL);")
 	(prinl))
 

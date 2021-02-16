@@ -118,12 +118,11 @@ process(const lisp_t lisp, const atom_t closure, const atom_t fds,
 static atom_t USED
 lisp_function_select(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, fds, closure, FDS);
+  LISP_ARGS(closure, C, FDS);
   /*
    * Check that the fds argument is a list.
    */
-  if (!IS_LIST(fds)) {
-    X(fds);
+  if (!IS_LIST(FDS)) {
     return UP(NIL);
   }
   /*
@@ -132,21 +131,20 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   fd_set rset, eset;
   FD_ZERO(&rset);
   FD_ZERO(&eset);
-  int fdmax = convert(fds, &rset, &eset);
+  int fdmax = convert(FDS, &rset, &eset);
   /*
    * Call select();
    */
   int res = select(fdmax + 1, &rset, NULL, &eset, NULL);
   if (res < 0) {
-    X(fds);
     TRACE("select() failed: %s", strerror(errno));
     return UP(NIL);
   }
   /*
    * Process the events.
    */
-  atom_t rres = process(lisp, closure, fds, "ON_READ", &rset);
-  atom_t eres = process(lisp, closure, fds, "ON_ERROR", &eset);
+  atom_t rres = process(lisp, C, FDS, "ON_READ", &rset);
+  atom_t eres = process(lisp, C, FDS, "ON_ERROR", &eset);
   /*
    * Build the result.
    */
@@ -156,7 +154,6 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   /*
    * Return the updated descriptor list.
    */
-  X(fds);
   return cn1;
 }
 

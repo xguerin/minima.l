@@ -3,13 +3,10 @@
 #include <mnml/slab.h>
 
 static atom_t USED
-lisp_function_conc(const lisp_t lisp, const atom_t closure)
+lisp_function_conc(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, fst, closure, X);
-  LISP_LOOKUP(lisp, snd, closure, Y);
-  atom_t res = lisp_conc(fst, snd);
-  X(fst, snd);
-  return res;
+  LISP_ARGS(closure, C, X, Y);
+  return lisp_conc(X, Y);
 }
 
 LISP_MODULE_SETUP(conc, conc, X, Y, NIL)

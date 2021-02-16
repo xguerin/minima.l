@@ -25,14 +25,14 @@ atom_match(const atom_t a, const atom_t b)
 }
 
 static atom_t
-lisp_match(const lisp_t lisp, const atom_t closure, const atom_t cell,
+lisp_match(const lisp_t lisp, const atom_t closure, const atom_t ANY,
            const atom_t match)
 {
   /*
    * Sanity checks.
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
-    X(cell, match);
+    X(ANY, match);
     return UP(NIL);
   }
   /*
@@ -48,29 +48,27 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t cell,
   atom_t prog = lisp_cdr(car);
   X(car);
   /*
-   * Match the cell with CAR.
+   * Match the ANY with CAR.
    */
-  if (atom_match(args, cell)) {
-    X(args, cdr, cell);
+  if (atom_match(args, ANY)) {
+    X(args, cdr, ANY);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    */
   X(args, prog);
-  return lisp_match(lisp, closure, cell, cdr);
+  return lisp_match(lisp, closure, ANY, cdr);
 }
 
 static atom_t USED
 lisp_function_match(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
-  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  atom_t res = lisp_match(lisp, closure, car, cdr);
-  X(cell);
-  return res;
+  LISP_ARGS(closure, C, ANY);
+  atom_t car = lisp_eval(lisp, closure, lisp_car(ANY));
+  atom_t cdr = lisp_cdr(ANY);
+  return lisp_match(lisp, C, car, cdr);
 }
 
-LISP_MODULE_SETUP(match, match, @)
+LISP_MODULE_SETUP(match, match, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

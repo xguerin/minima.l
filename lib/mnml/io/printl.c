@@ -26,12 +26,12 @@ lisp_printl_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t USED
 lisp_function_printl(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
-  atom_t res = lisp_printl_all(lisp, closure, cell, UP(NIL));
+  LISP_ARGS(closure, C, ANY);
+  atom_t res = lisp_printl_all(lisp, C, UP(ANY), UP(NIL));
   fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   return res;
 }
 
-LISP_MODULE_SETUP(printl, printl, @)
+LISP_MODULE_SETUP(printl, printl, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

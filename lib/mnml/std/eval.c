@@ -5,8 +5,8 @@
 static atom_t USED
 lisp_function_eval(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, car, closure, X);
-  return lisp_eval(lisp, closure, car);
+  LISP_ARGS(closure, C, X);
+  return lisp_eval(lisp, C, UP(X));
 }
 
 LISP_MODULE_SETUP(eval, eval, X, NIL)

@@ -4,12 +4,10 @@
 #include <mnml/utils.h>
 
 static atom_t USED
-lisp_function_equ(const lisp_t lisp, const atom_t closure)
+lisp_function_equ(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, vl0, closure, X);
-  LISP_LOOKUP(lisp, vl1, closure, Y);
-  atom_t res = lisp_equ(vl0, vl1) ? TRUE : NIL;
-  X(vl0, vl1);
+  LISP_ARGS(closure, C, X, Y);
+  atom_t res = lisp_equ(X, Y) ? TRUE : NIL;
   return UP(res);
 }
 

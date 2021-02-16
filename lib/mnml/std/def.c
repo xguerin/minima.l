@@ -5,29 +5,28 @@
 static atom_t USED
 lisp_function_def(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
+  LISP_ARGS(closure, C, ANY);
   /*
    * Grab the symbol.
    */
-  atom_t symb = lisp_car(cell);
+  atom_t symb = lisp_car(ANY);
   if (!IS_SYMB(symb)) {
-    X(symb, cell);
     return UP(NIL);
   }
   /*
    * Grab the arguments body.
    */
-  atom_t cdr0 = lisp_cdr(cell);
+  atom_t cdr0 = lisp_cdr(ANY);
   atom_t args = lisp_car(cdr0);
   if (!(IS_NULL(args) || IS_PAIR(args) || IS_SYMB(args))) {
-    X(symb, cell, cdr0, args);
+    X(symb, cdr0, args);
     return UP(NIL);
   }
   /*
    * Grab the body.
    */
   atom_t prog = lisp_cdr(cdr0);
-  X(cell, cdr0);
+  X(cdr0);
   /*
    * Check if there is a docstring in the declaration.
    */
@@ -53,6 +52,6 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   return symb;
 }
 
-LISP_MODULE_SETUP(def, def, @)
+LISP_MODULE_SETUP(def, def, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

@@ -15,21 +15,19 @@ lisp_eval_cond(const lisp_t lisp, const atom_t closure, const atom_t cell)
 static atom_t USED
 lisp_function_while(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, args, closure, @);
+  LISP_ARGS(closure, C, ANY);
   /*
    * Extract the condition and the prog.
    */
-  atom_t cnd = lisp_car(args);
-  atom_t prg = lisp_cdr(args);
-  X(args);
+  atom_t cnd = lisp_car(ANY);
+  atom_t prg = lisp_cdr(ANY);
   /*
    * Execute the loop.
    */
   atom_t res = UP(NIL);
-  while (lisp_eval_cond(lisp, closure, cnd)) {
+  while (lisp_eval_cond(lisp, C, cnd)) {
     X(res);
-    UP(prg);
-    res = lisp_prog(lisp, closure, prg, UP(NIL));
+    res = lisp_prog(lisp, C, UP(prg), UP(NIL));
   }
   /*
    * Clean-up and return the result.
@@ -38,6 +36,6 @@ lisp_function_while(const lisp_t lisp, const atom_t closure)
   return res;
 }
 
-LISP_MODULE_SETUP(while, while, @)
+LISP_MODULE_SETUP(while, while, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

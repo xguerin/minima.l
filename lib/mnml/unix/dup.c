@@ -1,3 +1,4 @@
+#include "mnml/debug.h"
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -7,14 +8,14 @@
 static atom_t USED
 lisp_function_dup(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
+  LISP_ARGS(closure, C, ANY);
   /*
    * Grab the arguments.
    */
-  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  atom_t tgt = lisp_eval(lisp, closure, lisp_car(cdr));
-  X(cdr, cell);
+  atom_t car = lisp_eval(lisp, C, lisp_car(ANY));
+  atom_t cdr = lisp_cdr(ANY);
+  atom_t tgt = lisp_eval(lisp, C, lisp_car(cdr));
+  X(cdr);
   /*
    * Call DUP if target is NIL.
    */
@@ -31,6 +32,6 @@ lisp_function_dup(const lisp_t lisp, const atom_t closure)
   return lisp_make_number(ret < 0 ? errno : ret);
 }
 
-LISP_MODULE_SETUP(dup, dup, @)
+LISP_MODULE_SETUP(dup, dup, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

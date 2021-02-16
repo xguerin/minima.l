@@ -23,11 +23,11 @@ lisp_close(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t USED
 lisp_function_close(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
-  bool res = lisp_close(lisp, closure, cell, true);
+  LISP_ARGS(closure, C, ANY);
+  bool res = lisp_close(lisp, C, UP(ANY), true);
   return UP(res ? TRUE : NIL);
 }
 
-LISP_MODULE_SETUP(close, close, @)
+LISP_MODULE_SETUP(close, close, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

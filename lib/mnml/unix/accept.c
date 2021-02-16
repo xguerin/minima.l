@@ -36,14 +36,13 @@ convert(const struct sockaddr_in* const sa)
 }
 
 static atom_t USED
-lisp_function_accept(const lisp_t lisp, const atom_t closure)
+lisp_function_accept(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, fd, closure, FD);
+  LISP_ARGS(closure, C, FD);
   /*
    * Make sure the port is valid.
    */
-  if (!IS_NUMB(fd) || fd->number < 0 || fd->number >= UINT32_MAX) {
-    X(fd);
+  if (!IS_NUMB(FD) || FD->number < 0 || FD->number >= UINT32_MAX) {
     return UP(NIL);
   }
   /*
@@ -51,9 +50,8 @@ lisp_function_accept(const lisp_t lisp, const atom_t closure)
    */
   struct sockaddr_in addr;
   socklen_t len = sizeof(addr);
-  int res = accept(fd->number, (struct sockaddr*)&addr, &len);
+  int res = accept(FD->number, (struct sockaddr*)&addr, &len);
   if (res < 0) {
-    X(fd);
     TRACE("accept() failed: %s", strerror(errno));
     return UP(NIL);
   }
@@ -63,7 +61,7 @@ lisp_function_accept(const lisp_t lisp, const atom_t closure)
   atom_t clfd = lisp_make_number(res);
   atom_t clad = convert(&addr);
   atom_t rslt = lisp_cons(clfd, clad);
-  X(clfd, clad, fd);
+  X(clfd, clad);
   return rslt;
 }
 

@@ -34,8 +34,7 @@ file called `add.c`:
 static atom_t
 lisp_function_add(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, x, closure, X);
-  LISP_LOOKUP(lisp, y, closure, Y);
+  LISP_ARGS(closure, C, X, Y);
   /*
    * Make sure the arguments are numbers.
    */
@@ -129,12 +128,11 @@ The argument symbols are defined as follows:
 | `LISP_MODULE_SETUP(fun, fun, A, B, REM)` | `(def fun (A B . REM) ...)` |
 
 Values for the declared symbols are passed to the module by the interpreter
-through the `args` parameter. They can be retrieved using the `LISP_LOOKUP`
+through the `args` parameter. They can be retrieved using the `LISP_ARGS`
 macro:
 ```c
-#define LISP_LOOKUP(_l, _v, _c, _x)
+#define LISP_ARGS(_c, _t, ...)
 ```
-The first argument is the current interpreter object. The second argument is a
-name to use for the variable to be assigned the value. The third argument is
-the name of the `args` parameter. The last argument is the name of the symbol to
-look up.
+The first argument is the closure passed to the function, which includes the
+arguments. The second argument is a name to use for the closure without the
+arguments. The remaining arguments are names of the arguments to pop.

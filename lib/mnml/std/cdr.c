@@ -3,12 +3,10 @@
 #include <mnml/slab.h>
 
 static atom_t USED
-lisp_function_cdr(const lisp_t lisp, const atom_t closure)
+lisp_function_cdr(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, arg, closure, X);
-  atom_t res = lisp_cdr(arg);
-  X(arg);
-  return res;
+  LISP_ARGS(closure, C, X);
+  return lisp_cdr(X);
 }
 
 LISP_MODULE_SETUP(cdr, cdr, X, NIL)

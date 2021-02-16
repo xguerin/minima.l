@@ -5,14 +5,13 @@
 #include <sys/wait.h>
 
 static atom_t USED
-lisp_function_wait(const lisp_t lisp, const atom_t closure)
+lisp_function_wait(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, car, closure, X);
+  LISP_ARGS(closure, C, X);
   /*
    * Get the PID.
    */
-  int tpid = car->number, state;
-  X(car);
+  int tpid = X->number, state;
   /*
    * Wait for the PID.
    */

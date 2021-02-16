@@ -4,7 +4,7 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
+lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t ANY,
             const atom_t expr)
 {
   /*
@@ -14,16 +14,16 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    * Return the evaluated result if CELL is NIL.
    */
-  if (IS_NULL(cell)) {
-    X(cell);
+  if (IS_NULL(ANY)) {
+    X(ANY);
     return res;
   }
   /*
    * Grab CAR and CDR.
    */
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_car(ANY);
+  atom_t cdr = lisp_cdr(ANY);
+  X(ANY);
   /*
    * Bind the quoted result.
    */
@@ -40,20 +40,19 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t USED
 lisp_function_stream(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
+  LISP_ARGS(closure, C, ANY);
   /*
    * Grab CAR/CDR.
    */
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_car(ANY);
+  atom_t cdr = lisp_cdr(ANY);
   /*
    */
-  return lisp_stream(lisp, closure, cdr, car);
+  return lisp_stream(lisp, C, cdr, car);
 }
 
 /* clang-format off */
-LISP_MODULE_SETUP(stream, |>, @)
+LISP_MODULE_SETUP(stream, |>, ANY)
 /* clang-format */
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

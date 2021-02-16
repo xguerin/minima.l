@@ -62,54 +62,89 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
   }
 
 /*
- * Closure lookup macro.
+ * Argument lookup macros.
  */
 
-#define LISP_LOOKUP(_l, _v, _c, _x)                   \
-  MAKE_SYMBOL_STATIC(_##_v, #_x, LISP_SYMBOL_LENGTH); \
-  atom_t _v = lisp_lookup(_l, _c, _##_v)
+#ifdef LISP_ENABLE_DEBUG
+
+#define LISP_ASSERT_ARG(_c, _a)                                            \
+  {                                                                        \
+    MAKE_SYMBOL_STATIC(_##_a, #_a, LISP_SYMBOL_LENGTH);                    \
+    if (!lisp_symbol_match(CAR(CAR(_c)), _##_a)) {                         \
+      ERROR("Argument mismatch: %.16s %s", CAR(CAR(_c))->symbol.val, #_a); \
+      abort();                                                             \
+    }                                                                      \
+  }
+
+#else
+
+#define LISP_ASSERT_ARG(_c, _a)
+
+#endif
+
+#define A_0(_c, _p, ...) atom_t _p = _c
+
+#define A_1(_c, _p, _1, ...) \
+  A_0(_c, _p, __VA_ARGS__);  \
+  LISP_ASSERT_ARG(_p, _1);   \
+  atom_t _1 = CDR(CAR(_p));  \
+  _p = CDR(_p)
+
+#define A_2(_c, _p, _2, ...) \
+  A_1(_c, _p, __VA_ARGS__);  \
+  LISP_ASSERT_ARG(_p, _2);   \
+  atom_t _2 = CDR(CAR(_p));  \
+  _p = CDR(_p)
+
+#define A_3(_c, _p, _3, ...) \
+  A_2(_c, _p, __VA_ARGS__);  \
+  LISP_ASSERT_ARG(_p, _3);   \
+  atom_t _3 = CDR(CAR(_p));  \
+  _p = CDR(_p)
+
+#define A_4(_c, _p, _4, ...) \
+  A_3(_c, _p, __VA_ARGS__);  \
+  LISP_ASSERT_ARG(_p, _4);   \
+  atom_t _4 = CDR(CAR(_p));  \
+  _p = CDR(_p)
+
+#define LISP_ARGS_(_1, _2, _3, _4, NAME, ...) NAME
+#define LISP_ARGS(_c, _p, ...) \
+  LISP_ARGS_(__VA_ARGS__, A_4, A_3, A_2, A_1)(_c, _p, __VA_ARGS__)
 
 /*
  * Module generators.
  */
 
-#define PREDICATE_GEN(_n, _o, _x)                                    \
-  static atom_t lisp_function_is##_n(const lisp_t l, const atom_t c) \
-  {                                                                  \
-    LISP_LOOKUP(l, car, c, _x);                                      \
-    atom_t res = _o(car) ? TRUE : NIL;                               \
-    X(car);                                                          \
-    return UP(res);                                                  \
+#define PREDICATE_GEN(_n, _o, _x)                                           \
+  static atom_t lisp_function_is##_n(UNUSED const lisp_t l, const atom_t c) \
+  {                                                                         \
+    LISP_ARGS(c, C, _x);                                                    \
+    atom_t res = _o(_x) ? TRUE : NIL;                                       \
+    return UP(res);                                                         \
   }
 
-#define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                         \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
-  {                                                                \
-    LISP_LOOKUP(l, vl0, c, _x);                                    \
-    LISP_LOOKUP(l, vl1, c, _y);                                    \
-    atom_t res = (!IS_NULL(vl0))_o(!IS_NULL(vl1)) ? TRUE : NIL;    \
-    X(vl0, vl1);                                                   \
-    return UP(res);                                                \
+#define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                                \
+  static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
+  {                                                                       \
+    LISP_ARGS(c, C, _x, _y);                                              \
+    atom_t res = (!IS_NULL(_x))_o(!IS_NULL(_y)) ? TRUE : NIL;             \
+    return UP(res);                                                       \
   }
 
-#define BINARY_NUMBER_GEN(_n, _o, _x, _y)                          \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
-  {                                                                \
-    LISP_LOOKUP(l, vl0, c, _x);                                    \
-    LISP_LOOKUP(l, vl1, c, _y);                                    \
-    atom_t res = lisp_make_number(vl0->number _o vl1->number);     \
-    X(vl0, vl1);                                                   \
-    return res;                                                    \
+#define BINARY_NUMBER_GEN(_n, _o, _x, _y)                                 \
+  static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
+  {                                                                       \
+    LISP_ARGS(c, C, _x, _y);                                              \
+    return lisp_make_number(_x->number _o _y->number);                    \
   }
 
-#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                         \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
-  {                                                                \
-    LISP_LOOKUP(l, vl0, c, _x);                                    \
-    LISP_LOOKUP(l, vl1, c, _y);                                    \
-    atom_t res = vl0->number _o vl1->number ? TRUE : NIL;          \
-    X(vl0, vl1);                                                   \
-    return UP(res);                                                \
+#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                                \
+  static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
+  {                                                                       \
+    LISP_ARGS(c, C, _x, _y);                                              \
+    atom_t res = _x->number _o _y->number ? TRUE : NIL;                   \
+    return UP(res);                                                       \
   }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

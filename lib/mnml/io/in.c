@@ -21,8 +21,7 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
   /*
    * Get CHAN and REM.
    */
-  LISP_LOOKUP(lisp, chan, closure, CHAN);
-  LISP_LOOKUP(lisp, prog, closure, REM);
+  LISP_ARGS(closure, C, CHAN, REM);
   /*
    * Get the working directory for the current ICHAN.
    */
@@ -30,27 +29,24 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
   /*
    * Process the CHAN.
    */
-  switch (chan->type) {
+  switch (CHAN->type) {
     case T_NIL:
       fd = dup(0);
-      X(chan);
       break;
     case T_NUMBER:
-      fd = dup(chan->number);
-      X(chan);
+      fd = dup(CHAN->number);
       break;
     case T_PAIR:
       /*
        * That argument must be a string.
        */
-      if (!lisp_is_string(chan)) {
-        X(chan, prog);
+      if (!lisp_is_string(CHAN)) {
         return UP(NIL);
       }
       /*
        * Get the filepath.
        */
-      lisp_make_cstring(chan, file_buf, PATH_MAX, 0);
+      lisp_make_cstring(CHAN, file_buf, PATH_MAX, 0);
       /*
        * Get the fullpath for the file.
        */
@@ -64,7 +60,6 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
        */
       fd = open(path, O_RDONLY);
       if (fd >= 0) {
-        X(chan);
         break;
       }
       ERROR("Cannot open file %s", path);
@@ -72,7 +67,6 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
        * NOTE(xrg) fall-through intended.
        */
     default:
-      X(chan, prog);
       return UP(NIL);
   }
   /*
@@ -81,14 +75,13 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
   FILE* handle = fdopen(fd, "r");
   if (handle == NULL) {
     close(fd);
-    X(prog);
     return UP(NIL);
   }
   /*
    * Push the context, eval the prog, pop the context.
    */
   PUSH_IO_CONTEXT(ICHAN, handle, dirn_buf);
-  atom_t res = lisp_prog(lisp, closure, prog, UP(NIL));
+  atom_t res = lisp_prog(lisp, C, UP(REM), UP(NIL));
   POP_IO_CONTEXT(ICHAN);
   /*
    * Close the FD if necessary and return the value.

@@ -6,21 +6,20 @@
 static atom_t USED
 lisp_function_time(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, arg, closure, @);
+  LISP_ARGS(closure, C, ANY);
   uint64_t result;
   uint64_t begin = lisp_timestamp();
-  if (IS_NULL(arg)) {
+  if (IS_NULL(ANY)) {
     result = begin;
-    X(arg);
   } else {
-    atom_t car = lisp_car(arg);
-    atom_t res = lisp_eval(lisp, closure, car);
+    atom_t car = lisp_car(ANY);
+    atom_t res = lisp_eval(lisp, C, car);
     result = lisp_timestamp() - begin;
-    X(arg, res);
+    X(res);
   }
   return lisp_make_number(result);
 }
 
-LISP_MODULE_SETUP(time, time, @)
+LISP_MODULE_SETUP(time, time, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

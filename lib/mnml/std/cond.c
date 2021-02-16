@@ -54,14 +54,13 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
 static atom_t USED
 lisp_function_cond(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, cell, closure, @);
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  atom_t res = lisp_cond(lisp, closure, car, cdr);
-  X(cell);
+  LISP_ARGS(closure, C, ANY);
+  atom_t car = lisp_car(ANY);
+  atom_t cdr = lisp_cdr(ANY);
+  atom_t res = lisp_cond(lisp, C, car, cdr);
   return res;
 }
 
-LISP_MODULE_SETUP(cond, cond, @)
+LISP_MODULE_SETUP(cond, cond, ANY)
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

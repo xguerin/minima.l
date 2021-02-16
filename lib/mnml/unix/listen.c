@@ -13,14 +13,13 @@
 #endif
 
 static atom_t USED
-lisp_function_listen(const lisp_t lisp, const atom_t closure)
+lisp_function_listen(UNUSED const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, port, closure, PORT);
+  LISP_ARGS(closure, C, PORT);
   /*
    * Make sure the port is valid.
    */
-  if (!IS_NUMB(port) || port->number < 0 || port->number >= UINT16_MAX) {
-    X(port);
+  if (!IS_NUMB(PORT) || PORT->number < 0 || PORT->number >= UINT16_MAX) {
     return UP(NIL);
   }
   /*
@@ -28,7 +27,6 @@ lisp_function_listen(const lisp_t lisp, const atom_t closure)
    */
   const int fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0) {
-    X(port);
     TRACE("socket() failed: %s", strerror(errno));
     return UP(NIL);
   }
@@ -39,14 +37,12 @@ lisp_function_listen(const lisp_t lisp, const atom_t closure)
   int res = setsockopt(fd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));
   if (res < 0) {
     close(fd);
-    X(port);
     TRACE("setsockopt(TCP_NODELAY) failed: %s", strerror(errno));
     return UP(NIL);
   }
   res = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(one));
   if (res < 0) {
     close(fd);
-    X(port);
     TRACE("setsockopt(SO_REUSEPORT) failed: %s", strerror(errno));
     return UP(NIL);
   }
@@ -57,14 +53,13 @@ lisp_function_listen(const lisp_t lisp, const atom_t closure)
   memset(&sa_in, 0, sizeof(sa_in));
   sa_in.sin_family = AF_INET;
   sa_in.sin_addr.s_addr = INADDR_ANY;
-  sa_in.sin_port = htons(port->number);
+  sa_in.sin_port = htons(PORT->number);
   /*
    * Bind the socket.
    */
   res = bind(fd, (struct sockaddr*)&sa_in, sizeof(sa_in));
   if (res < 0) {
     close(fd);
-    X(port);
     TRACE("bind() failed: %s", strerror(errno));
     return UP(NIL);
   }
@@ -74,14 +69,12 @@ lisp_function_listen(const lisp_t lisp, const atom_t closure)
   res = listen(fd, 5);
   if (res < 0) {
     close(fd);
-    X(port);
     TRACE("listen() failed: %s", strerror(errno));
     return UP(NIL);
   }
   /*
    * Return the socket.
    */
-  X(port);
   return lisp_make_number(fd);
 }
 
