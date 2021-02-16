@@ -48,11 +48,6 @@ bool lisp_neq(const atom_t a, const atom_t b);
 atom_t lisp_dup(const atom_t cell);
 
 /*
- * Merge define-site and call-site closures. The call-site closure is consumed.
- */
-atom_t lisp_merge(const atom_t defn, const atom_t call);
-
-/*
  * Return true if a cell is a string.
  */
 bool lisp_is_string(const atom_t cell);

@@ -1,3 +1,4 @@
+#include "mnml/debug.h"
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -28,12 +29,13 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
     return env;
   }
   /*
-   * Temporarily append this current environment to the evaluation closure.
+   * Prepend this current environment to the evaluation closure.
    */
-  atom_t tmp = lisp_merge(UP(env), lisp_dup(closure));
+  atom_t dup = lisp_dup(env);
+  atom_t tmp = lisp_conc(dup, closure);
   atom_t arg = lisp_car(car);
   atom_t val = lisp_eval(lisp, tmp, lisp_cdr(car));
-  X(tmp, car);
+  X(dup, tmp, car);
   /*
    * Bind the result to the environment and process the remainder.
    */
@@ -54,7 +56,8 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * Recursively apply the bind list.
    */
   atom_t next = lisp_let_bind(lisp, closure, UP(NIL), bind);
-  atom_t clos = lisp_merge(next, lisp_dup(closure));
+  atom_t clos = lisp_conc(next, closure);
+  X(next);
   /*
    * Evaluate the prog with the new bind list.
    */

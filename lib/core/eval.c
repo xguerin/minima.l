@@ -39,8 +39,9 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
     case T_SYMBOL: {
       TRACE_BIND_SEXP(arg);
       TRACE_BIND_SEXP(val);
-      ret = lisp_setq(closure, lisp_cons(arg, val));
-      X(closure, arg, val);
+      atom_t kvp = lisp_cons(arg, val);
+      ret = lisp_cons(kvp, closure);
+      X(arg, val, kvp, closure);
       TRACE_BIND_SEXP(ret);
       break;
     }
@@ -56,63 +57,62 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
 }
 
 static atom_t
-lisp_bind_args(const lisp_t lisp, const atom_t cl0, const atom_t cl1,
+lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
                const atom_t args, const atom_t vals)
 {
   TRACE_BIND_SEXP(args);
   TRACE_BIND_SEXP(vals);
   /*
-   * Return if we run out of arguments.
+   * Return (DSCL, NIL, VALS) if we run out of arguments. It can also be
+   * (DSCL, NIL, NIL) if there is no more values either.
    */
   if (IS_NULL(args)) {
-    atom_t cns = lisp_cons(args, vals);
-    atom_t res = lisp_cons(cl1, cns);
-    X(cl1, cns, args, vals);
-    TRACE_BIND_SEXP(res);
-    return res;
+    atom_t tail = lisp_cons(NIL, vals);
+    atom_t rslt = lisp_cons(dscl, tail);
+    X(dscl, tail, args, vals);
+    TRACE_BIND_SEXP(rslt);
+    return rslt;
   }
   /*
-   * If ARGS is a single symbol, bind the unevaluated values to it.
+   * If ARGS is a single symbol, bind the unevaluated values to it. That
+   * operation consumes all the values, so it returns (DSCL, NIL NIL).
    */
   if (IS_SYMB(args)) {
+    atom_t head = lisp_bind(lisp, dscl, args, vals);
     atom_t tail = lisp_cons(NIL, NIL);
-    atom_t head = lisp_bind(lisp, cl1, args, vals);
     atom_t rslt = lisp_cons(head, tail);
     X(head, tail);
     TRACE_BIND_SEXP(rslt);
     return rslt;
   }
   /*
-   * Return if we run out of values.
+   * Return (DSCL, ARGS, NIL) if we run out of values.
    */
   if (IS_NULL(vals)) {
-    atom_t cns = lisp_cons(args, vals);
-    atom_t res = lisp_cons(cl1, cns);
-    X(cl1, cns, args, vals);
-    TRACE_BIND_SEXP(res);
-    return res;
+    atom_t tail = lisp_cons(args, NIL);
+    atom_t rslt = lisp_cons(dscl, tail);
+    X(dscl, tail, args, vals);
+    TRACE_BIND_SEXP(rslt);
+    return rslt;
   }
   /*
-   * Grab CAR and CDR.
+   * If there is an ARG and a VAL available, we grab the CAR of each and we
+   * evaluate the value within the call-site closure.
    */
-  atom_t sym = lisp_car(args);
-  atom_t val = lisp_eval(lisp, cl0, lisp_car(vals));
+  atom_t arg = lisp_car(args);
+  atom_t val = lisp_eval(lisp, cscl, lisp_car(vals));
   atom_t oth = lisp_cdr(args);
   atom_t rem = lisp_cdr(vals);
   X(args, vals);
   /*
-   * Recursive descent.
+   * Then we bind the value to the argument. We do that to handle pattern
+   * decomposition for non-symbolic arguments.
    */
-  atom_t next = lisp_bind_args(lisp, cl0, cl1, oth, rem);
-  atom_t head = lisp_car(next);
-  atom_t tail = lisp_cdr(next);
-  X(next);
+  atom_t bind = lisp_bind(lisp, dscl, arg, val);
   /*
-   * Bind and return the result.
+   * Perform a recursive descent on the remaining arguments and values.
    */
-  atom_t updt = lisp_bind(lisp, head, sym, val);
-  atom_t rslt = lisp_cons(updt, tail);
-  X(updt, tail);
+  atom_t rslt = lisp_bind_args(lisp, cscl, bind, oth, rem);
   TRACE_BIND_SEXP(rslt);
   return rslt;
 }
@@ -130,40 +130,34 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
   TRACE_CLOS_SEXP(closure);
   TRACE_EVAL_SEXP(func);
   /*
-   * Grab the arguments, the closure and the body of the lambda.
+   * Grab the arguments, the definition-site closure and the body of the lambda.
    */
   atom_t args = lisp_car(func);
   atom_t cdr0 = lisp_cdr(func);
-  atom_t fcls = lisp_car(cdr0);
+  atom_t dscl = lisp_car(cdr0);
   atom_t body = lisp_cdr(cdr0);
   X(func, cdr0);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda is
-   * used as the run environment and augmented with the arguments' values.  The
-   * call-site closure is used for the evaluation of the arguments.
+   * used as the run environment and augmented with the values of the arguments.
+   * The call-site closure is used for the evaluation of the arguments.
    */
-  atom_t bind = lisp_bind_args(lisp, closure, fcls, args, vals);
-  atom_t next = lisp_car(bind);
+  atom_t bind = lisp_bind_args(lisp, closure, dscl, args, vals);
+  atom_t bscl = lisp_car(bind);
   atom_t cdr1 = lisp_cdr(bind);
   atom_t narg = lisp_car(cdr1);
   atom_t nval = lisp_cdr(cdr1);
   X(bind, cdr1);
   /*
-   * If some arguments remain, handle partial application.
+   * If no argument remains, apply the function.
    */
-  if (!IS_NULL(narg)) {
-    atom_t con0 = lisp_cons(next, body);
-    rslt = lisp_cons(narg, con0);
-    X(narg, con0, next, body);
-  }
-  /*
-   * Apply the function.
-   */
-  else {
+  if (IS_NULL(narg)) {
     /*
-     * Merge the definition-site closure with the call-site closure.
+     * Prepend the bind-site closure to the call-site closure.
      */
-    atom_t clos = lisp_merge(next, lisp_dup(closure));
+    atom_t dup = lisp_dup(bscl);
+    atom_t cls = lisp_conc(dup, closure);
+    X(bscl, dup);
     /*
      * Evaluation the native function. Native functions have no definition-site
      * closures, so we pass the previously computed closure with the currently
@@ -171,7 +165,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
      */
     if (IS_NUMB(body)) {
       function_t fun = (function_t)body->number;
-      rslt = fun(lisp, clos);
+      rslt = fun(lisp, cls);
       X(body);
     }
     /*
@@ -179,12 +173,20 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
      * function as a PROG.
      */
     else {
-      rslt = lisp_prog(lisp, clos, body, UP(NIL));
+      rslt = lisp_prog(lisp, cls, body, UP(NIL));
     }
     /*
      * Clean-up.
      */
-    X(narg, clos);
+    X(narg, cls);
+  }
+  /*
+   * Else handle partial application.
+   */
+  else {
+    atom_t con0 = lisp_cons(bscl, body);
+    rslt = lisp_cons(narg, con0);
+    X(narg, con0, bscl, body);
   }
   /*
    * If there is any remaining values, append them.
@@ -197,6 +199,8 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
   /*
    */
   X(nval);
+  TRACE_CLOS_SEXP(closure);
+  TRACE_EVAL_SEXP(rslt);
   return rslt;
 }
 

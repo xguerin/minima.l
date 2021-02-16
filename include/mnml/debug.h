@@ -30,6 +30,8 @@ void lisp_debug_parse_flags();
  * Debug macros.
  */
 
+#define SEXP_DEBUG_LEVEL 3
+
 #define FPRINTF(__h, __f, ...)                                           \
   if (MNML_DEBUG) {                                                      \
     const int __L = __LINE__;                                            \
@@ -111,10 +113,10 @@ void lisp_debug_parse_flags();
  * S-expression tracing.
  */
 
-#define TRACE_SEXP(__c)      \
-  do {                       \
-    HEADER_SEXP(__c);        \
-    lisp_debug(stderr, __c); \
+#define TRACE_SEXP(__c)                        \
+  do {                                         \
+    HEADER_SEXP(__c);                          \
+    lisp_debug(stderr, __c, SEXP_DEBUG_LEVEL); \
   } while (0)
 
 #define TRACE_CATG_SEXP(__k, __c) \
@@ -133,23 +135,23 @@ void lisp_debug_parse_flags();
 #define TRACE_MODL_SEXP(__c) TRACE_CATG_SEXP(MODL, __c)
 #define TRACE_SLAB_SEXP(__c) TRACE_CATG_SEXP(SLAB, __c)
 
-#define TRACE_REFC_SEXP(__f, __t, __n, __c) \
-  do {                                      \
-    if (MNML_DEBUG_REFC) {                  \
-      HEADER_REFC(__f, __t, __n);           \
-      lisp_debug(stderr, __c);              \
-    }                                       \
+#define TRACE_REFC_SEXP(__f, __t, __n, __c)      \
+  do {                                           \
+    if (MNML_DEBUG_REFC) {                       \
+      HEADER_REFC(__f, __t, __n);                \
+      lisp_debug(stderr, __c, SEXP_DEBUG_LEVEL); \
+    }                                            \
   } while (0)
 
-#define TRACE_SLOT_SEXP(__i, __c) \
-  do {                            \
-    if (MNML_DEBUG_SLOT) {        \
-      HEADER_SLOT(__i);           \
-      lisp_debug(stderr, __c);    \
-    }                             \
+#define TRACE_SLOT_SEXP(__i, __c)                \
+  do {                                           \
+    if (MNML_DEBUG_SLOT) {                       \
+      HEADER_SLOT(__i);                          \
+      lisp_debug(stderr, __c, SEXP_DEBUG_LEVEL); \
+    }                                            \
   } while (0)
 
-void lisp_debug(FILE* fp, const atom_t atom);
+void lisp_debug(FILE* fp, const atom_t atom, const size_t level);
 
 #else
 

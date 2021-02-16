@@ -15,9 +15,10 @@ lisp_function_lambda(const lisp_t lisp, const atom_t closure)
   /*
    * Append an empty currying list and capture the closure.
    */
-  atom_t con0 = lisp_cons(closure, prog);
+  atom_t clos = lisp_dup(closure);
+  atom_t con0 = lisp_cons(clos, prog);
   atom_t con1 = lisp_cons(args, con0);
-  X(prog, args, con0);
+  X(clos, prog, con0, args);
   /*
    * Return the lambda.
    */

@@ -52,8 +52,12 @@ lisp_debug_parse_flags()
  */
 
 static void
-lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
+lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
+                const size_t level)
 {
+  /*
+   * Process the current atom.
+   */
   switch (atom->type) {
     case T_NIL:
       fprintf(fp, "NIL");
@@ -92,6 +96,13 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
         break;
       }
       /*
+       * Return an ellipsis if level == 0.
+       */
+      if (level == 0) {
+        fprintf(fp, "…");
+        break;
+      }
+      /*
        * Process the list.
        */
       if (alter)
@@ -99,7 +110,7 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
       /*
        * Print CAR.
        */
-      lisp_debug_atom(fp, CAR(atom), true);
+      lisp_debug_atom(fp, CAR(atom), true, level - 1);
       /*
        * Print CDR.
        */
@@ -109,7 +120,7 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
         } else {
           fprintf(fp, " . ");
         }
-        lisp_debug_atom(fp, CDR(atom), false);
+        lisp_debug_atom(fp, CDR(atom), false, level);
       }
       /*
        */
@@ -139,10 +150,10 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, bool alter)
 }
 
 void
-lisp_debug(FILE* const fp, const atom_t atom)
+lisp_debug(FILE* const fp, const atom_t atom, const size_t level)
 {
   if (MNML_DEBUG) {
-    lisp_debug_atom(fp, atom, true);
+    lisp_debug_atom(fp, atom, true, level);
     fprintf(fp, "\n");
   }
 }

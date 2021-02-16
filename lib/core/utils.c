@@ -218,37 +218,15 @@ lisp_neq(const atom_t a, const atom_t b)
  */
 
 atom_t
-lisp_dup(const atom_t closure)
+lisp_dup(const atom_t cell)
 {
-  if (IS_PAIR(closure)) {
-    atom_t rem = lisp_dup(CDR(closure));
-    atom_t res = lisp_cons(CAR(closure), rem);
+  if (IS_PAIR(cell)) {
+    atom_t rem = lisp_dup(CDR(cell));
+    atom_t res = lisp_cons(CAR(cell), rem);
     X(rem);
     return res;
   }
-  return UP(closure);
-}
-
-/*
- * Merge define-site and call-site closures. Both closures is consumed.
- */
-
-atom_t
-lisp_merge(const atom_t defn, const atom_t call)
-{
-  if (IS_NULL(defn)) {
-    X(defn);
-    return call;
-  }
-  /*
-   */
-  atom_t elt = lisp_car(defn);
-  atom_t nxt = lisp_cdr(defn);
-  atom_t res = lisp_setq(call, elt);
-  X(defn, call);
-  /*
-   */
-  return lisp_merge(nxt, res);
+  return UP(cell);
 }
 
 /*

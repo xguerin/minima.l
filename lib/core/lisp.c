@@ -118,9 +118,7 @@ lisp_conc(const atom_t car, const atom_t cdr)
   /*
    */
   if (likely(IS_PAIR(car))) {
-    FOREACH(car, p) {
-      NEXT(p);
-    }
+    FOREACH(car, p) { NEXT(p); }
     X(p->cdr);
     p->cdr = UP(cdr);
     R = UP(car);
