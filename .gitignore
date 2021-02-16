@@ -1,4 +1,5 @@
 *.sw?
-.idea
-build*
-site
+/.cache
+/.idea
+/build*
+/site

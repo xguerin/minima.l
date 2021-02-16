@@ -48,9 +48,10 @@ message(STATUS "Build timestamp: " ${BUILD_TIMESTAMP})
 # Options
 #
 
-option(MNML_ENABLE_DEBUG  "Enable debug output"         ON)
-option(MNML_ENABLE_SSE41  "Enable SSE4.1 optimizations" ON)
-option(MNML_ENABLE_TESTS  "Build and run tests"         ON)
+option(MNML_ENABLE_DEBUG       "Enable debug output"         ON)
+option(MNML_ENABLE_SSE41       "Enable SSE4.1 optimizations" ON)
+option(MNML_ENABLE_TESTS       "Build and run tests"         ON)
+option(MNML_ENABLE_LISPY_TESTS "Enable LISPy tests"          ON)
 
 option(MNML_WITH_MODULES "Build modules"            ON)
 option(MNML_WITH_TRANSFN "Transpile LISP functions" ON)
