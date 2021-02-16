@@ -1,6 +1,6 @@
 site_name: Minima.l
 theme:
-    name: readthedocs
+    name: cinder
     highlightjs: true
     hljs_languages:
         - bash

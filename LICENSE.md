@@ -1,4 +1,4 @@
-Copyright (c) 2018 Xavier R. Guérin <copyright@applepine.org>
+Copyright (c) 2018 Xavier R. Guérin <xguerin@users.noreply.github.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above

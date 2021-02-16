@@ -2,6 +2,8 @@
 
 Opinionated LISP dialect that takes some of its inspirations from [Picolisp](https://picolisp.com),
 [CHICKEN Scheme](http://call-cc.org), and other great languages. The source code is located [here](https://git.sr.ht/~xguerin/minima.l).
+
+## Example
 ```lisp
 (load '(math + - <=) '(io prinl) '(std if))
 
@@ -12,12 +14,6 @@ Opinionated LISP dialect that takes some of its inspirations from [Picolisp](htt
 
 (prinl "Result: " (fib 30))
 ```
-## Build status
-
-| Arch | Debian | OpenBSD |
-|:-----|:-------|:--------|
-| [![Arch](https://builds.sr.ht/~xguerin/minima.l/arch.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/arch.yml?) | [![Debian](https://builds.sr.ht/~xguerin/minima.l/debian.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/debian.yml?) | [![OpenBSD](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml?) |
-
 ## License
 ```plain
 Copyright (c) 2020 Xavier R. Guérin <copyright@applepine.org>

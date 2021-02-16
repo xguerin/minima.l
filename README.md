@@ -5,6 +5,7 @@
 Opinionated LISP dialect that takes some of its inspirations from [Picolisp](https://picolisp.com),
 [CHICKEN Scheme](http://call-cc.org), and other great languages. The documentation is located [here](https://mnml.world).
 
+## Example
 ```lisp
 (load '(math + - <=) '(io prinl) '(std if))
 
@@ -15,15 +16,9 @@ Opinionated LISP dialect that takes some of its inspirations from [Picolisp](htt
 
 (prinl "Result: " (fib 30))
 ```
-## Build status
-
-| Arch | Debian | OpenBSD |
-|:-----|:-------|:--------|
-| [![Arch](https://builds.sr.ht/~xguerin/minima.l/arch.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/arch.yml?) | [![Debian](https://builds.sr.ht/~xguerin/minima.l/debian.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/debian.yml?) | [![OpenBSD](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml.svg)](https://builds.sr.ht/~xguerin/minima.l/openbsd.yml?) |
-
 ## License
 ```plain
-Copyright (c) 2020 Xavier R. Guérin <copyright@applepine.org>
+Copyright (c) 2020 Xavier R. Guérin <xguerin@users.noreply.github.com>
 
 Permission to use, copy, modify, and distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
