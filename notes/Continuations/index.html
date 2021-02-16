@@ -154,23 +154,21 @@
 <p>We use the greek letter κ (0x03BA) to represent the current continuation.</p>
 <h2 id="principle">Principle</h2>
 <h3 id="function-with-one-arguments">Function with one arguments</h3>
-<pre><code class="scheme">; Normal style
+<pre><code class="language-scheme">; Normal style
 (not T)
 
 ; Continuation-passing style
 (define (notcps v κ) (k (not v)))
 </code></pre>
-
 <h3 id="function-with-two-arguments">Function with two arguments</h3>
-<pre><code class="scheme">; Normal style
+<pre><code class="language-scheme">; Normal style
 (add 1 2)
 
 ; Continuation-passing style
 (define (add a b κ) (κ (+ a b)))
 </code></pre>
-
 <h3 id="singly-nested-functions">Singly-nested functions</h3>
-<pre><code class="scheme">; Normal style
+<pre><code class="language-scheme">; Normal style
 (define (fn) (add (mul 1 2) 3)
 
 ; Continuation-passing style
@@ -179,9 +177,8 @@
 
 (define (fn κ) (mul 1 2 (lambda (x) (add x 3 κ)))
 </code></pre>
-
 <h3 id="doubly-nested-functions">Doubly-nested functions</h3>
-<pre><code class="scheme">; Normal style
+<pre><code class="language-scheme">; Normal style
 (define (fn) (add (mul 1 2) (div 3 4)))
 
 ; Continuation-passing style
@@ -191,10 +188,9 @@
 
 (define (fn κ) (mul 1 2 (lambda (x) (div 4 2 (lambda (y) (add x y κ))))))
 </code></pre>
-
 <h3 id="control-structures">Control structures</h3>
 <h4 id="if-then-else">If-Then-Else</h4>
-<pre><code class="scheme">; Normal style
+<pre><code class="language-scheme">; Normal style
 (define (fn v)
     (if (equ v 0)
         (add v 1)
@@ -207,7 +203,6 @@
             (add v 1 κ)
             (sub v 1 κ)))
 </code></pre>
-
 <h2 id="evaluation">Evaluation</h2>
 <p>The continuation-passing style represent a function call as a chain of
 continuation-accepting functions <code>f(..., κ)</code> where the function of rank
@@ -251,10 +246,9 @@ continuation-accepting functions <code>f(..., κ)</code> where the function of r
                     ))                                                              |
     ))
 </code></pre>
-
 <h3 id="abi-view">ABI view</h3>
 <h4 id="types">Types</h4>
-<pre><code class="c">struct _continuation_t;
+<pre><code class="language-c">struct _continuation_t;
 
 typedef union _value_t {
   int64_t integer;
@@ -267,9 +261,8 @@ typedef value_t environment_t[16];
 
 typedef void (*continuation_t)(environment_t environment, value_t result);
 </code></pre>
-
 <h4 id="basic-functions">Basic functions</h4>
-<pre><code class="c">void fn_add(environment_t E, value_t A0, value_t A1, continuation_t K) {
+<pre><code class="language-c">void fn_add(environment_t E, value_t A0, value_t A1, continuation_t K) {
   const register value_t result = { .integer = A0.integer + A1.integer };
   K(E, result);
 }
@@ -284,9 +277,8 @@ void fn_div(environment_t E, value_t A0, value_t A1, continuation_t K) {
   K(E, result);
 }
 </code></pre>
-
 <h4 id="continuations_1">Continuations</h4>
-<pre><code class="c">void cont_1(environment_t E, value_t Y) {
+<pre><code class="language-c">void cont_1(environment_t E, value_t Y) {
   fn_add(E, E[1], Y, E[0].continuation);
 }
 
@@ -301,9 +293,8 @@ void print(environment_t E, value_t X) {
   printf(&quot;Hello %lld\n&quot;, X.integer);
 }
 </code></pre>
-
 <h4 id="top-and-main">Top and main</h4>
-<pre><code class="c">void fn(environment_t E, continuation_t K) {
+<pre><code class="language-c">void fn(environment_t E, continuation_t K) {
   register const value_t A0 = { .integer = 1 };
   register const value_t A1 = { .integer = 2 };
   E[0].continuation = K;

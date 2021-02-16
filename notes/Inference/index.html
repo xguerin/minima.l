@@ -139,7 +139,7 @@ we are really handling are <code>T optional</code>. How do I efficiently impleme
 <code>optional</code> in C? Should I use another register in the <code>value_t</code> definition to
 embed whether the  value is present or not? This solution would not optimize
 well.</p>
-<pre><code class="c">typedef struct _value {
+<pre><code class="language-c">typedef struct _value {
   bool present;
   union {
     int64_t number;
@@ -149,7 +149,6 @@ well.</p>
 }
 value_t;
 </code></pre>
-
 <h3 id="forbid-undefined-scenarios">Forbid undefined scenarios</h3>
 <p>Another solution would be to simply forbid that case since <code>C</code> forbids it. That
 allows us keep using simple types.</p>

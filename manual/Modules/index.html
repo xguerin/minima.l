@@ -138,33 +138,29 @@
 shared libraries with a C interface (binary modules). </p>
 <h2 id="binary-interface">Binary interface</h2>
 <p>A module is a shared library that must export the following interface:</p>
-<pre><code class="c">const char * lisp_module_name();
+<pre><code class="language-c">const char * lisp_module_name();
 atom_t lisp_module_setup(const lisp_t lisp);
 </code></pre>
-
 <p>The <code>lisp_module_setup</code> function returns an <code>atom_t</code> value that points to a
 list definition as follows:</p>
-<pre><code class="lisp">(ARGUMENTS NIL . INTEGER)
+<pre><code class="language-lisp">(ARGUMENTS NIL . INTEGER)
 </code></pre>
-
 <p>The integer part represents a pointer to a function with the following
 signature:</p>
-<pre><code class="c">atom_t
+<pre><code class="language-c">atom_t
 lisp_function_NAME(const lisp_t lisp, const atom_t closure, const atom_t args);
 </code></pre>
-
 <h2 id="example">Example</h2>
 <p>Let's take the following code written for an <code>add</code> function and save it in a
 file called <code>add.c</code>:</p>
-<pre><code class="c">#include &lt;mnml/lisp.h&gt;
+<pre><code class="language-c">#include &lt;mnml/lisp.h&gt;
 #include &lt;mnml/module.h&gt;
 #include &lt;mnml/slab.h&gt;
 
 static atom_t
 lisp_function_add(const lisp_t lisp, const atom_t closure)
 {
-  LISP_LOOKUP(lisp, x, closure, X);
-  LISP_LOOKUP(lisp, y, closure, Y);
+  LISP_ARGS(closure, C, X, Y);
   /*
    * Make sure the arguments are numbers.
    */
@@ -182,21 +178,18 @@ lisp_function_add(const lisp_t lisp, const atom_t closure)
 
 LISP_MODULE_SETUP(add, add, X, Y, NIL)
 </code></pre>
-
 <p>Then, let's compile it:</p>
-<pre><code class="bash">$ cc -I${PREFIX}/include -L${PREFIX}/lib -lminimal -o libminimal_function_add.${LD_EXT} add.c
+<pre><code class="language-bash">$ cc -I${PREFIX}/include -L${PREFIX}/lib -lminimal -o libminimal_function_add.${LD_EXT} add.c
 </code></pre>
-
 <p>Where <code>${PREFIX}</code> is Minima.l's installation prefix and <code>${LD_EXT}</code> the linker
 extension for your platform (<code>.so</code> on most, <code>.dylib</code> on Mac).</p>
 <p>Finally, place this shared object in your Minima.l cache (<code>$HOME/.mnml</code>) and
 fire the interpreter:</p>
-<pre><code class="lisp">: (load 'add)
+<pre><code class="language-lisp">: (load 'add)
 &gt; add
 : (add 1 2)
 &gt; 3
 </code></pre>
-
 <h2 id="programming-interface">Programming interface</h2>
 <h3 id="atom-type">Atom type</h3>
 <p>The basic type in Minima.l is <code>atom_t</code>. This type represents numbers,
@@ -204,31 +197,28 @@ characters, symbols, and pairs. Some symbols are defined as singletons, like
 <code>NIL</code>, <code>TRUE</code>, <code>QUOTE</code>, and <code>WILDCARD</code>.</p>
 <h4 id="allocation">Allocation</h4>
 <p>Atom values are allocated using functions in the <em>maker</em> interface:</p>
-<pre><code class="c">atom_t lisp_make_char(const char c);
+<pre><code class="language-c">atom_t lisp_make_char(const char c);
 atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_string(const char * const s, const size_t len);
 atom_t lisp_make_symbol(const symbol_t sym);
 </code></pre>
-
 <p>Pairs are created by using the <code>cons</code> and <code>conc</code> standard functions in the
 <code>lisp</code> interface:</p>
-<pre><code class="c">atom_t lisp_cons(const atom_t a, const atom_t b);
+<pre><code class="language-c">atom_t lisp_cons(const atom_t a, const atom_t b);
 atom_t lisp_conc(const atom_t a, const atom_t b);
 </code></pre>
-
 <h4 id="deallocation">Deallocation</h4>
 <p>Atom values must be manually deallocated using the <code>X(...)</code> macro defined in the
 <code>slab</code> interface. Atom values are reference counted, so great care must be taken
 when handling them.</p>
 <h3 id="registration">Registration</h3>
 <p>The <code>LISP_MODULE_SETUP</code> macro is used to register a new module:</p>
-<pre><code class="c">#define LISP_MODULE_SETUP(__s, __n, ...)
+<pre><code class="language-c">#define LISP_MODULE_SETUP(__s, __n, ...)
 </code></pre>
-
 <p>The first argument <code>__s</code> is the suffix of the function. The second argument
 <code>__n</code> is the name of the symbol. The variadic arguments represent the function
 argument symbols. For instance, the function <code>add</code> is defined as follow:</p>
-<pre><code class="c">static atom_t
+<pre><code class="language-c">static atom_t
 lisp_function_add(const lisp_t lisp, const atom_t closure)
 {
   /* ... */
@@ -236,7 +226,6 @@ lisp_function_add(const lisp_t lisp, const atom_t closure)
 
 LISP_MODULE_SETUP(add, add, X, Y, NIL)
 </code></pre>
-
 <h3 id="argument-processing">Argument processing</h3>
 <p>The argument symbols are defined as follows:</p>
 <table>
@@ -274,15 +263,13 @@ LISP_MODULE_SETUP(add, add, X, Y, NIL)
 </tbody>
 </table>
 <p>Values for the declared symbols are passed to the module by the interpreter
-through the <code>args</code> parameter. They can be retrieved using the <code>LISP_LOOKUP</code>
+through the <code>args</code> parameter. They can be retrieved using the <code>LISP_ARGS</code>
 macro:</p>
-<pre><code class="c">#define LISP_LOOKUP(_l, _v, _c, _x)
+<pre><code class="language-c">#define LISP_ARGS(_c, _t, ...)
 </code></pre>
-
-<p>The first argument is the current interpreter object. The second argument is a
-name to use for the variable to be assigned the value. The third argument is
-the name of the <code>args</code> parameter. The last argument is the name of the symbol to
-look up.</p>
+<p>The first argument is the closure passed to the function, which includes the
+arguments. The second argument is a name to use for the closure without the
+arguments. The remaining arguments are names of the arguments to pop.</p>
               
             </div>
           </div>

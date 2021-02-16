@@ -1188,46 +1188,41 @@
 <h2 id="detailed-description">Detailed description</h2>
 <h3 id="assoc">ASSOC</h3>
 <h4 id="invocation">Invocation</h4>
-<pre><code class="lisp">(assoc 'any 'lst)
+<pre><code class="language-lisp">(assoc 'any 'lst)
 </code></pre>
-
 <h4 id="description">Description</h4>
 <p>Look-up <code>any</code> in the association list <code>lst</code>.</p>
 <h4 id="return-value">Return value</h4>
 <p>If a value is bound to <code>any</code>, return that value. If not, return <code>NIL</code>.</p>
 <h4 id="example">Example</h4>
-<pre><code class="lisp">: (assoc 'hello '((hello . world)))
+<pre><code class="language-lisp">: (assoc 'hello '((hello . world)))
 &gt; world
 : (assoc 'foo '((hello . world)))
 &gt; NIL
 </code></pre>
-
 <hr />
 <h3 id="conc">CONC</h3>
 <h4 id="invocation_1">Invocation</h4>
-<pre><code class="lisp">(conc 'lst1 'lst2)
+<pre><code class="language-lisp">(conc 'lst1 'lst2)
 </code></pre>
-
 <h4 id="description_1">Description</h4>
 <p>Destructively concatenate two lists <code>lst1</code> and <code>lst2</code> into a single list.</p>
 <h4 id="return-value_1">Return value</h4>
 <p>If <code>lst1</code> is a list, return the concatenation of <code>lst1</code> and <code>lst2</code>. The value
 pointed by <code>lst1</code> is actually modified. If <code>lst1</code> is not a list, return <code>NIL</code>.</p>
 <h4 id="example_1">Example</h4>
-<pre><code class="lisp">: (setq A '(1 2))
+<pre><code class="language-lisp">: (setq A '(1 2))
 &gt; (1 2)
 : (conc A '(3 4))
 &gt; (1 2 3 4)
 : A
 &gt; (1 2 3 4)
 </code></pre>
-
 <hr />
 <h3 id="cond">COND</h3>
 <h4 id="invocation_2">Invocation</h4>
-<pre><code class="lisp">(cond 'any (any . prg) (any . prg) ...)
+<pre><code class="language-lisp">(cond 'any (any . prg) (any . prg) ...)
 </code></pre>
-
 <h4 id="description_2">Description</h4>
 <p>Evaluate <code>any</code> and use the <code>car</code> of the remaining arguments as a predicate over
 the result. Return the evaluation of the first positive match. The <em>default</em> or
@@ -1238,7 +1233,7 @@ is placed before a valid match, <code>_</code> is evaluated.</p>
 <p>If a match is made, returns the evaluation of the corresponding <code>prg</code>. If no
 match is made, return <code>NIL</code>.</p>
 <h4 id="example_2">Example</h4>
-<pre><code class="lisp">: (def test (v) (cond v (num? . 'number) (lst? . 'list) (_ . 'unknown)))
+<pre><code class="language-lisp">: (def test (v) (cond v (num? . 'number) (lst? . 'list) (_ . 'unknown)))
 &gt; test
 : (test 1)
 &gt; number
@@ -1247,91 +1242,80 @@ match is made, return <code>NIL</code>.</p>
 : (test T)
 &gt; unknown
 </code></pre>
-
 <hr />
 <h3 id="cons">CONS</h3>
 <h4 id="invocation_3">Invocation</h4>
-<pre><code class="lisp">(cons 'any1 'any2)
+<pre><code class="language-lisp">(cons 'any1 'any2)
 </code></pre>
-
 <h4 id="description_3">Description</h4>
 <p>Construct a new list using the first argument for <code>car</code> and the second argument
 for <code>cdr</code>.</p>
 <h4 id="return-value_3">Return value</h4>
 <p>Return the newly constructed list without modifying the arguments.</p>
 <h4 id="example_3">Example</h4>
-<pre><code class="lisp">: (cons 1 2)
+<pre><code class="language-lisp">: (cons 1 2)
 &gt; (1 . 2)
 : (cons 1 (cons 2 3))
 &gt; (1 2 . 3)
 </code></pre>
-
 <hr />
 <h3 id="def">DEF</h3>
 <h4 id="invocation_4">Invocation</h4>
-<pre><code class="lisp">(def sym lst [str] prg ...)
+<pre><code class="language-lisp">(def sym lst [str] prg ...)
 </code></pre>
-
 <h4 id="description_4">Description</h4>
 <p>Define a function with arguments <code>args</code> and body <code>prg</code> and associate it with
 the symbol <code>sym</code>. An optional <code>str</code> can be specified as a documentation string
 and is ignored by the interpreter.</p>
 <p>Function defined with the <code>def</code> keyword are simply lambda functions assigned to
 symbol. The following expressions are equivalent:</p>
-<pre><code class="lisp">: (def add (a b) (+ a b))
+<pre><code class="language-lisp">: (def add (a b) (+ a b))
 &gt; add
 : (setq add (\ (a b) (+ a b)))
 &gt; (\ (a b) (+ a b))
 </code></pre>
-
 <h4 id="return-value_4">Return value</h4>
 <p>Return the S-expression of the newly defined function.</p>
 <h4 id="example_4">Example</h4>
-<pre><code class="lisp">: (def add (x y) (+ x y))
+<pre><code class="language-lisp">: (def add (x y) (+ x y))
 &gt; ((x y) NIL NIL (+ x y))
 </code></pre>
-
 <hr />
 <h3 id="eval">EVAL</h3>
 <h4 id="invocation_5">Invocation</h4>
-<pre><code class="lisp">(eval 'any)
+<pre><code class="language-lisp">(eval 'any)
 </code></pre>
-
 <h4 id="description_5">Description</h4>
 <p>Evaluate <code>any</code>.</p>
 <h4 id="return-value_5">Return value</h4>
 <p>Return the result of the evaluation.</p>
 <h4 id="example_5">Example</h4>
-<pre><code class="lisp">: (eval (list '+ 1 1))
+<pre><code class="language-lisp">: (eval (list '+ 1 1))
 &gt; 2
 </code></pre>
-
 <hr />
 <h3 id="if">IF</h3>
 <h4 id="invocation_6">Invocation</h4>
-<pre><code class="lisp">(if 'any . lst)
+<pre><code class="language-lisp">(if 'any . lst)
 </code></pre>
-
 <h4 id="description_6">Description</h4>
 <p>When <code>any</code> evaluates to <code>T</code>, evaluate <code>(car lst)</code>. Otherwise, evaluate
 <code>(car (cdr lst))</code>.</p>
 <h4 id="return-value_6">Return value</h4>
 <p>Return the result of the evaluation.</p>
 <h4 id="example_6">Example</h4>
-<pre><code class="lisp">: (def test (v) (if (&gt; v 10) (* v 2)))
+<pre><code class="language-lisp">: (def test (v) (if (&gt; v 10) (* v 2)))
 &gt; test
 : (test 5)
 &gt; NIL 
 : (test 20)
 &gt; 40
 </code></pre>
-
 <hr />
 <h3 id="in">IN</h3>
 <h4 id="invocation_7">Invocation</h4>
-<pre><code class="lisp">(in 'any . prg)
+<pre><code class="language-lisp">(in 'any . prg)
 </code></pre>
-
 <h4 id="description_7">Description</h4>
 <p>Create a new input channel context and evaluate <code>prg</code> within that context. The
 previous context is restored after the evaluation.</p>
@@ -1343,78 +1327,68 @@ tries to open that file.</p>
 <hr />
 <h3 id="let">LET</h3>
 <h4 id="invocation_8">Invocation</h4>
-<pre><code class="lisp">(let lst . prg)
+<pre><code class="language-lisp">(let lst . prg)
 </code></pre>
-
 <h4 id="description_8">Description</h4>
 <p>Evaluate <code>prg</code> within the context of the bind list <code>lst</code>. The bind list has the
 following format:</p>
-<pre><code class="lisp">((any . 'any)(any . 'any)...)
+<pre><code class="language-lisp">((any . 'any)(any . 'any)...)
 </code></pre>
-
 <h4 id="return-value_8">Return value</h4>
 <p>Return the value of the evaluated <code>prg</code>.</p>
 <h4 id="example_7">Example</h4>
-<pre><code class="lisp">: (let ((lhv . (+ 1 2)) (rhv . (+ 3 4))) (+ lhv rhv))
+<pre><code class="language-lisp">: (let ((lhv . (+ 1 2)) (rhv . (+ 3 4))) (+ lhv rhv))
 &gt; 10
 </code></pre>
-
 <hr />
 <h3 id="list">LIST</h3>
 <h4 id="invocation_9">Invocation</h4>
-<pre><code class="lisp">(list 'any ...)
+<pre><code class="language-lisp">(list 'any ...)
 </code></pre>
-
 <h4 id="description_9">Description</h4>
 <p>Create a list with <code>any</code> arguments.</p>
 <h4 id="return-value_9">Return value</h4>
 <p>Return the newly created list.</p>
 <h4 id="example_8">Example</h4>
-<pre><code class="lisp">: (list)
+<pre><code class="language-lisp">: (list)
 &gt; NIL
 : (list (+ 1 1) 3 &quot;a&quot;)
 &gt; (2 3 &quot;a&quot;)
 </code></pre>
-
 <hr />
 <h3 id="load">LOAD</h3>
 <h4 id="invocation_10">Invocation</h4>
-<pre><code class="lisp">(load 'str ...)
+<pre><code class="language-lisp">(load 'str ...)
 (load '(mod sym ...))
 (load '(mod . T))
 </code></pre>
-
 <h4 id="description_10">Description</h4>
 <p>In the first form, load the <code>lisp</code> file pointed by <code>str</code>. If the path is
 prefixed by <code>@lib</code>, <code>load</code> will look for the file in the <code>lib</code> directory of the
 installation prefix.</p>
-<pre><code class="lisp">: (load &quot;@lib/cadr.l&quot;)
+<pre><code class="language-lisp">: (load &quot;@lib/cadr.l&quot;)
 &gt; ((x) NIL NIL (car (cdr x)))
 </code></pre>
-
 <p>In the second form, load <code>sym</code> in the module <code>mod</code>. In the third form, all
 symbols in the module <code>mod</code> are loaded. Modules are searched in the <code>lib/mnml</code>
 directory of the installation prefix or in the <code>MNML_MODULE_PATH</code> environment
 variable.</p>
-<pre><code class="lisp">: (load '(math +))
+<pre><code class="language-lisp">: (load '(math +))
 &gt; (+)
 </code></pre>
-
 <h4 id="return-value_10">Return value</h4>
 <p>In the first form, return the result of the last evaluated operation in the
 list. In the second and third form, return the list of loaded symbols. On error,
 <code>NIL</code> is returned.</p>
 <h4 id="example_9">Example</h4>
-<pre><code class="lisp">: (load &quot;lisp/cadr.l&quot;)
+<pre><code class="language-lisp">: (load &quot;lisp/cadr.l&quot;)
 &gt; ((x) NIL NIL (car (cdr x)))
 </code></pre>
-
 <hr />
 <h3 id="match">MATCH</h3>
 <h4 id="invocation_11">Invocation</h4>
-<pre><code class="lisp">(match 'any (any . prg) ...)
+<pre><code class="language-lisp">(match 'any (any . prg) ...)
 </code></pre>
-
 <h4 id="description_11">Description</h4>
 <p>Evaluate <code>any</code> and use the <code>car</code> of the remaining arguments as a structural
 template for the result. The
@@ -1424,17 +1398,15 @@ is placed before a valid match, <code>_</code> is evaluated.</p>
 <h4 id="return-value_11">Return value</h4>
 <p>Return the evaluation of the first positive match. Return <code>NIL</code> otherwise.</p>
 <h4 id="example_10">Example</h4>
-<pre><code class="lisp">: (prinl (match '(1 2 3) ((1 _ _) . &quot;OK&quot;) (_ . &quot;KO&quot;)))
+<pre><code class="language-lisp">: (prinl (match '(1 2 3) ((1 _ _) . &quot;OK&quot;) (_ . &quot;KO&quot;)))
 OK
 &gt; (^O ^K)
 </code></pre>
-
 <hr />
 <h3 id="out">OUT</h3>
 <h4 id="invocation_12">Invocation</h4>
-<pre><code class="lisp">(out 'any . prg)
+<pre><code class="language-lisp">(out 'any . prg)
 </code></pre>
-
 <h4 id="description_12">Description</h4>
 <p>Create a new output channel context and evaluate <code>prg</code> within that context. The
 previous context is restored after the evaluation.</p>
@@ -1447,16 +1419,14 @@ appended to it.</p>
 <h4 id="return-value_12">Return value</h4>
 <p>Return the evaluation of <code>prg</code>.</p>
 <h4 id="example_11">Example</h4>
-<pre><code class="lisp">: (out &quot;test.log&quot; (prinl &quot;Hello, world&quot;))
+<pre><code class="language-lisp">: (out &quot;test.log&quot; (prinl &quot;Hello, world&quot;))
 &gt; (^H ^e ^l ^l ^o ^, ^  ^w ^o ^r ^l ^d)
 </code></pre>
-
 <hr />
 <h3 id="prin">PRIN</h3>
 <h4 id="invocation_13">Invocation</h4>
-<pre><code class="lisp">(prin 'any ...)
+<pre><code class="language-lisp">(prin 'any ...)
 </code></pre>
-
 <h4 id="description_13">Description</h4>
 <p>Print the string representation of <code>any</code>. When multiple arguments are printed,
 no separator is used.</p>
@@ -1464,33 +1434,29 @@ no separator is used.</p>
 <p>Return the result of the evaluation of the last argument. If there is no
 argument, return <code>NIL</code>.</p>
 <h4 id="example_12">Example</h4>
-<pre><code class="lisp">: (prin &quot;hello, &quot; &quot;world!&quot;)
+<pre><code class="language-lisp">: (prin &quot;hello, &quot; &quot;world!&quot;)
 hello, world!&gt; &quot;world!&quot;
 </code></pre>
-
 <hr />
 <h3 id="prinl">PRINL</h3>
 <h4 id="invocation_14">Invocation</h4>
-<pre><code class="lisp">(prinl 'any ...)
+<pre><code class="language-lisp">(prinl 'any ...)
 </code></pre>
-
 <h4 id="description_14">Description</h4>
 <p>Calls <code>prin</code> and appends a new line.</p>
 <h4 id="return-value_14">Return value</h4>
 <p>Return the result of the evaluation of the last argument. If there is no
 argument, return <code>NIL</code>.</p>
 <h4 id="example_13">Example</h4>
-<pre><code class="lisp">: (prinl &quot;hello, &quot; &quot;world!&quot;)
+<pre><code class="language-lisp">: (prinl &quot;hello, &quot; &quot;world!&quot;)
 hello, world!
 &gt; &quot;world!&quot;
 </code></pre>
-
 <hr />
 <h3 id="print">PRINT</h3>
 <h4 id="invocation_15">Invocation</h4>
-<pre><code class="lisp">(print 'any ...)
+<pre><code class="language-lisp">(print 'any ...)
 </code></pre>
-
 <h4 id="description_15">Description</h4>
 <p>Print the S-expression of <code>any</code>. When multiple arguments are printed, a
 space separator is used.</p>
@@ -1498,48 +1464,42 @@ space separator is used.</p>
 <p>Return the result of the evaluation of the last argument. If there is no
 argument, return <code>NIL</code>.</p>
 <h4 id="example_14">Example</h4>
-<pre><code class="lisp">: (print 'a 'b '(1 2 3))
+<pre><code class="language-lisp">: (print 'a 'b '(1 2 3))
 a b (1 2 3)&gt; (1 2 3)
 </code></pre>
-
 <hr />
 <h3 id="printl">PRINTL</h3>
 <h4 id="invocation_16">Invocation</h4>
-<pre><code class="lisp">(printl 'any ...)
+<pre><code class="language-lisp">(printl 'any ...)
 </code></pre>
-
 <h4 id="description_16">Description</h4>
 <p>Calls <code>print</code> and appends a new line.</p>
 <h4 id="return-value_16">Return value</h4>
 <p>Return the result of the evaluation of the last argument. If there is no
 argument, return <code>NIL</code>.</p>
 <h4 id="example_15">Example</h4>
-<pre><code class="lisp">: (print 'a 'b (1 2 3))
+<pre><code class="language-lisp">: (print 'a 'b (1 2 3))
 a b (1 2 3)
 &gt; (1 2 3)
 </code></pre>
-
 <hr />
 <h3 id="prog">PROG</h3>
 <h4 id="invocation_17">Invocation</h4>
-<pre><code class="lisp">(prog prg1 prg2 ...)
+<pre><code class="language-lisp">(prog prg1 prg2 ...)
 </code></pre>
-
 <h4 id="description_17">Description</h4>
 <p>Evaluate <code>prg1</code>, <code>prg2</code>, ..., in sequence.</p>
 <h4 id="return-value_17">Return value</h4>
 <p>Return the the result of the last evaluation.</p>
 <h4 id="example_16">Example</h4>
-<pre><code class="lisp">: (prog (+ 1 1) (+ 2 2))
+<pre><code class="language-lisp">: (prog (+ 1 1) (+ 2 2))
 &gt; 4
 </code></pre>
-
 <hr />
 <h3 id="read">READ</h3>
 <h4 id="invocation_18">Invocation</h4>
-<pre><code class="lisp">(read)
+<pre><code class="language-lisp">(read)
 </code></pre>
-
 <h4 id="description_18">Description</h4>
 <p>Read a token from the current input stream. The current input stream differs
 depending on the context:</p>
@@ -1554,9 +1514,8 @@ depending on the context:</p>
 <hr />
 <h3 id="readline">READLINE</h3>
 <h4 id="invocation_19">Invocation</h4>
-<pre><code class="lisp">(readline)
+<pre><code class="language-lisp">(readline)
 </code></pre>
-
 <h4 id="description_19">Description</h4>
 <p>Read one line from the current input stream. Stop on <code>EOF</code>.</p>
 <h4 id="return-value_19">Return value</h4>
@@ -1564,9 +1523,8 @@ depending on the context:</p>
 <hr />
 <h3 id="run">RUN</h3>
 <h4 id="invocation_20">Invocation</h4>
-<pre><code class="lisp">(run 'str 'lst 'alst)
+<pre><code class="language-lisp">(run 'str 'lst 'alst)
 </code></pre>
-
 <h4 id="description_20">Description</h4>
 <p>Run an external program at path <code>str</code> with arguments <code>lst</code> and environment
 <code>alst</code>.  If <code>alst</code> is <code>NIL</code>, the current environment <code>ENV</code> is used instead.</p>
@@ -1576,73 +1534,65 @@ provide a handy way to run external binaries in a single shot.</p>
 <p>Return a pair with <code>CAR</code> as the status code of the binary and <code>CDR</code> the
 output of the command as list of lines.</p>
 <h4 id="example_17">Example</h4>
-<pre><code class="lisp">: (run &quot;/bin/hostname&quot; NIL NIL)
+<pre><code class="language-lisp">: (run &quot;/bin/hostname&quot; NIL NIL)
 &gt; (0 (^E ^n ^c ^e ^l ^a ^d ^u ^s))
 </code></pre>
-
 <hr />
 <h3 id="set">SET</h3>
 <h4 id="invocation_21">Invocation</h4>
-<pre><code class="lisp">(&lt;- 'sym 'any)
+<pre><code class="language-lisp">(&lt;- 'sym 'any)
 </code></pre>
-
 <h4 id="description_21">Description</h4>
 <p>Associate <code>any</code> with the symbol <code>sym</code>. The symbol must exist.</p>
 <h4 id="return-value_21">Return value</h4>
 <p>Return the previous value associated to the symbol.</p>
 <h4 id="example_18">Example</h4>
-<pre><code class="lisp">: (setq A (+ 1 2))
+<pre><code class="language-lisp">: (setq A (+ 1 2))
 &gt; 3
 : (&lt;- 'A 4)
 &gt; 3
 : A
 &gt; 4
 </code></pre>
-
 <hr />
 <h3 id="setq">SETQ</h3>
 <h4 id="invocation_22">Invocation</h4>
-<pre><code class="lisp">(setq sym 'any)
+<pre><code class="language-lisp">(setq sym 'any)
 </code></pre>
-
 <h4 id="description_22">Description</h4>
 <p>Associate <code>any</code> with the symbol <code>sym</code>.</p>
 <h4 id="return-value_22">Return value</h4>
 <p>Return the value associated to the symbol.</p>
 <h4 id="example_19">Example</h4>
-<pre><code class="lisp">: (setq A (+ 1 2))
+<pre><code class="language-lisp">: (setq A (+ 1 2))
 &gt; 3
 </code></pre>
-
 <hr />
 <h3 id="stream">STREAM</h3>
 <h4 id="invocation_23">Invocation</h4>
-<pre><code class="lisp">(|&gt; any0 [any1] ...)
+<pre><code class="language-lisp">(|&gt; any0 [any1] ...)
 </code></pre>
-
 <h4 id="description_23">Description</h4>
 <p>Fluent composition operator. Evaluate <code>any0</code> and pass the result to <code>any1</code>, and
 so on until the end of the list.</p>
 <h4 id="return-value_23">Return value</h4>
 <p>Return the result of the last <code>any</code> operation.</p>
 <h4 id="example_20">Example</h4>
-<pre><code class="lisp">: (|&gt; '(1 2 3) cdr car)
+<pre><code class="language-lisp">: (|&gt; '(1 2 3) cdr car)
 &gt; 2
 </code></pre>
-
 <hr />
 <h3 id="time">TIME</h3>
 <h4 id="invocation_24">Invocation</h4>
-<pre><code class="lisp">(time prg)
+<pre><code class="language-lisp">(time prg)
 </code></pre>
-
 <h4 id="description_24">Description</h4>
 <p>Compute the execution time of <code>prg</code>.</p>
 <h4 id="return-value_24">Return value</h4>
 <p>Return the computed time, in nanoseconds. If <code>prg</code> is <code>NIL</code>, return the current
 timestamp.</p>
 <h4 id="example_21">Example</h4>
-<pre><code class="lisp">: (time (+ 1 2))
+<pre><code class="language-lisp">: (time (+ 1 2))
 &gt; 8433
 : (time)
 862596451378329

@@ -162,9 +162,8 @@
 <h2 id="source-encoding">Source encoding</h2>
 <p>The source encoding is UTF-8.</p>
 <h2 id="comment">Comment</h2>
-<pre><code class="lisp"># This is a comment
+<pre><code class="language-lisp"># This is a comment
 </code></pre>
-
 <h2 id="types">Types</h2>
 <h3 id="table">Table</h3>
 <table>
@@ -212,10 +211,9 @@ Symbols can also be defined locally using the <code>let</code> function.</p>
 <h3 id="strings">Strings</h3>
 <p>The grammar supports the <em>string</em> type. Represented as a <code>"</code>-delimited string of
 characters, it is internally stored as a list of characters. For example:</p>
-<pre><code class="lisp">: &quot;hello&quot;
+<pre><code class="language-lisp">: &quot;hello&quot;
 &gt; (^h ^e ^l ^l ^o)
 </code></pre>
-
 <h2 id="expression-evaluation">Expression evaluation</h2>
 <h3 id="generic-rules">Generic rules</h3>
 <ul>
@@ -231,7 +229,7 @@ characters, it is internally stored as a list of characters. For example:</p>
 <li>A lambda definition</li>
 </ol>
 <p>The forms 1, 2, and 3 are mutually interchangeable:</p>
-<pre><code class="lisp">: (def add (a b) (+ a b))
+<pre><code class="language-lisp">: (def add (a b) (+ a b))
 &gt; ((a b) NIL (+ a b))
 : (add 1 2) # Form 1
 &gt; 3
@@ -240,12 +238,10 @@ characters, it is internally stored as a list of characters. For example:</p>
 : ((\ (a b) (+ a b)) 1 2) # Form 3
 &gt; 3
 </code></pre>
-
 <h2 id="functions">Functions</h2>
 <p>Functions are represented internally as the following 3-uple:</p>
-<pre><code class="lisp">(ARGUMENTS CLOSURE . BODY)
+<pre><code class="language-lisp">(ARGUMENTS CLOSURE . BODY)
 </code></pre>
-
 <p>The <code>ARGUMENTS</code> element is a list of symbols representing the arguments of the
 functions. The <code>CLOSURE</code> element is an association list that contains the
 context of the function at the definition site. Lastly, the <code>BODY</code> element is
@@ -262,23 +258,21 @@ function.</p>
 <h3 id="lambdas">Lambdas</h3>
 <p>Lambda functions are defined using the <code>\\</code> keyword. Invocation of <code>\\</code> is
 similar to <code>def</code>:</p>
-<pre><code class="lisp">: ((\ (x y) (+ x y)) 1 1)
+<pre><code class="language-lisp">: ((\ (x y) (+ x y)) 1 1)
 &gt; 2
 : ((\ (x) (map (\ (n) (+ n 1)) x)) '(1 2 3 4))
 &gt; (2 3 4 5)
 </code></pre>
-
 <h3 id="currying">Currying</h3>
 <p>Minima.l supports currying. It uses the function's closure to store the curried
 arguments. Curryring is available to all <code>lisp</code> and native functions. For example:</p>
-<pre><code class="lisp">: (def add (a b) (+ a b))
+<pre><code class="language-lisp">: (def add (a b) (+ a b))
 &gt; ((a b) NIL (+ a b))
 : (setq +1 (add 1))
 &gt; ((b) ((a . 1)) (+ a b))
 : (+1 2)
 &gt; 3
 </code></pre>
-
 <h3 id="recursion">Recursion</h3>
 <p>A function defined using <code>def</code> can be recursive. When functions are defined,
 symbols with their name are not resolved in their closure and are resolved
@@ -288,19 +282,17 @@ undefined behavior.</p>
 <h3 id="argument-assignation">Argument assignation</h3>
 <p>Assignation of arguments in <code>def</code>, <code>lamda</code>, or <code>let</code> functions support
 deconstruction. For instance, with <code>def</code>:</p>
-<pre><code class="lisp">: (def sum3 ((a b c)) (+ (+ a b) c))
+<pre><code class="language-lisp">: (def sum3 ((a b c)) (+ (+ a b) c))
 &gt; sum3
 : (sum3 (list 1 2 3))
 &gt; 6
 </code></pre>
-
 <p>Or with a lambda:</p>
-<pre><code class="lisp">: (setq data '((&quot;hello&quot; . 1) (&quot;world&quot; . 2)))
+<pre><code class="language-lisp">: (setq data '((&quot;hello&quot; . 1) (&quot;world&quot; . 2)))
 &gt; ((&quot;hello&quot; . 1) (&quot;world&quot; . 2))
 : (foldl (\ (acc (_ . v))(+ acc v)) 0 data)
 &gt; 3
 </code></pre>
-
 <h2 id="global-variables">Global variables</h2>
 <h3 id="argv">ARGV</h3>
 <p>When <code>mnml</code> is executed as a <code>#!</code> interpreter, the <code>ARGV</code> global contains the

@@ -127,18 +127,15 @@
 <pre><code>$ mnml
 &gt;
 </code></pre>
-
 <p>It accepts a file name as a parameter:</p>
 <pre><code>$ mnml file.l
 </code></pre>
-
 <p>It can be used as a <em>shebang</em> interpreter:</p>
 <pre><code>#!/usr/bin/env mnml
 
 (load '(math +))
 (+ 1 2)
 </code></pre>
-
 <p>By default, only the symbols <code>def</code>, <code>load</code>, and <code>quote</code> from the <code>std</code> module are
 available. Scripts are strongly encouraged to load what they use.</p>
 <h2 id="environment-variables">Environment variables</h2>
@@ -160,7 +157,6 @@ names:</p>
 </ul>
 <pre><code>$ MNML_DEBUG=MODL,SLOT mnml
 </code></pre>
-
 <p>The variable can be left empty to restrict debug output to <code>eval</code>.</p>
 <h3 id="mnml_module_path">MNML_MODULE_PATH</h3>
 <p>This variable controls where to look for modules, the default being the
@@ -168,14 +164,12 @@ names:</p>
 list of paths:</p>
 <pre><code>$ MNML_MODULE_PATH=/some/path:/some/other/path mnml
 </code></pre>
-
 <h3 id="mnml_script_path">MNML_SCRIPT_PATH</h3>
 <p>This variable controls where to look for lisp scripts, the default being
 <code>share/mnml</code> in the installation prefix. It accepts a colon-separated
 list of paths:</p>
 <pre><code>$ MNML_SCRIPT_PATH=/some/path:/some/other/path mnml
 </code></pre>
-
 <p>When set, that path is used to match occurences of <code>@lib</code> in <code>(load)</code> statements.</p>
               
             </div>
