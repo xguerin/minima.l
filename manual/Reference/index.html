@@ -1,450 +1,218 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  
-  
-  <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>Reference - Minima.l</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+<html lang="en">
 
-  <link rel="stylesheet" href="../../css/theme.css" />
-  <link rel="stylesheet" href="../../css/theme_extra.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "Reference";
-    var mkdocs_page_input_path = "manual/Reference.md";
-    var mkdocs_page_url = null;
-  </script>
-  
-  <script src="../../js/jquery-2.1.1.min.js" defer></script>
-  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/c.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script> 
-  
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    
+    <link rel="shortcut icon" href="../../img/favicon.ico">
+
+    
+    <title>Reference - Minima.l</title>
+    
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/v4-shims.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
+    <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
+
+    
+        
+        <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/styles/github.min.css">
+        
+    
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+            <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+        <![endif]-->
+
+    
+
+     
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body>
 
-  <div class="wy-grid-for-nav">
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
 
-    
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
-      <div class="wy-side-nav-search">
-        <a href="../.." class="icon icon-home"> Minima.l</a>
-        <div role="search">
-  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
-  </form>
-</div>
-      </div>
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+            <!-- Main title -->
+
+            
+              <a class="navbar-brand" href="../..">Minima.l</a>
+            
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+                <!-- Main navigation -->
+                <ul class="nav navbar-nav">
+                
+                
+                    <li >
+                        <a href="../..">Home</a>
                     </li>
+                
+                
+                
+                    <li class="dropdown active">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Manual <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../Language/">Language</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../Interpreter/">Interpreter</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../Modules/">Modules</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Reference</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
+                
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Notes <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        
+                            
+<li >
+    <a href="../../notes/Closures/">Closures</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../notes/Continuations/">Continuations</a>
+</li>
+
+                        
+                            
+<li >
+    <a href="../../notes/Inference/">Type Inference</a>
+</li>
+
+                        
+                        </ul>
+                    </li>
+                
+                
                 </ul>
-                <p class="caption"><span class="caption-text">Manual</span></p>
-                <ul class="current">
-                    <li class="toctree-l1"><a class="reference internal" href="../Language/">Language</a>
+
+            <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                            <i class="fas fa-search"></i> Search
+                        </a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../Interpreter/">Interpreter</a>
+                    <li >
+                        <a rel="prev" href="../Modules/">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
                     </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../Modules/">Modules</a>
+                    <li >
+                        <a rel="next" href="../../notes/Closures/">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
                     </li>
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Reference</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#notation-rules">Notation rules</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#structural-comparisons">Structural comparisons</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#numeric-comparison">Numeric comparison</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#arithmetic-operations">Arithmetic operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#logical-operations">Logical operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#predicates">Predicates</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#string-operations">String operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#symbol-definition">Symbol definition</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#list-manipulation">List manipulation</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#assoc-list-operations">Assoc-list operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#control-flow">Control flow</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#inputoutput-operations">Input/output operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#core-operations">Core operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#socket-functions">Socket functions</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#system-functions">System functions</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#detailed-description">Detailed description</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#assoc">ASSOC</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#conc">CONC</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_1">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_1">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_1">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_1">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cond">COND</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_2">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_2">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_2">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_2">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cons">CONS</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_3">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_3">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_3">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_3">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#def">DEF</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_4">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_4">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_4">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_4">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#eval">EVAL</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_5">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_5">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_5">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_5">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#if">IF</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_6">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_6">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_6">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_6">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#in">IN</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_7">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_7">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_7">Return value</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#let">LET</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_8">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_8">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_8">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_7">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#list">LIST</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_9">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_9">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_9">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_8">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#load">LOAD</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_10">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_10">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_10">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_9">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#match">MATCH</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_11">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_11">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_11">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_10">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#out">OUT</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_12">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_12">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_12">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_11">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#prin">PRIN</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_13">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_13">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_13">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_12">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#prinl">PRINL</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_14">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_14">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_14">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_13">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#print">PRINT</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_15">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_15">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_15">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_14">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#printl">PRINTL</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_16">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_16">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_16">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_15">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#prog">PROG</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_17">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_17">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_17">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_16">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#read">READ</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_18">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_18">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_18">Return value</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#readline">READLINE</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_19">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_19">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_19">Return value</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#run">RUN</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_20">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_20">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_20">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_17">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#set">SET</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_21">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_21">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_21">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_18">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#setq">SETQ</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_22">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_22">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_22">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_19">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#stream">STREAM</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_23">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_23">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_23">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_20">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#time">TIME</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_24">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_24">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_24">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_21">Example</a>
-    </li>
-        </ul>
-    </li>
-        </ul>
-    </li>
-    </ul>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Notes</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Closures/">Closures</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Continuations/">Continuations</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Inference/">Type Inference</a>
-                    </li>
-                </ul>
-      </div>
+            </ul>
+        </div>
     </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../..">Minima.l</a>
-      </nav>
-
-      
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
-  <ul class="wy-breadcrumbs">
-    <li><a href="../..">Docs</a> &raquo;</li>
-    
-      
-        
-          <li>Manual &raquo;</li>
-        
-      
-    
-    <li>Reference</li>
-    <li class="wy-breadcrumbs-aside">
-      
-    </li>
-  </ul>
-  
-  <hr/>
 </div>
-          <div role="main">
-            <div class="section">
-              
-                <h1 id="reference">Reference</h1>
+
+    <div class="container">
+        
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#reference">Reference</a></li>
+            <li class="second-level"><a href="#notation-rules">Notation rules</a></li>
+                
+            <li class="second-level"><a href="#summary">Summary</a></li>
+                
+                <li class="third-level"><a href="#structural-comparisons">Structural comparisons</a></li>
+                <li class="third-level"><a href="#numeric-comparison">Numeric comparison</a></li>
+                <li class="third-level"><a href="#arithmetic-operations">Arithmetic operations</a></li>
+                <li class="third-level"><a href="#logical-operations">Logical operations</a></li>
+                <li class="third-level"><a href="#predicates">Predicates</a></li>
+                <li class="third-level"><a href="#string-operations">String operations</a></li>
+                <li class="third-level"><a href="#symbol-definition">Symbol definition</a></li>
+                <li class="third-level"><a href="#list-manipulation">List manipulation</a></li>
+                <li class="third-level"><a href="#assoc-list-operations">Assoc-list operations</a></li>
+                <li class="third-level"><a href="#control-flow">Control flow</a></li>
+                <li class="third-level"><a href="#inputoutput-operations">Input/output operations</a></li>
+                <li class="third-level"><a href="#core-operations">Core operations</a></li>
+                <li class="third-level"><a href="#socket-functions">Socket functions</a></li>
+                <li class="third-level"><a href="#system-functions">System functions</a></li>
+            <li class="second-level"><a href="#detailed-description">Detailed description</a></li>
+                
+                <li class="third-level"><a href="#assoc">ASSOC</a></li>
+                <li class="third-level"><a href="#conc">CONC</a></li>
+                <li class="third-level"><a href="#cond">COND</a></li>
+                <li class="third-level"><a href="#cons">CONS</a></li>
+                <li class="third-level"><a href="#def">DEF</a></li>
+                <li class="third-level"><a href="#eval">EVAL</a></li>
+                <li class="third-level"><a href="#if">IF</a></li>
+                <li class="third-level"><a href="#in">IN</a></li>
+                <li class="third-level"><a href="#let">LET</a></li>
+                <li class="third-level"><a href="#list">LIST</a></li>
+                <li class="third-level"><a href="#load">LOAD</a></li>
+                <li class="third-level"><a href="#match">MATCH</a></li>
+                <li class="third-level"><a href="#out">OUT</a></li>
+                <li class="third-level"><a href="#prin">PRIN</a></li>
+                <li class="third-level"><a href="#prinl">PRINL</a></li>
+                <li class="third-level"><a href="#print">PRINT</a></li>
+                <li class="third-level"><a href="#printl">PRINTL</a></li>
+                <li class="third-level"><a href="#prog">PROG</a></li>
+                <li class="third-level"><a href="#read">READ</a></li>
+                <li class="third-level"><a href="#readline">READLINE</a></li>
+                <li class="third-level"><a href="#run">RUN</a></li>
+                <li class="third-level"><a href="#set">SET</a></li>
+                <li class="third-level"><a href="#setq">SETQ</a></li>
+                <li class="third-level"><a href="#stream">STREAM</a></li>
+                <li class="third-level"><a href="#time">TIME</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
+
+<h1 id="reference">Reference</h1>
 <h2 id="notation-rules">Notation rules</h2>
 <ol>
 <li>Elements in <code>[]</code> are optional</li>
@@ -1596,58 +1364,109 @@ timestamp.</p>
 &gt; 8433
 : (time)
 862596451378329
-</code></pre>
-              
-            </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="../../notes/Closures/" class="btn btn-neutral float-right" title="Closures">Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../Modules/" class="btn btn-neutral" title="Modules"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
+</code></pre></div>
+        
+        
     </div>
-  
 
-  <hr/>
-
-  <div role="contentinfo">
-    <!-- Copyright etc -->
     
-  </div>
+      <footer class="col-md-12 text-center">
+          
+          
+            <hr>
+            <p>
+            <small>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</small>
+            </p>
+          
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
-</footer>
-      
+          
+          
+      </footer>
+    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
+
+    
+    <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
+        
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/bash.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/c.min.js"></script>
+                <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/languages/lisp.min.js"></script>
+        
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    <script>var base_url = "../.."</script>
+    
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
+
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
         </div>
-      </div>
-
-    </section>
-
-  </div>
-
-  <div class="rst-versions" role="note" aria-label="versions">
-    <span class="rst-current-version" data-toggle="rst-current-version">
-      
-      
-        <span><a href="../Modules/" style="color: #fcfcfc;">&laquo; Previous</a></span>
-      
-      
-        <span style="margin-left: 15px"><a href="../../notes/Closures/" style="color: #fcfcfc">Next &raquo;</a></span>
-      
-    </span>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
 </div>
-    <script>var base_url = '../..';</script>
-    <script src="../../js/theme.js" defer></script>
-      <script src="../../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        };
-    </script>
+    </body>
 
-</body>
 </html>
