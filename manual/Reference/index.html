@@ -7,14 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   
-  
   <link rel="shortcut icon" href="../../img/favicon.ico">
   <title>Reference - Minima.l</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+  <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' type='text/css'>
 
-  <link rel="stylesheet" href="../../css/theme.css" />
-  <link rel="stylesheet" href="../../css/theme_extra.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  <link rel="stylesheet" href="../../css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
   
   <script>
     // Current page data
@@ -25,10 +25,10 @@
   
   <script src="../../js/jquery-2.1.1.min.js" defer></script>
   <script src="../../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/c.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/c.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/lisp.min.js"></script>
   <script>hljs.initHighlightingOnLoad();</script> 
   
 </head>
@@ -39,7 +39,6 @@
 
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
-    <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
         <a href="../.." class="icon icon-home"> Minima.l</a>
         <div role="search">
@@ -50,366 +49,1214 @@
       </div>
 
       <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Manual</span></p>
-                <ul class="current">
-                    <li class="toctree-l1"><a class="reference internal" href="../Language/">Language</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../Interpreter/">Interpreter</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../Modules/">Modules</a>
-                    </li>
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Reference</a>
-    <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#notation-rules">Notation rules</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#summary">Summary</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#structural-comparisons">Structural comparisons</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#numeric-comparison">Numeric comparison</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#arithmetic-operations">Arithmetic operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#logical-operations">Logical operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#predicates">Predicates</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#string-operations">String operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#symbol-definition">Symbol definition</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#list-manipulation">List manipulation</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#assoc-list-operations">Assoc-list operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#control-flow">Control flow</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#inputoutput-operations">Input/output operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#core-operations">Core operations</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#socket-functions">Socket functions</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#system-functions">System functions</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#detailed-description">Detailed description</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#assoc">ASSOC</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#conc">CONC</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_1">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_1">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_1">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_1">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cond">COND</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_2">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_2">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_2">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_2">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#cons">CONS</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_3">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_3">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_3">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_3">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#def">DEF</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_4">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_4">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_4">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_4">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#eval">EVAL</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_5">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_5">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_5">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_5">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#if">IF</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_6">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_6">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_6">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_6">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#in">IN</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_7">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_7">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_7">Return value</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#let">LET</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_8">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_8">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_8">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_7">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#list">LIST</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_9">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_9">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_9">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_8">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#load">LOAD</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_10">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_10">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_10">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_9">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#match">MATCH</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_11">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_11">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_11">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_10">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#out">OUT</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_12">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_12">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_12">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_11">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#prin">PRIN</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_13">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_13">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_13">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_12">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#prinl">PRINL</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_14">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_14">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_14">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_13">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#print">PRINT</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_15">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_15">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_15">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_14">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#printl">PRINTL</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_16">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_16">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_16">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_15">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#prog">PROG</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_17">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_17">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_17">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_16">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#read">READ</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_18">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_18">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_18">Return value</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#readline">READLINE</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_19">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_19">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_19">Return value</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#run">RUN</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_20">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_20">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_20">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_17">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#set">SET</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_21">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_21">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_21">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_18">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#setq">SETQ</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_22">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_22">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_22">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_19">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#stream">STREAM</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_23">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_23">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_23">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_20">Example</a>
-    </li>
-        </ul>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#time">TIME</a>
-        <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#invocation_24">Invocation</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#description_24">Description</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#return-value_24">Return value</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#example_21">Example</a>
-    </li>
-        </ul>
-    </li>
-        </ul>
-    </li>
+	<ul class="tocbase current">
+    
+    
+      
+
+
+  <li class="navtree toctree-l1 inactive">
+    <a class="" href="../..">Home</a>
+  </li>
+    
+      
+  <li class="navtree toctree-l1 label">
+    <p class="caption">Manual</p>
+  </li>
+
+
+  
+
+  
+    <li class="navtree toctree-l1 group">
+      <ul class="navtree subnav-l1 current">
+          
+
+
+  <li class="navtree toctree-l2 inactive">
+    <a class="" href="../Language/">Language</a>
+  </li>
+        
+          
+
+
+  <li class="navtree toctree-l2 inactive">
+    <a class="" href="../Interpreter/">Interpreter</a>
+  </li>
+        
+          
+
+
+  <li class="navtree toctree-l2 inactive">
+    <a class="" href="../Modules/">Modules</a>
+  </li>
+        
+          
+
+
+  
+    
+    <li class="navtree toctree-l2 page current">
+      <a class="current" href="./">
+        Reference
+          <span class="toctree-expand"></span>
+      </a>
+    </li>
+    
+      
+
+
+
+  <li class="toctree-l2 current">
+    <ul class="subnav-l2 current">
+    
+      
+        <li class="toctree-l3">
+          <a class="toctree-l4" href="#notation-rules">Notation rules</a>
+        </li>
+    
+      
+          
+
+  <li class="toctree-l3">
+    <a href="#summary">
+      Summary
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l3">
+    <ul class="subnav-l3 toc-hidden">
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#structural-comparisons">Structural comparisons</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#numeric-comparison">Numeric comparison</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#arithmetic-operations">Arithmetic operations</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#logical-operations">Logical operations</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#predicates">Predicates</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#string-operations">String operations</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#symbol-definition">Symbol definition</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#list-manipulation">List manipulation</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#assoc-list-operations">Assoc-list operations</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#control-flow">Control flow</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#inputoutput-operations">Input/output operations</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#core-operations">Core operations</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#socket-functions">Socket functions</a>
+        </li>
+    
+      
+        <li class="toctree-l4">
+          <a class="toctree-l5" href="#system-functions">System functions</a>
+        </li>
+    
     </ul>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Notes</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Closures/">Closures</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Continuations/">Continuations</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../notes/Inference/">Type Inference</a>
-                    </li>
-                </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l3">
+    <a href="#detailed-description">
+      Detailed description
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l3">
+    <ul class="subnav-l3 toc-hidden">
+    
+      
+          
+
+  <li class="toctree-l4 current with-children">
+    <a href="#assoc">
+      ASSOC
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4 current">
+    <ul class="subnav-l4 current">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#conc">
+      CONC
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_1">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_1">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_1">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_1">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#cond">
+      COND
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_2">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_2">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_2">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_2">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#cons">
+      CONS
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_3">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_3">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_3">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_3">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#def">
+      DEF
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_4">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_4">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_4">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_4">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#eval">
+      EVAL
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_5">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_5">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_5">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_5">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#if">
+      IF
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_6">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_6">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_6">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_6">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#in">
+      IN
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_7">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_7">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_7">Return value</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#let">
+      LET
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_8">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_8">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_8">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_7">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#list">
+      LIST
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_9">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_9">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_9">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_8">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#load">
+      LOAD
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_10">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_10">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_10">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_9">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#match">
+      MATCH
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_11">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_11">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_11">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_10">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#out">
+      OUT
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_12">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_12">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_12">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_11">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#prin">
+      PRIN
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_13">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_13">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_13">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_12">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#prinl">
+      PRINL
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_14">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_14">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_14">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_13">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#print">
+      PRINT
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_15">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_15">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_15">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_14">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#printl">
+      PRINTL
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_16">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_16">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_16">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_15">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#prog">
+      PROG
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_17">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_17">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_17">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_16">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#read">
+      READ
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_18">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_18">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_18">Return value</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#readline">
+      READLINE
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_19">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_19">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_19">Return value</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#run">
+      RUN
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_20">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_20">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_20">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_17">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#set">
+      SET
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_21">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_21">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_21">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_18">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#setq">
+      SETQ
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_22">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_22">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_22">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_19">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#stream">
+      STREAM
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_23">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_23">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_23">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_20">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+      
+          
+
+  <li class="toctree-l4">
+    <a href="#time">
+      TIME
+      <span class="toctree-expand"></span>
+    </a>
+  </li>
+
+
+
+  <li class="toctree-l4">
+    <ul class="subnav-l4 toc-hidden">
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#invocation_24">Invocation</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#description_24">Description</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#return-value_24">Return value</a>
+        </li>
+    
+      
+        <li class="toctree-l5">
+          <a class="toctree-l6" href="#example_21">Example</a>
+        </li>
+    
+    </ul>
+  </li>
+
+      
+    
+    </ul>
+  </li>
+
+      
+    
+    </ul>
+  </li>
+
+
+  
+        
+      </ul>
+    </li>
+    
+      
+  <li class="navtree toctree-l1 label">
+    <p class="caption">Notes</p>
+  </li>
+
+
+  
+
+  
+    <li class="navtree toctree-l1 group">
+      <ul class="navtree subnav-l1 current">
+          
+
+
+  <li class="navtree toctree-l2 inactive">
+    <a class="" href="../../notes/Closures/">Closures</a>
+  </li>
+        
+          
+
+
+  <li class="navtree toctree-l2 inactive">
+    <a class="" href="../../notes/Continuations/">Continuations</a>
+  </li>
+        
+          
+
+
+  <li class="navtree toctree-l2 inactive">
+    <a class="" href="../../notes/Inference/">Type Inference</a>
+  </li>
+        
+      </ul>
+    </li>
+    
+  </ul>
       </div>
-    </div>
+      &nbsp;
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
@@ -438,7 +1285,6 @@
       
     </li>
   </ul>
-  
   <hr/>
 </div>
           <div role="main">
@@ -1619,7 +2465,7 @@ timestamp.</p>
     
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
       
         </div>
@@ -1629,7 +2475,7 @@ timestamp.</p>
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="versions">
+  <div class="rst-versions" role="note" style="cursor: pointer">
     <span class="rst-current-version" data-toggle="rst-current-version">
       
       
@@ -1643,11 +2489,6 @@ timestamp.</p>
     <script>var base_url = '../..';</script>
     <script src="../../js/theme.js" defer></script>
       <script src="../../search/main.js" defer></script>
-    <script defer>
-        window.onload = function () {
-            SphinxRtdTheme.Navigation.enable(true);
-        };
-    </script>
 
 </body>
 </html>
