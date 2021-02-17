@@ -1,15 +1,15 @@
+cmake_minimum_required(VERSION 3.12)
+cmake_policy(SET CMP0048 NEW)
+
+include(CheckIPOSupported)
+include(cmake/Lemon.cmake)
+include(cmake/Ragel.cmake)
+
 #
 # Project definition
 #
 
-project("minima.l" C)
-cmake_minimum_required(VERSION 3.9)
-
-include(CheckIPOSupported)
-
-include(cmake/GetGitRevisionDescription.cmake)
-include(cmake/Lemon.cmake)
-include(cmake/Ragel.cmake)
+project("minima.l" VERSION 0.0.0 LANGUAGES C)
 
 #
 # Uninstall target
@@ -27,15 +27,7 @@ add_custom_target(uninstall
 # Get the current GIT version
 #
 
-git_describe(VERSION)
-
-string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA1 "${VERSION}")
-
-set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-message(STATUS "Build version: " ${VERSION_SHORT})
+message(STATUS "Build version: " ${CMAKE_PROJECT_VERSION})
 
 #
 # Get the current build timestamp
@@ -75,9 +67,8 @@ endif()
 
 add_definitions(-DMNML_COMPILER_ID="${CMAKE_C_COMPILER_ID}")
 add_definitions(-DMNML_COMPILER_VERSION="${CMAKE_C_COMPILER_VERSION}")
-add_definitions(-DMNML_COMPILER_VERSION="${CMAKE_C_COMPILER_VERSION}")
 add_definitions(-DMNML_BUILD_TIMESTAMP="${BUILD_TIMESTAMP}")
-add_definitions(-DMNML_VERSION="${VERSION_SHORT}")
+add_definitions(-DMNML_VERSION="${CMAKE_PROJECT_VERSION}")
 
 add_definitions(-D_GNU_SOURCE)
 add_definitions(-DYYNOERRORRECOVERY)

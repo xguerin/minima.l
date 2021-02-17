@@ -11,5 +11,7 @@ find_program(RAGEL_EXECUTABLE
   $ENV{RAGEL_ROOT}
   ${RAGEL_ROOT})
 
+include(FindPackageHandleStandardArgs)
+
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ragel DEFAULT_MSG RAGEL_EXECUTABLE)
 mark_as_advanced(RAGEL_EXECUTABLE)
