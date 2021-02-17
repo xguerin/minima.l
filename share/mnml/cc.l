@@ -682,12 +682,12 @@
 
 (def cc:ext ()
 	"Get the library extension depending on the OS name."
-	(let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV)))
+	(let (((_ osname) . (run "/usr/bin/env" '("uname" "-s") ENV)))
 		(if (= osname "Darwin") ".dylib" ".so")))
 
 (def cc:flags ()
 	"Generate the build flags based on the OS name."
-	(let (((_ osname) . (run "/usr/bin/uname" '("-s") ENV))
+	(let (((_ osname) . (run "/usr/bin/env" '("uname" "-s") ENV))
 				(incd				. (append (assoc 'PREFIX CONFIG) "/include"))
 				(libd				. (append (assoc 'PREFIX CONFIG) "/lib"))
 				(flags			. (list
