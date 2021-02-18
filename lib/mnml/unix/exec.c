@@ -62,8 +62,9 @@ lisp_function_exec(UNUSED const lisp_t lisp, const atom_t closure)
   /*
    * Call execve.
    */
-  int ret = execve(buffer, arg_str, len == 0 ? environ : env_str);
-  return lisp_make_number(ret == 0 ? 0 : errno);
+  execve(buffer, arg_str, len == 0 ? environ : env_str);
+  printf("%s\n", strerror(errno));
+  exit(errno);
 }
 
 LISP_MODULE_SETUP(exec, exec, PATH, ARGS, ENVP, NIL)
