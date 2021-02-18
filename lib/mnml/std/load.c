@@ -31,8 +31,11 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
      */
     char buffer[PATH_MAX + 1];
     lisp_make_cstring(car, buffer, PATH_MAX, 0);
-    res = lisp_load_file(lisp, buffer);
     X(car);
+    /*
+     * Load the file.
+     */
+    res = lisp_load_file(lisp, buffer);
   }
   /*
    * Otherwise load the binary module.

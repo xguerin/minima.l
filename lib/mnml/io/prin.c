@@ -6,16 +6,24 @@ static atom_t
 lisp_prin_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
               const atom_t result)
 {
+  /*
+   * Return the result if we are done.
+   */
   if (unlikely(IS_NULL(cell))) {
     X(cell);
     return result;
   }
+  X(result);
   /*
+   * Grab CAR and CDR, and evaluate CAR.
    */
   atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
+  X(cell);
+  /*
+   * Print CAR and recurse on CDR.
+   */
   lisp_prin(lisp, closure, car, false);
-  X(cell, result);
   return lisp_prin_all(lisp, closure, cdr, car);
 }
 

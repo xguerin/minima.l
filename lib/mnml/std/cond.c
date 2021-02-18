@@ -33,12 +33,16 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
     return lisp_eval(lisp, closure, prog);
   }
   /*
-   * Evaluate the predicate.
+   * Build the predicate.
    */
   atom_t con = lisp_cons(cell, NIL);
   atom_t evl = lisp_cons(args, con);
+  X(con, args);
+  /*
+   * Evaluate the predicate.
+   */
   atom_t res = lisp_eval(lisp, closure, evl);
-  X(con, res, args);
+  X(res);
   /*
    */
   if (IS_TRUE(res)) {

@@ -10,6 +10,12 @@ include(cmake/Lemon.cmake)
 include(cmake/Ragel.cmake)
 
 #
+# Compiler configuration
+#
+
+set(CMAKE_C_COMPILER_NAMES clang gcc)
+
+#
 # Project definition
 #
 
@@ -110,6 +116,7 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3")
 if(${CMAKE_C_COMPILER_ID} MATCHES "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-register")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-void-pointer-to-int-cast")
 endif()
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")

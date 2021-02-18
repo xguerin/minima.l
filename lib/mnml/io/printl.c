@@ -7,19 +7,27 @@ static atom_t
 lisp_printl_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
                 const atom_t result)
 {
+  /*
+   * Return the result if we are done.
+   */
   if (unlikely(IS_NULL(cell))) {
     X(cell);
     return result;
   }
+  X(result);
   /*
+   * Grab CAR and CDR, and evaluate CAR.
    */
   atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
   atom_t cdr = lisp_cdr(cell);
+  X(cell);
+  /*
+   * Print the evaluated CAR and recurse on CDR.
+   */
   lisp_prin(lisp, closure, car, true);
   if (!IS_NULL(cdr)) {
     fwrite(" ", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   }
-  X(cell, result);
   return lisp_printl_all(lisp, closure, cdr, car);
 }
 

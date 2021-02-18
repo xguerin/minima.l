@@ -34,13 +34,21 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
   atom_t dup = lisp_dup(env);
   atom_t tmp = lisp_conc(dup, closure);
   atom_t arg = lisp_car(car);
-  atom_t val = lisp_eval(lisp, tmp, lisp_cdr(car));
-  X(dup, tmp, car);
+  atom_t nvl = lisp_cdr(car);
+  X(dup, car);
   /*
-   * Bind the result to the environment and process the remainder.
+   * Evaluate the value. and bind it to the environment.
    */
-  atom_t next = lisp_bind(lisp, env, arg, val);
-  return lisp_let_bind(lisp, closure, next, cdr);
+  atom_t val = lisp_eval(lisp, tmp, nvl);
+  X(tmp);
+  /*
+   * Bind it to the environment.
+   */
+  atom_t nxt = lisp_bind(lisp, env, arg, val);
+  /*
+   * Process the remainder.
+   */
+  return lisp_let_bind(lisp, closure, nxt, cdr);
 }
 
 static atom_t

@@ -15,34 +15,31 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
           const atom_t val)
 {
   atom_t ret;
+  TRACE_BIND_SEXP(arg);
+  TRACE_BIND_SEXP(val);
   /*
    */
   switch (arg->type) {
     case T_PAIR: {
       /*
-       * Grab the CARs, evaluate the value and bind them.
+       * Grab CARs and CDR, and clean-up.
        */
       atom_t sym = lisp_car(arg);
       atom_t vl0 = lisp_car(val);
-      atom_t cl0 = lisp_bind(lisp, closure, sym, vl0);
-      /*
-       * Grab the CDRs and recursively bind them.
-       */
       atom_t oth = lisp_cdr(arg);
       atom_t rem = lisp_cdr(val);
       X(arg, val);
       /*
+       * Bind CARs and process CDRs.
        */
+      atom_t cl0 = lisp_bind(lisp, closure, sym, vl0);
       ret = lisp_bind(lisp, cl0, oth, rem);
       break;
     }
     case T_SYMBOL: {
-      TRACE_BIND_SEXP(arg);
-      TRACE_BIND_SEXP(val);
       atom_t kvp = lisp_cons(arg, val);
       ret = lisp_cons(kvp, closure);
       X(arg, val, kvp, closure);
-      TRACE_BIND_SEXP(ret);
       break;
     }
     default: {
@@ -53,6 +50,7 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
   }
   /*
    */
+  TRACE_BIND_SEXP(ret);
   return ret;
 }
 
@@ -60,6 +58,7 @@ static atom_t
 lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
                const atom_t args, const atom_t vals)
 {
+  atom_t rslt;
   TRACE_BIND_SEXP(args);
   TRACE_BIND_SEXP(vals);
   /*
@@ -68,51 +67,55 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    */
   if (IS_NULL(args)) {
     atom_t tail = lisp_cons(NIL, vals);
-    atom_t rslt = lisp_cons(dscl, tail);
+    rslt = lisp_cons(dscl, tail);
     X(dscl, tail, args, vals);
-    TRACE_BIND_SEXP(rslt);
-    return rslt;
   }
   /*
    * If ARGS is a single symbol, bind the unevaluated values to it. That
    * operation consumes all the values, so it returns (DSCL, NIL NIL).
    */
-  if (IS_SYMB(args)) {
+  else if (IS_SYMB(args)) {
     atom_t head = lisp_bind(lisp, dscl, args, vals);
     atom_t tail = lisp_cons(NIL, NIL);
-    atom_t rslt = lisp_cons(head, tail);
+    rslt = lisp_cons(head, tail);
     X(head, tail);
-    TRACE_BIND_SEXP(rslt);
-    return rslt;
   }
   /*
    * Return (DSCL, ARGS, NIL) if we run out of values.
    */
-  if (IS_NULL(vals)) {
+  else if (IS_NULL(vals)) {
     atom_t tail = lisp_cons(args, NIL);
-    atom_t rslt = lisp_cons(dscl, tail);
+    rslt = lisp_cons(dscl, tail);
     X(dscl, tail, args, vals);
-    TRACE_BIND_SEXP(rslt);
-    return rslt;
   }
   /*
    * If there is an ARG and a VAL available, we grab the CAR of each and we
    * evaluate the value within the call-site closure.
    */
-  atom_t arg = lisp_car(args);
-  atom_t val = lisp_eval(lisp, cscl, lisp_car(vals));
-  atom_t oth = lisp_cdr(args);
-  atom_t rem = lisp_cdr(vals);
-  X(args, vals);
+  else {
+    /*
+     * Grab CAR and CDR from the arguments.
+     */
+    atom_t arg = lisp_car(args);
+    atom_t oth = lisp_cdr(args);
+    X(args);
+    /*
+     * Grab CAR and CDR from the values, evaluate CAR.
+     */
+    atom_t val = lisp_eval(lisp, cscl, lisp_car(vals));
+    atom_t rem = lisp_cdr(vals);
+    X(vals);
+    /*
+     * Then we bind the value to the argument. We do that to handle pattern
+     * decomposition for non-symbolic arguments. Perform a recursive descent on
+     * the remaining arguments and values.
+     */
+    atom_t bind = lisp_bind(lisp, dscl, arg, val);
+    rslt = lisp_bind_args(lisp, cscl, bind, oth, rem);
+  }
   /*
-   * Then we bind the value to the argument. We do that to handle pattern
-   * decomposition for non-symbolic arguments.
+   * Return the result.
    */
-  atom_t bind = lisp_bind(lisp, dscl, arg, val);
-  /*
-   * Perform a recursive descent on the remaining arguments and values.
-   */
-  atom_t rslt = lisp_bind_args(lisp, cscl, bind, oth, rem);
   TRACE_BIND_SEXP(rslt);
   return rslt;
 }
@@ -196,9 +199,9 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
     rslt = lisp_eval(lisp, closure, lisp_cons(rslt, nval));
     X(tmp);
   }
+  X(nval);
   /*
    */
-  X(nval);
   TRACE_CLOS_SEXP(closure);
   TRACE_EVAL_SEXP(rslt);
   return rslt;
@@ -214,12 +217,15 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
   atom_t rslt;
   TRACE_EVAL_SEXP(cell);
   /*
-   * Evaluate CAR.
+   * Grab CAR and CDR.
    */
   atom_t car = lisp_car(cell);
-  atom_t nxt = lisp_eval(lisp, closure, UP(car));
   atom_t cdr = lisp_cdr(cell);
   X(cell);
+  /*
+   * Evaluate CAR.
+   */
+  atom_t nxt = lisp_eval(lisp, closure, UP(car));
   /*
    * Handle the case when CAR is a function.
    */
@@ -247,9 +253,10 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
     rslt = lisp_cons(nxt, cdr);
     X(nxt, cdr);
   }
+  X(car);
   /*
    */
-  X(car);
+  TRACE_EVAL_SEXP(rslt);
   return rslt;
 }
 
