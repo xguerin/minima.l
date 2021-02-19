@@ -20,7 +20,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   if (!IS_PAIR(car)) {
     X(car, cdr);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * If it's a string, load it as a script.

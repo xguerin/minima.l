@@ -63,12 +63,12 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
   /*
    * Recursively apply the bind list.
    */
-  atom_t next = lisp_let_bind(lisp, closure, UP(NIL), bind);
+  atom_t next = lisp_let_bind(lisp, closure, lisp_make_nil(), bind);
   atom_t clos = lisp_conc(next, UP(closure));
   /*
    * Evaluate the prog with the new bind list.
    */
-  atom_t res = lisp_prog(lisp, clos, prog, UP(NIL));
+  atom_t res = lisp_prog(lisp, clos, prog, lisp_make_nil());
   X(clos);
   return res;
 }

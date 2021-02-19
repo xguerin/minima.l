@@ -9,7 +9,7 @@ lisp_function_pipe(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
 {
   int fd[2] = { 0 };
   if (pipe(fd) != 0) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   atom_t car = lisp_make_number(fd[0]);
   atom_t cdr = lisp_make_number(fd[1]);

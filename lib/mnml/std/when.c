@@ -10,12 +10,12 @@ lisp_function_when(const lisp_t lisp, const atom_t closure)
    * Evaluate REM branch if TRUE.
    */
   if (likely(!IS_NULL(COND))) {
-    return lisp_prog(lisp, C, UP(REM), UP(NIL));
+    return lisp_prog(lisp, C, UP(REM), lisp_make_nil());
   }
   /*
    * Or return NIL;
    */
-  return UP(NIL);
+  return lisp_make_nil();
 }
 
 LISP_MODULE_SETUP(when, when, COND, REM)

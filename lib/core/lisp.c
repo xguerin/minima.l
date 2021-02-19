@@ -14,7 +14,7 @@ lisp_t
 lisp_new(const atom_t ichan, const atom_t ochan)
 {
   lisp_t lisp = (lisp_t)malloc(sizeof(struct _lisp));
-  lisp->globals = UP(NIL);
+  lisp->globals = lisp_make_nil();
   lisp->ichan = UP(ichan);
   lisp->ochan = UP(ochan);
   return lisp;
@@ -28,15 +28,6 @@ lisp_delete(lisp_t lisp)
   X(lisp->globals);
   free(lisp);
 }
-
-/*
- * Global symbols.
- */
-
-atom_t NIL = NULL;
-atom_t TRUE = NULL;
-atom_t QUOTE = NULL;
-atom_t WILDCARD = NULL;
 
 /*
  * Symbol lookup.
@@ -70,7 +61,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
   /*
    * Nothing found.
    */
-  return UP(NIL);
+  return lisp_make_nil();
 }
 
 /*
@@ -83,7 +74,7 @@ lisp_car(const atom_t cell)
   if (likely(IS_PAIR(cell))) {
     return UP(CAR(cell));
   }
-  return UP(NIL);
+  return lisp_make_nil();
 }
 
 atom_t
@@ -92,7 +83,7 @@ lisp_cdr(const atom_t cell)
   if (likely(IS_PAIR(cell))) {
     return UP(CDR(cell));
   }
-  return UP(NIL);
+  return lisp_make_nil();
 }
 
 /*

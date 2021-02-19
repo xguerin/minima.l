@@ -36,7 +36,7 @@ static atom_t
 process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
           const atom_t cb, const fd_set* const set)
 {
-  atom_t act = UP(NIL);
+  atom_t act = lisp_make_nil();
   /*
    * Base case.
    */
@@ -51,13 +51,13 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
      * Keep the file descriptor around.
      */
     X(act);
-    act = UP(TRUE);
+    act = lisp_make_true();
     /*
      * Call the callback if it is set.
      */
     if (FD_ISSET(CAR(fds)->number, set) && !IS_NULL(cb)) {
       atom_t fdn = lisp_car(fds);
-      atom_t cn0 = lisp_cons(fdn, UP(NIL));
+      atom_t cn0 = lisp_cons(fdn, lisp_make_nil());
       atom_t cn1 = lisp_cons(UP(cb), cn0);
       X(act);
       act = lisp_eval(lisp, closure, cn1);
@@ -119,7 +119,7 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
    * Check that the fds argument is a list.
    */
   if (!IS_LIST(FDS)) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Initialize the READ and ERROR sets.
@@ -134,7 +134,7 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   int res = select(fdmax + 1, &rset, NULL, &eset, NULL);
   if (res < 0) {
     TRACE("select() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Process the events.
@@ -144,7 +144,7 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   /*
    * Build the result.
    */
-  atom_t cn0 = lisp_cons(eres, UP(NIL));
+  atom_t cn0 = lisp_cons(eres, lisp_make_nil());
   atom_t cn1 = lisp_cons(rres, cn0);
   /*
    * Return the updated descriptor list.

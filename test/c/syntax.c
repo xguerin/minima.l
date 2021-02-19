@@ -39,16 +39,9 @@ lisp_test_init(const lisp_t lisp)
 {
   slab_allocate();
   /*
-   * Create the constants.
-   */
-  lisp_make_nil();
-  lisp_make_true();
-  lisp_make_quote();
-  lisp_make_wildcard();
-  /*
    * Create the GLOBALS and the lexer.
    */
-  GLOBALS = UP(NIL);
+  GLOBALS = lisp_make_nil();
   lexer = lexer_create(lisp, lisp_consumer);
   /*
    * Setup the debug variables.
@@ -63,10 +56,6 @@ lisp_test_fini(const lisp_t lisp)
 {
   X(GLOBALS);
   lexer_destroy(lexer);
-  X(WILDCARD);
-  X(QUOTE);
-  X(TRUE);
-  X(NIL);
   TRACE("D %ld", slab.n_alloc - slab.n_free);
   LISP_COLLECT();
   slab_destroy();

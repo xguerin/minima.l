@@ -52,7 +52,7 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
     LISP_CONS(arg, ##__VA_ARGS__);                             \
     uintptr_t fun = (uintptr_t)lisp_function_##__s;            \
     atom_t adr = lisp_make_number(fun);                        \
-    atom_t cn0 = lisp_cons(UP(NIL), adr);                      \
+    atom_t cn0 = lisp_cons(lisp_make_nil(), adr);              \
     atom_t val = lisp_cons(arg, cn0);                          \
     atom_t cns = lisp_cons(UP(sym), val);                      \
     atom_t tmp = GLOBALS;                                      \
@@ -120,16 +120,15 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
   static atom_t lisp_function_is##_n(UNUSED const lisp_t l, const atom_t c) \
   {                                                                         \
     LISP_ARGS(c, C, _x);                                                    \
-    atom_t res = _o(_x) ? TRUE : NIL;                                       \
-    return UP(res);                                                         \
+    return _o(_x) ? lisp_make_true() : lisp_make_nil();                     \
   }
 
 #define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                                \
   static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
   {                                                                       \
     LISP_ARGS(c, C, _x, _y);                                              \
-    atom_t res = (!IS_NULL(_x))_o(!IS_NULL(_y)) ? TRUE : NIL;             \
-    return UP(res);                                                       \
+    return (!IS_NULL(_x))_o(!IS_NULL(_y)) ? lisp_make_true()              \
+                                          : lisp_make_nil();              \
   }
 
 #define BINARY_NUMBER_GEN(_n, _o, _x, _y)                                 \
@@ -143,8 +142,7 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
   static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
   {                                                                       \
     LISP_ARGS(c, C, _x, _y);                                              \
-    atom_t res = _x->number _o _y->number ? TRUE : NIL;                   \
-    return UP(res);                                                       \
+    return _x->number _o _y->number ? lisp_make_true() : lisp_make_nil(); \
   }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

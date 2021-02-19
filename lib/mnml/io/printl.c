@@ -35,7 +35,7 @@ static atom_t USED
 lisp_function_printl(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
-  atom_t res = lisp_printl_all(lisp, C, UP(ANY), UP(NIL));
+  atom_t res = lisp_printl_all(lisp, C, UP(ANY), lisp_make_nil());
   fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
   return res;
 }

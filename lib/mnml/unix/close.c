@@ -25,7 +25,7 @@ lisp_function_close(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
   bool res = lisp_close(lisp, C, UP(ANY), true);
-  return UP(res ? TRUE : NIL);
+  return res ? lisp_make_true() : lisp_make_nil();
 }
 
 LISP_MODULE_SETUP(close, close, ANY)

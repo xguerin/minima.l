@@ -14,7 +14,7 @@ convert(const struct sockaddr_in* const sa)
    */
   if (sa->sin_family != AF_INET) {
     TRACE("Unsupported protocol: %d", sa->sin_family);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Grab the host.
@@ -41,7 +41,7 @@ lisp_function_accept(UNUSED const lisp_t lisp, const atom_t closure)
    * Make sure the port is valid.
    */
   if (!IS_NUMB(FD) || FD->number < 0 || FD->number >= UINT32_MAX) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Call accept() on the file descriptor.
@@ -51,7 +51,7 @@ lisp_function_accept(UNUSED const lisp_t lisp, const atom_t closure)
   int res = accept(FD->number, (struct sockaddr*)&addr, &len);
   if (res < 0) {
     TRACE("accept() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Construct the result.

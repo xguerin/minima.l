@@ -11,7 +11,7 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
    */
   atom_t symb = lisp_car(ANY);
   if (!IS_SYMB(symb)) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Grab the arguments body.
@@ -20,7 +20,7 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   atom_t args = lisp_car(cdr0);
   if (!(IS_NULL(args) || IS_PAIR(args) || IS_SYMB(args))) {
     X(symb, cdr0, args);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Grab the body.
@@ -40,7 +40,7 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   /*
    * Append an empty closure.
    */
-  atom_t con0 = lisp_cons(UP(NIL), prog);
+  atom_t con0 = lisp_cons(lisp_make_nil(), prog);
   atom_t con1 = lisp_cons(args, con0);
   /*
    * Set the symbol's value.

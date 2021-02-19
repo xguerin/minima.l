@@ -206,7 +206,7 @@
 				(effargs	. (cc:arg:get args))
 				(genquot	. (\ (arg)
 											(prog
-												(prin (o|) "atom_t " arg " = lisp_cons(UP(QUOTE), UP(")
+												(prin (o|) "atom_t " arg " = lisp_cons(lisp_make_quote(), UP(")
 												(cc:value:atm ARGS kvar arg)
 												(prinl "));")
 												(when (= kvar arg) (cc:gen:x ARGS kvar arg))
@@ -235,7 +235,7 @@
 													# a function symbol.
 													#
 													(NIL	. (gensymb arg))
-													(_		. (prinl (o|) "atom_t " arg " = UP(NIL); /* Unsupported type " (str type) " */"))
+													(_		. (prinl (o|) "atom_t " arg " = lisp_make_nil(); /* Unsupported type " (str type) " */"))
 													))))
 				(gencall	. (\ (arg)
 											(prinl (o|) "_T = lisp_cons(" arg ", _S);")
@@ -243,7 +243,7 @@
 				(type			. (assoc nvar TYPES)))
 		(iter genargs effargs)
 		(/**/ "Build the expression to evaluate.")
-		(prinl (o|) "atom_t _S = UP(NIL), _T;")
+		(prinl (o|) "atom_t _S = lisp_make_nil(), _T;")
 		(iter gencall (rev effargs))
 		(/**/ "Evaluate the expression.")
 		(prinl (o|) "atom_t _R = lisp_eval(lisp, E, _S);")
@@ -376,7 +376,7 @@
 	(/**/ "Build the closure.")
 	(cc:gen:closure CONT CONT)
 	(/**/ "Collect the arguments.")
-	(prinl (o|) "value_t R = { .atom = UP(NIL) };")
+	(prinl (o|) "value_t R = { .atom = lisp_make_nil() };")
 	(/**/ "Build the continuation.")
 	(cc:gen:callback NAME REFS CONT CONT)
 	(cc:gen:cleanup ARGS REFS TYPES CONT kvar CONT)
@@ -531,7 +531,7 @@
 		(match rtype
 			(NUMBER	. (prinl (o|) "return lisp_make_number(V.number);"))
 			(ATOM		. (prinl (o|) "return V.atom;"))
-			(_			. (prinl (o|) "return UP(NIL); /* Unsupported type " (str rtype) " */"))
+			(_			. (prinl (o|) "return lisp_make_nil(); /* Unsupported type " (str rtype) " */"))
 			)))
 
 (def cc:gen:identity (NAME TYPES kvar)

@@ -35,7 +35,7 @@ static atom_t USED
 lisp_function_print(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
-  return lisp_print_all(lisp, C, UP(ANY), UP(NIL));
+  return lisp_print_all(lisp, C, UP(ANY), lisp_make_nil());
 }
 
 LISP_MODULE_SETUP(print, print, ANY)

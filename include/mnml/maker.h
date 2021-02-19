@@ -23,7 +23,7 @@
  * CONS helpers.
  */
 
-#define LISP_CONS_0(R) atom_t R = UP(NIL)
+#define LISP_CONS_0(R) atom_t R = lisp_make_nil()
 
 #define LISP_CONS_1(R, _1)                     \
   LISP_CONS_0(R);                              \
@@ -95,13 +95,9 @@ atom_t lisp_make_number(const int64_t num);
 atom_t lisp_make_string(const char* const s, const size_t len);
 atom_t lisp_make_symbol(const symbol_t sym);
 
-/*
- * Singleton makers.
- */
-
-void lisp_make_nil();
-void lisp_make_true();
-void lisp_make_quote();
-void lisp_make_wildcard();
+atom_t lisp_make_nil();
+atom_t lisp_make_true();
+atom_t lisp_make_quote();
+atom_t lisp_make_wildcard();
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

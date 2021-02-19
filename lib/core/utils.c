@@ -83,13 +83,6 @@ lisp_init()
     return false;
   }
   /*
-   * Create the constants.
-   */
-  lisp_make_nil();
-  lisp_make_true();
-  lisp_make_quote();
-  lisp_make_wildcard();
-  /*
    * Setup the debug variables.
    */
 #ifdef LISP_ENABLE_DEBUG
@@ -104,17 +97,7 @@ lisp_init()
 void
 lisp_fini()
 {
-  /*
-   * Clean-up the plugins.
-   */
   module_fini();
-  /*
-   * Destroy the global variables.
-   */
-  X(WILDCARD, QUOTE, TRUE, NIL);
-  /*
-   * Destroy the slab allocator.
-   */
   slab_destroy();
 }
 
@@ -147,7 +130,7 @@ lisp_len(const atom_t cell)
 atom_t
 lisp_append(const atom_t lst, const atom_t elt)
 {
-  atom_t con = lisp_cons(elt, UP(NIL));
+  atom_t con = lisp_cons(elt, lisp_make_nil());
   return lisp_conc(lst, con);
 }
 
@@ -432,7 +415,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   const char* path = lisp_get_fullpath(lisp, absl_buf, filepath, path_buf);
   if (path == NULL) {
     ERROR("Cannot get the full path for %s", filepath);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Grab the directory of the file.
@@ -441,7 +424,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   const char* dir = dirname(dirn_buf);
   if (dir == NULL) {
     ERROR("Cannot get directory for %s", path);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Get the current working directory.
@@ -449,7 +432,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   const char* const cwd = getcwd(curd_buf, PATH_MAX);
   if (cwd == NULL) {
     ERROR("Cannot get CWD for %s", path);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Open the file.
@@ -457,7 +440,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   FILE* handle = fopen(path, "r");
   if (handle == NULL) {
     ERROR("Cannot open %s", path);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Push the context.
@@ -467,11 +450,12 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   /*
    * Load all the entries
    */
-  atom_t input, res = UP(NIL);
-  while ((input = lisp_read(lisp, NIL, UP(NIL))) != NULL) {
+  atom_t input, nil = lisp_make_nil(), res = lisp_make_nil();
+  while ((input = lisp_read(lisp, nil, lisp_make_nil())) != NULL) {
     X(res);
-    res = lisp_eval(lisp, NIL, input);
+    res = lisp_eval(lisp, nil, input);
   }
+  X(nil);
   /*
    * Pop the context and return the value.
    */

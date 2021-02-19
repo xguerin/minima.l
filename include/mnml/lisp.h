@@ -42,13 +42,8 @@ void lisp_delete(lisp_t lisp);
 typedef atom_t (*function_t)(const lisp_t, const atom_t);
 
 /*
- * Symbol management.
+ * Symbol lookup.
  */
-
-extern atom_t NIL;
-extern atom_t TRUE;
-extern atom_t QUOTE;
-extern atom_t WILDCARD;
 
 atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym);
 

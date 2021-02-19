@@ -74,7 +74,7 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    */
   else if (IS_SYMB(args)) {
     atom_t head = lisp_bind(lisp, dscl, args, vals);
-    atom_t tail = lisp_cons(UP(NIL), UP(NIL));
+    atom_t tail = lisp_cons(lisp_make_nil(), lisp_make_nil());
     rslt = lisp_cons(head, tail);
   }
   /*
@@ -142,6 +142,9 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
    * The call-site closure is used for the evaluation of the arguments.
    */
   atom_t bind = lisp_bind_args(lisp, closure, dscl, args, vals);
+  /*
+   * Extract the bound arguments, and remaining arguments and values,
+   */
   atom_t bscl = lisp_car(bind);
   atom_t cdr1 = lisp_cdr(bind);
   atom_t narg = lisp_car(cdr1);
@@ -172,7 +175,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
      * function as a PROG.
      */
     else {
-      rslt = lisp_prog(lisp, cls, body, UP(NIL));
+      rslt = lisp_prog(lisp, cls, body, lisp_make_nil());
     }
     /*
      * Clean-up.

@@ -7,8 +7,7 @@ static atom_t USED
 lisp_function_equ(UNUSED const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X, Y);
-  atom_t res = lisp_equ(X, Y) ? TRUE : NIL;
-  return UP(res);
+  return lisp_equ(X, Y) ? lisp_make_true() : lisp_make_nil();
 }
 
 LISP_MODULE_SETUP(equ, =, X, Y, NIL)

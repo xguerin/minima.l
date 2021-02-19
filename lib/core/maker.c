@@ -29,12 +29,12 @@ lisp_make_number(const int64_t num)
 atom_t
 lisp_make_string(const char* const str, const size_t len)
 {
-  atom_t res = UP(NIL);
+  atom_t res = lisp_make_nil();
   for (size_t i = 0; i < len; i += 1) {
     atom_t c = lisp_make_char(str[len - i - 1]);
     res = lisp_cons(c, res);
   }
-  return lisp_process_escapes(res, false, UP(NIL));
+  return lisp_process_escapes(res, false, lisp_make_nil());
 }
 
 atom_t
@@ -48,43 +48,43 @@ lisp_make_symbol(const symbol_t sym)
   return R;
 }
 
-void
+atom_t
 lisp_make_nil()
 {
   atom_t R = lisp_allocate();
   R->type = T_NIL;
   R->refs = 1;
   TRACE_MAKE_SEXP(R);
-  NIL = R;
+  return R;
 }
 
-void
+atom_t
 lisp_make_true()
 {
   atom_t R = lisp_allocate();
   R->type = T_TRUE;
   R->refs = 1;
   TRACE_MAKE_SEXP(R);
-  TRUE = R;
+  return R;
 }
 
-void
+atom_t
 lisp_make_quote()
 {
   MAKE_SYMBOL_STATIC(quote, "quote", 5);
   atom_t R = lisp_make_symbol(quote);
   TRACE_MAKE_SEXP(R);
-  QUOTE = R;
+  return R;
 }
 
-void
+atom_t
 lisp_make_wildcard()
 {
   atom_t R = lisp_allocate();
   R->type = T_WILDCARD;
   R->refs = 1;
   TRACE_MAKE_SEXP(R);
-  WILDCARD = R;
+  return R;
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

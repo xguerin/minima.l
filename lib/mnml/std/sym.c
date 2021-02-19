@@ -11,7 +11,7 @@ lisp_function_sym(UNUSED const lisp_t lisp, const atom_t closure)
    * Check that the argument is a string.
    */
   if (unlikely(!(IS_PAIR(X) && lisp_is_string(X)))) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Process the string.
@@ -19,7 +19,7 @@ lisp_function_sym(UNUSED const lisp_t lisp, const atom_t closure)
   char buffer[17];
   size_t len = lisp_make_cstring(X, buffer, LISP_SYMBOL_LENGTH, 0);
   if (len == 0) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   MAKE_SYMBOL_STATIC(symb, buffer, len);
   return lisp_make_symbol(symb);

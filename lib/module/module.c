@@ -88,7 +88,7 @@ module_init()
   /*
    * Reset the MODULES variable.
    */
-  MODULES = UP(NIL);
+  MODULES = lisp_make_nil();
   /*
    * Try to create the user cache directory.
    */
@@ -154,7 +154,7 @@ module_load(const lisp_t lisp, const atom_t cell)
    */
   if (IS_NULL(module_name) || !IS_SYMB(module_name)) {
     X(module_name, symbol_list);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Load the environment variable.
@@ -168,7 +168,7 @@ module_load(const lisp_t lisp, const atom_t cell)
   free(paths);
   if (!found) {
     X(module_name, symbol_list);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Load the symbols in the module.

@@ -27,8 +27,8 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t ANY,
   /*
    * Bind the quoted result.
    */
-  atom_t cn0 = lisp_cons(UP(QUOTE), res);
-  atom_t cn1 = lisp_cons(cn0, UP(NIL));
+  atom_t cn0 = lisp_cons(lisp_make_quote(), res);
+  atom_t cn1 = lisp_cons(cn0, lisp_make_nil());
   atom_t nxt = lisp_cons(car, cn1);
   /*
    * Call recursively.

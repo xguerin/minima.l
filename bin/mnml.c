@@ -1,3 +1,4 @@
+#include "mnml/maker.h"
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/module.h>
@@ -33,18 +34,20 @@ signal_handler(UNUSED const int sigid)
 static atom_t
 run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
 {
-  atom_t input, result = UP(NIL);
+  atom_t nil = lisp_make_nil();
+  atom_t input, result = lisp_make_nil();
   while (keep_running) {
     X(result);
-    pread(lisp, NIL, data);
-    input = lisp_read(lisp, NIL, UP(NIL));
+    pread(lisp, nil, data);
+    input = lisp_read(lisp, nil, lisp_make_nil());
     if (input == NULL) {
-      result = UP(NIL);
+      result = lisp_make_nil();
       break;
     }
-    result = lisp_eval(lisp, NIL, input);
+    result = lisp_eval(lisp, nil, input);
     pdone(lisp, result, data);
   }
+  X(nil);
   return result;
 }
 
@@ -70,9 +73,11 @@ static void
 stage_newline(const lisp_t lisp, const atom_t cell,
               UNUSED const void* const data)
 {
+  atom_t nil = lisp_make_nil();
   fwrite("> ", 1, 2, stdout);
-  lisp_prin(lisp, NIL, cell, true);
+  lisp_prin(lisp, nil, cell, true);
   fwrite("\n", 1, 1, stdout);
+  X(nil);
 }
 
 /*
@@ -104,7 +109,7 @@ lisp_pop()
 static void
 lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
 {
-  atom_t res = UP(NIL);
+  atom_t res = lisp_make_nil();
   /*
    * Build ARGV.
    */
@@ -130,7 +135,7 @@ static void
 lisp_build_config(const lisp_t lisp)
 {
   atom_t key, val, con;
-  atom_t res = UP(NIL);
+  atom_t res = lisp_make_nil();
   /*
    * Add the version string.
    */
@@ -185,7 +190,7 @@ static void
 lisp_build_env(const lisp_t lisp)
 {
   extern char** environ;
-  atom_t res = UP(NIL);
+  atom_t res = lisp_make_nil();
   /*
    * Parse environ and build the variable list.
    */
@@ -231,7 +236,7 @@ lisp_load_defaults(const lisp_t lisp)
   atom_t sy0 = lisp_make_symbol(lod);
   atom_t sy1 = lisp_make_symbol(qte);
   atom_t sy2 = lisp_make_symbol(def);
-  atom_t cn0 = lisp_cons(sy0, UP(NIL));
+  atom_t cn0 = lisp_cons(sy0, lisp_make_nil());
   atom_t cn1 = lisp_cons(sy1, cn0);
   atom_t cn2 = lisp_cons(sy2, cn1);
   atom_t cn3 = lisp_cons(mod, cn2);
@@ -329,7 +334,8 @@ main(const int argc, char** const argv)
   /*
    * Create a lisp context.
    */
-  lisp_t lisp = lisp_new(NIL, NIL);
+  atom_t nil = lisp_make_nil();
+  lisp_t lisp = lisp_new(nil, nil);
   lisp_load_defaults(lisp);
   /*
    * Build ARGV, CONFIG and ENV.
@@ -351,7 +357,7 @@ main(const int argc, char** const argv)
     /*
      * Setup the PAIRS to NIL.
      */
-    PAIRS = UP(NIL);
+    PAIRS = lisp_make_nil();
     /*
      * Parse the expression.
      */
@@ -367,7 +373,7 @@ main(const int argc, char** const argv)
     /*
      * Evaluate the parsed expressions.
      */
-    result = UP(NIL);
+    result = lisp_make_nil();
     while (keep_running) {
       atom_t car = lisp_pop();
       if (IS_NULL(car)) {
@@ -375,7 +381,7 @@ main(const int argc, char** const argv)
         break;
       }
       X(result);
-      result = lisp_eval(lisp, NIL, car);
+      result = lisp_eval(lisp, nil, car);
     }
     /*
      * Pop the IO context.
@@ -400,6 +406,7 @@ main(const int argc, char** const argv)
    * Clean-up the lisp context.
    */
   lisp_delete(lisp);
+  X(nil);
   lisp_fini();
   /*
    * Check the slab and update the status accordingly.

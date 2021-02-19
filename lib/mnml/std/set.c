@@ -17,7 +17,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
    */
   if (unlikely(!IS_SYMB(sym))) {
     X(sym, val);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Lookup first in the closure.
@@ -51,7 +51,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
    * Set the symbol in the closure stack.
    */
   X(sym, val);
-  return UP(NIL);
+  return lisp_make_nil();
 }
 
 /* clang-format off */

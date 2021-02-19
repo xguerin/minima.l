@@ -21,7 +21,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
    */
   if (unlikely(!(lisp_is_string(ADDRESS) && lisp_is_string(PORT)))) {
     TRACE("Address and service must be strings");
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Convert the address to a C string.
@@ -30,7 +30,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
   size_t len = lisp_make_cstring(ADDRESS, address, 1024, 0);
   if (len == 0) {
     TRACE("Cannot convert address to a C string");
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Convert the address to a C string.
@@ -39,7 +39,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
   len = lisp_make_cstring(PORT, service, 1024, 0);
   if (len == 0) {
     TRACE("Cannot convert service to a C string");
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Create the TCP socket.
@@ -47,7 +47,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
   const int fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0) {
     TRACE("socket() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Set TCP_NODELAY.
@@ -57,7 +57,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
   if (res < 0) {
     close(fd);
     TRACE("setsockopt(TCP_NODELAY) failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Resolve the domain name.
@@ -72,7 +72,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
   if (res != 0) {
     close(fd);
     TRACE("getaddrinfo() failed: %s", gai_strerror(res));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Connect to the first entry.
@@ -82,7 +82,7 @@ lisp_function_connect(UNUSED const lisp_t lisp, const atom_t closure)
   if (res != 0) {
     close(fd);
     TRACE("connect() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Return the file descriptor.

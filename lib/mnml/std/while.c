@@ -24,10 +24,10 @@ lisp_function_while(const lisp_t lisp, const atom_t closure)
   /*
    * Execute the loop.
    */
-  atom_t res = UP(NIL);
+  atom_t res = lisp_make_nil();
   while (lisp_eval_cond(lisp, C, cnd)) {
     X(res);
-    res = lisp_prog(lisp, C, UP(prg), UP(NIL));
+    res = lisp_prog(lisp, C, UP(prg), lisp_make_nil());
   }
   /*
    * Clean-up and return the result.

@@ -11,7 +11,7 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
     X(cell, match);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Get CAR/CDR.
@@ -35,22 +35,21 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    * Build the predicate.
    */
-  atom_t con = lisp_cons(UP(cell), UP(NIL));
+  atom_t con = lisp_cons(UP(cell), lisp_make_nil());
   atom_t evl = lisp_cons(args, con);
   /*
    * Evaluate the predicate.
    */
   atom_t res = lisp_eval(lisp, closure, evl);
-  X(res);
   /*
    */
   if (IS_TRUE(res)) {
-    X(cdr, cell);
+    X(cdr, cell, res);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    */
-  X(prog);
+  X(prog, res);
   return lisp_cond(lisp, closure, cell, cdr);
 }
 

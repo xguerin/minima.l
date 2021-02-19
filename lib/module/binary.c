@@ -152,7 +152,7 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
    * If cell is T, load everything.
    */
   if (IS_TRUE(cell)) {
-    atom_t result = UP(NIL);
+    atom_t result = lisp_make_nil();
     /*
      * Compute available entries.
      */
@@ -183,7 +183,7 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
    */
   if (!IS_LIST(cell)) {
     X(cell);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Load the element of the list.
@@ -215,7 +215,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
      */
     handle = module_load_at_path(path, bsym);
     if (handle == NULL) {
-      return UP(NIL);
+      return lisp_make_nil();
     }
     /*
      * Mark the handle to be added to the cache.
@@ -228,7 +228,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   const module_entry_t* (*entries)() = dlsym(handle, "lisp_module_entries");
   if (entries == NULL) {
     DLCLOSE(add_to_cache, handle);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Load all the symbols from the list.

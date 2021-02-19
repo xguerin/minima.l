@@ -32,7 +32,7 @@ root ::= prefix(A).
 
 list(A) ::= POPEN PCLOSE.
 {
-  A = UP(NIL);
+  A = lisp_make_nil();
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
@@ -47,7 +47,7 @@ list(A) ::= POPEN items(B) DOT prefix(C) PCLOSE.
 
 items(A) ::= prefix(B).
 {
-  A = lisp_cons(B, UP(NIL));
+  A = lisp_cons(B, lisp_make_nil());
 }
 
 items(A) ::= items(B) prefix(C).
@@ -57,8 +57,10 @@ items(A) ::= items(B) prefix(C).
 
 items(A) ::= items(B) TILDE prefix(C).
 {
-  C = lisp_eval(lexer->lisp, NIL, C);
+  atom_t nil = lisp_make_nil();
+  C = lisp_eval(lexer->lisp, nil, C);
   A = lisp_conc(B, C);
+  X(nil);
 }
 
 prefix(A) ::= item(B).
@@ -68,12 +70,14 @@ prefix(A) ::= item(B).
 
 prefix(A) ::= CQUOTE item(B).
 {
-  A = lisp_cons(UP(QUOTE), B);
+  A = lisp_cons(lisp_make_quote(), B);
 }
 
 prefix(A) ::= BACKTICK item(B).
 {
-  A = lisp_eval(lexer->lisp, NIL, B);
+  atom_t nil = lisp_make_nil();
+  A = lisp_eval(lexer->lisp, nil, B);
+  X(nil);
 }
 
 item(A) ::= NUMBER(B).
@@ -100,17 +104,17 @@ item(A) ::= SYMBOL(B).
 
 item(A) ::= C_NIL.
 {
-  A = UP(NIL);
+  A = lisp_make_nil();
 }
 
 item(A) ::= C_TRUE.
 {
-  A = UP(TRUE);
+  A = lisp_make_true();
 }
 
 item(A) ::= C_WILDCARD.
 {
-  A = UP(WILDCARD);
+  A = lisp_make_wildcard();
 }
 
 item(A) ::= list(B).

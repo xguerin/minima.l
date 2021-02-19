@@ -20,7 +20,7 @@ lisp_function_listen(UNUSED const lisp_t lisp, const atom_t closure)
    * Make sure the port is valid.
    */
   if (!IS_NUMB(PORT) || PORT->number < 0 || PORT->number >= UINT16_MAX) {
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Create the TCP socket.
@@ -28,7 +28,7 @@ lisp_function_listen(UNUSED const lisp_t lisp, const atom_t closure)
   const int fd = socket(AF_INET, SOCK_STREAM, 0);
   if (fd < 0) {
     TRACE("socket() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Set TCP_NODELAY and SO_REUSEPORT.
@@ -38,13 +38,13 @@ lisp_function_listen(UNUSED const lisp_t lisp, const atom_t closure)
   if (res < 0) {
     close(fd);
     TRACE("setsockopt(TCP_NODELAY) failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   res = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(one));
   if (res < 0) {
     close(fd);
     TRACE("setsockopt(SO_REUSEPORT) failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Prepare the socket address.
@@ -61,7 +61,7 @@ lisp_function_listen(UNUSED const lisp_t lisp, const atom_t closure)
   if (res < 0) {
     close(fd);
     TRACE("bind() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Listen on the socket.
@@ -70,7 +70,7 @@ lisp_function_listen(UNUSED const lisp_t lisp, const atom_t closure)
   if (res < 0) {
     close(fd);
     TRACE("listen() failed: %s", strerror(errno));
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Return the socket.

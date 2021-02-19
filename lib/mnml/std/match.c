@@ -33,7 +33,7 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
     X(ANY, match);
-    return UP(NIL);
+    return lisp_make_nil();
   }
   /*
    * Get CAR/CDR.
