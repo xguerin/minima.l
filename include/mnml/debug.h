@@ -164,6 +164,7 @@ void lisp_debug(FILE* fp, const atom_t atom, const size_t level);
 #define TRACE_CONS(__c, ...)
 #define TRACE_EVAL(__c, ...)
 #define TRACE_MAKE(__c, ...)
+#define TRACE_MODL(__c, ...)
 #define TRACE_REFC(__c, ...)
 #define TRACE_SLAB(__c, ...)
 #define TRACE_SLOT(__c, ...)

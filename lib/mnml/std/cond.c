@@ -35,9 +35,8 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    * Build the predicate.
    */
-  atom_t con = lisp_cons(cell, NIL);
+  atom_t con = lisp_cons(UP(cell), UP(NIL));
   atom_t evl = lisp_cons(args, con);
-  X(con, args);
   /*
    * Evaluate the predicate.
    */

@@ -40,15 +40,14 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   /*
    * Append an empty closure.
    */
-  atom_t con0 = lisp_cons(NIL, prog);
+  atom_t con0 = lisp_cons(UP(NIL), prog);
   atom_t con1 = lisp_cons(args, con0);
-  X(prog, args, con0);
   /*
    * Set the symbol's value.
    */
   atom_t tmp = GLOBALS;
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(symb, con1));
-  X(tmp, con1);
+  GLOBALS = lisp_setq(GLOBALS, lisp_cons(UP(symb), con1));
+  X(tmp);
   return symb;
 }
 

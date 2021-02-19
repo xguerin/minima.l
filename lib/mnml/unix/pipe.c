@@ -13,9 +13,7 @@ lisp_function_pipe(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
   }
   atom_t car = lisp_make_number(fd[0]);
   atom_t cdr = lisp_make_number(fd[1]);
-  atom_t con = lisp_cons(car, cdr);
-  X(car, cdr);
-  return con;
+  return lisp_cons(car, cdr);
 }
 
 LISP_MODULE_SETUP(pipe, pipe)

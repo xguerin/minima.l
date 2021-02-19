@@ -90,6 +90,9 @@ Pairs are created by using the `cons` and `conc` standard functions in the
 atom_t lisp_cons(const atom_t a, const atom_t b);
 atom_t lisp_conc(const atom_t a, const atom_t b);
 ```
+Both functions consume their arguments as those are often created for the sole
+purpose of being `cons`'d or `conc`'d.
+
 #### Deallocation
 
 Atom values must be manually deallocated using the `X(...)` macro defined in the

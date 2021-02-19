@@ -6,7 +6,7 @@ static atom_t USED
 lisp_function_conc(UNUSED const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X, Y);
-  return lisp_conc(X, Y);
+  return lisp_conc(UP(X), UP(Y));
 }
 
 LISP_MODULE_SETUP(conc, conc, X, Y, NIL)

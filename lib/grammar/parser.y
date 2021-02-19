@@ -43,13 +43,11 @@ list(A) ::= POPEN items(B) PCLOSE.
 list(A) ::= POPEN items(B) DOT prefix(C) PCLOSE.
 {
   A = lisp_conc(B, C);
-  X(B, C);
 }
 
 items(A) ::= prefix(B).
 {
-  A = lisp_cons(B, NIL);
-  X(B);
+  A = lisp_cons(B, UP(NIL));
 }
 
 items(A) ::= items(B) prefix(C).
@@ -61,7 +59,6 @@ items(A) ::= items(B) TILDE prefix(C).
 {
   C = lisp_eval(lexer->lisp, NIL, C);
   A = lisp_conc(B, C);
-  X(B, C);
 }
 
 prefix(A) ::= item(B).
@@ -71,8 +68,7 @@ prefix(A) ::= item(B).
 
 prefix(A) ::= CQUOTE item(B).
 {
-  A = lisp_cons(QUOTE, B);
-  X(B);
+  A = lisp_cons(UP(QUOTE), B);
 }
 
 prefix(A) ::= BACKTICK item(B).

@@ -61,6 +61,7 @@ atom_t lisp_cdr(const atom_t cell);
 
 /*
  * Internal list construction functions. CONS is pure, CONC is destructive.
+ * NOTE Both functions consume their arguments.
  */
 
 atom_t lisp_cons(const atom_t a, const atom_t b);

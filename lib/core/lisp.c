@@ -105,8 +105,8 @@ lisp_cons(const atom_t car, const atom_t cdr)
   atom_t R = lisp_allocate();
   R->type = T_PAIR;
   R->refs = 1;
-  CAR(R) = UP(car);
-  CDR(R) = UP(cdr);
+  CAR(R) = car;
+  CDR(R) = cdr;
   TRACE_CONS_SEXP(R);
   return R;
 }
@@ -120,10 +120,11 @@ lisp_conc(const atom_t car, const atom_t cdr)
   if (likely(IS_PAIR(car))) {
     FOREACH(car, p) { NEXT(p); }
     X(p->cdr);
-    p->cdr = UP(cdr);
-    R = UP(car);
+    p->cdr = cdr;
+    R = car;
   } else {
-    R = UP(cdr);
+    X(car);
+    R = cdr;
   }
   /*
    */
@@ -149,9 +150,7 @@ lisp_setq(const atom_t closure, const atom_t pair)
    * If the closure is NIL, return the wrapped pair.
    */
   if (IS_NULL(closure)) {
-    atom_t res = lisp_cons(pair, closure);
-    X(pair);
-    return res;
+    return lisp_cons(pair, UP(closure));
   }
   /*
    * Extract CAR and CDR.
@@ -162,17 +161,15 @@ lisp_setq(const atom_t closure, const atom_t pair)
    * Replace car if its symbol matches pair's.
    */
   if (lisp_symbol_match(CAR(car), &CAR(pair)->symbol)) {
-    atom_t res = lisp_cons(pair, cdr);
-    X(pair, cdr, car);
-    return res;
+    X(car);
+    return lisp_cons(pair, cdr);
   }
   /*
    * Look further down the closure.
    */
   atom_t nxt = lisp_setq(cdr, pair);
-  atom_t res = lisp_cons(car, nxt);
-  X(cdr, car, nxt);
-  return res;
+  X(cdr);
+  return lisp_cons(car, nxt);
 }
 
 /*

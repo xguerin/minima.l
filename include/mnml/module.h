@@ -52,12 +52,12 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
     LISP_CONS(arg, ##__VA_ARGS__);                             \
     uintptr_t fun = (uintptr_t)lisp_function_##__s;            \
     atom_t adr = lisp_make_number(fun);                        \
-    atom_t cn0 = lisp_cons(NIL, adr);                          \
+    atom_t cn0 = lisp_cons(UP(NIL), adr);                      \
     atom_t val = lisp_cons(arg, cn0);                          \
-    atom_t cns = lisp_cons(sym, val);                          \
+    atom_t cns = lisp_cons(UP(sym), val);                      \
     atom_t tmp = GLOBALS;                                      \
     GLOBALS = lisp_setq(GLOBALS, cns);                         \
-    X(adr, cn0, arg, val, tmp);                                \
+    X(tmp);                                                    \
     return sym;                                                \
   }
 

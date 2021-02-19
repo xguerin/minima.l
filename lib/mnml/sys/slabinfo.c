@@ -9,9 +9,7 @@ lisp_function_slabinfo(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
 {
   atom_t car = lisp_make_number(slab.n_alloc);
   atom_t cdr = lisp_make_number(slab.n_free);
-  atom_t res = lisp_cons(car, cdr);
-  X(car, cdr);
-  return res;
+  return lisp_cons(car, cdr);
 }
 
 LISP_MODULE_SETUP(slabinfo, slabinfo)

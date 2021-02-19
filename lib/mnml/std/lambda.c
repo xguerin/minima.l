@@ -12,16 +12,11 @@ lisp_function_lambda(UNUSED const lisp_t lisp, const atom_t closure)
   atom_t args = lisp_car(ANY);
   atom_t prog = lisp_cdr(ANY);
   /*
-   * Append an empty currying list and capture the closure.
+   * Append an empty currying list, capture the closure, and return the lambda.
    */
   atom_t clos = lisp_dup(C);
   atom_t con0 = lisp_cons(clos, prog);
-  atom_t con1 = lisp_cons(args, con0);
-  X(clos, prog, con0, args);
-  /*
-   * Return the lambda.
-   */
-  return con1;
+  return lisp_cons(args, con0);
 }
 
 LISP_MODULE_SETUP(lambda, \\, ANY)

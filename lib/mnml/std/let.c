@@ -32,10 +32,10 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
    * Prepend this current environment to the evaluation closure.
    */
   atom_t dup = lisp_dup(env);
-  atom_t tmp = lisp_conc(dup, closure);
+  atom_t tmp = lisp_conc(dup, UP(closure));
   atom_t arg = lisp_car(car);
   atom_t nvl = lisp_cdr(car);
-  X(dup, car);
+  X(car);
   /*
    * Evaluate the value. and bind it to the environment.
    */
@@ -64,8 +64,7 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * Recursively apply the bind list.
    */
   atom_t next = lisp_let_bind(lisp, closure, UP(NIL), bind);
-  atom_t clos = lisp_conc(next, closure);
-  X(next);
+  atom_t clos = lisp_conc(next, UP(closure));
   /*
    * Evaluate the prog with the new bind list.
    */

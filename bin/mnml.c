@@ -14,8 +14,13 @@ typedef void (*stage_t)(const lisp_t, const atom_t, const void* const data);
 
 static bool keep_running = true;
 
+#ifdef LISP_ENABLE_DEBUG
 static void
 signal_handler(const int sigid)
+#else
+static void
+signal_handler(UNUSED const int sigid)
+#endif
 {
   TRACE("Caught signal: %d", sigid);
   keep_running = false;
@@ -115,7 +120,7 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
     atom_t key = lisp_make_symbol(var);
     atom_t tmp = GLOBALS;
     GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
-    X(key, res, tmp);
+    X(tmp);
   } else {
     X(res);
   }
@@ -124,7 +129,7 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
 static void
 lisp_build_config(const lisp_t lisp)
 {
-  atom_t key, val, con, nxt;
+  atom_t key, val, con;
   atom_t res = UP(NIL);
   /*
    * Add the version string.
@@ -133,9 +138,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(version);
   val = lisp_make_string(MNML_VERSION, strlen(MNML_VERSION));
   con = lisp_cons(key, val);
-  nxt = lisp_cons(con, res);
-  X(key, val, con, res);
-  res = nxt;
+  res = lisp_cons(con, res);
   /*
    * Add the prefix.
    */
@@ -143,9 +146,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(prefix);
   val = lisp_make_string(lisp_prefix(), strlen(lisp_prefix()));
   con = lisp_cons(key, val);
-  nxt = lisp_cons(con, res);
-  X(key, val, con, res);
-  res = nxt;
+  res = lisp_cons(con, res);
   /*
    * Add the compiler version.
    */
@@ -153,9 +154,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(compver);
   val = lisp_make_string(MNML_COMPILER_VERSION, strlen(MNML_COMPILER_VERSION));
   con = lisp_cons(key, val);
-  nxt = lisp_cons(con, res);
-  X(key, val, con, res);
-  res = nxt;
+  res = lisp_cons(con, res);
   /*
    * Add the compiler ID.
    */
@@ -163,9 +162,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(compid);
   val = lisp_make_string(MNML_COMPILER_ID, strlen(MNML_COMPILER_ID));
   con = lisp_cons(key, val);
-  nxt = lisp_cons(con, res);
-  X(key, val, con, res);
-  res = nxt;
+  res = lisp_cons(con, res);
   /*
    * Add the build timestamp.
    */
@@ -173,9 +170,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(buildts);
   val = lisp_make_string(MNML_BUILD_TIMESTAMP, strlen(MNML_BUILD_TIMESTAMP));
   con = lisp_cons(key, val);
-  nxt = lisp_cons(con, res);
-  X(key, val, con, res);
-  res = nxt;
+  res = lisp_cons(con, res);
   /*
    * Set the variable if the list is not NIL.
    */
@@ -183,7 +178,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(env);
   atom_t tmp = GLOBALS;
   GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
-  X(key, res, tmp);
+  X(tmp);
 }
 
 static void
@@ -202,7 +197,6 @@ lisp_build_env(const lisp_t lisp)
       atom_t val = lisp_make_string(n + 1, strlen(n + 1));
       atom_t con = lisp_cons(key, val);
       res = lisp_append(res, con);
-      X(key, val);
     }
   }
   /*
@@ -213,7 +207,7 @@ lisp_build_env(const lisp_t lisp)
     atom_t key = lisp_make_symbol(env);
     atom_t tmp = GLOBALS;
     GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
-    X(key, res, tmp);
+    X(tmp);
   } else {
     X(res);
   }
@@ -237,12 +231,12 @@ lisp_load_defaults(const lisp_t lisp)
   atom_t sy0 = lisp_make_symbol(lod);
   atom_t sy1 = lisp_make_symbol(qte);
   atom_t sy2 = lisp_make_symbol(def);
-  atom_t cn0 = lisp_cons(sy0, NIL);
+  atom_t cn0 = lisp_cons(sy0, UP(NIL));
   atom_t cn1 = lisp_cons(sy1, cn0);
   atom_t cn2 = lisp_cons(sy2, cn1);
   atom_t cn3 = lisp_cons(mod, cn2);
   atom_t tmp = module_load(lisp, cn3);
-  X(mod, sy0, sy1, sy2, cn0, cn1, cn2, tmp);
+  X(tmp);
 }
 
 /*

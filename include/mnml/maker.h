@@ -39,21 +39,18 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t __1 = lisp_make_symbol(s_1);        \
-    atom_t r_1 = lisp_cons(__1, R);            \
-    X(__1, R);                                 \
-    R = r_1;                                   \
+    R = lisp_cons(__1, R);                     \
   }
 
 #define LISP_CONS_REM(R, _1)                   \
   LISP_CONS_0(R);                              \
   {                                            \
+    X(R);                                      \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t __1 = lisp_make_symbol(s_1);        \
     MAKE_SYMBOL_STATIC(s_0, "REM", 3);         \
     atom_t __0 = lisp_make_symbol(s_0);        \
-    atom_t r_1 = lisp_cons(__1, __0);          \
-    X(__0, __1, R);                            \
-    R = r_1;                                   \
+    R = lisp_cons(__1, __0);                   \
   }
 
 #define LISP_CONS_2(R, _2, _1) LISP_CONS_##_1(R, _2)
@@ -63,9 +60,7 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_3, #_3, strlen(#_3)); \
     atom_t __3 = lisp_make_symbol(s_3);        \
-    atom_t r_3 = lisp_cons(__3, R);            \
-    X(__3, R);                                 \
-    R = r_3;                                   \
+    R = lisp_cons(__3, R);                     \
   }
 
 #define LISP_CONS_4(R, _4, ...)                \
@@ -73,9 +68,7 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_4, #_4, strlen(#_4)); \
     atom_t __4 = lisp_make_symbol(s_4);        \
-    atom_t r_4 = lisp_cons(__4, R);            \
-    X(__4, R);                                 \
-    R = r_4;                                   \
+    R = lisp_cons(__4, R);                     \
   }
 
 #define LISP_CONS_5(R, _5, ...)                \
@@ -83,9 +76,7 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_5, #_5, strlen(#_5)); \
     atom_t __5 = lisp_make_symbol(s_5);        \
-    atom_t r_5 = lisp_cons(__5, R);            \
-    X(__5, R);                                 \
-    R = r_5;                                   \
+    R = lisp_cons(__5, R);                     \
   }
 
 #define LISP_CONS_(_0, _1, _2, _3, _4, _5, NAME, ...) NAME

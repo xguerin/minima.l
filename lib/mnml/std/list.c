@@ -20,9 +20,7 @@ lisp_list(const lisp_t lisp, const atom_t closure, const atom_t cell)
      */
     atom_t res = lisp_list(lisp, closure, cdr);
     atom_t evl = lisp_eval(lisp, closure, car);
-    atom_t con = lisp_cons(evl, res);
-    X(evl, res);
-    return con;
+    return lisp_cons(evl, res);
   }
   /*
    */

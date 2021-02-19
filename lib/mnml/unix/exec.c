@@ -5,6 +5,7 @@
 #include <mnml/utils.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdio.h>
 #include <unistd.h>
 
 extern char** environ;

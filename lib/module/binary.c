@@ -126,7 +126,6 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
         atom_t sym = e->load(lisp);
         atom_t tmp = nxt;
         nxt = lisp_cons(sym, tmp);
-        X(sym, tmp);
         break;
       }
       e++;
@@ -175,7 +174,6 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
        */
       atom_t tmp = result;
       result = lisp_cons(sym, tmp);
-      X(sym, tmp);
     }
     X(cell);
     return result;
@@ -246,10 +244,10 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
    */
   if (add_to_cache) {
     atom_t hnd = lisp_make_number((uint64_t)handle);
-    atom_t val = lisp_cons(name, hnd);
+    atom_t val = lisp_cons(UP(name), hnd);
     atom_t tmp = MODULES;
     MODULES = lisp_setq(MODULES, val);
-    X(hnd, tmp);
+    X(tmp);
   }
   /*
    * Return the result.

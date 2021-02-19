@@ -92,12 +92,10 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
 #define PUSH_IO_CONTEXT(__c, __d, __p)             \
   do {                                             \
     atom_t p = lisp_make_string(__p, strlen(__p)); \
-    atom_t x = lisp_cons(p, NIL);                  \
+    atom_t x = lisp_cons(p, UP(NIL));              \
     atom_t n = lisp_make_number((int64_t)__d);     \
     atom_t y = lisp_cons(n, x);                    \
-    atom_t o = __c;                                \
-    __c = lisp_cons(y, o);                         \
-    X(o, y, n, x, p);                              \
+    __c = lisp_cons(y, __c);                       \
   } while (0)
 
 #define POP_IO_CONTEXT(__c) \

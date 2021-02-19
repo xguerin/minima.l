@@ -147,10 +147,8 @@ lisp_len(const atom_t cell)
 atom_t
 lisp_append(const atom_t lst, const atom_t elt)
 {
-  atom_t con = lisp_cons(elt, NIL);
-  atom_t res = lisp_conc(lst, con);
-  X(con, elt, lst);
-  return res;
+  atom_t con = lisp_cons(elt, UP(NIL));
+  return lisp_conc(lst, con);
 }
 
 /*
@@ -222,9 +220,7 @@ lisp_dup(const atom_t cell)
 {
   if (IS_PAIR(cell)) {
     atom_t rem = lisp_dup(CDR(cell));
-    atom_t res = lisp_cons(CAR(cell), rem);
-    X(rem);
-    return res;
+    return lisp_cons(UP(CAR(cell)), rem);
   }
   return UP(cell);
 }

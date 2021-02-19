@@ -39,7 +39,6 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
     case T_SYMBOL: {
       atom_t kvp = lisp_cons(arg, val);
       ret = lisp_cons(kvp, closure);
-      X(arg, val, kvp, closure);
       break;
     }
     default: {
@@ -66,9 +65,8 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    * (DSCL, NIL, NIL) if there is no more values either.
    */
   if (IS_NULL(args)) {
-    atom_t tail = lisp_cons(NIL, vals);
+    atom_t tail = lisp_cons(args /* NIL */, vals);
     rslt = lisp_cons(dscl, tail);
-    X(dscl, tail, args, vals);
   }
   /*
    * If ARGS is a single symbol, bind the unevaluated values to it. That
@@ -76,17 +74,15 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    */
   else if (IS_SYMB(args)) {
     atom_t head = lisp_bind(lisp, dscl, args, vals);
-    atom_t tail = lisp_cons(NIL, NIL);
+    atom_t tail = lisp_cons(UP(NIL), UP(NIL));
     rslt = lisp_cons(head, tail);
-    X(head, tail);
   }
   /*
    * Return (DSCL, ARGS, NIL) if we run out of values.
    */
   else if (IS_NULL(vals)) {
-    atom_t tail = lisp_cons(args, NIL);
+    atom_t tail = lisp_cons(args, vals /* NIL */);
     rslt = lisp_cons(dscl, tail);
-    X(dscl, tail, args, vals);
   }
   /*
    * If there is an ARG and a VAL available, we grab the CAR of each and we
@@ -159,8 +155,8 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
      * Prepend the bind-site closure to the call-site closure.
      */
     atom_t dup = lisp_dup(bscl);
-    atom_t cls = lisp_conc(dup, closure);
-    X(bscl, dup);
+    atom_t cls = lisp_conc(dup, UP(closure));
+    X(bscl);
     /*
      * Evaluation the native function. Native functions have no definition-site
      * closures, so we pass the previously computed closure with the currently
@@ -189,14 +185,13 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
   else {
     atom_t con0 = lisp_cons(bscl, body);
     rslt = lisp_cons(narg, con0);
-    X(narg, con0, bscl, body);
   }
   /*
    * If there is any remaining values, append them.
    */
   if (!IS_NULL(nval)) {
     atom_t tmp = rslt;
-    rslt = lisp_eval(lisp, closure, lisp_cons(rslt, nval));
+    rslt = lisp_eval(lisp, closure, lisp_cons(UP(rslt), UP(nval)));
     X(tmp);
   }
   X(nval);
@@ -237,21 +232,18 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   else if (lisp_equ(car, nxt)) {
     rslt = lisp_cons(nxt, cdr);
-    X(nxt, cdr);
   }
   /*
    * If it's a symbol, re-evaluate cell.
    */
   else if (IS_SYMB(nxt) || IS_PAIR(nxt)) {
     rslt = lisp_eval(lisp, closure, lisp_cons(nxt, cdr));
-    X(nxt, cdr);
   }
   /*
    * Otherwise, recompose the list.
    */
   else {
     rslt = lisp_cons(nxt, cdr);
-    X(nxt, cdr);
   }
   X(car);
   /*

@@ -30,9 +30,7 @@ convert(const struct sockaddr_in* const sa)
   /*
    * Construct and return the result.
    */
-  atom_t rslt = lisp_cons(host, port);
-  X(host, port);
-  return rslt;
+  return lisp_cons(host, port);
 }
 
 static atom_t USED
@@ -60,9 +58,7 @@ lisp_function_accept(UNUSED const lisp_t lisp, const atom_t closure)
    */
   atom_t clfd = lisp_make_number(res);
   atom_t clad = convert(&addr);
-  atom_t rslt = lisp_cons(clfd, clad);
-  X(clfd, clad);
-  return rslt;
+  return lisp_cons(clfd, clad);
 }
 
 LISP_MODULE_SETUP(accept, accept, FD, NIL)

@@ -57,9 +57,9 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
      */
     if (FD_ISSET(CAR(fds)->number, set) && !IS_NULL(cb)) {
       atom_t fdn = lisp_car(fds);
-      atom_t cn0 = lisp_cons(fdn, NIL);
-      atom_t cn1 = lisp_cons(cb, cn0);
-      X(act, fdn, cn0);
+      atom_t cn0 = lisp_cons(fdn, UP(NIL));
+      atom_t cn1 = lisp_cons(UP(cb), cn0);
+      X(act);
       act = lisp_eval(lisp, closure, cn1);
     }
   }
@@ -74,14 +74,11 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
       atom_t car = lisp_car(fds);
       atom_t nxt = process_r(lisp, closure, CDR(fds), cb, set);
       atom_t cn0 = lisp_cons(car, nxt);
-      X(car, nxt);
       /*
        * If the returned number is different, append it too.
        */
       if (car->number != act->number) {
-        atom_t tmp = lisp_cons(act, cn0);
-        X(cn0);
-        cn0 = tmp;
+        cn0 = lisp_cons(UP(act), cn0);
       }
       /*
        * Return the new set.
@@ -95,11 +92,10 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
       return process_r(lisp, closure, CDR(fds), cb, set);
     }
     default: {
+      X(act);
       atom_t car = lisp_car(fds);
       atom_t nxt = process_r(lisp, closure, CDR(fds), cb, set);
-      atom_t cn0 = lisp_cons(car, nxt);
-      X(act, car, nxt);
-      return cn0;
+      return lisp_cons(car, nxt);
     }
   }
 }
@@ -148,9 +144,8 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   /*
    * Build the result.
    */
-  atom_t cn0 = lisp_cons(eres, NIL);
+  atom_t cn0 = lisp_cons(eres, UP(NIL));
   atom_t cn1 = lisp_cons(rres, cn0);
-  X(rres, cn0, eres);
   /*
    * Return the updated descriptor list.
    */

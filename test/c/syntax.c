@@ -257,13 +257,10 @@ conc_cons_tests()
   tmp1 = result;
   lexer_parse(lexer, INPUT("2"), true);
   tmp2 = result;
-  tmp3 = lisp_conc(tmp1, result);
+  tmp3 = lisp_conc(tmp1, tmp2);
   lexer_parse(lexer, INPUT("(1 . 2)"), true);
   ASSERT_TRUE(lisp_equ(tmp1, result));
-  X(tmp1);
-  X(tmp2);
-  X(tmp3);
-  X(result);
+  X(tmp3, result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -278,10 +275,9 @@ conc_cons_tests()
   lexer_parse(lexer, INPUT("(1)"), true);
   tmp1 = result;
   lexer_parse(lexer, INPUT("(2)"), true);
-  tmp2 = lisp_conc(tmp1, result);
-  X(tmp1);
-  X(tmp2);
-  X(result);
+  tmp2 = result;
+  tmp3 = lisp_conc(tmp1, tmp2);
+  X(tmp3);
   /*
    */
   lisp_test_fini(&lisp);
@@ -296,10 +292,9 @@ conc_cons_tests()
   lexer_parse(lexer, INPUT("(())"), true);
   tmp1 = result;
   lexer_parse(lexer, INPUT("(2)"), true);
-  tmp2 = lisp_conc(tmp1, result);
-  X(tmp1);
-  X(tmp2);
-  X(result);
+  tmp2 = result;
+  tmp3 = lisp_conc(tmp1, tmp2);
+  X(tmp3);
   /*
    */
   lisp_test_fini(&lisp);
@@ -316,8 +311,6 @@ conc_cons_tests()
   lexer_parse(lexer, INPUT("2"), true);
   tmp2 = lisp_cons(tmp1, result);
   X(tmp2);
-  X(tmp1);
-  X(result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -334,8 +327,6 @@ conc_cons_tests()
   lexer_parse(lexer, INPUT("2"), true);
   tmp2 = lisp_cons(tmp1, result);
   X(tmp2);
-  X(tmp1);
-  X(result);
   /*
    */
   lisp_test_fini(&lisp);
@@ -352,8 +343,6 @@ conc_cons_tests()
   lexer_parse(lexer, INPUT("(2)"), true);
   tmp2 = lisp_cons(tmp1, result);
   X(tmp2);
-  X(tmp1);
-  X(result);
   /*
    * Clean-up.
    */
