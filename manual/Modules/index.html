@@ -251,6 +251,8 @@ atom_t lisp_make_symbol(const symbol_t sym);
 <pre><code class="language-c">atom_t lisp_cons(const atom_t a, const atom_t b);
 atom_t lisp_conc(const atom_t a, const atom_t b);
 </code></pre>
+<p>Both functions consume their arguments as those are often created for the sole
+purpose of being <code>cons</code>'d or <code>conc</code>'d.</p>
 <h4 id="deallocation">Deallocation</h4>
 <p>Atom values must be manually deallocated using the <code>X(...)</code> macro defined in the
 <code>slab</code> interface. Atom values are reference counted, so great care must be taken
