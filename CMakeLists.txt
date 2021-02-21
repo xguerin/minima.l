@@ -51,6 +51,8 @@ message(STATUS "Build timestamp: " ${BUILD_TIMESTAMP})
 #
 
 option(MNML_ENABLE_DEBUG       "Enable debug output"         ON)
+option(MNML_ENABLE_ASAN        "Enable address sanitizer"    OFF)
+option(MNML_ENABLE_MSAN        "Enable memory sanitizer"     OFF)
 option(MNML_ENABLE_SSE41       "Enable SSE4.1 optimizations" ON)
 option(MNML_ENABLE_TESTS       "Build and run tests"         ON)
 option(MNML_ENABLE_LISPY_TESTS "Enable LISPy tests"          ON)
@@ -112,6 +114,26 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3")
+
+if(MNML_ENABLE_ASAN)
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=address")
+  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=address")
+
+  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
+  set (CMAKE_LINKER_FLAGS_RELEASE "${CMAKE_LINKER_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=address")
+  set (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_LINKER_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=address")
+endif()
+
+if(MNML_ENABLE_MSAN)
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=memory")
+  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=memory")
+  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=memory")
+
+  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=memory")
+  set (CMAKE_LINKER_FLAGS_RELEASE "${CMAKE_LINKER_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=memory")
+  set (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_LINKER_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=memory")
+endif()
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-register")
