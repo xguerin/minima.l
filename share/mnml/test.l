@@ -3,13 +3,12 @@
 	"has.l"
 	"iter.l"
 	"iterators.l"
-	"len.l"
 	"split.l"
 	"term.l"
 	'(io prin printl prinl)
 	'(logic = and)
 	'(math >)
-	'(std let if eval cond prog car setq tru?)
+	'(std len let if eval cond prog car setq tru?)
 	'(sys slabinfo))
 
 (def usage ()

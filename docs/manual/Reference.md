@@ -95,7 +95,7 @@
 | `insert`    | `(insert 'fun 'any 'lst)`     |        | Insert `any` into a sorted `lst` using `fun` |
 | `iter`      | `(iter 'fun 'lst)`            |        | Iterate over the elements of a list |
 | `last`      | `(last 'lst)`                 |        | Return the last element of a list |
-| `len`       | `(len 'lst)`                  |        | Compute the length `lst` |
+| `len`       | `(len 'lst)`                  | `std`    | Compute the length `lst` |
 | `list`      | `(list 'any ...)`             | `std`    | [Create](#list) a list with `any` |
 | `map`       | `(map 'fun 'lst)`             |        | Map the content of `lst` |
 | `map2`      | `(map2 'fun 'lst 'lst)`       |        | Map the content of a two lists |

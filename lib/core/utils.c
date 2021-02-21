@@ -108,19 +108,13 @@ lisp_fini()
 size_t
 lisp_len(const atom_t cell)
 {
-  /*
-   * Base case.
-   */
-  if (IS_NULL(cell)) {
-    return 0;
+  size_t len = 0;
+  FOREACH(cell, a)
+  {
+    len += 1;
+    NEXT(a);
   }
-  /*
-   * Recursive call.
-   */
-  atom_t cdr = lisp_cdr(cell);
-  size_t len = lisp_len(cdr);
-  X(cdr);
-  return 1 + len;
+  return len;
 }
 
 /*

@@ -2,7 +2,6 @@
 	"@lib/append.l"
 	"@lib/iter.l"
 	"@lib/join.l"
-	"@lib/len.l"
 	"@lib/split.l"
 	"@lib/trim.l"
 	'(io in out prinl printl readline)
@@ -10,7 +9,7 @@
 	'(manips cadr caddr cddr)
 	'(logic = or)
 	'(math >)
-	'(std \ <- car cons if let list match nil? prog unless when while)
+	'(std \ <- car cons if len let list match nil? prog unless when while)
 	'(unix accept close connect listen select))
 
 #

@@ -1,9 +1,9 @@
 (load
-	"len.l" "manips.l"
+	"manips.l"
 	'(logic or =)
 	'(io prinl)
 	'(math - >)
-	'(std if nil? cdr cons car eval let prog))
+	'(std if nil? cdr cons car eval len let prog))
 
 (def args:skip (LST LEN)
 	"Extract sublist of LEN from LST."

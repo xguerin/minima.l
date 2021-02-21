@@ -1,4 +1,4 @@
-#include "mnml/debug.h"
+#include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
