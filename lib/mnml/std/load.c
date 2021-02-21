@@ -16,32 +16,48 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
   atom_t cdr = lisp_cdr(cell);
   X(cell);
   /*
-   * Make sure that we are dealing with a list.
+   * Make sure that we are dealing with a symbol or a list.
    */
-  if (!IS_PAIR(car)) {
-    X(car, cdr);
-    return lisp_make_nil();
-  }
-  /*
-   * If it's a string, load it as a script.
-   */
-  if (lisp_is_string(car)) {
+  switch (car->type) {
     /*
-     * Construct the file name.
+     * If it's a symbol, load the binary module (shortcut for '(SYM . T)).
      */
-    char buffer[PATH_MAX + 1];
-    lisp_make_cstring(car, buffer, PATH_MAX, 0);
-    X(car);
+    case T_SYMBOL: {
+      atom_t mod = lisp_cons(car, lisp_make_true());
+      res = module_load(lisp, mod);
+      break;
+    }
     /*
-     * Load the file.
+     * If it's a pair, it can be either a string or a binary module.
      */
-    res = lisp_load_file(lisp, buffer);
-  }
-  /*
-   * Otherwise load the binary module.
-   */
-  else {
-    res = module_load(lisp, car);
+    case T_PAIR: {
+      /*
+       * If it's a string, load it as a script.
+       */
+      if (lisp_is_string(car)) {
+        /*
+         * Construct the file name.
+         */
+        char buffer[PATH_MAX + 1];
+        lisp_make_cstring(car, buffer, PATH_MAX, 0);
+        X(car);
+        /*
+         * Load the file.
+         */
+        res = lisp_load_file(lisp, buffer);
+      }
+      /*
+       * Otherwise load the binary module.
+       */
+      else {
+        res = module_load(lisp, car);
+      }
+      break;
+    }
+    default: {
+      X(car);
+      res = lisp_make_nil();
+    }
   }
   /*
    * If CDR is NIL, return the result.

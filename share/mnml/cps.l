@@ -7,7 +7,7 @@
 	"orelse.l"
 	"replc.l"
 	"rev.l"
-	'(logic . T) '(math . T)'(std . T))
+	'logic 'math 'std)
 
 #
 # Make a symbol placeholder

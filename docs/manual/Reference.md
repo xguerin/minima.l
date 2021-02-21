@@ -81,6 +81,7 @@
 | `cadr`      | `(cadr 'lst)`                 | `manips` | Get the 2nd element of `lst` |
 | `cddr`      | `(cddr 'lst)`                 | `manips` | Get the tail of the tail of `lst` |
 | `caddr`     | `(caddr 'lst)`                | `manips` | Get the 3rd element of `lst` |
+| `cadddr`    | `(cadddr 'lst)`               | `manips` | Get the 4th element of `lst` |
 | `caar`      | `(caar 'lst)`                 | `manips` | Get the 1st element of the head of `lst` |
 | `cadar`     | `(cadar 'lst)`                | `manips` | Get the 2nd element of the head of `lst` |
 | `cdar`      | `(cdar 'lst)`                 | `manips` | Get the tail of the head of `lst` |
@@ -418,6 +419,7 @@ Return the newly created list.
 ```lisp
 (load 'str ...)
 (load '(mod sym ...))
+(load 'sym ...)
 (load '(mod . T))
 ```
 #### Description
@@ -429,14 +431,15 @@ installation prefix.
 : (load "@lib/cadr.l")
 > ((x) NIL NIL (car (cdr x)))
 ```
-In the second form, load `sym` in the module `mod`. In the third form, all
-symbols in the module `mod` are loaded. Modules are searched in the `lib/mnml`
-directory of the installation prefix or in the `MNML_MODULE_PATH` environment
-variable.
+In the second form, load `sym` in the module `mod`. In the third and fourth
+forms, all symbols in the module `mod` are loaded.
 ```lisp
 : (load '(math +))
 > (+)
 ```
+Modules are searched in the `lib/mnml` directory of the installation prefix or
+in the `MNML_MODULE_PATH` environment variable.
+
 #### Return value
 
 In the first form, return the result of the last evaluated operation in the

@@ -10,8 +10,7 @@
 	"manips.l"
 	"rev.l"
 	"run.l"
-	'(io . T) '(logic . T) '(math . T) '(std . T)
-	'(sys . T) '(unix . T))
+	'io 'logic 'math 'std 'sys 'unix)
 
 #
 # Indentation management.

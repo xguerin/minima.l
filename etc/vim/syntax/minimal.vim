@@ -49,6 +49,7 @@ syn keyword MinimalFuncs
       \ cddr
       \ cadar
       \ caddr
+      \ cadddr
       \ cadr
       \ car
       \ cdar

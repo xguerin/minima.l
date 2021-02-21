@@ -5,7 +5,7 @@
 	'(io in readline)
 	'(logic =)
 	'(std let \ if cons prog)
-	'(unix . T))
+	'unix)
 
 (def readlines (result)
 	"Read all lines from FD."
