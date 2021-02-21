@@ -28,8 +28,10 @@ module_find_at_path(const char* const dirpath, const char* const name,
    * Create the library file name.
    */
 #ifdef __MACH__
-  const size_t lib_name_len = strlen(name) + 9;
+  /* LIB NAME .DYLIB\0 = 3 + STRLEN(NAME) + 7 */
+  const size_t lib_name_len = strlen(name) + 10;
 #else
+  /* LIB NAME .SO\0 = 3 + STRLEN(NAME) + 3 */
   const size_t lib_name_len = strlen(name) + 6;
 #endif
   char* const lib_name = alloca(lib_name_len);
@@ -89,9 +91,9 @@ module_find(const char* const paths, const atom_t sym, char* const path)
   /*
    * Scan libraries in the path.
    */
-  FOR_EACH_TOKEN(paths, ":", entry,
-                 result =
-                   !result ? module_find_at_path(entry, bsym, path) : result);
+  FOR_EACH_TOKEN(paths, ":", entry, {
+    result = !result ? module_find_at_path(entry, bsym, path) : result;
+  });
   return result;
 }
 
