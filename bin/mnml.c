@@ -55,7 +55,7 @@ static void
 repl_parse_error_handler(const lisp_t lisp)
 {
   write(1, "^ parse error\n", 14);
-  if (IS_NULL(CDR(CDR(CAR(ICHAN))))) {
+  if (IS_NULL(CDR(CDR(CAR(lisp->ichan))))) {
     fwrite(": ", 1, 2, stdout);
   }
 }
@@ -64,7 +64,7 @@ static void
 stage_prompt(const lisp_t lisp, UNUSED const atom_t cell,
              UNUSED const void* const data)
 {
-  if (IS_NULL(CDR(CDR(CAR(ICHAN))))) {
+  if (IS_NULL(CDR(CDR(CAR(lisp->ichan))))) {
     fwrite(": ", 1, 2, stdout);
   }
 }
@@ -123,8 +123,8 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(lisp, var);
-    atom_t tmp = GLOBALS;
-    GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, key, res));
+    atom_t tmp = lisp->globals;
+    lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
     X(lisp->slab, tmp);
   } else {
     X(lisp->slab, res);
@@ -183,8 +183,8 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(lisp, env);
-  atom_t tmp = GLOBALS;
-  GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, key, res));
+  atom_t tmp = lisp->globals;
+  lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
   X(lisp->slab, tmp);
 }
 
@@ -212,8 +212,8 @@ lisp_build_env(const lisp_t lisp)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(lisp, env);
-    atom_t tmp = GLOBALS;
-    GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, key, res));
+    atom_t tmp = lisp->globals;
+    lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
     X(lisp->slab, tmp);
   } else {
     X(lisp->slab, res);
@@ -356,11 +356,11 @@ main(const int argc, char** const argv)
   atom_t result;
   if (filename == NULL && expr == NULL) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    PUSH_IO_CONTEXT(lisp, ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(lisp, OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp, lisp->ichan, stdin, cwd);
+    PUSH_IO_CONTEXT(lisp, lisp->ochan, stdout, cwd);
     result = run(lisp, stage_prompt, stage_newline, cwd);
-    POP_IO_CONTEXT(lisp, ICHAN);
-    POP_IO_CONTEXT(lisp, OCHAN);
+    POP_IO_CONTEXT(lisp, lisp->ichan);
+    POP_IO_CONTEXT(lisp, lisp->ochan);
   } else if (filename == NULL) {
     /*
      * Setup the PAIRS to NIL.
@@ -376,8 +376,8 @@ main(const int argc, char** const argv)
     /*
      * Push the IO context.
      */
-    PUSH_IO_CONTEXT(lisp, ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(lisp, OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp, lisp->ichan, stdin, cwd);
+    PUSH_IO_CONTEXT(lisp, lisp->ochan, stdout, cwd);
     /*
      * Evaluate the parsed expressions.
      */
@@ -396,16 +396,16 @@ main(const int argc, char** const argv)
     /*
      * Pop the IO context.
      */
-    POP_IO_CONTEXT(lisp, ICHAN);
-    POP_IO_CONTEXT(lisp, OCHAN);
+    POP_IO_CONTEXT(lisp, lisp->ichan);
+    POP_IO_CONTEXT(lisp, lisp->ochan);
     /*
      * Clear the PAIRS.
      */
     X(lisp->slab, PAIRS);
   } else {
-    PUSH_IO_CONTEXT(lisp, OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp, lisp->ochan, stdout, cwd);
     result = lisp_load_file(lisp, filename);
-    POP_IO_CONTEXT(lisp, OCHAN);
+    POP_IO_CONTEXT(lisp, lisp->ochan);
   }
   /*
    * Compute the return status.

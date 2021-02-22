@@ -75,9 +75,9 @@ lisp_function_out(const lisp_t lisp, const atom_t closure)
   /*
    * Push the context, eval the REM, pop the context.
    */
-  PUSH_IO_CONTEXT(lisp, OCHAN, handle, dirn_buf);
+  PUSH_IO_CONTEXT(lisp, lisp->ochan, handle, dirn_buf);
   atom_t res = lisp_prog(lisp, C, UP(REM), lisp_make_nil(lisp));
-  POP_IO_CONTEXT(lisp, OCHAN);
+  POP_IO_CONTEXT(lisp, lisp->ochan);
   /*
    * Close the FD if necessary and return the value.
    */

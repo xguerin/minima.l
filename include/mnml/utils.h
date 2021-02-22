@@ -80,7 +80,7 @@ void lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb,
 uint64_t lisp_timestamp();
 
 /*
- * Get the full path of a file according to the current ICHAN context.
+ * Get the full path of a file according to the current input channel context.
  */
 const char* lisp_get_fullpath(const lisp_t lisp, const char* const cwd,
                               const char* const filepath, char* const buffer);

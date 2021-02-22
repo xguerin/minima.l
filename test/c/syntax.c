@@ -39,9 +39,9 @@ lisp_test_init(const lisp_t lisp)
 {
   lisp->slab = slab_allocate();
   /*
-   * Create the GLOBALS and the lexer.
+   * Create the lisp->globals and the lexer.
    */
-  GLOBALS = lisp_make_nil(lisp);
+  lisp->globals = lisp_make_nil(lisp);
   lexer = lexer_create(lisp, lisp_consumer);
   /*
    * Setup the debug variables.
@@ -54,7 +54,7 @@ lisp_test_init(const lisp_t lisp)
 bool
 lisp_test_fini(const lisp_t lisp)
 {
-  X(lisp->slab, GLOBALS);
+  X(lisp->slab, lisp->globals);
   lexer_destroy(lexer);
   TRACE("D %ld", lisp->slab->n_alloc - lisp->slab->n_free);
   LISP_COLLECT(lisp->slab);

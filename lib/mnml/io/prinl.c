@@ -33,7 +33,7 @@ lisp_function_prinl(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
   atom_t res = lisp_prinl_all(lisp, C, UP(ANY), lisp_make_nil(lisp));
-  fwrite("\n", 1, 1, (FILE*)CAR(CAR(OCHAN))->number);
+  fwrite("\n", 1, 1, (FILE*)CAR(CAR(lisp->ochan))->number);
   return res;
 }
 

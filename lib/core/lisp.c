@@ -51,7 +51,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
   /*
    * Check the global environment.
    */
-  FOREACH(GLOBALS, g)
+  FOREACH(lisp->globals, g)
   {
     atom_t car = g->car;
     if (lisp_symbol_match(CAR(car), sym)) {

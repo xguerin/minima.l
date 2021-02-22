@@ -36,7 +36,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
   /*
    * Look second in globals.
    */
-  FOREACH(GLOBALS, c1)
+  FOREACH(lisp->globals, c1)
   {
     atom_t car = c1->car;
     if (lisp_symbol_match(CAR(car), &sym->symbol)) {

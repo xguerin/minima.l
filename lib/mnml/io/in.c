@@ -23,9 +23,9 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
    */
   LISP_ARGS(closure, C, CHAN, REM);
   /*
-   * Get the working directory for the current ICHAN.
+   * Get the working directory for the current lisp->ichan.
    */
-  lisp_make_cstring(CAR(CDR(CAR(ICHAN))), dirn_buf, PATH_MAX, 0);
+  lisp_make_cstring(CAR(CDR(CAR(lisp->ichan))), dirn_buf, PATH_MAX, 0);
   /*
    * Process the CHAN.
    */
@@ -80,9 +80,9 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
   /*
    * Push the context, eval the prog, pop the context.
    */
-  PUSH_IO_CONTEXT(lisp, ICHAN, handle, dirn_buf);
+  PUSH_IO_CONTEXT(lisp, lisp->ichan, handle, dirn_buf);
   atom_t res = lisp_prog(lisp, C, UP(REM), lisp_make_nil(lisp));
-  POP_IO_CONTEXT(lisp, ICHAN);
+  POP_IO_CONTEXT(lisp, lisp->ichan);
   /*
    * Close the FD if necessary and return the value.
    */

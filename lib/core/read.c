@@ -12,37 +12,37 @@
 static void
 lisp_consumer(const lisp_t lisp, const atom_t cell)
 {
-  atom_t chn = CAR(ICHAN);
+  atom_t chn = CAR(lisp->ichan);
   CDR(chn) = lisp_append(lisp, CDR(chn), cell);
 }
 
 static atom_t
 lisp_read_pop(const lisp_t lisp)
 {
-  TRACE_CHAN_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(lisp->ichan);
   /*
    * ((CHN0 PWD V1 V2) (CHN1 PWD V1 V2) ...).
    */
-  atom_t chn = CAR(ICHAN);
+  atom_t chn = CAR(lisp->ichan);
   atom_t vls = CDR(CDR(chn));
   atom_t res = UP(CAR(vls));
   CDR(CDR(chn)) = UP(CDR(vls));
   X(lisp->slab, vls);
   /*
    */
-  TRACE_CHAN_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(lisp->ichan);
   return res;
 }
 
 atom_t
 lisp_read(const lisp_t lisp, UNUSED const atom_t closure, const atom_t cell)
 {
-  TRACE_CHAN_SEXP(ICHAN);
+  TRACE_CHAN_SEXP(lisp->ichan);
   X(lisp->slab, cell);
   /*
    * Grab the channel, the path and the content.
    */
-  atom_t chn = CAR(ICHAN);
+  atom_t chn = CAR(lisp->ichan);
   atom_t hnd = CAR(chn);
   atom_t val = CDR(CDR(chn));
   /*
@@ -66,7 +66,7 @@ lisp_read(const lisp_t lisp, UNUSED const atom_t closure, const atom_t cell)
     }
     size_t len = strlen(p);
     lexer_parse(lexer, buffer, lexer->rem + len, lexer->rem + len < RBUFLEN);
-  } while (IS_NULL(CDR(CDR(CAR(ICHAN)))) || lexer_pending(lexer));
+  } while (IS_NULL(CDR(CDR(CAR(lisp->ichan)))) || lexer_pending(lexer));
   /*
    * Grab the result and return it.
    */

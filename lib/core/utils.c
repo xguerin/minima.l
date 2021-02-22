@@ -536,7 +536,7 @@ lisp_get_fullpath(const lisp_t lisp, const char* const cwd,
   /*
    * If the expanded path is not absolute, prepend the current CWD.
    */
-  if (expn_buf[0] != '/' && !IS_NULL(ICHAN)) {
+  if (expn_buf[0] != '/' && !IS_NULL(lisp->ichan)) {
     strcpy(absl_buf, cwd);
     strcat(absl_buf, "/");
     strcat(absl_buf, expn_buf);
@@ -582,10 +582,10 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   /*
    * Get CWD.
    */
-  if (IS_NULL(ICHAN)) {
+  if (IS_NULL(lisp->ichan)) {
     strcpy(absl_buf, getenv("PWD"));
   } else {
-    lisp_make_cstring(CAR(CDR(CAR(ICHAN))), absl_buf, PATH_MAX, 0);
+    lisp_make_cstring(CAR(CDR(CAR(lisp->ichan))), absl_buf, PATH_MAX, 0);
   }
   /*
    * Get the fullpath for the file.
@@ -624,7 +624,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
    * Push the context.
    */
   TRACE("Loading %s", path);
-  PUSH_IO_CONTEXT(lisp, ICHAN, handle, dir);
+  PUSH_IO_CONTEXT(lisp, lisp->ichan, handle, dir);
   /*
    * Load all the entries
    */
@@ -637,7 +637,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
   /*
    * Pop the context and return the value.
    */
-  POP_IO_CONTEXT(lisp, ICHAN);
+  POP_IO_CONTEXT(lisp, lisp->ichan);
   fclose(handle);
   return res;
 }

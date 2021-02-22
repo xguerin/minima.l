@@ -128,7 +128,7 @@ void
 lisp_prin(const lisp_t lisp, const atom_t closure, const atom_t cell,
           const bool s)
 {
-  FILE* handle = (FILE*)CAR(CAR(OCHAN))->number;
+  FILE* handle = (FILE*)CAR(CAR(lisp->ochan))->number;
   char buffer[IO_BUFFER_LEN];
   size_t idx = lisp_prin_atom(handle, buffer, 0, closure, cell, s);
   lisp_flush(handle, buffer, idx);

@@ -34,10 +34,6 @@ typedef struct _lisp
 lisp_t lisp_new(const slab_t slab);
 void lisp_delete(const lisp_t lisp);
 
-#define GLOBALS lisp->globals
-#define ICHAN lisp->ichan
-#define OCHAN lisp->ochan
-
 /*
  * Native function type.
  */
