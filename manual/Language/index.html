@@ -182,7 +182,8 @@
                 <li class="third-level"><a href="#lambdas">Lambdas</a></li>
                 <li class="third-level"><a href="#currying">Currying</a></li>
                 <li class="third-level"><a href="#recursion">Recursion</a></li>
-                <li class="third-level"><a href="#argument-assignation">Argument assignation</a></li>
+                <li class="third-level"><a href="#tail-call-optimization">Tail-call optimization</a></li>
+                <li class="third-level"><a href="#value-deconstruction">Value deconstruction</a></li>
             <li class="second-level"><a href="#global-variables">Global variables</a></li>
                 
                 <li class="third-level"><a href="#argv">ARGV</a></li>
@@ -297,6 +298,10 @@ similar to <code>def</code>:</p>
 : ((\ (x) (map (\ (n) (+ n 1)) x)) '(1 2 3 4))
 &gt; (2 3 4 5)
 </code></pre>
+<p>The closure available at the time a lambda is defined is placed in its
+signature. This is the lambda's <em>define-site closure</em>. When the lambda is called,
+its closure is extended with the environment available where the call is
+performed. This is the lambda's <em>call-site closure</em>.</p>
 <h3 id="currying">Currying</h3>
 <p>Minima.l supports currying. It uses the function's closure to store the curried
 arguments. Curryring is available to all <code>lisp</code> and native functions. For example:</p>
@@ -309,11 +314,30 @@ arguments. Curryring is available to all <code>lisp</code> and native functions.
 </code></pre>
 <h3 id="recursion">Recursion</h3>
 <p>A function defined using <code>def</code> can be recursive. When functions are defined,
-symbols with their name are not resolved in their closure and are resolved
-dynamically in the symbol domain instead. There is a caveat however: since the
-function symbols are resolved dynamically, redefining these symbols will lead to
-undefined behavior.</p>
-<h3 id="argument-assignation">Argument assignation</h3>
+symbols with their names are not resolved in their closure and are resolved
+dynamically in the symbol domain instead.</p>
+<p>A lambda defined using <code>let</code> can also be recursive. Similarly as above, the
+recursive calls are resolved dynamically. However, the resolution process
+first looks into the <em>define-site closure</em> of the lambda, then its <em>call-site
+closure</em>, and finally in the symbol domain.</p>
+<p>There is a caveat however: since the function symbols are resolved dynamically,
+redefining these symbols will lead to undefined behavior. For instance, the
+following is a valid recursive lambda and returns <code>0</code>:</p>
+<pre><code class="language-lisp">(let ((fn . (\ (A) (if (= A 0) 0 (fn (- A 1))))))
+  (fn 10))
+</code></pre>
+<p>However, the following is not and returns <code>10</code>:</p>
+<pre><code class="language-lisp">(let ((fn . (\ (A) (+ A 1))))
+  (let ((fn . (\ (A) (unless (= A 0) (fn (- A 1))))))
+    (fn 10)))
+</code></pre>
+<h3 id="tail-call-optimization">Tail-call optimization</h3>
+<p>When functions are defined with <code>def</code> or <code>\\</code> in <code>let</code>, the function's body is
+scanned for potential tail calls. During evaluation, when a tail call is
+encountered, its argument are evaluated at its call-site and returned to the
+parent. These arguments are then used at the root of the function in a new
+application of that function, executed in a tight loop.</p>
+<h3 id="value-deconstruction">Value deconstruction</h3>
 <p>Assignation of arguments in <code>def</code>, <code>lamda</code>, or <code>let</code> functions support
 deconstruction. For instance, with <code>def</code>:</p>
 <pre><code class="language-lisp">: (def sum3 ((a b c)) (+ (+ a b) c))

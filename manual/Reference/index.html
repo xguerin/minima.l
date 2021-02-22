@@ -538,6 +538,12 @@
 <td align="left">Get the 3rd element of <code>lst</code></td>
 </tr>
 <tr>
+<td align="left"><code>cadddr</code></td>
+<td align="left"><code>(cadddr 'lst)</code></td>
+<td align="center"><code>manips</code></td>
+<td align="left">Get the 4th element of <code>lst</code></td>
+</tr>
+<tr>
 <td align="left"><code>caar</code></td>
 <td align="left"><code>(caar 'lst)</code></td>
 <td align="center"><code>manips</code></td>
@@ -1128,6 +1134,7 @@ following format:</p>
 <h4 id="invocation_10">Invocation</h4>
 <pre><code class="language-lisp">(load 'str ...)
 (load '(mod sym ...))
+(load 'sym ...)
 (load '(mod . T))
 </code></pre>
 <h4 id="description_10">Description</h4>
@@ -1137,13 +1144,13 @@ installation prefix.</p>
 <pre><code class="language-lisp">: (load &quot;@lib/cadr.l&quot;)
 &gt; ((x) NIL NIL (car (cdr x)))
 </code></pre>
-<p>In the second form, load <code>sym</code> in the module <code>mod</code>. In the third form, all
-symbols in the module <code>mod</code> are loaded. Modules are searched in the <code>lib/mnml</code>
-directory of the installation prefix or in the <code>MNML_MODULE_PATH</code> environment
-variable.</p>
+<p>In the second form, load <code>sym</code> in the module <code>mod</code>. In the third and fourth
+forms, all symbols in the module <code>mod</code> are loaded.</p>
 <pre><code class="language-lisp">: (load '(math +))
 &gt; (+)
 </code></pre>
+<p>Modules are searched in the <code>lib/mnml</code> directory of the installation prefix or
+in the <code>MNML_MODULE_PATH</code> environment variable.</p>
 <h4 id="return-value_10">Return value</h4>
 <p>In the first form, return the result of the last evaluated operation in the
 list. In the second and third form, return the list of loaded symbols. On error,
