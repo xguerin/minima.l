@@ -1,3 +1,4 @@
+#include "mnml/types.h"
 #include <mnml/debug.h>
 #include <mnml/maker.h>
 #include <mnml/module.h>
@@ -307,6 +308,206 @@ lisp_process_escapes(const atom_t cell, const bool esc, const atom_t res)
 }
 
 /*
+ * Check if a function arguments can be applied to a set of values.
+ */
+
+bool
+lisp_may_apply(const atom_t args, const atom_t vals)
+{
+  /*
+   * Return true if both lists are empty.
+   */
+  if ((IS_NULL(args) && IS_NULL(vals))) {
+    return true;
+  }
+  /*
+   * Also return true if the argument is a catch-all symbol.
+   */
+  else if (IS_SYMB(args)) {
+    return true;
+  }
+  /*
+   * Also return true if all values are consumed but not all arguments.
+   */
+  else if (!IS_NULL(args) && IS_NULL(vals)) {
+    return true;
+  }
+  /*
+   * If both args and vals are lists, check both CDRs.
+   */
+  else if (IS_PAIR(args) && IS_PAIR(vals)) {
+    return lisp_may_apply(CDR(args), CDR(vals));
+  }
+  /*
+   * Return false otherwise, when there are more values than arguments.
+   */
+  return false;
+}
+
+/*
+ * Return true if a function has tail calls.
+ */
+
+static atom_t lisp_collect_tails(const atom_t cell);
+
+static atom_t
+lisp_collect_tails_assoc(const atom_t cell)
+{
+  /*
+   * Empty list.
+   */
+  if (IS_NULL(cell)) {
+    return cell;
+  }
+  /*
+   * Not a list.
+   */
+  if (!IS_PAIR(cell)) {
+    X(cell);
+    return lisp_make_nil();
+  }
+  /*
+   * Grab CAR and CDR.
+   */
+  atom_t car = lisp_car(cell);
+  atom_t cdr = lisp_cdr(cell);
+  X(cell);
+  /*
+   * Process CAR.
+   */
+  atom_t head = lisp_collect_tails(lisp_cdr(car));
+  X(car);
+  /*
+   * Process CDR.
+   */
+  atom_t tail = lisp_collect_tails_assoc(cdr);
+  /*
+   * Return the CONC.
+   */
+  return lisp_conc(head, tail);
+}
+
+static atom_t
+lisp_collect_tails(const atom_t cell)
+{
+  atom_t res;
+  TRACE_TAIL_SEXP(cell);
+  /*
+   * Handle the cell by type.
+   */
+  switch (cell->type) {
+    case T_PAIR: {
+      /*
+       * Check what kind of list we are working with.
+       */
+      if (!IS_SYMB(CAR(cell))) {
+        res = lisp_cons(cell, lisp_make_nil());
+        break;
+      }
+      /*
+       * Check for IF constructs.
+       */
+      if (lisp_symbol_equal(CAR(cell), "if")) {
+        atom_t cd0 = lisp_cdr(cell);
+        atom_t cd1 = lisp_cdr(cd0);
+        atom_t thn = lisp_collect_tails(lisp_car(cd1));
+        atom_t cd2 = lisp_cdr(cd1);
+        atom_t els = lisp_collect_tails(lisp_car(cd2));
+        X(cell, cd0, cd1, cd2);
+        res = lisp_conc(thn, els);
+        break;
+      }
+      /*
+       * Check for COND and MATCH constructs.
+       */
+      if (lisp_symbol_equal(CAR(cell), "cond") ||
+          lisp_symbol_equal(CAR(cell), "match")) {
+        atom_t cd0 = lisp_cdr(cell);
+        atom_t cd1 = lisp_cdr(cd0);
+        res = lisp_collect_tails_assoc(cd1);
+        X(cell, cd0);
+        break;
+      }
+      /*
+       * Check for PROG and STREAM constructs.
+       */
+      if (lisp_symbol_equal(CAR(cell), "prog") ||
+          lisp_symbol_equal(CAR(cell), "|>")) {
+        FOREACH(cell, p) { NEXT(p); }
+        atom_t last = UP(p->car);
+        res = lisp_collect_tails(last);
+        X(cell);
+        break;
+      }
+      /*
+       * Check for UNLESS and WHEN constructs.
+       */
+      if (lisp_symbol_equal(CAR(cell), "unless") ||
+          lisp_symbol_equal(CAR(cell), "when")) {
+        atom_t cd0 = lisp_cdr(cell);
+        atom_t cd1 = lisp_cdr(cd0);
+        res = lisp_collect_tails(lisp_car(cd1));
+        X(cell, cd0, cd1);
+        break;
+      }
+      /*
+       * Wrap the list in a list.
+       */
+      res = lisp_cons(cell, lisp_make_nil());
+      break;
+    }
+    case T_NIL: {
+      res = cell;
+      break;
+    }
+    default: {
+      res = lisp_cons(cell, lisp_make_nil());
+      break;
+    }
+  }
+  /*
+   */
+  TRACE_TAIL_SEXP(res);
+  return res;
+}
+
+void
+lisp_mark_tail_calls(const atom_t symb, const atom_t args, const atom_t body)
+{
+  TRACE_TAIL_SEXP(symb);
+  TRACE_TAIL_SEXP(args);
+  TRACE_TAIL_SEXP(body);
+  /*
+   * Grab the last expression of the body.
+   */
+  FOREACH(body, pe) { NEXT(pe); }
+  atom_t last = UP(pe->car);
+  /*
+   * Extract the tails.
+   */
+  atom_t tails = lisp_collect_tails(last);
+  TRACE_TAIL_SEXP(tails);
+  /*
+   * Check if there is a symbol match and return the result.
+   */
+  FOREACH(tails, pt)
+  {
+    if (IS_PAIR(pt->car)) {
+      if (lisp_symbol_match(CAR(pt->car), &symb->symbol)) {
+        if (lisp_may_apply(args, CDR(pt->car))) {
+          CAR(pt->car)->flags = F_TAIL_CALL;
+        }
+      }
+    }
+    NEXT(pt);
+  }
+  /*
+   * Clean-up.
+   */
+  X(tails);
+}
+
+/*
  * Get a timestamp in nanoseconds.
  */
 
@@ -461,6 +662,12 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
 /*
  * Symbol matching.
  */
+
+inline bool
+lisp_symbol_equal(const atom_t a, const char* const b)
+{
+  return strncmp(a->symbol.val, b, LISP_SYMBOL_LENGTH) == 0;
+}
 
 inline bool
 lisp_symbol_match(const atom_t a, const symbol_t b)

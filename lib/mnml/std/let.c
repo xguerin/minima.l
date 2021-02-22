@@ -37,17 +37,40 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
   atom_t nvl = lisp_cdr(car);
   X(car);
   /*
-   * Evaluate the value. and bind it to the environment.
+   * Evaluate the value and bind it to the environment.
    */
   atom_t val = lisp_eval(lisp, tmp, nvl);
-  X(tmp);
-  /*
-   * Bind it to the environment.
-   */
   atom_t nxt = lisp_bind(lisp, env, arg, val);
+  /*
+   * If the value is a function, mark the tail calls.
+   */
+  if (IS_SYMB(arg) && IS_FUNC(val)) {
+    bool unique = true;
+    /*
+     * Check that the symbol is unique in the definition-site closure. If it is
+     * not unique, the symbol will be resolved to the one in the definition-site
+     * closure, and not the one in the call-site closure, as it should for a
+     * let-bound recursive lambda.
+     */
+    FOREACH(tmp, p)
+    {
+      if (lisp_symbol_match(CAR(p->car), &arg->symbol)) {
+        unique = false;
+        break;
+      }
+      NEXT(p);
+    }
+    /*
+     * If it is unique, mark the tail calls.
+     */
+    if (unique) {
+      lisp_mark_tail_calls(arg, CAR(val), CDR(CDR(val)));
+    }
+  }
   /*
    * Process the remainder.
    */
+  X(tmp);
   return lisp_let_bind(lisp, closure, nxt, cdr);
 }
 

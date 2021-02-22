@@ -391,37 +391,37 @@
 			# Predicate operations.
 			#
 			~(foldl
-				 (\ (acc e) (cons (cons (list e _ _) '(make-any last cc:op:predicate)) acc))
+				 (\ (acc e) (cons (cons (list e _ _) '(make-any 'last cc:op:predicate)) acc))
 				 NIL '(lst? nil?))
 			#
 			# Unary operations.
 			#
 			~(foldl
-				 (\ (acc e) (cons (cons (list e _ _) '(make-any last cc:op:num:one)) acc))
+				 (\ (acc e) (cons (cons (list e _ _) '(make-any 'last cc:op:num:one)) acc))
 				 NIL '(not))
 			#
 			# Binary operations.
 			#
 			~(foldl
-				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:num:two)) acc))
+				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any 'last cc:op:num:two)) acc))
 				 NIL '(+ - * / < <= > >= and or))
 			#
 			# Equality operations.
 			#
 			~(foldl
-				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:atm:two)) acc))
+				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any 'last cc:op:atm:two)) acc))
 				 NIL '(= <>))
 			#
 			# Unary list operations.
 			#
 			~(foldl
-				 (\ (acc e) (cons (cons (list e _ _) '(make-any last cc:op:lst:one)) acc))
+				 (\ (acc e) (cons (cons (list e _ _) '(make-any 'last cc:op:lst:one)) acc))
 				 NIL '(car cdr))
 			#
 			# Binary list operations.
 			#
 			~(foldl
-				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any last cc:op:lst:two)) acc))
+				 (\ (acc e) (cons (cons (list e _ _ _) '(make-any 'last cc:op:lst:two)) acc))
 				 NIL '(conc cons))
 			#
 			# Quote operation.
@@ -440,13 +440,13 @@
 			#
 			# KVAR funcall.
 			#
-			((_ _) . (make-any car cc:op:extcall))
+			((_ _) . (make-any 'car cc:op:extcall))
 			#
 			# Recursive behavior
 			#
 			((_ . _) . (if (= NAME (car body))
-									 (make-any last cc:op:reccall)
-									 (make-any last cc:op:funcall)))
+									 (make-any 'last cc:op:reccall)
+									 (make-any 'last cc:op:funcall)))
 			#
 			# Unknown behavior.
 			#

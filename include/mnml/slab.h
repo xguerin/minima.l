@@ -7,7 +7,7 @@
  * Slab types.
  */
 
-typedef struct _slab_t
+typedef struct _slab
 {
   size_t first;
   size_t n_alloc;

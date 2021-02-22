@@ -1,3 +1,5 @@
+#include "mnml/maker.h"
+#include "mnml/types.h"
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/slab.h>
@@ -65,8 +67,8 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    * (DSCL, NIL, NIL) if there is no more values either.
    */
   if (IS_NULL(args)) {
-    atom_t tail = lisp_cons(args /* NIL */, vals);
-    rslt = lisp_cons(dscl, tail);
+    rslt = lisp_cons(dscl, args);
+    X(vals);
   }
   /*
    * If ARGS is a single symbol, bind the unevaluated values to it. That
@@ -74,15 +76,14 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    */
   else if (IS_SYMB(args)) {
     atom_t head = lisp_bind(lisp, dscl, args, vals);
-    atom_t tail = lisp_cons(lisp_make_nil(), lisp_make_nil());
-    rslt = lisp_cons(head, tail);
+    rslt = lisp_cons(head, lisp_make_nil());
   }
   /*
    * Return (DSCL, ARGS, NIL) if we run out of values.
    */
   else if (IS_NULL(vals)) {
-    atom_t tail = lisp_cons(args, vals /* NIL */);
-    rslt = lisp_cons(dscl, tail);
+    rslt = lisp_cons(dscl, args);
+    X(vals);
   }
   /*
    * If there is an ARG and a VAL available, we grab the CAR of each and we
@@ -122,16 +123,26 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
  */
 
 static atom_t
-lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
-               const atom_t vals)
+lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
+               const atom_t func, const atom_t vals)
 {
   atom_t rslt;
   TRACE_CLOS_SEXP(closure);
   TRACE_EVAL_SEXP(func);
   /*
-   * Grab the arguments, the definition-site closure and the body of the lambda.
+   * Grab the arguments.
    */
   atom_t args = lisp_car(func);
+  /*
+   * Check if the function can be applied.
+   */
+  if (!lisp_may_apply(args, vals)) {
+    X(func, vals, args);
+    return lisp_make_nil();
+  }
+  /*
+   * Grab the definition-site closure and the body.
+   */
   atom_t cdr0 = lisp_cdr(func);
   atom_t dscl = lisp_car(cdr0);
   atom_t body = lisp_cdr(cdr0);
@@ -146,14 +157,12 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
    * Extract the bound arguments, and remaining arguments and values,
    */
   atom_t bscl = lisp_car(bind);
-  atom_t cdr1 = lisp_cdr(bind);
-  atom_t narg = lisp_car(cdr1);
-  atom_t nval = lisp_cdr(cdr1);
-  X(bind, cdr1);
+  atom_t narg = lisp_cdr(bind);
+  X(bind);
   /*
-   * If no argument remains, apply the function.
+   * Evaluate the binary function.
    */
-  if (IS_NULL(narg)) {
+  if (IS_NULL(narg) && IS_NUMB(body)) {
     /*
      * Prepend the bind-site closure to the call-site closure.
      */
@@ -161,26 +170,49 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
     atom_t cls = lisp_conc(dup, UP(closure));
     X(bscl);
     /*
-     * Evaluation the native function. Native functions have no definition-site
-     * closures, so we pass the previously computed closure with the currently
-     * available closure to the function.
+     * Call the binary function.
      */
-    if (IS_NUMB(body)) {
-      function_t fun = (function_t)body->number;
-      rslt = fun(lisp, cls);
-      X(body);
+    function_t fun = (function_t)body->number;
+    rslt = fun(lisp, cls);
+    X(body, narg, cls);
+  }
+  /*
+   * Evaluate the lisp function (tail call).
+   */
+  else if (IS_NULL(narg) && IS_TAIL_CALL(symb)) {
+    rslt = lisp_cons(UP(symb), lisp_dup(bscl));
+    rslt->flags = F_TAIL_CALL;
+    X(body, narg, bscl);
+  }
+  /*
+   * Evaluate the lisp function.
+   */
+  else if (IS_NULL(narg)) {
+    /*
+     * Prepend the bind-site closure to the call-site closure.
+     */
+    atom_t dup = lisp_dup(bscl);
+    X(narg, bscl);
+    /*
+     * Tail-call evaluation loop.
+     */
+  tailcall_loop:;
+    atom_t cls = lisp_conc(dup, UP(closure));
+    atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil());
+    X(cls);
+    /*
+     * If it's a tail call, evaluate the function with the new arguments.
+     */
+    if (IS_TAIL_CALL(res) && lisp_symbol_match(CAR(res), &symb->symbol)) {
+      dup = lisp_cdr(res);
+      X(res);
+      goto tailcall_loop;
     }
     /*
-     * Stack the closures and the curried arguments in order and evaluate the
-     * function as a PROG.
+     * Otherwise, leave the loop.
      */
-    else {
-      rslt = lisp_prog(lisp, cls, body, lisp_make_nil());
-    }
-    /*
-     * Clean-up.
-     */
-    X(narg, cls);
+    rslt = res;
+    X(body);
   }
   /*
    * Else handle partial application.
@@ -189,15 +221,6 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t func,
     atom_t con0 = lisp_cons(bscl, body);
     rslt = lisp_cons(narg, con0);
   }
-  /*
-   * If there is any remaining values, append them.
-   */
-  if (!IS_NULL(nval)) {
-    atom_t tmp = rslt;
-    rslt = lisp_eval(lisp, closure, lisp_cons(UP(rslt), UP(nval)));
-    X(tmp);
-  }
-  X(nval);
   /*
    */
   TRACE_CLOS_SEXP(closure);
@@ -228,7 +251,7 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * Handle the case when CAR is a function.
    */
   if (IS_FUNC(nxt)) {
-    rslt = lisp_eval_func(lisp, closure, nxt, cdr);
+    rslt = lisp_eval_func(lisp, closure, car, nxt, cdr);
   }
   /*
    * If CAR and CNR are the same, recompose the list.

@@ -1,6 +1,7 @@
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
+#include <mnml/utils.h>
 
 static atom_t USED
 lisp_function_def(const lisp_t lisp, const atom_t closure)
@@ -37,6 +38,10 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
     prog = nxt;
   }
   X(doc);
+  /*
+   * Check if there is any tail call.
+   */
+  lisp_mark_tail_calls(symb, args, prog);
   /*
    * Append an empty closure.
    */

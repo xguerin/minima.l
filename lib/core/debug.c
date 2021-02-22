@@ -21,6 +21,7 @@ bool MNML_DEBUG_MODL = false;
 bool MNML_DEBUG_REFC = false;
 bool MNML_DEBUG_SLOT = false;
 bool MNML_DEBUG_SLAB = false;
+bool MNML_DEBUG_TAIL = false;
 
 static void
 lisp_debug_set_flag(const char* const flag)
@@ -35,6 +36,7 @@ lisp_debug_set_flag(const char* const flag)
   MNML_DEBUG_REFC = MNML_DEBUG_REFC || strcmp(flag, "REFC") == 0;
   MNML_DEBUG_SLAB = MNML_DEBUG_SLAB || strcmp(flag, "SLAB") == 0;
   MNML_DEBUG_SLOT = MNML_DEBUG_SLOT || strcmp(flag, "SLOT") == 0;
+  MNML_DEBUG_TAIL = MNML_DEBUG_SLOT || strcmp(flag, "TAIL") == 0;
 }
 
 void

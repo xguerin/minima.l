@@ -66,6 +66,10 @@ basic_tests()
 {
   struct _lisp lisp;
   /*
+   * Make sure the atom size is always the same.
+   */
+  assert(sizeof(struct _atom) == 32);
+  /*
    * TEST 00.
    */
   lisp_test_init(&lisp);

@@ -65,6 +65,17 @@ atom_t lisp_process_escapes(const atom_t cell, const bool esc,
                             const atom_t res);
 
 /*
+ * Check if a function arguments can be applied to a set of values.
+ */
+bool lisp_may_apply(const atom_t args, const atom_t vals);
+
+/*
+ * Mark tail calls. Return true if any were found.
+ */
+void lisp_mark_tail_calls(const atom_t symb, const atom_t args,
+                          const atom_t body);
+
+/*
  * Get a timestamp in nanoseconds.
  */
 uint64_t lisp_timestamp();
@@ -84,6 +95,7 @@ atom_t lisp_load_file(const lisp_t lisp, const char* const filepath);
  * Symbol matching.
  */
 
+bool lisp_symbol_equal(const atom_t a, const char* const b);
 bool lisp_symbol_match(const atom_t a, const symbol_t b);
 
 /*

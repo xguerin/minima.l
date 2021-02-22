@@ -9,6 +9,7 @@ lisp_make_char(const char c)
 {
   atom_t R = lisp_allocate();
   R->type = T_CHAR;
+  R->flags = 0;
   R->refs = 1;
   R->number = c;
   TRACE_MAKE_SEXP(R);
@@ -20,6 +21,7 @@ lisp_make_number(const int64_t num)
 {
   atom_t R = lisp_allocate();
   R->type = T_NUMBER;
+  R->flags = 0;
   R->refs = 1;
   R->number = num;
   TRACE_MAKE_SEXP(R);
@@ -42,6 +44,7 @@ lisp_make_symbol(const symbol_t sym)
 {
   atom_t R = lisp_allocate();
   R->type = T_SYMBOL;
+  R->flags = 0;
   R->refs = 1;
   R->symbol = *sym;
   TRACE_MAKE_SEXP(R);
@@ -53,6 +56,7 @@ lisp_make_nil()
 {
   atom_t R = lisp_allocate();
   R->type = T_NIL;
+  R->flags = 0;
   R->refs = 1;
   TRACE_MAKE_SEXP(R);
   return R;
@@ -63,6 +67,7 @@ lisp_make_true()
 {
   atom_t R = lisp_allocate();
   R->type = T_TRUE;
+  R->flags = 0;
   R->refs = 1;
   TRACE_MAKE_SEXP(R);
   return R;
@@ -82,6 +87,7 @@ lisp_make_wildcard()
 {
   atom_t R = lisp_allocate();
   R->type = T_WILDCARD;
+  R->flags = 0;
   R->refs = 1;
   TRACE_MAKE_SEXP(R);
   return R;

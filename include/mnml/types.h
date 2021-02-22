@@ -28,6 +28,11 @@ typedef enum _atom_type
   T_WILDCARD
 } atom_type_t;
 
+typedef enum _atom_flag
+{
+  F_TAIL_CALL = 0x1,
+} atom_flag_t;
+
 #define ATOM_TYPES 7
 
 struct _atom;
@@ -52,7 +57,8 @@ typedef union _symbol
 typedef struct _atom
 {
   uint32_t next;
-  atom_type_t type : 32;
+  atom_type_t type : 16;
+  uint16_t flags;
   uint64_t refs;
   union
   {
@@ -75,6 +81,8 @@ typedef struct _atom
 
 #define IS_LIST(__a) (IS_PAIR(__a) || IS_NULL(__a))
 #define IS_ATOM(__a) (!IS_LIST(__a))
+
+#define IS_TAIL_CALL(__a) ((__a)->flags == F_TAIL_CALL)
 
 /*
  * A function has the following format:

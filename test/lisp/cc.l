@@ -7,7 +7,7 @@
 	"Compile and build SYM."
 	(cc:build SYM (cc:compile SYM (list SYM))))
 
-(setq DELTA 28)
+(setq DELTA 24)
 
 (test:run
 	"Compiler operations"

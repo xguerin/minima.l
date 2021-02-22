@@ -23,6 +23,7 @@ extern bool MNML_DEBUG_MODL;
 extern bool MNML_DEBUG_REFC;
 extern bool MNML_DEBUG_SLOT;
 extern bool MNML_DEBUG_SLAB;
+extern bool MNML_DEBUG_TAIL;
 
 void lisp_debug_parse_flags();
 
@@ -45,14 +46,14 @@ void lisp_debug_parse_flags();
             ##__VA_ARGS__);                                              \
   }
 
-#define ERROR(__fmt, ...)                                     \
-  do {                                                        \
-    FPRINTF(stderr, "[ERROR ] - " __fmt "\n", ##__VA_ARGS__); \
+#define ERROR(__fmt, ...)                                         \
+  do {                                                            \
+    FPRINTF(stderr, "[ERROR ] - { } " __fmt "\n", ##__VA_ARGS__); \
   } while (0)
 
-#define TRACE(__fmt, ...)                                     \
-  do {                                                        \
-    FPRINTF(stderr, "[TRACE ] - " __fmt "\n", ##__VA_ARGS__); \
+#define TRACE(__fmt, ...)                                         \
+  do {                                                            \
+    FPRINTF(stderr, "[TRACE ] - { } " __fmt "\n", ##__VA_ARGS__); \
   } while (0)
 
 #define TRACE_CATG(__k, __fmt, ...) \
@@ -64,36 +65,38 @@ void lisp_debug_parse_flags();
 
 #if defined(__MACH__) || defined(__OpenBSD__)
 
-#define HEADER_SEXP(__c)                                  \
-  do {                                                    \
-    FPRINTF(stderr, "[%06llu] - %s = ", __c->refs, #__c); \
+#define HEADER_SEXP(__c)                                \
+  do {                                                  \
+    FPRINTF(stderr, "[%06llu] - {%c} %s = ", __c->refs, \
+            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);       \
   } while (0)
 
-#define HEADER_REFC(__f, __t, __n)                            \
-  do {                                                        \
-    FPRINTF(stderr, "[%2llu->%2llu] - %s = ", __f, __t, __n); \
+#define HEADER_REFC(__f, __t, __n)                                \
+  do {                                                            \
+    FPRINTF(stderr, "[%2llu->%2llu] - { } %s = ", __f, __t, __n); \
   } while (0)
 
-#define HEADER_SLOT(__i)                        \
-  do {                                          \
-    FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i); \
+#define HEADER_SLOT(__i)                            \
+  do {                                              \
+    FPRINTF(stderr, "[SLOT  ] - { } @%lu = ", __i); \
   } while (0)
 
 #else
 
-#define HEADER_SEXP(__c)                                 \
-  do {                                                   \
-    FPRINTF(stderr, "[%06lu] - %s = ", __c->refs, #__c); \
+#define HEADER_SEXP(__c)                              \
+  do {                                                \
+    FPRINTF(stderr, "[%06lu] - { } %s = ", __c->refs, \
+            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);     \
   } while (0)
 
-#define HEADER_REFC(__f, __t, __n)                          \
-  do {                                                      \
-    FPRINTF(stderr, "[%2lu->%2lu] - %s = ", __f, __t, __n); \
+#define HEADER_REFC(__f, __t, __n)                              \
+  do {                                                          \
+    FPRINTF(stderr, "[%2lu->%2lu] - { } %s = ", __f, __t, __n); \
   } while (0)
 
-#define HEADER_SLOT(__i)                        \
-  do {                                          \
-    FPRINTF(stderr, "[SLOT  ] - @%lu = ", __i); \
+#define HEADER_SLOT(__i)                            \
+  do {                                              \
+    FPRINTF(stderr, "[SLOT  ] - { } @%lu = ", __i); \
   } while (0)
 
 #endif
@@ -108,6 +111,7 @@ void lisp_debug_parse_flags();
 #define TRACE_REFC(__fmt, ...) TRACE_CATG(REFC, __fmt, ##__VA_ARGS__)
 #define TRACE_SLAB(__fmt, ...) TRACE_CATG(SLAB, __fmt, ##__VA_ARGS__)
 #define TRACE_SLOT(__fmt, ...) TRACE_CATG(SLOT, __fmt, ##__VA_ARGS__)
+#define TRACE_TAIL(__fmt, ...) TRACE_CATG(TAIL, __fmt, ##__VA_ARGS__)
 
 /*
  * S-expression tracing.
@@ -134,6 +138,7 @@ void lisp_debug_parse_flags();
 #define TRACE_MAKE_SEXP(__c) TRACE_CATG_SEXP(MAKE, __c)
 #define TRACE_MODL_SEXP(__c) TRACE_CATG_SEXP(MODL, __c)
 #define TRACE_SLAB_SEXP(__c) TRACE_CATG_SEXP(SLAB, __c)
+#define TRACE_TAIL_SEXP(__c) TRACE_CATG_SEXP(TAIL, __c)
 
 #define TRACE_REFC_SEXP(__f, __t, __n, __c)      \
   do {                                           \
@@ -168,6 +173,7 @@ void lisp_debug(FILE* fp, const atom_t atom, const size_t level);
 #define TRACE_REFC(__c, ...)
 #define TRACE_SLAB(__c, ...)
 #define TRACE_SLOT(__c, ...)
+#define TRACE_TAIL(__c, ...)
 
 #define TRACE_SEXP(__c)
 #define TRACE_BIND_SEXP(__c)
@@ -180,6 +186,7 @@ void lisp_debug(FILE* fp, const atom_t atom, const size_t level);
 #define TRACE_REFC_SEXP(__c)
 #define TRACE_SLAB_SEXP(__c)
 #define TRACE_SLOT_SEXP(__c)
+#define TRACE_TAIL_SEXP(__c)
 
 #endif
 
