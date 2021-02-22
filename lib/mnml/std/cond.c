@@ -10,33 +10,33 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
    * Sanity checks.
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
-    X(cell, match);
-    return lisp_make_nil();
+    X(lisp->slab, cell, match);
+    return lisp_make_nil(lisp);
   }
   /*
    * Get CAR/CDR.
    */
-  atom_t car = lisp_car(match);
-  atom_t cdr = lisp_cdr(match);
-  X(match);
+  atom_t car = lisp_car(lisp, match);
+  atom_t cdr = lisp_cdr(lisp, match);
+  X(lisp->slab, match);
   /*
    * Get args and prog.
    */
-  atom_t args = lisp_car(car);
-  atom_t prog = lisp_cdr(car);
-  X(car);
+  atom_t args = lisp_car(lisp, car);
+  atom_t prog = lisp_cdr(lisp, car);
+  X(lisp->slab, car);
   /*
    * If the cond argument _, simply execute the program.
    */
   if (IS_WILD(args)) {
-    X(args, cdr, cell);
+    X(lisp->slab, args, cdr, cell);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    * Build the predicate.
    */
-  atom_t con = lisp_cons(UP(cell), lisp_make_nil());
-  atom_t evl = lisp_cons(args, con);
+  atom_t con = lisp_cons(lisp, UP(cell), lisp_make_nil(lisp));
+  atom_t evl = lisp_cons(lisp, args, con);
   /*
    * Evaluate the predicate.
    */
@@ -44,12 +44,12 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    */
   if (IS_TRUE(res)) {
-    X(cdr, cell, res);
+    X(lisp->slab, cdr, cell, res);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    */
-  X(prog, res);
+  X(lisp->slab, prog, res);
   return lisp_cond(lisp, closure, cell, cdr);
 }
 
@@ -57,8 +57,8 @@ static atom_t USED
 lisp_function_cond(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
-  atom_t car = lisp_car(ANY);
-  atom_t cdr = lisp_cdr(ANY);
+  atom_t car = lisp_car(lisp, ANY);
+  atom_t cdr = lisp_cdr(lisp, ANY);
   atom_t res = lisp_cond(lisp, C, car, cdr);
   return res;
 }

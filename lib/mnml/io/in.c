@@ -41,7 +41,7 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
        * That argument must be a string.
        */
       if (!lisp_is_string(CHAN)) {
-        return lisp_make_nil();
+        return lisp_make_nil(lisp);
       }
       /*
        * Get the filepath.
@@ -53,7 +53,7 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
       const char* path = lisp_get_fullpath(lisp, dirn_buf, file_buf, path_buf);
       if (path == NULL) {
         ERROR("Cannot get the full path for %s", file_buf);
-        return lisp_make_nil();
+        return lisp_make_nil(lisp);
       }
       /*
        * Open the file.
@@ -67,7 +67,7 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
        * NOTE(xrg) fall-through intended.
        */
     default:
-      return lisp_make_nil();
+      return lisp_make_nil(lisp);
   }
   /*
    * Open the file handle.
@@ -75,14 +75,14 @@ lisp_function_in(const lisp_t lisp, const atom_t closure)
   FILE* handle = fdopen(fd, "r");
   if (handle == NULL) {
     close(fd);
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
   /*
    * Push the context, eval the prog, pop the context.
    */
-  PUSH_IO_CONTEXT(ICHAN, handle, dirn_buf);
-  atom_t res = lisp_prog(lisp, C, UP(REM), lisp_make_nil());
-  POP_IO_CONTEXT(ICHAN);
+  PUSH_IO_CONTEXT(lisp, ICHAN, handle, dirn_buf);
+  atom_t res = lisp_prog(lisp, C, UP(REM), lisp_make_nil(lisp));
+  POP_IO_CONTEXT(lisp, ICHAN);
   /*
    * Close the FD if necessary and return the value.
    */

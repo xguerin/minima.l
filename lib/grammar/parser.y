@@ -32,7 +32,7 @@ root ::= prefix(A).
 
 list(A) ::= POPEN PCLOSE.
 {
-  A = lisp_make_nil();
+  A = lisp_make_nil(lexer->lisp);
 }
 
 list(A) ::= POPEN items(B) PCLOSE.
@@ -42,25 +42,25 @@ list(A) ::= POPEN items(B) PCLOSE.
 
 list(A) ::= POPEN items(B) DOT prefix(C) PCLOSE.
 {
-  A = lisp_conc(B, C);
+  A = lisp_conc(lexer->lisp, B, C);
 }
 
 items(A) ::= prefix(B).
 {
-  A = lisp_cons(B, lisp_make_nil());
+  A = lisp_cons(lexer->lisp, B, lisp_make_nil(lexer->lisp));
 }
 
 items(A) ::= items(B) prefix(C).
 {
-  A = lisp_append(B, C);
+  A = lisp_append(lexer->lisp, B, C);
 }
 
 items(A) ::= items(B) TILDE prefix(C).
 {
-  atom_t nil = lisp_make_nil();
+  atom_t nil = lisp_make_nil(lexer->lisp);
   C = lisp_eval(lexer->lisp, nil, C);
-  A = lisp_conc(B, C);
-  X(nil);
+  A = lisp_conc(lexer->lisp, B, C);
+  X(lexer->lisp->slab, nil);
 }
 
 prefix(A) ::= item(B).
@@ -70,51 +70,51 @@ prefix(A) ::= item(B).
 
 prefix(A) ::= CQUOTE item(B).
 {
-  A = lisp_cons(lisp_make_quote(), B);
+  A = lisp_cons(lexer->lisp, lisp_make_quote(lexer->lisp), B);
 }
 
 prefix(A) ::= BACKTICK item(B).
 {
-  atom_t nil = lisp_make_nil();
+  atom_t nil = lisp_make_nil(lexer->lisp);
   A = lisp_eval(lexer->lisp, nil, B);
-  X(nil);
+  X(lexer->lisp->slab, nil);
 }
 
 item(A) ::= NUMBER(B).
 {
-  A = lisp_make_number((int64_t)B);
+  A = lisp_make_number(lexer->lisp, (int64_t)B);
 }
 
 item(A) ::= CHAR(B).
 {
-  A = lisp_make_char((char)B);
+  A = lisp_make_char(lexer->lisp, (char)B);
 }
 
 item(A) ::= STRING(B).
 {
-  A = lisp_make_string(B, strlen(B));
+  A = lisp_make_string(lexer->lisp, B, strlen(B));
   free(B);
 }
 
 item(A) ::= SYMBOL(B).
 {
-  A = lisp_make_symbol((symbol_t)B);
+  A = lisp_make_symbol(lexer->lisp, (symbol_t)B);
   free(B);
 }
 
 item(A) ::= C_NIL.
 {
-  A = lisp_make_nil();
+  A = lisp_make_nil(lexer->lisp);
 }
 
 item(A) ::= C_TRUE.
 {
-  A = lisp_make_true();
+  A = lisp_make_true(lexer->lisp);
 }
 
 item(A) ::= C_WILDCARD.
 {
-  A = lisp_make_wildcard();
+  A = lisp_make_wildcard(lexer->lisp);
 }
 
 item(A) ::= list(B).

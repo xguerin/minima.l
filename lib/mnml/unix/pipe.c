@@ -5,15 +5,15 @@
 #include <unistd.h>
 
 atom_t USED
-lisp_function_pipe(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
+lisp_function_pipe(const lisp_t lisp, UNUSED const atom_t closure)
 {
   int fd[2] = { 0 };
   if (pipe(fd) != 0) {
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
-  atom_t car = lisp_make_number(fd[0]);
-  atom_t cdr = lisp_make_number(fd[1]);
-  return lisp_cons(car, cdr);
+  atom_t car = lisp_make_number(lisp, fd[0]);
+  atom_t cdr = lisp_make_number(lisp, fd[1]);
+  return lisp_cons(lisp, car, cdr);
 }
 
 LISP_MODULE_SETUP(pipe, pipe)

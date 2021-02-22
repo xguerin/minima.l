@@ -3,8 +3,6 @@
 #include <mnml/module.h>
 #include <stdbool.h>
 
-extern atom_t MODULES;
-
 /*
  * Module search.
  */

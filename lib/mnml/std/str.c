@@ -4,12 +4,12 @@
 #include <mnml/utils.h>
 
 static atom_t USED
-lisp_function_str(UNUSED const lisp_t lisp, const atom_t closure)
+lisp_function_str(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X);
   char buffer[17] = { 0 };
   strncpy(buffer, X->symbol.val, LISP_SYMBOL_LENGTH);
-  return lisp_make_string(buffer, strlen(buffer));
+  return lisp_make_string(lisp, buffer, strlen(buffer));
 }
 
 LISP_MODULE_SETUP(str, str, X, NIL)

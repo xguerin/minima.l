@@ -171,7 +171,7 @@ if(MNML_WITH_TRANSFN)
   set(MNML_WITH_MODULES ON)
 endif()
 
-if(MNML_ENABLE_DEBUG)
+if(MNML_ENABLE_TESTS)
   enable_testing()
   add_subdirectory(test)
 endif()

@@ -133,8 +133,8 @@
 	(let (((op arg cont)	. body))
 		(prin (o|) "value_t R = { .atom = ")
 		(match op
-			(car . (prin "lisp_car("))
-			(cdr . (prin "lisp_cdr("))
+			(car . (prin "lisp_car(lisp, "))
+			(cdr . (prin "lisp_cdr(lisp, "))
 			(_	 . (prin " /* Unsupported operation " op " */ ")))
 		(cc:value:atm ARGS kvar arg)
 		(prinl ") };")
@@ -145,8 +145,8 @@
 	(let (((op arg1 arg2 cont)	. body))
 		(prin (o|) "value_t R = { .atom = ")
 		(match op
-			(conc . (prin "lisp_conc(UP("))
-			(cons . (prin "lisp_cons(UP("))
+			(conc . (prin "lisp_conc(lisp, UP("))
+			(cons . (prin "lisp_cons(lisp, UP("))
 			(_		.	(prin " /* Unsupported operation " op " */ ")))
 		(cc:value:atm ARGS kvar arg1)
 		(prin "), UP(")
@@ -205,20 +205,20 @@
 				(effargs	. (cc:arg:get args))
 				(genquot	. (\ (arg)
 											(prog
-												(prin (o|) "atom_t " arg " = lisp_cons(lisp_make_quote(), UP(")
+												(prin (o|) "atom_t " arg " = lisp_cons(lisp, lisp_make_quote(lisp), UP(")
 												(cc:value:atm ARGS kvar arg)
 												(prinl "));")
 												(when (= kvar arg) (cc:gen:x ARGS kvar arg))
 												)))
 				(gensymb	. (\ (arg)
 											(prinl (o|) "MAKE_SYMBOL_STATIC(s_" arg ", \"" arg "\", " (len (str arg)) ");")
-											(prinl (o|) "atom_t " arg " = lisp_make_symbol(s_" arg ");")
+											(prinl (o|) "atom_t " arg " = lisp_make_symbol(lisp, s_" arg ");")
 											))
 				(genargs	. (\ (arg)
 											(let ((type . (assoc arg TYPES)))
 												(match type
 													(NUMBER . (prog
-																			(prin (o|) "atom_t " arg " = lisp_make_number(")
+																			(prin (o|) "atom_t " arg " = lisp_make_number(lisp, ")
 																			(cc:value:num ARGS kvar arg)
 																			(prinl ");")))
 													#
@@ -234,15 +234,15 @@
 													# a function symbol.
 													#
 													(NIL	. (gensymb arg))
-													(_		. (prinl (o|) "atom_t " arg " = lisp_make_nil(); /* Unsupported type " (str type) " */"))
+													(_		. (prinl (o|) "atom_t " arg " = lisp_make_nil(lisp); /* Unsupported type " (str type) " */"))
 													))))
 				(gencall	. (\ (arg)
-											(prinl (o|) "_T = lisp_cons(" arg ", _S);")
+											(prinl (o|) "_T = lisp_cons(lisp, " arg ", _S);")
 											(prinl (o|) "_S = _T;")))
 				(type			. (assoc nvar TYPES)))
 		(iter genargs effargs)
 		(/**/ "Build the expression to evaluate.")
-		(prinl (o|) "atom_t _S = lisp_make_nil(), _T;")
+		(prinl (o|) "atom_t _S = lisp_make_nil(lisp), _T;")
 		(iter gencall (rev effargs))
 		(/**/ "Evaluate the expression.")
 		(prinl (o|) "atom_t _R = lisp_eval(lisp, E, _S);")
@@ -276,11 +276,11 @@
 		(NUMBER . (prinl "{ .number = _" arg "->number };"))
 		(ATOM		. (prinl "{ .atom = UP(_" arg ") };"))
 		(_			. (prinl "{ .number = 0 }; /* Unsupported type " (str atype) " */")))
-	(if x (prinl (o|) "X(_" arg ");")))
+	(if x (prinl (o|) "X(lisp->slab, _" arg ");")))
 
 (def cc:gen:x (ARGS kvar ref)
 	"Generate X(REF)."
-	(prin (o|) "X(") (cc:value:atm ARGS kvar ref) (prinl ");"))
+	(prin (o|) "X(lisp->slab, ") (cc:value:atm ARGS kvar ref) (prinl ");"))
 
 (def cc:value:get (ARGS kvar arg)
 	"Generate the C code for the ref R-value ARG."
@@ -375,7 +375,7 @@
 	(/**/ "Build the closure.")
 	(cc:gen:closure CONT CONT)
 	(/**/ "Collect the arguments.")
-	(prinl (o|) "value_t R = { .atom = lisp_make_nil() };")
+	(prinl (o|) "value_t R = { .atom = lisp_make_nil(lisp) };")
 	(/**/ "Build the continuation.")
 	(cc:gen:callback NAME REFS CONT CONT)
 	(cc:gen:cleanup ARGS REFS TYPES CONT kvar CONT)
@@ -528,9 +528,9 @@
 	"Generate the return value conversion."
 	(let ((rtype . (assoc kvar TYPES)))
 		(match rtype
-			(NUMBER	. (prinl (o|) "return lisp_make_number(V.number);"))
+			(NUMBER	. (prinl (o|) "return lisp_make_number(lisp, V.number);"))
 			(ATOM		. (prinl (o|) "return V.atom;"))
-			(_			. (prinl (o|) "return lisp_make_nil(); /* Unsupported type " (str rtype) " */"))
+			(_			. (prinl (o|) "return lisp_make_nil(lisp); /* Unsupported type " (str rtype) " */"))
 			)))
 
 (def cc:gen:identity (NAME TYPES kvar)

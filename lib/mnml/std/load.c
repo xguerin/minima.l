@@ -12,9 +12,9 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
   /*
    * Get CAR/CDR.
    */
-  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_eval(lisp, closure, lisp_car(lisp, cell));
+  atom_t cdr = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   /*
    * Make sure that we are dealing with a symbol or a list.
    */
@@ -23,7 +23,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
      * If it's a symbol, load the binary module (shortcut for '(SYM . T)).
      */
     case T_SYMBOL: {
-      atom_t mod = lisp_cons(car, lisp_make_true());
+      atom_t mod = lisp_cons(lisp, car, lisp_make_true(lisp));
       res = module_load(lisp, mod);
       break;
     }
@@ -40,7 +40,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
          */
         char buffer[PATH_MAX + 1];
         lisp_make_cstring(car, buffer, PATH_MAX, 0);
-        X(car);
+        X(lisp->slab, car);
         /*
          * Load the file.
          */
@@ -55,21 +55,21 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
       break;
     }
     default: {
-      X(car);
-      res = lisp_make_nil();
+      X(lisp->slab, car);
+      res = lisp_make_nil(lisp);
     }
   }
   /*
    * If CDR is NIL, return the result.
    */
   if (IS_NULL(cdr)) {
-    X(cdr);
+    X(lisp->slab, cdr);
     return res;
   }
   /*
    * Return the next evaluation otherwise.
    */
-  X(res);
+  X(lisp->slab, res);
   return lisp_load(lisp, closure, cdr);
 }
 

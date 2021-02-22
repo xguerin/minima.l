@@ -5,10 +5,10 @@
 #include <unistd.h>
 
 static atom_t USED
-lisp_function_fork(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
+lisp_function_fork(const lisp_t lisp, UNUSED const atom_t closure)
 {
   pid_t pid = fork();
-  return lisp_make_number(pid < 0 ? errno : pid);
+  return lisp_make_number(lisp, pid < 0 ? errno : pid);
 }
 
 LISP_MODULE_SETUP(fork, fork)

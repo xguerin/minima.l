@@ -13,7 +13,7 @@ static void
 lisp_consumer(const lisp_t lisp, const atom_t cell)
 {
   atom_t chn = CAR(ICHAN);
-  CDR(chn) = lisp_append(CDR(chn), cell);
+  CDR(chn) = lisp_append(lisp, CDR(chn), cell);
 }
 
 static atom_t
@@ -27,7 +27,7 @@ lisp_read_pop(const lisp_t lisp)
   atom_t vls = CDR(CDR(chn));
   atom_t res = UP(CAR(vls));
   CDR(CDR(chn)) = UP(CDR(vls));
-  X(vls);
+  X(lisp->slab, vls);
   /*
    */
   TRACE_CHAN_SEXP(ICHAN);
@@ -38,7 +38,7 @@ atom_t
 lisp_read(const lisp_t lisp, UNUSED const atom_t closure, const atom_t cell)
 {
   TRACE_CHAN_SEXP(ICHAN);
-  X(cell);
+  X(lisp->slab, cell);
   /*
    * Grab the channel, the path and the content.
    */

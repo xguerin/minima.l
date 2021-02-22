@@ -4,10 +4,10 @@
 #include <unistd.h>
 
 static atom_t USED
-lisp_function_quit(UNUSED const lisp_t lisp, UNUSED const atom_t closure)
+lisp_function_quit(const lisp_t lisp, UNUSED const atom_t closure)
 {
   kill(getpid(), SIGQUIT);
-  return lisp_make_true();
+  return lisp_make_true(lisp);
 }
 
 LISP_MODULE_SETUP(quit, quit)

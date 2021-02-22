@@ -9,23 +9,23 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure)
   /*
    * Extract the symbol and the value.
    */
-  atom_t sym = lisp_car(ANY);
-  atom_t cdr = lisp_cdr(ANY);
-  atom_t res = lisp_eval(lisp, C, lisp_car(cdr));
-  X(cdr);
+  atom_t sym = lisp_car(lisp, ANY);
+  atom_t cdr = lisp_cdr(lisp, ANY);
+  atom_t res = lisp_eval(lisp, C, lisp_car(lisp, cdr));
+  X(lisp->slab, cdr);
   /*
    * Don't set anything if NIL.
    */
   if (unlikely(IS_NULL(res))) {
-    X(sym);
+    X(lisp->slab, sym);
     return res;
   }
   /*
    * Call SETQ.
    */
   atom_t tmp = GLOBALS;
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(sym, UP(res)));
-  X(tmp);
+  GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, sym, UP(res)));
+  X(lisp->slab, tmp);
   return res;
 }
 

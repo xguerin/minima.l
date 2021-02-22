@@ -11,16 +11,16 @@ lisp_function_if(const lisp_t lisp, const atom_t closure)
    * Evaluate the THEN branch if TRUE.
    */
   if (unlikely(IS_NULL(COND))) {
-    atom_t cd1 = lisp_cdr(REM);
-    atom_t els = lisp_car(cd1);
-    X(cd1);
+    atom_t cd1 = lisp_cdr(lisp, REM);
+    atom_t els = lisp_car(lisp, cd1);
+    X(lisp->slab, cd1);
     return lisp_eval(lisp, C, els);
   }
   /*
    * Or evaluate the ELSE branch.
    */
   else {
-    atom_t thn = lisp_car(REM);
+    atom_t thn = lisp_car(lisp, REM);
     return lisp_eval(lisp, C, thn);
   }
 }

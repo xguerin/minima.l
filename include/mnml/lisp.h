@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mnml/slab.h>
 #include <mnml/types.h>
 #include <stdbool.h>
 
@@ -23,13 +24,15 @@
 
 typedef struct _lisp
 {
+  slab_t slab;
   atom_t globals;
+  atom_t modules;
   atom_t ichan;
   atom_t ochan;
 } * lisp_t;
 
-lisp_t lisp_new(const atom_t ichan, const atom_t ochan);
-void lisp_delete(lisp_t lisp);
+lisp_t lisp_new(const slab_t slab);
+void lisp_delete(const lisp_t lisp);
 
 #define GLOBALS lisp->globals
 #define ICHAN lisp->ichan
@@ -51,16 +54,16 @@ atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym);
  * Lisp basic functions.
  */
 
-atom_t lisp_car(const atom_t cell);
-atom_t lisp_cdr(const atom_t cell);
+atom_t lisp_car(const lisp_t lisp, const atom_t cell);
+atom_t lisp_cdr(const lisp_t lisp, const atom_t cell);
 
 /*
  * Internal list construction functions. CONS is pure, CONC is destructive.
  * NOTE Both functions consume their arguments.
  */
 
-atom_t lisp_cons(const atom_t a, const atom_t b);
-atom_t lisp_conc(const atom_t a, const atom_t b);
+atom_t lisp_cons(const lisp_t lisp, const atom_t a, const atom_t b);
+atom_t lisp_conc(const lisp_t lisp, const atom_t a, const atom_t b);
 
 /*
  * Evaluation and closure functions.
@@ -68,7 +71,7 @@ atom_t lisp_conc(const atom_t a, const atom_t b);
 
 atom_t lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t args,
                  const atom_t vals);
-atom_t lisp_setq(const atom_t closure, const atom_t pair);
+atom_t lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair);
 atom_t lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
                  const atom_t rslt);
 

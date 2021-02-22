@@ -12,30 +12,30 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
    * Check if the cell is a pair.
    */
   if (unlikely(!IS_PAIR(cell))) {
-    X(cell);
+    X(lisp->slab, cell);
     return env;
   }
   /*
    * Grab CAR and CDR.
    */
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_car(lisp, cell);
+  atom_t cdr = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   /*
    * Return if the element is not a pair.
    */
   if (unlikely(!IS_PAIR(car))) {
-    X(car, cdr);
+    X(lisp->slab, car, cdr);
     return env;
   }
   /*
    * Prepend this current environment to the evaluation closure.
    */
-  atom_t dup = lisp_dup(env);
-  atom_t tmp = lisp_conc(dup, UP(closure));
-  atom_t arg = lisp_car(car);
-  atom_t nvl = lisp_cdr(car);
-  X(car);
+  atom_t dup = lisp_dup(lisp, env);
+  atom_t tmp = lisp_conc(lisp, dup, UP(closure));
+  atom_t arg = lisp_car(lisp, car);
+  atom_t nvl = lisp_cdr(lisp, car);
+  X(lisp->slab, car);
   /*
    * Evaluate the value and bind it to the environment.
    */
@@ -64,13 +64,13 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
      * If it is unique, mark the tail calls.
      */
     if (unique) {
-      lisp_mark_tail_calls(arg, CAR(val), CDR(CDR(val)));
+      lisp_mark_tail_calls(lisp, arg, CAR(val), CDR(CDR(val)));
     }
   }
   /*
    * Process the remainder.
    */
-  X(tmp);
+  X(lisp->slab, tmp);
   return lisp_let_bind(lisp, closure, nxt, cdr);
 }
 
@@ -80,19 +80,19 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
   /*
    * Get the bind list and the prog.
    */
-  atom_t bind = lisp_car(cell);
-  atom_t prog = lisp_cdr(cell);
-  X(cell);
+  atom_t bind = lisp_car(lisp, cell);
+  atom_t prog = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   /*
    * Recursively apply the bind list.
    */
-  atom_t next = lisp_let_bind(lisp, closure, lisp_make_nil(), bind);
-  atom_t clos = lisp_conc(next, UP(closure));
+  atom_t next = lisp_let_bind(lisp, closure, lisp_make_nil(lisp), bind);
+  atom_t clos = lisp_conc(lisp, next, UP(closure));
   /*
    * Evaluate the prog with the new bind list.
    */
-  atom_t res = lisp_prog(lisp, clos, prog, lisp_make_nil());
-  X(clos);
+  atom_t res = lisp_prog(lisp, clos, prog, lisp_make_nil(lisp));
+  X(lisp->slab, clos);
   return res;
 }
 

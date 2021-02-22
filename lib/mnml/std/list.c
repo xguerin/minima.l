@@ -12,15 +12,15 @@ lisp_list(const lisp_t lisp, const atom_t closure, const atom_t cell)
     /*
      * Get CAR/CDR.
      */
-    atom_t car = lisp_car(cell);
-    atom_t cdr = lisp_cdr(cell);
-    X(cell);
+    atom_t car = lisp_car(lisp, cell);
+    atom_t cdr = lisp_cdr(lisp, cell);
+    X(lisp->slab, cell);
     /*
      * Recursively get the result.
      */
     atom_t res = lisp_list(lisp, closure, cdr);
     atom_t evl = lisp_eval(lisp, closure, car);
-    return lisp_cons(evl, res);
+    return lisp_cons(lisp, evl, res);
   }
   /*
    */

@@ -15,21 +15,21 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    * Return the evaluated result if CELL is NIL.
    */
   if (IS_NULL(ANY)) {
-    X(ANY);
+    X(lisp->slab, ANY);
     return res;
   }
   /*
    * Grab CAR and CDR.
    */
-  atom_t car = lisp_car(ANY);
-  atom_t cdr = lisp_cdr(ANY);
-  X(ANY);
+  atom_t car = lisp_car(lisp, ANY);
+  atom_t cdr = lisp_cdr(lisp, ANY);
+  X(lisp->slab, ANY);
   /*
    * Bind the quoted result.
    */
-  atom_t cn0 = lisp_cons(lisp_make_quote(), res);
-  atom_t cn1 = lisp_cons(cn0, lisp_make_nil());
-  atom_t nxt = lisp_cons(car, cn1);
+  atom_t cn0 = lisp_cons(lisp, lisp_make_quote(lisp), res);
+  atom_t cn1 = lisp_cons(lisp, cn0, lisp_make_nil(lisp));
+  atom_t nxt = lisp_cons(lisp, car, cn1);
   /*
    * Call recursively.
    */
@@ -43,8 +43,8 @@ lisp_function_stream(const lisp_t lisp, const atom_t closure)
   /*
    * Grab CAR/CDR.
    */
-  atom_t car = lisp_car(ANY);
-  atom_t cdr = lisp_cdr(ANY);
+  atom_t car = lisp_car(lisp, ANY);
+  atom_t cdr = lisp_cdr(lisp, ANY);
   /*
    */
   return lisp_stream(lisp, C, cdr, car);

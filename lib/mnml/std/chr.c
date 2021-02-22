@@ -4,11 +4,11 @@
 #include <mnml/utils.h>
 
 static atom_t USED
-lisp_function_chr(UNUSED const lisp_t lisp, const atom_t closure)
+lisp_function_chr(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X);
   char val = X->number;
-  return lisp_make_char(val);
+  return lisp_make_char(lisp, val);
 }
 
 LISP_MODULE_SETUP(chr, chr, X, NIL)

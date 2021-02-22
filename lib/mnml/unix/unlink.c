@@ -5,14 +5,14 @@
 #include <unistd.h>
 
 static atom_t USED
-lisp_function_unlink(UNUSED const lisp_t lisp, const atom_t closure)
+lisp_function_unlink(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, NAME);
   /*
    * Make sure the argument is a string.
    */
   if (!lisp_is_string(NAME)) {
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
   /*
    * Convert the argument.
@@ -22,7 +22,7 @@ lisp_function_unlink(UNUSED const lisp_t lisp, const atom_t closure)
   /*
    * Call unlink().
    */
-  return unlink(name_buf) == 0 ? lisp_make_true() : lisp_make_nil();
+  return unlink(name_buf) == 0 ? lisp_make_true(lisp) : lisp_make_nil(lisp);
 }
 
 LISP_MODULE_SETUP(unlink, unlink, NAME, NIL)

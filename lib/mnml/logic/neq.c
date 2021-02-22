@@ -3,10 +3,10 @@
 #include <mnml/slab.h>
 
 static atom_t USED
-lisp_function_neq(UNUSED const lisp_t lisp, const atom_t closure)
+lisp_function_neq(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X, Y);
-  return lisp_neq(X, Y) ? lisp_make_true() : lisp_make_nil();
+  return lisp_neq(X, Y) ? lisp_make_true(lisp) : lisp_make_nil(lisp);
 }
 
 LISP_MODULE_SETUP(neq, <>, X, Y, NIL)

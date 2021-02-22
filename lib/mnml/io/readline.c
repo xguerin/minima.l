@@ -16,7 +16,7 @@ lisp_function_readline(const lisp_t lisp, UNUSED const atom_t closure)
   ssize_t len = getline(&line, &cap, handle);
   if (len < 0) {
     MAKE_SYMBOL_STATIC(eof_s, "EOF", 3);
-    return lisp_make_symbol(eof_s);
+    return lisp_make_symbol(lisp, eof_s);
   }
   /*
    * Remove the extra newline character.
@@ -28,7 +28,7 @@ lisp_function_readline(const lisp_t lisp, UNUSED const atom_t closure)
   /*
    * Produce the result.
    */
-  atom_t res = lisp_make_string(line, len);
+  atom_t res = lisp_make_string(lisp, line, len);
   free(line);
   return res;
 }

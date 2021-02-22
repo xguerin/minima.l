@@ -12,24 +12,24 @@ lisp_function_dup(const lisp_t lisp, const atom_t closure)
   /*
    * Grab the arguments.
    */
-  atom_t car = lisp_eval(lisp, C, lisp_car(ANY));
-  atom_t cdr = lisp_cdr(ANY);
-  atom_t tgt = lisp_eval(lisp, C, lisp_car(cdr));
-  X(cdr);
+  atom_t car = lisp_eval(lisp, C, lisp_car(lisp, ANY));
+  atom_t cdr = lisp_cdr(lisp, ANY);
+  atom_t tgt = lisp_eval(lisp, C, lisp_car(lisp, cdr));
+  X(lisp->slab, cdr);
   /*
    * Call DUP if target is NIL.
    */
   if (IS_NULL(tgt)) {
     int ret = dup(car->number);
-    X(tgt, car);
-    return lisp_make_number(ret < 0 ? errno : ret);
+    X(lisp->slab, tgt, car);
+    return lisp_make_number(lisp, ret < 0 ? errno : ret);
   }
   /*
    * Otherwise call DUP2.
    */
   int ret = dup2(car->number, tgt->number);
-  X(tgt, car);
-  return lisp_make_number(ret < 0 ? errno : ret);
+  X(lisp->slab, tgt, car);
+  return lisp_make_number(lisp, ret < 0 ? errno : ret);
 }
 
 LISP_MODULE_SETUP(dup, dup, ANY)

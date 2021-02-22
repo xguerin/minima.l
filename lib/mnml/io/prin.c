@@ -10,16 +10,16 @@ lisp_prin_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
    * Return the result if we are done.
    */
   if (unlikely(IS_NULL(cell))) {
-    X(cell);
+    X(lisp->slab, cell);
     return result;
   }
-  X(result);
+  X(lisp->slab, result);
   /*
    * Grab CAR and CDR, and evaluate CAR.
    */
-  atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_eval(lisp, closure, lisp_car(lisp, cell));
+  atom_t cdr = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   /*
    * Print CAR and recurse on CDR.
    */
@@ -31,7 +31,7 @@ static atom_t USED
 lisp_function_prin(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
-  return lisp_prin_all(lisp, C, UP(ANY), lisp_make_nil());
+  return lisp_prin_all(lisp, C, UP(ANY), lisp_make_nil(lisp));
 }
 
 LISP_MODULE_SETUP(prin, prin, ANY);

@@ -8,15 +8,15 @@ lisp_close(const lisp_t lisp, const atom_t closure, const atom_t cell,
            const bool res)
 {
   if (!IS_NULL(cell)) {
-    atom_t car = lisp_eval(lisp, closure, lisp_car(cell));
-    atom_t cdr = lisp_cdr(cell);
+    atom_t car = lisp_eval(lisp, closure, lisp_car(lisp, cell));
+    atom_t cdr = lisp_cdr(lisp, cell);
     int s = close(car->number);
-    X(car, cell);
+    X(lisp->slab, car, cell);
     return lisp_close(lisp, closure, cdr, res && s == 0);
   }
   /*
    */
-  X(cell);
+  X(lisp->slab, cell);
   return res;
 }
 
@@ -25,7 +25,7 @@ lisp_function_close(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
   bool res = lisp_close(lisp, C, UP(ANY), true);
-  return res ? lisp_make_true() : lisp_make_nil();
+  return res ? lisp_make_true(lisp) : lisp_make_nil(lisp);
 }
 
 LISP_MODULE_SETUP(close, close, ANY)

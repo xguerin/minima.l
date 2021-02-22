@@ -10,49 +10,49 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   /*
    * Grab the symbol.
    */
-  atom_t symb = lisp_car(ANY);
+  atom_t symb = lisp_car(lisp, ANY);
   if (!IS_SYMB(symb)) {
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
   /*
    * Grab the arguments body.
    */
-  atom_t cdr0 = lisp_cdr(ANY);
-  atom_t args = lisp_car(cdr0);
+  atom_t cdr0 = lisp_cdr(lisp, ANY);
+  atom_t args = lisp_car(lisp, cdr0);
   if (!(IS_NULL(args) || IS_PAIR(args) || IS_SYMB(args))) {
-    X(symb, cdr0, args);
-    return lisp_make_nil();
+    X(lisp->slab, symb, cdr0, args);
+    return lisp_make_nil(lisp);
   }
   /*
    * Grab the body.
    */
-  atom_t prog = lisp_cdr(cdr0);
-  X(cdr0);
+  atom_t prog = lisp_cdr(lisp, cdr0);
+  X(lisp->slab, cdr0);
   /*
    * Check if there is a docstring in the declaration.
    */
-  atom_t doc = lisp_car(prog);
+  atom_t doc = lisp_car(lisp, prog);
   if (IS_PAIR(doc) && IS_CHAR(CAR(doc))) {
-    atom_t nxt = lisp_cdr(prog);
-    X(prog);
+    atom_t nxt = lisp_cdr(lisp, prog);
+    X(lisp->slab, prog);
     prog = nxt;
   }
-  X(doc);
+  X(lisp->slab, doc);
   /*
    * Check if there is any tail call.
    */
-  lisp_mark_tail_calls(symb, args, prog);
+  lisp_mark_tail_calls(lisp, symb, args, prog);
   /*
    * Append an empty closure.
    */
-  atom_t con0 = lisp_cons(lisp_make_nil(), prog);
-  atom_t con1 = lisp_cons(args, con0);
+  atom_t con0 = lisp_cons(lisp, lisp_make_nil(lisp), prog);
+  atom_t con1 = lisp_cons(lisp, args, con0);
   /*
    * Set the symbol's value.
    */
   atom_t tmp = GLOBALS;
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(UP(symb), con1));
-  X(tmp);
+  GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, UP(symb), con1));
+  X(lisp->slab, tmp);
   return symb;
 }
 

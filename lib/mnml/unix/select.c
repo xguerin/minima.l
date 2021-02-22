@@ -36,7 +36,7 @@ static atom_t
 process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
           const atom_t cb, const fd_set* const set)
 {
-  atom_t act = lisp_make_nil();
+  atom_t act = lisp_make_nil(lisp);
   /*
    * Base case.
    */
@@ -50,16 +50,16 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
     /*
      * Keep the file descriptor around.
      */
-    X(act);
-    act = lisp_make_true();
+    X(lisp->slab, act);
+    act = lisp_make_true(lisp);
     /*
      * Call the callback if it is set.
      */
     if (FD_ISSET(CAR(fds)->number, set) && !IS_NULL(cb)) {
-      atom_t fdn = lisp_car(fds);
-      atom_t cn0 = lisp_cons(fdn, lisp_make_nil());
-      atom_t cn1 = lisp_cons(UP(cb), cn0);
-      X(act);
+      atom_t fdn = lisp_car(lisp, fds);
+      atom_t cn0 = lisp_cons(lisp, fdn, lisp_make_nil(lisp));
+      atom_t cn1 = lisp_cons(lisp, UP(cb), cn0);
+      X(lisp->slab, act);
       act = lisp_eval(lisp, closure, cn1);
     }
   }
@@ -71,31 +71,31 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
       /*
        * Append the head of the set.
        */
-      atom_t car = lisp_car(fds);
+      atom_t car = lisp_car(lisp, fds);
       atom_t nxt = process_r(lisp, closure, CDR(fds), cb, set);
-      atom_t cn0 = lisp_cons(car, nxt);
+      atom_t cn0 = lisp_cons(lisp, car, nxt);
       /*
        * If the returned number is different, append it too.
        */
       if (car->number != act->number) {
-        cn0 = lisp_cons(UP(act), cn0);
+        cn0 = lisp_cons(lisp, UP(act), cn0);
       }
       /*
        * Return the new set.
        */
-      X(act);
+      X(lisp->slab, act);
       return cn0;
     }
     case T_NIL: {
-      X(act);
+      X(lisp->slab, act);
       close(CAR(fds)->number);
       return process_r(lisp, closure, CDR(fds), cb, set);
     }
     default: {
-      X(act);
-      atom_t car = lisp_car(fds);
+      X(lisp->slab, act);
+      atom_t car = lisp_car(lisp, fds);
       atom_t nxt = process_r(lisp, closure, CDR(fds), cb, set);
-      return lisp_cons(car, nxt);
+      return lisp_cons(lisp, car, nxt);
     }
   }
 }
@@ -105,9 +105,9 @@ process(const lisp_t lisp, const atom_t closure, const atom_t fds,
         const char* const cb_name, const fd_set* const set)
 {
   MAKE_SYMBOL_STATIC(cb_s, cb_name, strlen(cb_name));
-  atom_t cbk = lisp_make_symbol(cb_s);
+  atom_t cbk = lisp_make_symbol(lisp, cb_s);
   atom_t res = process_r(lisp, closure, fds, cbk, set);
-  X(cbk);
+  X(lisp->slab, cbk);
   return res;
 }
 
@@ -119,7 +119,7 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
    * Check that the fds argument is a list.
    */
   if (!IS_LIST(FDS)) {
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
   /*
    * Initialize the READ and ERROR sets.
@@ -134,7 +134,7 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   int res = select(fdmax + 1, &rset, NULL, &eset, NULL);
   if (res < 0) {
     TRACE("select() failed: %s", strerror(errno));
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
   /*
    * Process the events.
@@ -144,8 +144,8 @@ lisp_function_select(const lisp_t lisp, const atom_t closure)
   /*
    * Build the result.
    */
-  atom_t cn0 = lisp_cons(eres, lisp_make_nil());
-  atom_t cn1 = lisp_cons(rres, cn0);
+  atom_t cn0 = lisp_cons(lisp, eres, lisp_make_nil(lisp));
+  atom_t cn1 = lisp_cons(lisp, rres, cn0);
   /*
    * Return the updated descriptor list.
    */

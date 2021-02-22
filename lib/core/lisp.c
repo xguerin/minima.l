@@ -11,21 +11,22 @@
  */
 
 lisp_t
-lisp_new(const atom_t ichan, const atom_t ochan)
+lisp_new(const slab_t slab)
 {
   lisp_t lisp = (lisp_t)malloc(sizeof(struct _lisp));
-  lisp->globals = lisp_make_nil();
-  lisp->ichan = UP(ichan);
-  lisp->ochan = UP(ochan);
+  lisp->slab = slab;
+  lisp->globals = lisp_make_nil(lisp);
+  lisp->ichan = lisp_make_nil(lisp);
+  lisp->ochan = lisp_make_nil(lisp);
   return lisp;
 }
 
 void
 lisp_delete(lisp_t lisp)
 {
-  X(lisp->ochan);
-  X(lisp->ichan);
-  X(lisp->globals);
+  X(lisp->slab, lisp->ochan);
+  X(lisp->slab, lisp->ichan);
+  X(lisp->slab, lisp->globals);
   free(lisp);
 }
 
@@ -61,7 +62,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
   /*
    * Nothing found.
    */
-  return lisp_make_nil();
+  return lisp_make_nil(lisp);
 }
 
 /*
@@ -69,21 +70,21 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
  */
 
 atom_t
-lisp_car(const atom_t cell)
+lisp_car(const lisp_t lisp, const atom_t cell)
 {
   if (likely(IS_PAIR(cell))) {
     return UP(CAR(cell));
   }
-  return lisp_make_nil();
+  return lisp_make_nil(lisp);
 }
 
 atom_t
-lisp_cdr(const atom_t cell)
+lisp_cdr(const lisp_t lisp, const atom_t cell)
 {
   if (likely(IS_PAIR(cell))) {
     return UP(CDR(cell));
   }
-  return lisp_make_nil();
+  return lisp_make_nil(lisp);
 }
 
 /*
@@ -91,9 +92,9 @@ lisp_cdr(const atom_t cell)
  */
 
 atom_t
-lisp_cons(const atom_t car, const atom_t cdr)
+lisp_cons(const lisp_t lisp, const atom_t car, const atom_t cdr)
 {
-  atom_t R = lisp_allocate();
+  atom_t R = lisp_allocate(lisp->slab);
   R->type = T_PAIR;
   R->refs = 1;
   CAR(R) = car;
@@ -103,18 +104,18 @@ lisp_cons(const atom_t car, const atom_t cdr)
 }
 
 atom_t
-lisp_conc(const atom_t car, const atom_t cdr)
+lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr)
 {
   atom_t R;
   /*
    */
   if (likely(IS_PAIR(car))) {
     FOREACH(car, p) { NEXT(p); }
-    X(p->cdr);
+    X(lisp->slab, p->cdr);
     p->cdr = cdr;
     R = car;
   } else {
-    X(car);
+    X(lisp->slab, car);
     R = cdr;
   }
   /*
@@ -128,39 +129,39 @@ lisp_conc(const atom_t car, const atom_t cdr)
  */
 
 atom_t
-lisp_setq(const atom_t closure, const atom_t pair)
+lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair)
 {
   /*
    * Check if pair is valid.
    */
   if (!IS_PAIR(pair) || !IS_SYMB(CAR(pair))) {
-    X(pair);
+    X(lisp->slab, pair);
     return UP(closure);
   }
   /*
    * If the closure is NIL, return the wrapped pair.
    */
   if (IS_NULL(closure)) {
-    return lisp_cons(pair, UP(closure));
+    return lisp_cons(lisp, pair, UP(closure));
   }
   /*
    * Extract CAR and CDR.
    */
-  atom_t car = lisp_car(closure);
-  atom_t cdr = lisp_cdr(closure);
+  atom_t car = lisp_car(lisp, closure);
+  atom_t cdr = lisp_cdr(lisp, closure);
   /*
    * Replace car if its symbol matches pair's.
    */
   if (lisp_symbol_match(CAR(car), &CAR(pair)->symbol)) {
-    X(car);
-    return lisp_cons(pair, cdr);
+    X(lisp->slab, car);
+    return lisp_cons(lisp, pair, cdr);
   }
   /*
    * Look further down the closure.
    */
-  atom_t nxt = lisp_setq(cdr, pair);
-  X(cdr);
-  return lisp_cons(car, nxt);
+  atom_t nxt = lisp_setq(lisp, cdr, pair);
+  X(lisp->slab, cdr);
+  return lisp_cons(lisp, car, nxt);
 }
 
 /*
@@ -175,16 +176,16 @@ lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
     /*
      * Get CAR/CDR.
      */
-    atom_t res = lisp_eval(lisp, closure, lisp_car(cell));
-    atom_t cdr = lisp_cdr(cell);
+    atom_t res = lisp_eval(lisp, closure, lisp_car(lisp, cell));
+    atom_t cdr = lisp_cdr(lisp, cell);
     /*
      */
-    X(cell, result);
+    X(lisp->slab, cell, result);
     return lisp_prog(lisp, closure, cdr, res);
   }
   /*
    */
-  X(cell);
+  X(lisp->slab, cell);
   return result;
 }
 

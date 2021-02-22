@@ -3,10 +3,10 @@
 #include <mnml/slab.h>
 
 static atom_t
-lisp_function_not(UNUSED const lisp_t lisp, const atom_t closure)
+lisp_function_not(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X);
-  return IS_NULL(X) ? lisp_make_true() : lisp_make_nil();
+  return IS_NULL(X) ? lisp_make_true(lisp) : lisp_make_nil(lisp);
 }
 
 LISP_MODULE_SETUP(not, not, X, NIL)

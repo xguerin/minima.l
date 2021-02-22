@@ -10,12 +10,12 @@ lisp_function_unless(const lisp_t lisp, const atom_t closure)
    * Evaluate REM branch if TRUE.
    */
   if (likely(IS_NULL(COND))) {
-    return lisp_prog(lisp, C, UP(REM), lisp_make_nil());
+    return lisp_prog(lisp, C, UP(REM), lisp_make_nil(lisp));
   }
   /*
    * Or return NIL;
    */
-  return lisp_make_nil();
+  return lisp_make_nil(lisp);
 }
 
 LISP_MODULE_SETUP(unless, unless, COND, REM)

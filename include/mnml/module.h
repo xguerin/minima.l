@@ -10,8 +10,8 @@
  * Lifecycle management.
  */
 
-bool module_init();
-void module_fini();
+bool module_init(const lisp_t lisp);
+void module_fini(const lisp_t lisp);
 
 /*
  * Module entry.
@@ -48,16 +48,16 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
   atom_t USED lisp_module_##__s##_load(const lisp_t lisp)      \
   {                                                            \
     MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);         \
-    atom_t sym = lisp_make_symbol(inp);                        \
-    LISP_CONS(arg, ##__VA_ARGS__);                             \
+    atom_t sym = lisp_make_symbol(lisp, inp);                  \
+    LISP_CONS(lisp, arg, ##__VA_ARGS__);                       \
     uintptr_t fun = (uintptr_t)lisp_function_##__s;            \
-    atom_t adr = lisp_make_number(fun);                        \
-    atom_t cn0 = lisp_cons(lisp_make_nil(), adr);              \
-    atom_t val = lisp_cons(arg, cn0);                          \
-    atom_t cns = lisp_cons(UP(sym), val);                      \
+    atom_t adr = lisp_make_number(lisp, fun);                  \
+    atom_t cn0 = lisp_cons(lisp, lisp_make_nil(lisp), adr);    \
+    atom_t val = lisp_cons(lisp, arg, cn0);                    \
+    atom_t cns = lisp_cons(lisp, UP(sym), val);                \
     atom_t tmp = GLOBALS;                                      \
-    GLOBALS = lisp_setq(GLOBALS, cns);                         \
-    X(tmp);                                                    \
+    GLOBALS = lisp_setq(lisp, GLOBALS, cns);                   \
+    X(lisp->slab, tmp);                                        \
     return sym;                                                \
   }
 
@@ -116,33 +116,33 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
  * Module generators.
  */
 
-#define PREDICATE_GEN(_n, _o, _x)                                           \
-  static atom_t lisp_function_is##_n(UNUSED const lisp_t l, const atom_t c) \
+#define PREDICATE_GEN(_n, _o, _x)                                    \
+  static atom_t lisp_function_is##_n(const lisp_t l, const atom_t c) \
+  {                                                                  \
+    LISP_ARGS(c, C, _x);                                             \
+    return _o(_x) ? lisp_make_true(l) : lisp_make_nil(l);            \
+  }
+
+#define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                         \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
+  {                                                                \
+    LISP_ARGS(c, C, _x, _y);                                       \
+    return (!IS_NULL(_x))_o(!IS_NULL(_y)) ? lisp_make_true(l)      \
+                                          : lisp_make_nil(l);      \
+  }
+
+#define BINARY_NUMBER_GEN(_n, _o, _x, _y)                          \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
+  {                                                                \
+    LISP_ARGS(c, C, _x, _y);                                       \
+    return lisp_make_number(l, _x->number _o _y->number);          \
+  }
+
+#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                                  \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c)          \
   {                                                                         \
-    LISP_ARGS(c, C, _x);                                                    \
-    return _o(_x) ? lisp_make_true() : lisp_make_nil();                     \
-  }
-
-#define BINARY_BOOLEAN_GEN(_n, _o, _x, _y)                                \
-  static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
-  {                                                                       \
-    LISP_ARGS(c, C, _x, _y);                                              \
-    return (!IS_NULL(_x))_o(!IS_NULL(_y)) ? lisp_make_true()              \
-                                          : lisp_make_nil();              \
-  }
-
-#define BINARY_NUMBER_GEN(_n, _o, _x, _y)                                 \
-  static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
-  {                                                                       \
-    LISP_ARGS(c, C, _x, _y);                                              \
-    return lisp_make_number(_x->number _o _y->number);                    \
-  }
-
-#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                                \
-  static atom_t lisp_function_##_n(UNUSED const lisp_t l, const atom_t c) \
-  {                                                                       \
-    LISP_ARGS(c, C, _x, _y);                                              \
-    return _x->number _o _y->number ? lisp_make_true() : lisp_make_nil(); \
+    LISP_ARGS(c, C, _x, _y);                                                \
+    return _x->number _o _y->number ? lisp_make_true(l) : lisp_make_nil(l); \
   }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

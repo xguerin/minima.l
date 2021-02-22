@@ -1,4 +1,4 @@
-#include "mnml/maker.h"
+#include <mnml/maker.h>
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/module.h>
@@ -34,20 +34,20 @@ signal_handler(UNUSED const int sigid)
 static atom_t
 run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
 {
-  atom_t nil = lisp_make_nil();
-  atom_t input, result = lisp_make_nil();
+  atom_t nil = lisp_make_nil(lisp);
+  atom_t input, result = lisp_make_nil(lisp);
   while (keep_running) {
-    X(result);
+    X(lisp->slab, result);
     pread(lisp, nil, data);
-    input = lisp_read(lisp, nil, lisp_make_nil());
+    input = lisp_read(lisp, nil, lisp_make_nil(lisp));
     if (input == NULL) {
-      result = lisp_make_nil();
+      result = lisp_make_nil(lisp);
       break;
     }
     result = lisp_eval(lisp, nil, input);
     pdone(lisp, result, data);
   }
-  X(nil);
+  X(lisp->slab, nil);
   return result;
 }
 
@@ -73,11 +73,11 @@ static void
 stage_newline(const lisp_t lisp, const atom_t cell,
               UNUSED const void* const data)
 {
-  atom_t nil = lisp_make_nil();
+  atom_t nil = lisp_make_nil(lisp);
   fwrite("> ", 1, 2, stdout);
   lisp_prin(lisp, nil, cell, true);
   fwrite("\n", 1, 1, stdout);
-  X(nil);
+  X(lisp->slab, nil);
 }
 
 /*
@@ -87,17 +87,17 @@ stage_newline(const lisp_t lisp, const atom_t cell,
 static atom_t PAIRS;
 
 static void
-lisp_push(UNUSED const lisp_t lisp, const atom_t cell)
+lisp_push(const lisp_t lisp, const atom_t cell)
 {
-  PAIRS = lisp_append(PAIRS, cell);
+  PAIRS = lisp_append(lisp, PAIRS, cell);
 }
 
 static atom_t
-lisp_pop()
+lisp_pop(const lisp_t lisp)
 {
-  atom_t rslt = lisp_car(PAIRS);
-  atom_t next = lisp_cdr(PAIRS);
-  X(PAIRS);
+  atom_t rslt = lisp_car(lisp, PAIRS);
+  atom_t next = lisp_cdr(lisp, PAIRS);
+  X(lisp->slab, PAIRS);
   PAIRS = next;
   return rslt;
 }
@@ -109,25 +109,25 @@ lisp_pop()
 static void
 lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
 {
-  atom_t res = lisp_make_nil();
+  atom_t res = lisp_make_nil(lisp);
   /*
    * Build ARGV.
    */
   for (int i = 0; i < argc; i += 1) {
-    atom_t str = lisp_make_string(argv[i], strlen(argv[i]));
-    res = lisp_append(res, str);
+    atom_t str = lisp_make_string(lisp, argv[i], strlen(argv[i]));
+    res = lisp_append(lisp, res, str);
   }
   /*
    * Set the variable if the list is not NIL.
    */
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
-    atom_t key = lisp_make_symbol(var);
+    atom_t key = lisp_make_symbol(lisp, var);
     atom_t tmp = GLOBALS;
-    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
-    X(tmp);
+    GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, key, res));
+    X(lisp->slab, tmp);
   } else {
-    X(res);
+    X(lisp->slab, res);
   }
 }
 
@@ -135,62 +135,64 @@ static void
 lisp_build_config(const lisp_t lisp)
 {
   atom_t key, val, con;
-  atom_t res = lisp_make_nil();
+  atom_t res = lisp_make_nil(lisp);
   /*
    * Add the version string.
    */
   MAKE_SYMBOL_STATIC(version, "VERSION", 7);
-  key = lisp_make_symbol(version);
-  val = lisp_make_string(MNML_VERSION, strlen(MNML_VERSION));
-  con = lisp_cons(key, val);
-  res = lisp_cons(con, res);
+  key = lisp_make_symbol(lisp, version);
+  val = lisp_make_string(lisp, MNML_VERSION, strlen(MNML_VERSION));
+  con = lisp_cons(lisp, key, val);
+  res = lisp_cons(lisp, con, res);
   /*
    * Add the prefix.
    */
   MAKE_SYMBOL_STATIC(prefix, "PREFIX", 6);
-  key = lisp_make_symbol(prefix);
-  val = lisp_make_string(lisp_prefix(), strlen(lisp_prefix()));
-  con = lisp_cons(key, val);
-  res = lisp_cons(con, res);
+  key = lisp_make_symbol(lisp, prefix);
+  val = lisp_make_string(lisp, lisp_prefix(), strlen(lisp_prefix()));
+  con = lisp_cons(lisp, key, val);
+  res = lisp_cons(lisp, con, res);
   /*
    * Add the compiler version.
    */
   MAKE_SYMBOL_STATIC(compver, "COMPVER", 7);
-  key = lisp_make_symbol(compver);
-  val = lisp_make_string(MNML_COMPILER_VERSION, strlen(MNML_COMPILER_VERSION));
-  con = lisp_cons(key, val);
-  res = lisp_cons(con, res);
+  key = lisp_make_symbol(lisp, compver);
+  val = lisp_make_string(lisp, MNML_COMPILER_VERSION,
+                         strlen(MNML_COMPILER_VERSION));
+  con = lisp_cons(lisp, key, val);
+  res = lisp_cons(lisp, con, res);
   /*
    * Add the compiler ID.
    */
   MAKE_SYMBOL_STATIC(compid, "COMPID", 6);
-  key = lisp_make_symbol(compid);
-  val = lisp_make_string(MNML_COMPILER_ID, strlen(MNML_COMPILER_ID));
-  con = lisp_cons(key, val);
-  res = lisp_cons(con, res);
+  key = lisp_make_symbol(lisp, compid);
+  val = lisp_make_string(lisp, MNML_COMPILER_ID, strlen(MNML_COMPILER_ID));
+  con = lisp_cons(lisp, key, val);
+  res = lisp_cons(lisp, con, res);
   /*
    * Add the build timestamp.
    */
   MAKE_SYMBOL_STATIC(buildts, "BUILD_TS", 8);
-  key = lisp_make_symbol(buildts);
-  val = lisp_make_string(MNML_BUILD_TIMESTAMP, strlen(MNML_BUILD_TIMESTAMP));
-  con = lisp_cons(key, val);
-  res = lisp_cons(con, res);
+  key = lisp_make_symbol(lisp, buildts);
+  val =
+    lisp_make_string(lisp, MNML_BUILD_TIMESTAMP, strlen(MNML_BUILD_TIMESTAMP));
+  con = lisp_cons(lisp, key, val);
+  res = lisp_cons(lisp, con, res);
   /*
    * Set the variable if the list is not NIL.
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
-  key = lisp_make_symbol(env);
+  key = lisp_make_symbol(lisp, env);
   atom_t tmp = GLOBALS;
-  GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
-  X(tmp);
+  GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, key, res));
+  X(lisp->slab, tmp);
 }
 
 static void
 lisp_build_env(const lisp_t lisp)
 {
   extern char** environ;
-  atom_t res = lisp_make_nil();
+  atom_t res = lisp_make_nil(lisp);
   /*
    * Parse environ and build the variable list.
    */
@@ -198,10 +200,10 @@ lisp_build_env(const lisp_t lisp)
     char* n = strstr(*p, "=");
     if (n != NULL && *(n + 1) != 0) {
       size_t len = n - *p;
-      atom_t key = lisp_make_string(*p, len);
-      atom_t val = lisp_make_string(n + 1, strlen(n + 1));
-      atom_t con = lisp_cons(key, val);
-      res = lisp_append(res, con);
+      atom_t key = lisp_make_string(lisp, *p, len);
+      atom_t val = lisp_make_string(lisp, n + 1, strlen(n + 1));
+      atom_t con = lisp_cons(lisp, key, val);
+      res = lisp_append(lisp, res, con);
     }
   }
   /*
@@ -209,12 +211,12 @@ lisp_build_env(const lisp_t lisp)
    */
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
-    atom_t key = lisp_make_symbol(env);
+    atom_t key = lisp_make_symbol(lisp, env);
     atom_t tmp = GLOBALS;
-    GLOBALS = lisp_setq(GLOBALS, lisp_cons(key, res));
-    X(tmp);
+    GLOBALS = lisp_setq(lisp, GLOBALS, lisp_cons(lisp, key, res));
+    X(lisp->slab, tmp);
   } else {
-    X(res);
+    X(lisp->slab, res);
   }
 }
 
@@ -232,16 +234,16 @@ lisp_load_defaults(const lisp_t lisp)
   MAKE_SYMBOL_STATIC(lod, "load", 4);
   MAKE_SYMBOL_STATIC(qte, "quote", 5);
   MAKE_SYMBOL_STATIC(def, "def", 3);
-  atom_t mod = lisp_make_symbol(std);
-  atom_t sy0 = lisp_make_symbol(lod);
-  atom_t sy1 = lisp_make_symbol(qte);
-  atom_t sy2 = lisp_make_symbol(def);
-  atom_t cn0 = lisp_cons(sy0, lisp_make_nil());
-  atom_t cn1 = lisp_cons(sy1, cn0);
-  atom_t cn2 = lisp_cons(sy2, cn1);
-  atom_t cn3 = lisp_cons(mod, cn2);
+  atom_t mod = lisp_make_symbol(lisp, std);
+  atom_t sy0 = lisp_make_symbol(lisp, lod);
+  atom_t sy1 = lisp_make_symbol(lisp, qte);
+  atom_t sy2 = lisp_make_symbol(lisp, def);
+  atom_t cn0 = lisp_cons(lisp, sy0, lisp_make_nil(lisp));
+  atom_t cn1 = lisp_cons(lisp, sy1, cn0);
+  atom_t cn2 = lisp_cons(lisp, sy2, cn1);
+  atom_t cn3 = lisp_cons(lisp, mod, cn2);
   atom_t tmp = module_load(lisp, cn3);
-  X(tmp);
+  X(lisp->slab, tmp);
 }
 
 /*
@@ -307,13 +309,6 @@ main(const int argc, char** const argv)
     filename = argv[optind];
   }
   /*
-   * Initialize the engine.
-   */
-  if (!lisp_init()) {
-    fprintf(stderr, "Minima.l engine initialization failed.\n");
-    return __LINE__;
-  }
-  /*
    * Register system signals.
    */
   signal(SIGQUIT, signal_handler);
@@ -334,8 +329,21 @@ main(const int argc, char** const argv)
   /*
    * Create a lisp context.
    */
-  atom_t nil = lisp_make_nil();
-  lisp_t lisp = lisp_new(nil, nil);
+  slab_t slab = slab_allocate();
+  lisp_t lisp = lisp_new(slab);
+  /*
+   * Setup the debug variables.
+   */
+#ifdef LISP_ENABLE_DEBUG
+  lisp_debug_parse_flags();
+#endif
+  /*
+   * Initialize the plugins.
+   */
+  if (!module_init(lisp)) {
+    fprintf(stderr, "Minima.l engine initialization failed.\n");
+    return __LINE__;
+  }
   lisp_load_defaults(lisp);
   /*
    * Build ARGV, CONFIG and ENV.
@@ -348,16 +356,16 @@ main(const int argc, char** const argv)
   atom_t result;
   if (filename == NULL && expr == NULL) {
     lisp_set_parse_error_handler(repl_parse_error_handler);
-    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp, ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(lisp, OCHAN, stdout, cwd);
     result = run(lisp, stage_prompt, stage_newline, cwd);
-    POP_IO_CONTEXT(ICHAN);
-    POP_IO_CONTEXT(OCHAN);
+    POP_IO_CONTEXT(lisp, ICHAN);
+    POP_IO_CONTEXT(lisp, OCHAN);
   } else if (filename == NULL) {
     /*
      * Setup the PAIRS to NIL.
      */
-    PAIRS = lisp_make_nil();
+    PAIRS = lisp_make_nil(lisp);
     /*
      * Parse the expression.
      */
@@ -368,52 +376,57 @@ main(const int argc, char** const argv)
     /*
      * Push the IO context.
      */
-    PUSH_IO_CONTEXT(ICHAN, stdin, cwd);
-    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp, ICHAN, stdin, cwd);
+    PUSH_IO_CONTEXT(lisp, OCHAN, stdout, cwd);
     /*
      * Evaluate the parsed expressions.
      */
-    result = lisp_make_nil();
+    result = lisp_make_nil(lisp);
     while (keep_running) {
-      atom_t car = lisp_pop();
+      atom_t nil = lisp_make_nil(lisp);
+      atom_t car = lisp_pop(lisp);
       if (IS_NULL(car)) {
-        X(car);
+        X(lisp->slab, car);
         break;
       }
-      X(result);
+      X(lisp->slab, result);
       result = lisp_eval(lisp, nil, car);
+      X(lisp->slab, nil);
     }
     /*
      * Pop the IO context.
      */
-    POP_IO_CONTEXT(ICHAN);
-    POP_IO_CONTEXT(OCHAN);
+    POP_IO_CONTEXT(lisp, ICHAN);
+    POP_IO_CONTEXT(lisp, OCHAN);
     /*
      * Clear the PAIRS.
      */
-    X(PAIRS);
+    X(lisp->slab, PAIRS);
   } else {
-    PUSH_IO_CONTEXT(OCHAN, stdout, cwd);
+    PUSH_IO_CONTEXT(lisp, OCHAN, stdout, cwd);
     result = lisp_load_file(lisp, filename);
-    POP_IO_CONTEXT(OCHAN);
+    POP_IO_CONTEXT(lisp, OCHAN);
   }
   /*
    * Compute the return status.
    */
   int status = IS_NULL(result) ? -1 : 0;
-  X(result);
+  X(lisp->slab, result);
+  /*
+   * Unload modules.
+   */
+  module_fini(lisp);
   /*
    * Clean-up the lisp context.
    */
   lisp_delete(lisp);
-  X(nil);
-  lisp_fini();
   /*
-   * Check the slab and update the status accordingly.
+   * Check the slab, update the status, and destroy the slab.
    */
-  if (check_slab && slab.n_alloc != slab.n_free) {
+  if (check_slab && slab->n_alloc != slab->n_free) {
     status = -2;
   }
+  slab_destroy(slab);
   /*
    */
   return status;

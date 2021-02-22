@@ -12,12 +12,12 @@ lisp_function_time(const lisp_t lisp, const atom_t closure)
   if (IS_NULL(ANY)) {
     result = begin;
   } else {
-    atom_t car = lisp_car(ANY);
+    atom_t car = lisp_car(lisp, ANY);
     atom_t res = lisp_eval(lisp, C, car);
     result = lisp_timestamp() - begin;
-    X(res);
+    X(lisp->slab, res);
   }
-  return lisp_make_number(result);
+  return lisp_make_number(lisp, result);
 }
 
 LISP_MODULE_SETUP(time, time, ANY)

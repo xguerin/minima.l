@@ -10,8 +10,6 @@
 #include <string.h>
 #include <sys/stat.h>
 
-atom_t MODULES;
-
 /*
  * Helper functions.
  */
@@ -83,12 +81,12 @@ module_paths()
  */
 
 bool
-module_init()
+module_init(const lisp_t lisp)
 {
   /*
    * Reset the MODULES variable.
    */
-  MODULES = lisp_make_nil();
+  lisp->modules = lisp_make_nil(lisp);
   /*
    * Try to create the user cache directory.
    */
@@ -123,16 +121,16 @@ module_init()
 }
 
 void
-module_fini()
+module_fini(const lisp_t lisp)
 {
-  FOREACH(MODULES, p)
+  FOREACH(lisp->modules, p)
   {
     atom_t car = p->car;
     atom_t hnd = CAR(CDR(car));
     dlclose((void*)hnd);
     NEXT(p);
   }
-  X(MODULES);
+  X(lisp->slab, lisp->modules);
 }
 
 /*
@@ -146,15 +144,15 @@ module_load(const lisp_t lisp, const atom_t cell)
   /*
    * Grab the module name and the symbol list.
    */
-  atom_t module_name = lisp_car(cell);
-  atom_t symbol_list = lisp_cdr(cell);
-  X(cell);
+  atom_t module_name = lisp_car(lisp, cell);
+  atom_t symbol_list = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   /*
    * Check the format of the arguments.
    */
   if (IS_NULL(module_name) || !IS_SYMB(module_name)) {
-    X(module_name, symbol_list);
-    return lisp_make_nil();
+    X(lisp->slab, module_name, symbol_list);
+    return lisp_make_nil(lisp);
   }
   /*
    * Load the environment variable.
@@ -167,8 +165,8 @@ module_load(const lisp_t lisp, const atom_t cell)
   bool found = module_find(paths, module_name, path);
   free(paths);
   if (!found) {
-    X(module_name, symbol_list);
-    return lisp_make_nil();
+    X(lisp->slab, module_name, symbol_list);
+    return lisp_make_nil(lisp);
   }
   /*
    * Load the symbols in the module.
@@ -177,7 +175,7 @@ module_load(const lisp_t lisp, const atom_t cell)
   /*
    * Clean-up and return.
    */
-  X(module_name);
+  X(lisp->slab, module_name);
   return syms;
 }
 

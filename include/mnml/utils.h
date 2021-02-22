@@ -14,8 +14,7 @@ typedef void (*error_handler_t)(const lisp_t lisp);
 void lisp_set_parse_error_handler(const error_handler_t h);
 void lisp_set_syntax_error_handler(const error_handler_t h);
 
-bool lisp_init();
-void lisp_fini();
+void lisp_fini(const lisp_t lisp);
 
 /*
  * Installation information.
@@ -30,7 +29,7 @@ size_t lisp_len(const atom_t cell);
 /*
  * Destructively append element ELT to list LST.
  */
-atom_t lisp_append(const atom_t lst, const atom_t elt);
+atom_t lisp_append(const lisp_t lisp, const atom_t lst, const atom_t elt);
 
 /*
  * Equality A and B.
@@ -45,7 +44,7 @@ bool lisp_neq(const atom_t a, const atom_t b);
 /*
  * Shallow duplicate: 1(1X 1X ...) -> 1(2X 2X ...).
  */
-atom_t lisp_dup(const atom_t cell);
+atom_t lisp_dup(const lisp_t lisp, const atom_t cell);
 
 /*
  * Return true if a cell is a string.
@@ -61,8 +60,8 @@ size_t lisp_make_cstring(const atom_t cell, char* const buffer,
 /*
  * Process escapes in a list of characters.
  */
-atom_t lisp_process_escapes(const atom_t cell, const bool esc,
-                            const atom_t res);
+atom_t lisp_process_escapes(const lisp_t lisp, const atom_t cell,
+                            const bool esc, const atom_t res);
 
 /*
  * Check if a function arguments can be applied to a set of values.
@@ -72,8 +71,8 @@ bool lisp_may_apply(const atom_t args, const atom_t vals);
 /*
  * Mark tail calls. Return true if any were found.
  */
-void lisp_mark_tail_calls(const atom_t symb, const atom_t args,
-                          const atom_t body);
+void lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb,
+                          const atom_t args, const atom_t body);
 
 /*
  * Get a timestamp in nanoseconds.
@@ -101,20 +100,20 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
 /*
  * IO context helpers.
  */
-#define PUSH_IO_CONTEXT(__c, __d, __p)             \
-  do {                                             \
-    atom_t p = lisp_make_string(__p, strlen(__p)); \
-    atom_t x = lisp_cons(p, lisp_make_nil());      \
-    atom_t n = lisp_make_number((int64_t)__d);     \
-    atom_t y = lisp_cons(n, x);                    \
-    __c = lisp_cons(y, __c);                       \
+#define PUSH_IO_CONTEXT(__l, __c, __d, __p)             \
+  do {                                                  \
+    atom_t p = lisp_make_string(__l, __p, strlen(__p)); \
+    atom_t x = lisp_cons(__l, p, lisp_make_nil(__l));   \
+    atom_t n = lisp_make_number(__l, (int64_t)__d);     \
+    atom_t y = lisp_cons(__l, n, x);                    \
+    __c = lisp_cons(__l, y, __c);                       \
   } while (0)
 
-#define POP_IO_CONTEXT(__c) \
-  do {                      \
-    atom_t old = __c;       \
-    __c = UP(CDR(__c));     \
-    X(old);                 \
+#define POP_IO_CONTEXT(__l, __c) \
+  do {                           \
+    atom_t old = __c;            \
+    __c = UP(CDR(__c));          \
+    X(__l->slab, old);           \
   } while (0)
 
 /*

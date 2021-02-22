@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 
 static atom_t USED
-lisp_function_wait(UNUSED const lisp_t lisp, const atom_t closure)
+lisp_function_wait(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X);
   /*
@@ -17,13 +17,13 @@ lisp_function_wait(UNUSED const lisp_t lisp, const atom_t closure)
    */
   pid_t pid = waitpid(tpid, &state, 0);
   if (pid < 0) {
-    return lisp_make_number(errno);
+    return lisp_make_number(lisp, errno);
   }
   /*
    * Return the result.
    */
-  atom_t res =
-    WIFEXITED(state) ? lisp_make_number(WEXITSTATUS(state)) : lisp_make_nil();
+  atom_t res = WIFEXITED(state) ? lisp_make_number(lisp, WEXITSTATUS(state))
+                                : lisp_make_nil(lisp);
   return res;
 }
 

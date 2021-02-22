@@ -32,31 +32,31 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    * Sanity checks.
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
-    X(ANY, match);
-    return lisp_make_nil();
+    X(lisp->slab, ANY, match);
+    return lisp_make_nil(lisp);
   }
   /*
    * Get CAR/CDR.
    */
-  atom_t car = lisp_car(match);
-  atom_t cdr = lisp_cdr(match);
-  X(match);
+  atom_t car = lisp_car(lisp, match);
+  atom_t cdr = lisp_cdr(lisp, match);
+  X(lisp->slab, match);
   /*
    * Get args and prog.
    */
-  atom_t args = lisp_car(car);
-  atom_t prog = lisp_cdr(car);
-  X(car);
+  atom_t args = lisp_car(lisp, car);
+  atom_t prog = lisp_cdr(lisp, car);
+  X(lisp->slab, car);
   /*
    * Match the ANY with CAR.
    */
   if (atom_match(args, ANY)) {
-    X(args, cdr, ANY);
+    X(lisp->slab, args, cdr, ANY);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    */
-  X(args, prog);
+  X(lisp->slab, args, prog);
   return lisp_match(lisp, closure, ANY, cdr);
 }
 
@@ -64,8 +64,8 @@ static atom_t USED
 lisp_function_match(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, ANY);
-  atom_t car = lisp_eval(lisp, closure, lisp_car(ANY));
-  atom_t cdr = lisp_cdr(ANY);
+  atom_t car = lisp_eval(lisp, closure, lisp_car(lisp, ANY));
+  atom_t cdr = lisp_cdr(lisp, ANY);
   return lisp_match(lisp, C, car, cdr);
 }
 

@@ -61,18 +61,18 @@ module_load_at_path(const char* const path, const char* const name)
 }
 
 static void*
-module_find_from_cache(const atom_t sym)
+module_find_from_cache(const lisp_t lisp, const atom_t sym)
 {
   /*
    * Check if modules is NIL.
    */
-  if (IS_NULL(MODULES)) {
+  if (IS_NULL(lisp->modules)) {
     return NULL;
   }
   /*
    * Scan all the module entries.
    */
-  FOREACH(MODULES, m)
+  FOREACH(lisp->modules, m)
   {
     atom_t car = m->car;
     if (lisp_symbol_match(CAR(car), &sym->symbol)) {
@@ -101,9 +101,9 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Grab CAR and CDR.
    */
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_car(lisp, cell);
+  atom_t cdr = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   /*
    * Process the remainder.
    */
@@ -125,7 +125,7 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
       if (strcmp(e->name(), bsym) == 0) {
         atom_t sym = e->load(lisp);
         atom_t tmp = nxt;
-        nxt = lisp_cons(sym, tmp);
+        nxt = lisp_cons(lisp, sym, tmp);
         break;
       }
       e++;
@@ -134,7 +134,7 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Return symbol list.
    */
-  X(car);
+  X(lisp->slab, car);
   return nxt;
 }
 
@@ -152,7 +152,7 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
    * If cell is T, load everything.
    */
   if (IS_TRUE(cell)) {
-    atom_t result = lisp_make_nil();
+    atom_t result = lisp_make_nil(lisp);
     /*
      * Compute available entries.
      */
@@ -173,17 +173,17 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
        * Enqueue the new function name in the result list.
        */
       atom_t tmp = result;
-      result = lisp_cons(sym, tmp);
+      result = lisp_cons(lisp, sym, tmp);
     }
-    X(cell);
+    X(lisp->slab, cell);
     return result;
   }
   /*
    * Check that cell is a list.
    */
   if (!IS_LIST(cell)) {
-    X(cell);
-    return lisp_make_nil();
+    X(lisp->slab, cell);
+    return lisp_make_nil(lisp);
   }
   /*
    * Load the element of the list.
@@ -200,7 +200,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   /*
    * Check if the module is in the cache.
    */
-  handle = module_find_from_cache(name);
+  handle = module_find_from_cache(lisp, name);
   /*
    * If it was not in the cache, load it from the filesystem.
    */
@@ -215,7 +215,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
      */
     handle = module_load_at_path(path, bsym);
     if (handle == NULL) {
-      return lisp_make_nil();
+      return lisp_make_nil(lisp);
     }
     /*
      * Mark the handle to be added to the cache.
@@ -228,7 +228,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   const module_entry_t* (*entries)() = dlsym(handle, "lisp_module_entries");
   if (entries == NULL) {
     DLCLOSE(add_to_cache, handle);
-    return lisp_make_nil();
+    return lisp_make_nil(lisp);
   }
   /*
    * Load all the symbols from the list.
@@ -243,11 +243,11 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
    * Append the module and call the register function if it was found on disk.
    */
   if (add_to_cache) {
-    atom_t hnd = lisp_make_number((uint64_t)handle);
-    atom_t val = lisp_cons(UP(name), hnd);
-    atom_t tmp = MODULES;
-    MODULES = lisp_setq(MODULES, val);
-    X(tmp);
+    atom_t hnd = lisp_make_number(lisp, (uint64_t)handle);
+    atom_t val = lisp_cons(lisp, UP(name), hnd);
+    atom_t tmp = lisp->modules;
+    lisp->modules = lisp_setq(lisp, lisp->modules, val);
+    X(lisp->slab, tmp);
   }
   /*
    * Return the result.

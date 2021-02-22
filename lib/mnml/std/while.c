@@ -8,7 +8,7 @@ lisp_eval_cond(const lisp_t lisp, const atom_t closure, const atom_t cell)
   UP(cell);
   atom_t evl = lisp_eval(lisp, closure, cell);
   const bool res = !IS_NULL(evl);
-  X(evl);
+  X(lisp->slab, evl);
   return res;
 }
 
@@ -19,20 +19,20 @@ lisp_function_while(const lisp_t lisp, const atom_t closure)
   /*
    * Extract the condition and the prog.
    */
-  atom_t cnd = lisp_car(ANY);
-  atom_t prg = lisp_cdr(ANY);
+  atom_t cnd = lisp_car(lisp, ANY);
+  atom_t prg = lisp_cdr(lisp, ANY);
   /*
    * Execute the loop.
    */
-  atom_t res = lisp_make_nil();
+  atom_t res = lisp_make_nil(lisp);
   while (lisp_eval_cond(lisp, C, cnd)) {
-    X(res);
-    res = lisp_prog(lisp, C, UP(prg), lisp_make_nil());
+    X(lisp->slab, res);
+    res = lisp_prog(lisp, C, UP(prg), lisp_make_nil(lisp));
   }
   /*
    * Clean-up and return the result.
    */
-  X(cnd, prg);
+  X(lisp->slab, cnd, prg);
   return res;
 }
 

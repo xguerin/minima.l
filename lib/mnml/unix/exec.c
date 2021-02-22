@@ -17,23 +17,23 @@ extern char** environ;
 #define MAX_ARGS 128
 
 static size_t
-lisp_exec_make_strings(const atom_t cell, char** array, const size_t len,
-                       const size_t idx)
+lisp_exec_make_strings(const lisp_t lisp, const atom_t cell, char** array,
+                       const size_t len, const size_t idx)
 {
   if (IS_NULL(cell) || idx == len) {
-    X(cell);
+    X(lisp->slab, cell);
     array[idx] = NULL;
     return idx;
   }
   /*
    */
   char buffer[PATH_MAX + 1];
-  atom_t car = lisp_car(cell);
-  atom_t cdr = lisp_cdr(cell);
-  X(cell);
+  atom_t car = lisp_car(lisp, cell);
+  atom_t cdr = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
   lisp_make_cstring(car, buffer, PATH_MAX, 0);
   array[idx] = strdup(buffer);
-  return lisp_exec_make_strings(cdr, array, len, idx + 1);
+  return lisp_exec_make_strings(lisp, cdr, array, len, idx + 1);
 }
 
 static atom_t USED
@@ -54,12 +54,12 @@ lisp_function_exec(UNUSED const lisp_t lisp, const atom_t closure)
    * Build the argument list.
    */
   char* arg_str[MAX_ARGS + 1] = { [0] = strdup(buffer) };
-  lisp_exec_make_strings(UP(ARGS), arg_str, MAX_ARGS - 1, 1);
+  lisp_exec_make_strings(lisp, UP(ARGS), arg_str, MAX_ARGS - 1, 1);
   /*
    * Build the environment.
    */
   char* env_str[MAX_ARGS + 1];
-  size_t len = lisp_exec_make_strings(UP(ENVP), env_str, MAX_ARGS, 0);
+  size_t len = lisp_exec_make_strings(lisp, UP(ENVP), env_str, MAX_ARGS, 0);
   /*
    * Call execve.
    */
