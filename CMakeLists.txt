@@ -19,7 +19,7 @@ set(CMAKE_C_COMPILER_NAMES clang gcc)
 # Project definition
 #
 
-project("minima.l" VERSION 0.0.0 LANGUAGES C)
+project("minima.l" VERSION 1.0.0 LANGUAGES C)
 
 #
 # Uninstall target
