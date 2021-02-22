@@ -291,7 +291,7 @@ function.</p>
 <li><code>LIST</code>: arguments are evaluated and assigned to the symbols in <code>LIST</code></li>
 </ul>
 <h3 id="lambdas">Lambdas</h3>
-<p>Lambda functions are defined using the <code>\\</code> keyword. Invocation of <code>\\</code> is
+<p>Lambda functions are defined using the <code>\</code> keyword. Invocation of <code>\</code> is
 similar to <code>def</code>:</p>
 <pre><code class="language-lisp">: ((\ (x y) (+ x y)) 1 1)
 &gt; 2
@@ -332,7 +332,7 @@ following is a valid recursive lambda and returns <code>0</code>:</p>
     (fn 10)))
 </code></pre>
 <h3 id="tail-call-optimization">Tail-call optimization</h3>
-<p>When functions are defined with <code>def</code> or <code>\\</code> in <code>let</code>, the function's body is
+<p>When functions are defined with <code>def</code> or <code>\</code> in <code>let</code>, the function's body is
 scanned for potential tail calls. During evaluation, when a tail call is
 encountered, its argument are evaluated at its call-site and returned to the
 parent. These arguments are then used at the root of the function in a new
