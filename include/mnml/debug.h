@@ -53,7 +53,7 @@ void lisp_debug_parse_flags();
 
 #define TRACE(__fmt, ...)                                         \
   do {                                                            \
-    FPRINTF(stderr, "[TRACE ] - { } " __fmt "\n", ##__VA_ARGS__); \
+    FPRINTF(stderr, "[TRACE ] { } - " __fmt "\n", ##__VA_ARGS__); \
   } while (0)
 
 #define TRACE_CATG(__k, __fmt, ...) \
@@ -67,36 +67,36 @@ void lisp_debug_parse_flags();
 
 #define HEADER_SEXP(__c)                                \
   do {                                                  \
-    FPRINTF(stderr, "[%06llu] - {%c} %s = ", __c->refs, \
+    FPRINTF(stderr, "[%06llu] {%c} - %s = ", __c->refs, \
             IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);       \
   } while (0)
 
 #define HEADER_REFC(__f, __t, __n)                                \
   do {                                                            \
-    FPRINTF(stderr, "[%2llu->%2llu] - { } %s = ", __f, __t, __n); \
+    FPRINTF(stderr, "[%2llu->%2llu] { } - %s = ", __f, __t, __n); \
   } while (0)
 
 #define HEADER_SLOT(__i)                            \
   do {                                              \
-    FPRINTF(stderr, "[SLOT  ] - { } @%lu = ", __i); \
+    FPRINTF(stderr, "[SLOT  ] { } - @%lu = ", __i); \
   } while (0)
 
 #else
 
-#define HEADER_SEXP(__c)                              \
-  do {                                                \
-    FPRINTF(stderr, "[%06lu] - { } %s = ", __c->refs, \
-            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);     \
+#define HEADER_SEXP(__c)                               \
+  do {                                                 \
+    FPRINTF(stderr, "[%06lu] {%c} - %s = ", __c->refs, \
+            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);      \
   } while (0)
 
 #define HEADER_REFC(__f, __t, __n)                              \
   do {                                                          \
-    FPRINTF(stderr, "[%2lu->%2lu] - { } %s = ", __f, __t, __n); \
+    FPRINTF(stderr, "[%2lu->%2lu] { } - %s = ", __f, __t, __n); \
   } while (0)
 
 #define HEADER_SLOT(__i)                            \
   do {                                              \
-    FPRINTF(stderr, "[SLOT  ] - { } @%lu = ", __i); \
+    FPRINTF(stderr, "[SLOT  ] { } - @%lu = ", __i); \
   } while (0)
 
 #endif
