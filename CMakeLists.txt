@@ -135,6 +135,10 @@ if(MNML_ENABLE_MSAN)
   set (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_LINKER_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=memory")
 endif()
 
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_LINKER_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=lld")
+endif()
+
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-register")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
