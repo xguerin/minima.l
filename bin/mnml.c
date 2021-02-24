@@ -383,13 +383,13 @@ main(const int argc, char** const argv)
      */
     result = lisp_make_nil(lisp);
     while (keep_running) {
-      atom_t nil = lisp_make_nil(lisp);
       atom_t car = lisp_pop(lisp);
       if (IS_NULL(car)) {
         X(lisp->slab, car);
         break;
       }
       X(lisp->slab, result);
+      atom_t nil = lisp_make_nil(lisp);
       result = lisp_eval(lisp, nil, car);
       X(lisp->slab, nil);
     }

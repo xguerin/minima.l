@@ -40,6 +40,18 @@ lisp_make_string(const lisp_t lisp, const char* const str, const size_t len)
 }
 
 atom_t
+lisp_make_scoped_symbol(const lisp_t lisp, const symbol_t sym)
+{
+  atom_t R = lisp_allocate(lisp->slab);
+  R->type = T_SCOPED_SYMBOL;
+  R->flags = 0;
+  R->refs = 1;
+  R->symbol = *sym;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+atom_t
 lisp_make_symbol(const lisp_t lisp, const symbol_t sym)
 {
   atom_t R = lisp_allocate(lisp->slab);
@@ -76,8 +88,8 @@ lisp_make_true(const lisp_t lisp)
 atom_t
 lisp_make_quote(const lisp_t lisp)
 {
-  MAKE_SYMBOL_STATIC(quote, "quote", 5);
-  atom_t R = lisp_make_symbol(lisp, quote);
+  MAKE_SCOPED_SYMBOL_STATIC(quote, "std", 3, "quote", 5);
+  atom_t R = lisp_make_scoped_symbol(lisp, quote);
   TRACE_MAKE_SEXP(R);
   return R;
 }

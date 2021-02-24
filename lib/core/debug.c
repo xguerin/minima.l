@@ -107,8 +107,9 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
       /*
        * Process the list.
        */
-      if (alter)
+      if (alter) {
         fprintf(fp, "(");
+      }
       /*
        * Print CAR.
        */
@@ -126,28 +127,41 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
       }
       /*
        */
-      if (alter)
+      if (alter) {
         fprintf(fp, ")");
+      }
       break;
-    case T_NUMBER:
+    case T_NUMBER: {
 #if defined(__MACH__) || defined(__OpenBSD__)
       fprintf(fp, "%lld", atom->number);
 #else
       fprintf(fp, "%ld", atom->number);
 #endif
       break;
+    }
     case T_SYMBOL: {
       char bsym[17] = { 0 };
       strncpy(bsym, atom->symbol.val, LISP_SYMBOL_LENGTH);
       fprintf(fp, "%s", bsym);
       break;
     }
-    case T_WILDCARD:
+    case T_SCOPED_SYMBOL: {
+      const size_t max = LISP_SYMBOL_LENGTH >> 1;
+      char bsym[9] = { 0 };
+      strncpy(bsym, atom->symbol.val, max);
+      fprintf(fp, "%s.", bsym);
+      strncpy(bsym, &atom->symbol.val[max], max);
+      fprintf(fp, "%s", bsym);
+      break;
+    }
+    case T_WILDCARD: {
       fprintf(fp, "_");
       break;
-    default:
+    }
+    default: {
       TRACE("Unknown-type error");
       abort();
+    }
   }
 }
 

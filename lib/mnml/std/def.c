@@ -1,3 +1,4 @@
+#include "mnml/debug.h"
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -11,7 +12,8 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
    * Grab the symbol.
    */
   atom_t symb = lisp_car(lisp, ANY);
-  if (!IS_SYMB(symb)) {
+  if (!IS_SCOP(symb) && !IS_SYMB(symb)) {
+    X(lisp->slab, symb);
     return lisp_make_nil(lisp);
   }
   /*
@@ -39,6 +41,13 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   }
   X(lisp->slab, doc);
   /*
+   * Don't set anything if NIL.
+   */
+  if (unlikely(IS_NULL(prog))) {
+    X(lisp->slab, symb, args, prog);
+    return lisp_make_nil(lisp);
+  }
+  /*
    * Check if there is any tail call.
    */
   lisp_mark_tail_calls(lisp, symb, args, prog);
@@ -50,10 +59,30 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   /*
    * Set the symbol's value.
    */
-  atom_t tmp = lisp->globals;
-  lisp->globals =
-    lisp_setq(lisp, lisp->globals, lisp_cons(lisp, UP(symb), con1));
-  X(lisp->slab, tmp);
+  if (IS_SCOP(symb)) {
+    /*
+     * Grab the scope's name and symbol.
+     */
+    atom_t nsp = lisp_scope_get_name(lisp, symb);
+    atom_t sym = lisp_scope_get_symb(lisp, symb);
+    /*
+     * Grab the scope and update the value.
+     */
+    atom_t scp = lisp_lookup(lisp, lisp->globals, closure, &nsp->symbol);
+    atom_t tmp = scp;
+    scp = lisp_setq(lisp, tmp, lisp_cons(lisp, sym, con1));
+    X(lisp->slab, tmp);
+    /*
+     * Update the scope in GLOBALS.
+     */
+    tmp = lisp->globals;
+    lisp->globals = lisp_setq(lisp, tmp, lisp_cons(lisp, nsp, scp));
+    X(lisp->slab, tmp);
+  } else {
+    atom_t tmp = lisp->globals;
+    lisp->globals = lisp_setq(lisp, tmp, lisp_cons(lisp, UP(symb), con1));
+    X(lisp->slab, tmp);
+  }
   return symb;
 }
 

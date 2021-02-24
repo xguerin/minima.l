@@ -262,7 +262,7 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
   /*
    * If it's a symbol, re-evaluate cell.
    */
-  else if (IS_SYMB(nxt) || IS_PAIR(nxt)) {
+  else if (IS_SCOP(nxt) || IS_SYMB(nxt) || IS_PAIR(nxt)) {
     rslt = lisp_eval(lisp, closure, lisp_cons(lisp, nxt, cdr));
   }
   /*
@@ -294,8 +294,17 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
       rslt = lisp_eval_pair(lisp, closure, cell);
       break;
     }
+    case T_SCOPED_SYMBOL: {
+      atom_t nam = lisp_scope_get_name(lisp, cell);
+      atom_t sym = lisp_scope_get_symb(lisp, cell);
+      atom_t nil = lisp_make_nil(lisp);
+      atom_t scp = lisp_lookup(lisp, lisp->globals, nil, &nam->symbol);
+      rslt = lisp_lookup(lisp, scp, closure, &sym->symbol);
+      X(lisp->slab, cell, nam, sym, nil, scp);
+      break;
+    }
     case T_SYMBOL: {
-      rslt = lisp_lookup(lisp, closure, &cell->symbol);
+      rslt = lisp_lookup(lisp, lisp->globals, closure, &cell->symbol);
       X(lisp->slab, cell);
       break;
     }

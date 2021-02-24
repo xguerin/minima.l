@@ -17,6 +17,7 @@ atom_match(const atom_t a, const atom_t b)
       return a->number == b->number;
     case T_PAIR:
       return atom_match(CAR(a), CAR(b)) && atom_match(CDR(a), CDR(b));
+    case T_SCOPED_SYMBOL:
     case T_SYMBOL:
       return lisp_symbol_match(a, &b->symbol);
     default:

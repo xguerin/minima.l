@@ -48,12 +48,14 @@ lisp_prin_pair(FILE* const handle, char* const buf, const size_t idx,
    */
   if (!IS_NULL(CDR(cell))) {
     if (IS_PAIR(CDR(cell))) {
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, " ", 1);
+      }
       return lisp_prin_pair(handle, buf, nxt, closure, CDR(cell), s);
     } else {
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, " . ", 3);
+      }
       return lisp_prin_atom(handle, buf, nxt, closure, CDR(cell), s);
     }
   }
@@ -98,11 +100,13 @@ lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
     }
     case T_PAIR: {
       size_t nxt = idx;
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, "(", 1);
+      }
       nxt = lisp_prin_pair(handle, buf, nxt, closure, cell, s);
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, ")", 1);
+      }
       return nxt;
     }
     case T_NUMBER: {
@@ -114,13 +118,25 @@ lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
 #endif
       return lisp_write(handle, buf, idx, buffer, strlen(buffer));
     }
-    case T_SYMBOL:
+    case T_SCOPED_SYMBOL: {
+      const size_t max = LISP_SYMBOL_LENGTH >> 1;
+      size_t nxt = idx;
+      nxt = lisp_write(handle, buf, nxt, cell->symbol.val,
+                       strnlen(cell->symbol.val, max));
+      nxt = lisp_write(handle, buf, nxt, ".", 1);
+      return lisp_write(handle, buf, nxt, &cell->symbol.val[max],
+                        strnlen(&cell->symbol.val[max], max));
+    }
+    case T_SYMBOL: {
       return lisp_write(handle, buf, idx, cell->symbol.val,
                         strnlen(cell->symbol.val, LISP_SYMBOL_LENGTH));
-    case T_WILDCARD:
+    }
+    case T_WILDCARD: {
       return lisp_write(handle, buf, idx, "_", 1);
-    default:
+    }
+    default: {
       return 0;
+    }
   }
 }
 

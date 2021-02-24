@@ -1,3 +1,5 @@
+#include <mnml/debug.h>
+#include <mnml/maker.h>
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
@@ -20,7 +22,20 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   switch (car->type) {
     /*
-     * If it's a symbol, load the binary module (shortcut for '(SYM . T)).
+     * If it's a scoped symbol, load the one symbol from the binary module
+     * (shortcut for '(MOD . SYM)).
+     */
+    case T_SCOPED_SYMBOL: {
+      atom_t nsp = lisp_scope_get_name(lisp, car);
+      atom_t sym = lisp_scope_get_symb(lisp, car);
+      X(lisp->slab, car);
+      atom_t mod =
+        lisp_cons(lisp, nsp, lisp_cons(lisp, sym, lisp_make_nil(lisp)));
+      res = module_load(lisp, mod);
+      break;
+    }
+    /*
+     * If it's a symbol, load the binary module (shortcut for '(MOD . T)).
      */
     case T_SYMBOL: {
       atom_t mod = lisp_cons(lisp, car, lisp_make_true(lisp));

@@ -89,14 +89,15 @@ module_find_from_cache(const lisp_t lisp, const atom_t sym)
 
 static atom_t
 module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
-                         const atom_t cell)
+                         const atom_t scope, const atom_t cell)
 {
   TRACE_MODL_SEXP(cell);
   /*
    * Check if cell is NIL.
    */
   if (IS_NULL(cell)) {
-    return cell;
+    X(lisp->slab, cell);
+    return scope;
   }
   /*
    * Grab CAR and CDR.
@@ -107,7 +108,7 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Process the remainder.
    */
-  atom_t nxt = module_load_symbols_list(entries, lisp, cdr);
+  atom_t nxt = module_load_symbols_list(entries, lisp, scope, cdr);
   /*
    * If CAR is a symbol, try to load it.
    */
@@ -123,9 +124,7 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
     const module_entry_t* e = &entries[0];
     while (e->name != NULL) {
       if (strcmp(e->name(), bsym) == 0) {
-        atom_t sym = e->load(lisp);
-        atom_t tmp = nxt;
-        nxt = lisp_cons(lisp, sym, tmp);
+        nxt = e->load(lisp, nxt);
         break;
       }
       e++;
@@ -140,8 +139,9 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
 
 static atom_t
 module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
-                    const atom_t cell)
+                    const atom_t scope, const atom_t cell)
 {
+  atom_t nxt = scope;
   /*
    * Check if cell is NIL.
    */
@@ -152,7 +152,6 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
    * If cell is T, load everything.
    */
   if (IS_TRUE(cell)) {
-    atom_t result = lisp_make_nil(lisp);
     /*
      * Compute available entries.
      */
@@ -165,18 +164,10 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
      * Scan backward and build the result.
      */
     for (size_t i = 0; i < count; i += 1) {
-      /*
-       * Load the function.
-       */
-      atom_t sym = entries[count - i - 1].load(lisp);
-      /*
-       * Enqueue the new function name in the result list.
-       */
-      atom_t tmp = result;
-      result = lisp_cons(lisp, sym, tmp);
+      nxt = entries[count - i - 1].load(lisp, nxt);
     }
     X(lisp->slab, cell);
-    return result;
+    return nxt;
   }
   /*
    * Check that cell is a list.
@@ -188,7 +179,7 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Load the element of the list.
    */
-  return module_load_symbols_list(entries, lisp, cell);
+  return module_load_symbols_list(entries, lisp, scope, cell);
 }
 
 atom_t
@@ -231,14 +222,26 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
     return lisp_make_nil(lisp);
   }
   /*
+   * Grab the scope.
+   */
+  atom_t nil = lisp_make_nil(lisp);
+  atom_t scope = lisp_lookup(lisp, lisp->globals, nil, &name->symbol);
+  X(lisp->slab, nil);
+  /*
    * Load all the symbols from the list.
    */
   const module_entry_t* e = entries();
-  const atom_t syms = module_load_symbols(e, lisp, symbols);
-  if (IS_NULL(syms)) {
+  const atom_t mods = module_load_symbols(e, lisp, scope, symbols);
+  if (IS_NULL(mods)) {
     DLCLOSE(add_to_cache, handle);
-    return syms;
+    return mods;
   }
+  /*
+   * Update the scope.
+   */
+  atom_t tmp = lisp->globals;
+  lisp->globals = lisp_setq(lisp, tmp, lisp_cons(lisp, UP(name), mods));
+  X(lisp->slab, tmp);
   /*
    * Append the module and call the register function if it was found on disk.
    */
@@ -252,7 +255,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   /*
    * Return the result.
    */
-  return syms;
+  return lisp_make_true(lisp);
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

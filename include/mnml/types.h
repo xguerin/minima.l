@@ -24,6 +24,7 @@ typedef enum _atom_type
   T_CHAR,
   T_NUMBER,
   T_PAIR,
+  T_SCOPED_SYMBOL,
   T_SYMBOL,
   T_WILDCARD
 } atom_type_t;
@@ -32,8 +33,6 @@ typedef enum _atom_flag
 {
   F_TAIL_CALL = 0x1,
 } atom_flag_t;
-
-#define ATOM_TYPES 7
 
 struct _atom;
 
@@ -77,6 +76,7 @@ typedef struct _atom
 #define IS_CHAR(__a) ((__a)->type == T_CHAR)
 #define IS_NUMB(__a) ((__a)->type == T_NUMBER)
 #define IS_PAIR(__a) ((__a)->type == T_PAIR)
+#define IS_SCOP(__a) ((__a)->type == T_SCOPED_SYMBOL)
 #define IS_SYMB(__a) ((__a)->type == T_SYMBOL)
 
 #define IS_LIST(__a) (IS_PAIR(__a) || IS_NULL(__a))

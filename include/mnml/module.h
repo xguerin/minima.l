@@ -18,7 +18,7 @@ void module_fini(const lisp_t lisp);
  */
 
 typedef const char* (*module_name_t)();
-typedef atom_t (*module_load_t)(const lisp_t lisp);
+typedef atom_t (*module_load_t)(const lisp_t lisp, const atom_t scope);
 
 typedef struct _module_entry
 {
@@ -41,24 +41,24 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
     lisp_module_##__s##_name, lisp_module_##__s##_load \
   }
 
-#define LISP_MODULE_SETUP(__s, __n, ...)                       \
-                                                               \
-  const char* USED lisp_module_##__s##_name() { return #__n; } \
-                                                               \
-  atom_t USED lisp_module_##__s##_load(const lisp_t lisp)      \
-  {                                                            \
-    MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);         \
-    atom_t sym = lisp_make_symbol(lisp, inp);                  \
-    LISP_CONS(lisp, arg, ##__VA_ARGS__);                       \
-    uintptr_t fun = (uintptr_t)lisp_function_##__s;            \
-    atom_t adr = lisp_make_number(lisp, fun);                  \
-    atom_t cn0 = lisp_cons(lisp, lisp_make_nil(lisp), adr);    \
-    atom_t val = lisp_cons(lisp, arg, cn0);                    \
-    atom_t cns = lisp_cons(lisp, UP(sym), val);                \
-    atom_t tmp = lisp->globals;                                \
-    lisp->globals = lisp_setq(lisp, lisp->globals, cns);       \
-    X(lisp->slab, tmp);                                        \
-    return sym;                                                \
+#define LISP_MODULE_SETUP(__s, __n, ...)                                      \
+                                                                              \
+  const char* USED lisp_module_##__s##_name() { return #__n; }                \
+                                                                              \
+  atom_t USED lisp_module_##__s##_load(const lisp_t lisp, const atom_t scope) \
+  {                                                                           \
+    MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);                        \
+    atom_t sym = lisp_make_symbol(lisp, inp);                                 \
+    LISP_CONS(lisp, arg, ##__VA_ARGS__);                                      \
+    uintptr_t fun = (uintptr_t)lisp_function_##__s;                           \
+    atom_t adr = lisp_make_number(lisp, fun);                                 \
+    atom_t cn0 = lisp_cons(lisp, lisp_make_nil(lisp), adr);                   \
+    atom_t val = lisp_cons(lisp, arg, cn0);                                   \
+    atom_t cn1 = lisp_cons(lisp, sym, val);                                   \
+    atom_t tmp = scope;                                                       \
+    atom_t res = lisp_setq(lisp, tmp, cn1);                                   \
+    X(lisp->slab, tmp);                                                       \
+    return res;                                                               \
   }
 
 /*

@@ -44,7 +44,8 @@ typedef atom_t (*function_t)(const lisp_t, const atom_t);
  * Symbol lookup.
  */
 
-atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym);
+atom_t lisp_lookup(const lisp_t lisp, const atom_t scope, const atom_t closure,
+                   const symbol_t sym);
 
 /*
  * Lisp basic functions.

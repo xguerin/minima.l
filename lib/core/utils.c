@@ -136,6 +136,7 @@ lisp_equ(const atom_t a, const atom_t b)
       return a->number == b->number;
     case T_PAIR:
       return lisp_equ(CAR(a), CAR(b)) && lisp_equ(CDR(a), CDR(b));
+    case T_SCOPED_SYMBOL:
     case T_SYMBOL:
       return lisp_symbol_match(a, &b->symbol);
     default:
@@ -163,6 +164,7 @@ lisp_neq(const atom_t a, const atom_t b)
       return mismatch || a->number != b->number;
     case T_PAIR:
       return mismatch || lisp_neq(CAR(a), CAR(b)) || lisp_neq(CDR(a), CDR(b));
+    case T_SCOPED_SYMBOL:
     case T_SYMBOL:
       return mismatch || !lisp_symbol_match(a, &b->symbol);
     default:
@@ -389,7 +391,8 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
       /*
        * Check for IF constructs.
        */
-      if (lisp_symbol_equal(CAR(cell), "if")) {
+      MAKE_SCOPED_SYMBOL_STATIC(_if, "std", 3, "if", 2);
+      if (lisp_symbol_match(CAR(cell), _if)) {
         atom_t cd0 = lisp_cdr(lisp, cell);
         atom_t cd1 = lisp_cdr(lisp, cd0);
         atom_t thn = lisp_collect_tails(lisp, lisp_car(lisp, cd1));
@@ -402,8 +405,10 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
       /*
        * Check for COND and MATCH constructs.
        */
-      if (lisp_symbol_equal(CAR(cell), "cond") ||
-          lisp_symbol_equal(CAR(cell), "match")) {
+      MAKE_SCOPED_SYMBOL_STATIC(_cond, "std", 3, "cond", 4);
+      MAKE_SCOPED_SYMBOL_STATIC(_match, "std", 3, "match", 5);
+      if (lisp_symbol_match(CAR(cell), _cond) ||
+          lisp_symbol_match(CAR(cell), _match)) {
         atom_t cd0 = lisp_cdr(lisp, cell);
         atom_t cd1 = lisp_cdr(lisp, cd0);
         res = lisp_collect_tails_assoc(lisp, cd1);
@@ -413,8 +418,10 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
       /*
        * Check for PROG and STREAM constructs.
        */
-      if (lisp_symbol_equal(CAR(cell), "prog") ||
-          lisp_symbol_equal(CAR(cell), "|>")) {
+      MAKE_SCOPED_SYMBOL_STATIC(_prog, "std", 3, "prog", 4);
+      MAKE_SCOPED_SYMBOL_STATIC(_strm, "std", 3, "|>", 2);
+      if (lisp_symbol_match(CAR(cell), _prog) ||
+          lisp_symbol_match(CAR(cell), _strm)) {
         FOREACH(cell, p) { NEXT(p); }
         atom_t last = UP(p->car);
         res = lisp_collect_tails(lisp, last);
@@ -424,8 +431,10 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
       /*
        * Check for UNLESS and WHEN constructs.
        */
-      if (lisp_symbol_equal(CAR(cell), "unless") ||
-          lisp_symbol_equal(CAR(cell), "when")) {
+      MAKE_SCOPED_SYMBOL_STATIC(_unless, "std", 3, "unless", 6);
+      MAKE_SCOPED_SYMBOL_STATIC(_when, "std", 3, "when", 4);
+      if (lisp_symbol_match(CAR(cell), _unless) ||
+          lisp_symbol_match(CAR(cell), _when)) {
         atom_t cd0 = lisp_cdr(lisp, cell);
         atom_t cd1 = lisp_cdr(lisp, cd0);
         res = lisp_collect_tails(lisp, lisp_car(lisp, cd1));
@@ -643,14 +652,45 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
 }
 
 /*
- * Symbol matching.
+ * Scope.
  */
 
-inline bool
-lisp_symbol_equal(const atom_t a, const char* const b)
+atom_t
+lisp_scope_get_name(const lisp_t lisp, const atom_t a)
 {
-  return strncmp(a->symbol.val, b, LISP_SYMBOL_LENGTH) == 0;
+  /*
+   * Check if we have a scoped symbol.
+   */
+  if (!IS_SCOP(a)) {
+    return lisp_make_nil(lisp);
+  }
+  /*
+   * Grab the name of the scope.
+   */
+  MAKE_SYMBOL_STATIC(sym, a->symbol.val, LISP_SYMBOL_LENGTH >> 1);
+  return lisp_make_symbol(lisp, sym);
 }
+
+atom_t
+lisp_scope_get_symb(const lisp_t lisp, const atom_t a)
+{
+  /*
+   * Check if we have a scoped symbol.
+   */
+  if (!IS_SCOP(a)) {
+    return lisp_make_nil(lisp);
+  }
+  /*
+   * Grab the name of the scope.
+   */
+  MAKE_SYMBOL_STATIC(sym, &a->symbol.val[LISP_SYMBOL_LENGTH >> 1],
+                     LISP_SYMBOL_LENGTH >> 1);
+  return lisp_make_symbol(lisp, sym);
+}
+
+/*
+ * Symbol matching.
+ */
 
 inline bool
 lisp_symbol_match(const atom_t a, const symbol_t b)

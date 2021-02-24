@@ -164,6 +164,17 @@ action tok_symbol
   lisp_consume_token(lexer);
 }
 
+action tok_scoped
+{ 
+  const char * start = UNPREFIX(ts);
+  size_t len = te - start;
+  size_t off = 0;
+  for (off = 0; off < len && start[off] != '.'; off += 1);
+  MAKE_SCOPED_SYMBOL_DYNAMIC(sym, start, off, &start[off + 1], len - off - 1);
+  Parse(lexer->parser, SCOPED_SYMBOL, sym, lexer);
+  lisp_consume_token(lexer);
+}
+
 popen   = '(';
 pclose  = ')';
 dot     = '.';
@@ -173,8 +184,10 @@ tilde   = '~';
 number  = '-'? digit+;
 char    = '^' . (print - '\\' | "\\\\" | "\\e" | "\\n" | "\\r" | "\\t") $!parse_error;
 string  = '"' . ([^"] | '\\' '"')* . '"';
-marks   = [!@$%&*_+\-={}\[\]:;|\\<>?,./];
-symbol  = (alpha | marks) . (alnum | marks){,15} $!parse_error;
+marks   = [!@$%&*_+\-={}\[\]:;|\\<>?,/];
+symbol  = (alpha | marks) . (alnum | marks){,16} $!parse_error;
+member  = (alpha | marks) . (alnum | marks){,8} $!parse_error;
+scoped  = member . dot . member;
 comment = '#' . [^\n]*;
 
 purge := any* %{ fgoto main; };
@@ -193,6 +206,7 @@ main := |*
   'T'    => tok_true;
   '_'    => tok_wildcard;
   symbol => tok_symbol;
+  scoped => tok_scoped;
   #
   # Escaped POPEN.
   #
@@ -200,17 +214,23 @@ main := |*
   (backt . popen) %tok_backt $!err_prefix => tok_popen;
   (tilde . popen) %tok_tilde $!err_prefix => tok_popen;
   #
+  # Escaped NUMBER.
+  #
+  (quote . number) %tok_quote $!err_prefix => tok_number;
+  (backt . number) %tok_backt $!err_prefix => tok_number;
+  (tilde . number) %tok_tilde $!err_prefix => tok_number;
+  #
   # Escaped SYMBOL.
   #
   (quote . symbol) %tok_quote $!err_prefix => tok_symbol;
   (backt . symbol) %tok_backt $!err_prefix => tok_symbol;
   (tilde . symbol) %tok_tilde $!err_prefix => tok_symbol;
   #
-  # Escaped NUMBER.
+  # Escaped SCOPED.
   #
-  (quote . number) %tok_quote $!err_prefix => tok_number;
-  (backt . number) %tok_backt $!err_prefix => tok_number;
-  (tilde . number) %tok_tilde $!err_prefix => tok_number;
+  (quote . scoped) %tok_quote $!err_prefix => tok_scoped;
+  (backt . scoped) %tok_backt $!err_prefix => tok_scoped;
+  (tilde . scoped) %tok_tilde $!err_prefix => tok_scoped;
   #
   # Garbage.
   #

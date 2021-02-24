@@ -35,7 +35,8 @@ lisp_delete(lisp_t lisp)
  */
 
 atom_t
-lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
+lisp_lookup(const lisp_t lisp, const atom_t scope, const atom_t closure,
+            const symbol_t sym)
 {
   /*
    * Look for the symbol the closure.
@@ -51,7 +52,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
   /*
    * Check the global environment.
    */
-  FOREACH(lisp->globals, g)
+  FOREACH(scope, g)
   {
     atom_t car = g->car;
     if (lisp_symbol_match(CAR(car), sym)) {
@@ -134,7 +135,7 @@ lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair)
   /*
    * Check if pair is valid.
    */
-  if (!IS_PAIR(pair) || !IS_SYMB(CAR(pair))) {
+  if (!IS_PAIR(pair) || (!IS_SCOP(CAR(pair)) && !IS_SYMB(CAR(pair)))) {
     X(lisp->slab, pair);
     return UP(closure);
   }

@@ -96,6 +96,12 @@ item(A) ::= STRING(B).
   free(B);
 }
 
+item(A) ::= SCOPED_SYMBOL(B).
+{
+  A = lisp_make_scoped_symbol(lexer->lisp, (symbol_t)B);
+  free(B);
+}
+
 item(A) ::= SYMBOL(B).
 {
   A = lisp_make_symbol(lexer->lisp, (symbol_t)B);

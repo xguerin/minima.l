@@ -21,6 +21,24 @@
   strncpy(__v->val, __s, __n)
 
 /*
+ * Scoped symbol makers.
+ */
+
+#define MAKE_SCOPED_SYMBOL_STATIC(__v, __p, __n, __s, __m)      \
+  symbol_t __v = (union _symbol*)alloca(sizeof(union _symbol)); \
+  __v->word[0] = 0;                                             \
+  __v->word[1] = 0;                                             \
+  strncpy(__v->val, __p, __n);                                  \
+  strncpy(&__v->val[8], __s, __m);
+
+#define MAKE_SCOPED_SYMBOL_DYNAMIC(__v, __p, __n, __s, __m)     \
+  symbol_t __v = (union _symbol*)malloc(sizeof(union _symbol)); \
+  __v->word[0] = 0;                                             \
+  __v->word[1] = 0;                                             \
+  strncpy(__v->val, __p, __n);                                  \
+  strncpy(&__v->val[8], __s, __m);
+
+/*
  * CONS helpers.
  */
 
@@ -95,6 +113,8 @@ atom_t lisp_make_char(const lisp_t lisp, const char c);
 atom_t lisp_make_number(const lisp_t lisp, const int64_t num);
 atom_t lisp_make_string(const lisp_t lisp, const char* const s,
                         const size_t len);
+
+atom_t lisp_make_scoped_symbol(const lisp_t lisp, const symbol_t sym);
 atom_t lisp_make_symbol(const lisp_t lisp, const symbol_t sym);
 
 atom_t lisp_make_nil(const lisp_t lisp);
