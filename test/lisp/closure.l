@@ -1,4 +1,5 @@
 (load "@lib/test.l" '(logic and) '(math +) '(std let |> <- \))
+(use '(logic and) '(math +) '(std let |> <- \))
 
 (test:run
 	"Closures"

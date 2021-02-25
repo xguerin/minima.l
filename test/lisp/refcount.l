@@ -1,7 +1,5 @@
-(load
-	"@lib/test.l" "@lib/cps.l"
-	'(math + - * <=)
-	'(std let \ car))
+(load "@lib/test.l" "@lib/cps.l" '(math + - * <=) '(std let \ car))
+(use '(math + - * <=) '(std let \ car))
 
 (test:run
 	"CPS reference counting"

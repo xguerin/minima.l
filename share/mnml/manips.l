@@ -1,4 +1,5 @@
 (load "rev.l" '(logic = not) '(math > -) '(std |> car cdr cons if nil? when))
+(use '(logic = not) '(math > -) '(std |> car cdr cons if nil? when))
 
 (def assoc (k lst)
 	"Return the value for K in the association list LST."

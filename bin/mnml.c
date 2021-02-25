@@ -220,23 +220,22 @@ lisp_build_env(const lisp_t lisp)
 static void
 lisp_load_defaults(const lisp_t lisp)
 {
+  atom_t res;
+  atom_t nil = lisp_make_nil(lisp);
   /*
-   * Load a default set of functions.
+   * Pre-load some symbols.
    */
-  MAKE_SYMBOL_STATIC(std, "std", 6);
-  MAKE_SYMBOL_STATIC(lod, "load", 4);
-  MAKE_SYMBOL_STATIC(qte, "quote", 5);
-  MAKE_SYMBOL_STATIC(def, "def", 3);
-  atom_t mod = lisp_make_symbol(lisp, std);
-  atom_t sy0 = lisp_make_symbol(lisp, lod);
-  atom_t sy1 = lisp_make_symbol(lisp, qte);
-  atom_t sy2 = lisp_make_symbol(lisp, def);
-  atom_t cn0 = lisp_cons(lisp, sy0, lisp_make_nil(lisp));
-  atom_t cn1 = lisp_cons(lisp, sy1, cn0);
-  atom_t cn2 = lisp_cons(lisp, sy2, cn1);
-  atom_t cn3 = lisp_cons(lisp, mod, cn2);
-  atom_t tmp = module_load(lisp, cn3);
-  X(lisp->slab, tmp);
+  LISP_CONS(lisp, mods, std, def, load, quote, use, NIL);
+  res = module_load(lisp, mods);
+  X(lisp->slab, res);
+  /*
+   * Pre-use some symbols.
+   */
+  MAKE_SYMBOL_STATIC(_std, "std", 3);
+  atom_t std = lisp_make_symbol(lisp, _std);
+  LISP_CONS(lisp, uses, def, load, quote, use, NIL);
+  res = lisp_import(lisp, nil, std, uses, lisp_make_nil(lisp));
+  X(lisp->slab, res, std, nil);
 }
 
 /*

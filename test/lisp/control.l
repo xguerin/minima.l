@@ -1,6 +1,5 @@
-(load
-	"@lib/test.l"
-	'(std match cond num? str? sym? chr?))
+(load "@lib/test.l" '(std match cond num? str? sym? chr?))
+(use '(std match cond num? str? sym? chr?))
 
 (test:run
 	"Control operations"

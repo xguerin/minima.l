@@ -5,6 +5,12 @@
 	'(math - >)
 	'(std if nil? cdr cons car eval len let prog))
 
+(use
+	'(logic or =)
+	'(io prinl)
+	'(math - >)
+	'(std if nil? cdr cons car eval len let prog))
+
 (def args:skip (LST LEN)
 	"Extract sublist of LEN from LST."
 	(if (or (= 0 LEN) (nil? LST))

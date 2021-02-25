@@ -295,12 +295,23 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
       break;
     }
     case T_SCOPED_SYMBOL: {
+      /*
+       * Get the namespace and the symbol.
+       */
       atom_t nam = lisp_scope_get_name(lisp, cell);
       atom_t sym = lisp_scope_get_symb(lisp, cell);
+      X(lisp->slab, cell);
+      /*
+       * Lookup the namespace.
+       */
       atom_t nil = lisp_make_nil(lisp);
       atom_t scp = lisp_lookup(lisp, lisp->scopes, nil, &nam->symbol);
+      X(lisp->slab, nam, nil);
+      /*
+       * Lookup the symbol.
+       */
       rslt = lisp_lookup(lisp, scp, closure, &sym->symbol);
-      X(lisp->slab, cell, nam, sym, nil, scp);
+      X(lisp->slab, sym, scp);
       break;
     }
     case T_SYMBOL: {

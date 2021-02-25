@@ -2,6 +2,10 @@
 	'(logic and not)
 	'(std if lst? nil? car cdr cons))
 
+(use
+	'(logic and not)
+	'(std if lst? nil? car cdr cons))
+
 (def foldl (fun acc lst)
 	"Left-fold FUN over LST with ACC as the default accumulator value."
 	(if (lst? lst)

@@ -68,6 +68,65 @@ lisp_lookup(const lisp_t lisp, const atom_t scope, const atom_t closure,
   return lisp_make_nil(lisp);
 }
 
+atom_t
+lisp_import(const lisp_t lisp, const atom_t closure, const atom_t scope,
+            const atom_t sym, const atom_t res)
+{
+  atom_t tmp = res;
+  /*
+   * Default case.
+   */
+  if (IS_NULL(sym)) {
+    X(lisp->slab, sym);
+    return res;
+  }
+  /*
+   * Check that we have a pair.
+   */
+  if (!IS_PAIR(sym)) {
+    X(lisp->slab, sym);
+    return res;
+  }
+  /*
+   * Grab CAR and CDR.
+   */
+  atom_t car = lisp_car(lisp, sym);
+  atom_t cdr = lisp_cdr(lisp, sym);
+  X(lisp->slab, sym);
+  /*
+   * Process CAR.
+   */
+  if (IS_SYMB(car)) {
+    X(lisp->slab, tmp);
+    /*
+     * Lookup the namespace.
+     */
+    atom_t nil = lisp_make_nil(lisp);
+    atom_t scp = lisp_lookup(lisp, lisp->scopes, nil, &scope->symbol);
+    X(lisp->slab, nil);
+    /*
+     * Lookup the symbol.
+     */
+    atom_t val = lisp_lookup(lisp, scp, closure, &car->symbol);
+    X(lisp->slab, scp);
+    /*
+     * If the symbol exists, add its to the globals.
+     */
+    if (IS_NULL(val)) {
+      X(lisp->slab, car);
+      tmp = val;
+    } else {
+      atom_t entry = lisp_cons(lisp, car, val);
+      LISP_SETQ(lisp, lisp->globals, entry);
+      tmp = lisp_make_true(lisp);
+    }
+  }
+  /*
+   * Return the result.
+   */
+  return lisp_import(lisp, closure, scope, cdr, tmp);
+}
+
 /*
  * Basic functions.
  */

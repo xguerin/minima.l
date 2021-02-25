@@ -1,4 +1,5 @@
 (load '(logic =) '(std let \ if car cdr conc list cons))
+(use '(logic =) '(std let \ if car cdr conc list cons))
 
 (def split (lst chr)
 	(let ((spliN . (\ (lst chr end)

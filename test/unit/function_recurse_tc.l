@@ -1,4 +1,5 @@
 (load '(logic =) '(math + -) '(std if))
+(use '(logic =) '(math + -) '(std if))
 
 (def accumulate (V)
 	(if (= 0 V)

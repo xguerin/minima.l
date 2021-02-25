@@ -11,6 +11,13 @@
 	'(std len let if eval cond prog car setq tru?)
 	'(sys slabinfo))
 
+(use
+	'(io prin printl prinl)
+	'(logic = and)
+	'(math >)
+	'(std len let if eval cond prog car setq tru?)
+	'(sys slabinfo))
+
 (def usage ()
   "Print out a usage string for the testsuite."
   (let ((arg0 . (car (cdr ARGV)))

@@ -4,6 +4,10 @@
 	'(logic = or)
 	'(std \ |> car cdr cons if))
 
+(use
+	'(logic = or)
+	'(std \ |> car cdr cons if))
+
 (def whitespace? (chr)
 	"Return T if CHR is a white space."
 	(|> (= chr ^ ) (or (= chr ^\t)) (or (= chr ^\n)) (or (= chr ^\r))))

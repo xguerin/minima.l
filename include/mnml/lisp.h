@@ -42,11 +42,13 @@ void lisp_delete(const lisp_t lisp);
 typedef atom_t (*function_t)(const lisp_t, const atom_t);
 
 /*
- * Symbol lookup.
+ * Symbol lookup and import.
  */
 
 atom_t lisp_lookup(const lisp_t lisp, const atom_t scope, const atom_t closure,
                    const symbol_t sym);
+atom_t lisp_import(const lisp_t lisp, const atom_t closure, const atom_t scope,
+                   const atom_t sym, const atom_t res);
 
 /*
  * Lisp basic functions.

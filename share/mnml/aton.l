@@ -1,4 +1,5 @@
 (load "iterators.l" '(math + - *) '(std \))
+(use '(math + - *) '(std \))
 
 (def aton (STR)
 	"Convert a string STR to a (positive) number."

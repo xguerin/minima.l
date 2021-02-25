@@ -1,4 +1,5 @@
 (load "iterators.l" '(logic and) '(std if lst? \ conc list))
+(use '(logic and) '(std if lst? \ conc list))
 
 (def flatten (lst)
 	"Flatten k-deep LST into a 1-deep list."

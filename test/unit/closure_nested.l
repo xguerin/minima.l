@@ -1,4 +1,5 @@
 (load '(logic =) '(std \ let))
+(use '(logic =) '(std \ let))
 
 (let ((A . 1)
 			(F . (\ () A))

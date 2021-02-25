@@ -1,4 +1,5 @@
 (load '(logic =) '(math + % /) '(std let \ if cons chr))
+(use '(logic =) '(math + % /) '(std let \ if cons chr))
 
 (def ntoa (n)
 	"Convert a number N into a list of character."

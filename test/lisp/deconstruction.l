@@ -1,4 +1,5 @@
 (load "@lib/test.l" '(std let cons))
+(use '(std let cons))
 
 (test:run
 	"List deconstruction"

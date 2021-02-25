@@ -1,4 +1,5 @@
 (load '(logic = and) '(std cond num? lst?))
+(use '(logic = and) '(std cond num? lst?))
 
 (def test (v)
 	(cond v

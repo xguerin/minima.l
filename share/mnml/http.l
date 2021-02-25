@@ -12,6 +12,15 @@
 	'(std \ <- car cons if len let list match nil? prog unless when while)
 	'(unix accept close connect listen select))
 
+(use
+	'(io in out prinl printl readline)
+	'(iterators foldl)
+	'(manips cadr caddr cddr)
+	'(logic = or)
+	'(math >)
+	'(std \ <- car cons if len let list match nil? prog unless when while)
+	'(unix accept close connect listen select))
+
 #
 # HTTP methods.
 #

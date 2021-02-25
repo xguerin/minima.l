@@ -1,4 +1,5 @@
 (load '(std if nil? list let car cdr cons))
+(use '(std if nil? list let car cdr cons))
 
 (def insert (cmp a lst)
 	"Insert A into ordered list LST using comparator CMP."

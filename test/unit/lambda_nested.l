@@ -1,4 +1,5 @@
 (load '(logic =) '(math +) '(std \))
+(use '(logic =) '(math +) '(std \))
 
 (def exec (FN A B) (FN A B))
 

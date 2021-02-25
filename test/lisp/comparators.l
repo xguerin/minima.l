@@ -1,4 +1,5 @@
 (load "@lib/test.l" '(logic =))
+(use '(logic =))
 
 (test:run
 	"Comparison operations"

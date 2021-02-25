@@ -1,4 +1,5 @@
 (load "iterators.l" '(logic = or) '(std \))
+(use '(logic = or) '(std \))
 
 (def has (LST X)
 	"Check if X is in LST"

@@ -7,6 +7,12 @@
 	'(std let \ if cons prog)
 	'unix)
 
+(use
+	'(io in readline)
+	'(logic =)
+	'(std let \ if cons prog)
+	'unix)
+
 (def readlines (result)
 	"Read all lines from FD."
 	(let ((line . (readline)))

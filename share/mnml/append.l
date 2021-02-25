@@ -1,4 +1,5 @@
 (load "iterators.l" '(std \ eval cons))
+(use '(std \ eval cons))
 
 (def append (x . @)
 	"Non-destructively concatenate multiple strings."

@@ -1,4 +1,5 @@
 (load "iterators.l" '(logic =) '(std \ if cons))
+(use '(logic =) '(std \ if cons))
 
 (def replc (k v lst)
 	(foldr

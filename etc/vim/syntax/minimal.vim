@@ -114,6 +114,7 @@ syn keyword MinimalFuncs
       \ truncr
       \ unless
       \ unlink
+      \ use
       \ tru?
       \ when
       \ while

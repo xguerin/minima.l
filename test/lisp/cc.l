@@ -3,9 +3,16 @@
 	'(math + - * / <=)
 	'(std cdr prog let list |> num? nil? unless))
 
+(use
+	'(logic and not)
+	'(math + - * / <=)
+	'(std cdr prog let list |> num? nil? unless))
+
 (def test:build (SYM)
 	"Compile and build SYM."
-	(cc:build SYM (cc:compile SYM (list SYM))))
+	(and
+		(cc:build SYM (cc:compile SYM (list SYM)))
+		(use SYM)))
 
 (setq DELTA 24)
 
@@ -20,9 +27,9 @@
 										(bod 	. (|> _add cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_add) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
-										(and (assert:equal 2 (_add 1 1)))
+										(and (assert:equal 2 (_add._add 1 1)))
 										(and (assert:equal (+ pre DELTA) (test:slabdelta)))
 										))))
 	("sub"	. (prog
@@ -31,7 +38,7 @@
 										(bod 	. (|> _sub cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_sub) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal 0 (_sub 1 1)))
 										(and (assert:equal (+ pre DELTA) (test:slabdelta)))
@@ -42,7 +49,7 @@
 										(bod 	. (|> _mul cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_mul) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal 8 (_mul 2 4)))
 										(and (assert:equal (+ pre DELTA) (test:slabdelta)))
@@ -53,7 +60,7 @@
 										(bod 	. (|> _div cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_div) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal 3 (_div 9 3)))
 										(and (assert:equal (+ pre DELTA) (test:slabdelta)))
@@ -67,7 +74,7 @@
 										(bod 	. (|> _ith cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_ith) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal NIL (_ith NIL)))
 										(and (assert:equal '(2) (_ith '(1 2))))
@@ -79,7 +86,7 @@
 											(bod 	. (|> _unless cdr cdr))
 											(pre 	. (test:slabdelta)))
 									(|> T
-											(and (assert:equal '(_unless) res))
+											(and res)
 											(and (assert:predicate 'num? bod))
 											(and (assert:equal NIL (_unless NIL)))
 											(and (assert:equal '(2) (_unless '(1 2))))
@@ -91,7 +98,7 @@
 										(bod 	. (|> _when cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_when) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal NIL (_when NIL)))
 										(and (assert:equal '(2) (_when '(1 2))))
@@ -106,7 +113,7 @@
 										(bod 	. (|> _ite cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_ite) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal 1 (_ite 1 3)))
 										(and (assert:equal 1 (_ite 3 1)))
@@ -118,7 +125,7 @@
 													(bod 	. (|> _ite_nested cdr cdr))
 													(pre 	. (test:slabdelta)))
 											(|> T
-													(and (assert:equal '(_ite_nested) res))
+													(and res)
 													(and (assert:predicate 'num? bod))
 													(and (assert:equal 3 (_ite_nested 3 2 1)))
 													(and (assert:equal 3 (_ite_nested 2 3 1)))
@@ -134,7 +141,7 @@
 										(bod 	. (|> _fib cdr cdr))
 										(pre 	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_fib) res))
+										(and res)
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal 55 (_fib 10)))
 										(and (assert:equal (+ pre DELTA) (test:slabdelta)))
@@ -151,7 +158,7 @@
 											(bod 	. (|> _foldl cdr cdr))
 											(pre 	. (test:slabdelta)))
 									(|> T
-											(and (assert:equal '(_foldl) res))
+											(and res)
 											(and (assert:predicate 'num? bod))
 											(and (assert:equal 3 (_foldl (\ (acc _) (+ acc 1)) 0 '(1 2 3))))
 											(and (assert:equal 4 (_foldl (\ (acc _) (+ acc 1)) 0 '(1 2 3 4))))
@@ -167,7 +174,7 @@
 											(bod 	. (|> _foldr cdr cdr))
 											(pre 	. (test:slabdelta)))
 									(|> T
-											(and (assert:equal '(_foldr) res))
+											(and res)
 											(and (assert:predicate 'num? bod))
 											(and (assert:equal 3 (_foldr (\ (_ acc) (+ acc 1)) '(1 2 3) 0)))
 											(and (assert:equal 4 (_foldr (\ (_ acc) (+ acc 1)) '(1 2 3 4) 0)))
@@ -184,7 +191,7 @@
 											(bod 	. (|> _map cdr cdr))
 											(pre 	. (test:slabdelta)))
 									(|> T
-											(and (assert:equal '(_map) res))
+											(and res)
 											(and (assert:equal '(2 3 4) (_map (\ (e) (+ e 1)) '(1 2 3))))
 											(and (assert:equal '(0 1 2) (_map (\ (e) (- e 1)) '(1 2 3))))
 											(and (assert:predicate 'num? bod))
@@ -200,7 +207,7 @@
 										(bod	. (|> _fnc cdr cdr))
 										(pre	. (test:slabdelta)))
 								(|> T
-										(and (assert:equal '(_fnc) res))
+										(and res)
 										(and (assert:equal 2	(_fnc 1 1)))
 										(and (assert:predicate 'num? bod))
 										(and (assert:equal (+ pre DELTA) (test:slabdelta)))

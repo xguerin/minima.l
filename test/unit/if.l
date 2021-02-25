@@ -1,4 +1,5 @@
 (load '(logic =) '(std if let))
+(use '(logic =) '(std if let))
 
 (let ((A . 1)
 			(REM . 1)

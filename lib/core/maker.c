@@ -88,8 +88,8 @@ lisp_make_true(const lisp_t lisp)
 atom_t
 lisp_make_quote(const lisp_t lisp)
 {
-  MAKE_SCOPED_SYMBOL_STATIC(quote, "std", 3, "quote", 5);
-  atom_t R = lisp_make_scoped_symbol(lisp, quote);
+  MAKE_SYMBOL_STATIC(quote, "quote", 5);
+  atom_t R = lisp_make_symbol(lisp, quote);
   TRACE_MAKE_SEXP(R);
   return R;
 }

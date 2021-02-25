@@ -98,11 +98,19 @@
     __r = lisp_cons(__l, __5, __r);            \
   }
 
-#define LISP_CONS_(_1, _2, _3, _4, _5, NAME, ...) NAME
+#define LISP_CONS_6(__l, __r, _6, ...)         \
+  LISP_CONS_5(__l, __r, __VA_ARGS__);          \
+  {                                            \
+    MAKE_SYMBOL_STATIC(s_6, #_6, strlen(#_6)); \
+    atom_t __6 = lisp_make_symbol(__l, s_6);   \
+    __r = lisp_cons(__l, __6, __r);            \
+  }
+
+#define LISP_CONS_(_1, _2, _3, _4, _5, _6, NAME, ...) NAME
 
 #define LISP_CONS(__l, __r, ...)                                              \
-  LISP_CONS_(__VA_ARGS__, LISP_CONS_5, LISP_CONS_4, LISP_CONS_3, LISP_CONS_2, \
-             LISP_CONS_1)                                                     \
+  LISP_CONS_(__VA_ARGS__, LISP_CONS_6, LISP_CONS_5, LISP_CONS_4, LISP_CONS_3, \
+             LISP_CONS_2, LISP_CONS_1)                                        \
   (__l, __r, __VA_ARGS__)
 
 /*

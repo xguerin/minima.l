@@ -12,6 +12,8 @@
 	"run.l"
 	'io 'logic 'math 'std 'sys 'unix)
 
+(use 'io 'logic 'math 'std 'sys 'unix)
+
 #
 # Indentation management.
 #

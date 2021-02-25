@@ -5,6 +5,12 @@
 	'(sys time)
 	'(unix unlink))
 
+(use
+	'(io out in read print)
+	'(std let)
+	'(sys time)
+	'(unix unlink))
+
 (test:run
 	"I/O operations"
 	#

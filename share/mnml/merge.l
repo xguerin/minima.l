@@ -1,4 +1,5 @@
 (load "iterators.l" '(std \))
+(use '(std \))
 
 (def merge (ded ins lstA lstB)
 	"Merge list A into list B using dedup function DED and insert function INS."

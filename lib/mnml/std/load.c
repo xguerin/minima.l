@@ -23,7 +23,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
   switch (car->type) {
     /*
      * If it's a scoped symbol, load the one symbol from the binary module
-     * (shortcut for '(MOD . SYM)).
+     * (shortcut for '(MOD SYM)).
      */
     case T_SCOPED_SYMBOL: {
       atom_t nsp = lisp_scope_get_name(lisp, car);
@@ -69,6 +69,9 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
       }
       break;
     }
+    /*
+     * Other forms are not supported.
+     */
     default: {
       X(lisp->slab, car);
       res = lisp_make_nil(lisp);

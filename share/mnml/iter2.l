@@ -1,4 +1,5 @@
 (load '(logic and) '(std if car cdr))
+(use '(logic and) '(std if car cdr))
 
 (def iter2 (fun lst1 lst2)
 	"Iterate over list LST1 and LST1 and call FUN on each pair of item."

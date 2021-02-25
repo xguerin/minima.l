@@ -1,4 +1,5 @@
 (load '(logic =) '(math +) '(std eval list))
+(use '(logic =) '(math +) '(std eval list))
 
 (def add (A B) (+ A B))
 

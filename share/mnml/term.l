@@ -6,6 +6,10 @@
 	'(math >= -)
 	'(std |> if sym len list eval cons chr \))
 
+(use
+	'(math >= -)
+	'(std |> if sym len list eval cons chr \))
+
 #
 # Escape STR with CODE.
 #

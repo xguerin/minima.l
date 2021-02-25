@@ -9,6 +9,8 @@
 	"rev.l"
 	'logic 'math 'std)
 
+(use 'logic 'math 'std)
+
 #
 # Make a symbol placeholder
 #
