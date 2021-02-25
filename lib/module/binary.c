@@ -225,7 +225,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
    * Grab the scope.
    */
   atom_t nil = lisp_make_nil(lisp);
-  atom_t scope = lisp_lookup(lisp, lisp->globals, nil, &name->symbol);
+  atom_t scope = lisp_lookup(lisp, lisp->scopes, nil, &name->symbol);
   X(lisp->slab, nil);
   /*
    * Load all the symbols from the list.
@@ -239,7 +239,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   /*
    * Update the scope.
    */
-  LISP_SETQ(lisp, lisp->globals, lisp_cons(lisp, UP(name), mods));
+  LISP_SETQ(lisp, lisp->scopes, lisp_cons(lisp, UP(name), mods));
   /*
    * Append the module and call the register function if it was found on disk.
    */

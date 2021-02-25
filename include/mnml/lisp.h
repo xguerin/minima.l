@@ -26,6 +26,7 @@ typedef struct _lisp
 {
   slab_t slab;
   atom_t globals;
+  atom_t scopes;
   atom_t modules;
   atom_t ichan;
   atom_t ochan;

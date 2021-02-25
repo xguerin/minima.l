@@ -86,6 +86,7 @@ syn keyword MinimalFuncs
       \ merge
       \ nil?
       \ not
+      \ ns
       \ ntoa
       \ num?
       \ or

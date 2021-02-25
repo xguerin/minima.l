@@ -5,7 +5,6 @@
 static atom_t USED
 lisp_function_setq(const lisp_t lisp, const atom_t closure)
 {
-  atom_t val;
   LISP_ARGS(closure, C, ANY);
   /*
    * Extract the symbol.
@@ -29,7 +28,7 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure)
     return res;
   }
   /*
-   * If the symbol is scoped, update the value and prepare the scope.
+   * If the symbol is scoped, update the value and the scope.
    */
   if (IS_SCOP(symb)) {
     /*
@@ -41,23 +40,23 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure)
     /*
      * Grab the scope and update the value.
      */
-    atom_t scp = lisp_lookup(lisp, lisp->globals, closure, &nsp->symbol);
+    atom_t scp = lisp_lookup(lisp, lisp->scopes, closure, &nsp->symbol);
     LISP_SETQ(lisp, scp, lisp_cons(lisp, sym, UP(res)));
     /*
      * Prepare the scope.
      */
-    val = lisp_cons(lisp, nsp, scp);
+    atom_t val = lisp_cons(lisp, nsp, scp);
+    LISP_SETQ(lisp, lisp->scopes, val);
   }
   /*
-   * Otherwise, just rrepare the value.
+   * Otherwise, just update the globals.
    */
   else {
-    val = lisp_cons(lisp, symb, UP(res));
+    atom_t val = lisp_cons(lisp, symb, UP(res));
+    LISP_SETQ(lisp, lisp->globals, val);
   }
   /*
-   * Update the globals with the new scope or value.
    */
-  LISP_SETQ(lisp, lisp->globals, val);
   return res;
 }
 

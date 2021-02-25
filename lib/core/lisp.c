@@ -16,6 +16,7 @@ lisp_new(const slab_t slab)
   lisp_t lisp = (lisp_t)malloc(sizeof(struct _lisp));
   lisp->slab = slab;
   lisp->globals = lisp_make_nil(lisp);
+  lisp->scopes = lisp_make_nil(lisp);
   lisp->ichan = lisp_make_nil(lisp);
   lisp->ochan = lisp_make_nil(lisp);
   return lisp;
@@ -26,6 +27,7 @@ lisp_delete(lisp_t lisp)
 {
   X(lisp->slab, lisp->ochan);
   X(lisp->slab, lisp->ichan);
+  X(lisp->slab, lisp->scopes);
   X(lisp->slab, lisp->globals);
   free(lisp);
 }

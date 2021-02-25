@@ -298,7 +298,7 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
       atom_t nam = lisp_scope_get_name(lisp, cell);
       atom_t sym = lisp_scope_get_symb(lisp, cell);
       atom_t nil = lisp_make_nil(lisp);
-      atom_t scp = lisp_lookup(lisp, lisp->globals, nil, &nam->symbol);
+      atom_t scp = lisp_lookup(lisp, lisp->scopes, nil, &nam->symbol);
       rslt = lisp_lookup(lisp, scp, closure, &sym->symbol);
       X(lisp->slab, cell, nam, sym, nil, scp);
       break;
