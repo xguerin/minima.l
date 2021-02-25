@@ -239,18 +239,14 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   /*
    * Update the scope.
    */
-  atom_t tmp = lisp->globals;
-  lisp->globals = lisp_setq(lisp, tmp, lisp_cons(lisp, UP(name), mods));
-  X(lisp->slab, tmp);
+  LISP_SETQ(lisp, lisp->globals, lisp_cons(lisp, UP(name), mods));
   /*
    * Append the module and call the register function if it was found on disk.
    */
   if (add_to_cache) {
     atom_t hnd = lisp_make_number(lisp, (uint64_t)handle);
     atom_t val = lisp_cons(lisp, UP(name), hnd);
-    atom_t tmp = lisp->modules;
-    lisp->modules = lisp_setq(lisp, lisp->modules, val);
-    X(lisp->slab, tmp);
+    LISP_SETQ(lisp, lisp->modules, val);
   }
   /*
    * Return the result.

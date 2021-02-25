@@ -78,8 +78,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_definitions(-DMNML_COMPILER_ID="${CMAKE_C_COMPILER_ID}")
-add_definitions(-DMNML_COMPILER_VERSION="${CMAKE_C_COMPILER_VERSION}")
-add_definitions(-DMNML_BUILD_TIMESTAMP="${BUILD_TIMESTAMP}")
+add_definitions(-DMNML_COMPILER_VER="${CMAKE_C_COMPILER_VERSION}")
+add_definitions(-DMNML_BUILD_TS="${BUILD_TIMESTAMP}")
 add_definitions(-DMNML_VERSION="${CMAKE_PROJECT_VERSION}")
 
 add_definitions(-D_GNU_SOURCE)

@@ -1,3 +1,4 @@
+#include "mnml/lisp.h"
 #include <mnml/maker.h>
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
@@ -123,9 +124,7 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(lisp, var);
-    atom_t tmp = lisp->globals;
-    lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-    X(lisp->slab, tmp);
+    LISP_SETQ(lisp, lisp->globals, lisp_cons(lisp, key, res));
   } else {
     X(lisp->slab, res);
   }
@@ -157,8 +156,7 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(compver, "COMPVER", 7);
   key = lisp_make_symbol(lisp, compver);
-  val = lisp_make_string(lisp, MNML_COMPILER_VERSION,
-                         strlen(MNML_COMPILER_VERSION));
+  val = lisp_make_string(lisp, MNML_COMPILER_VER, strlen(MNML_COMPILER_VER));
   con = lisp_cons(lisp, key, val);
   res = lisp_cons(lisp, con, res);
   /*
@@ -174,8 +172,7 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(buildts, "BUILD_TS", 8);
   key = lisp_make_symbol(lisp, buildts);
-  val =
-    lisp_make_string(lisp, MNML_BUILD_TIMESTAMP, strlen(MNML_BUILD_TIMESTAMP));
+  val = lisp_make_string(lisp, MNML_BUILD_TS, strlen(MNML_BUILD_TS));
   con = lisp_cons(lisp, key, val);
   res = lisp_cons(lisp, con, res);
   /*
@@ -183,9 +180,7 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(lisp, env);
-  atom_t tmp = lisp->globals;
-  lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-  X(lisp->slab, tmp);
+  LISP_SETQ(lisp, lisp->globals, lisp_cons(lisp, key, res));
 }
 
 static void
@@ -212,9 +207,7 @@ lisp_build_env(const lisp_t lisp)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(lisp, env);
-    atom_t tmp = lisp->globals;
-    lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-    X(lisp->slab, tmp);
+    LISP_SETQ(lisp, lisp->globals, lisp_cons(lisp, key, res));
   } else {
     X(lisp->slab, res);
   }

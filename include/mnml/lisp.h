@@ -72,6 +72,13 @@ atom_t lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair);
 atom_t lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
                  const atom_t rslt);
 
+#define LISP_SETQ(__l, __c, __v)    \
+  {                                 \
+    atom_t tmp = __c;               \
+    __c = lisp_setq(__l, tmp, __v); \
+    X(__l->slab, tmp);              \
+  }
+
 /*
  * Read, eval, print functions.
  */

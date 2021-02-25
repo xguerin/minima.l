@@ -7,6 +7,7 @@
 static atom_t USED
 lisp_function_def(const lisp_t lisp, const atom_t closure)
 {
+  atom_t val;
   LISP_ARGS(closure, C, ANY);
   /*
    * Grab the symbol.
@@ -57,7 +58,7 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   atom_t con0 = lisp_cons(lisp, lisp_make_nil(lisp), prog);
   atom_t con1 = lisp_cons(lisp, args, con0);
   /*
-   * Set the symbol's value.
+   * If the symbol is scoped, update the value and prepare the scope.
    */
   if (IS_SCOP(symb)) {
     /*
@@ -69,20 +70,23 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
      * Grab the scope and update the value.
      */
     atom_t scp = lisp_lookup(lisp, lisp->globals, closure, &nsp->symbol);
-    atom_t tmp = scp;
-    scp = lisp_setq(lisp, tmp, lisp_cons(lisp, sym, con1));
-    X(lisp->slab, tmp);
+    LISP_SETQ(lisp, scp, lisp_cons(lisp, sym, con1));
     /*
-     * Update the scope in GLOBALS.
+     * Prepare the scope.
      */
-    tmp = lisp->globals;
-    lisp->globals = lisp_setq(lisp, tmp, lisp_cons(lisp, nsp, scp));
-    X(lisp->slab, tmp);
-  } else {
-    atom_t tmp = lisp->globals;
-    lisp->globals = lisp_setq(lisp, tmp, lisp_cons(lisp, UP(symb), con1));
-    X(lisp->slab, tmp);
+    val = lisp_cons(lisp, nsp, scp);
+
   }
+  /*
+   * Otherwise, just rrepare the value.
+   */
+  else {
+    val = lisp_cons(lisp, UP(symb), con1);
+  }
+  /*
+   * Update the globals with the new scope or value.
+   */
+  LISP_SETQ(lisp, lisp->globals, val);
   return symb;
 }
 
