@@ -14,8 +14,6 @@ typedef void (*error_handler_t)(const lisp_t lisp);
 void lisp_set_parse_error_handler(const error_handler_t h);
 void lisp_set_syntax_error_handler(const error_handler_t h);
 
-void lisp_fini(const lisp_t lisp);
-
 /*
  * Installation information.
  */
@@ -98,10 +96,12 @@ atom_t lisp_scope_get_name(const lisp_t lisp, const atom_t a);
 atom_t lisp_scope_get_symb(const lisp_t lisp, const atom_t a);
 
 /*
- * Symbol matching.
+ * Symbols.
  */
 
 bool lisp_symbol_match(const atom_t a, const symbol_t b);
+void lisp_symbol_write(const lisp_t lisp, const atom_t closure,
+                       const atom_t symbol, const atom_t value);
 
 /*
  * IO context helpers.

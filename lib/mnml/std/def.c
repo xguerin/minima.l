@@ -59,32 +59,7 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   /*
    * If the symbol is scoped, update the value and the scope.
    */
-  if (IS_SCOP(symb)) {
-    /*
-     * Grab the scope's name and symbol.
-     */
-    atom_t nsp = lisp_scope_get_name(lisp, symb);
-    atom_t sym = lisp_scope_get_symb(lisp, symb);
-    /*
-     * Grab the scope and update the value.
-     */
-    atom_t scp = lisp_lookup(lisp, lisp->scopes, closure, &nsp->symbol);
-    LISP_SETQ(lisp, scp, lisp_cons(lisp, sym, con1));
-    /*
-     * Prepare the scope.
-     */
-    atom_t val = lisp_cons(lisp, nsp, scp);
-    LISP_SETQ(lisp, lisp->scopes, val);
-  }
-  /*
-   * Otherwise, update the globals
-   */
-  else {
-    atom_t val = lisp_cons(lisp, UP(symb), con1);
-    LISP_SETQ(lisp, lisp->globals, val);
-  }
-  /*
-   */
+  lisp_symbol_write(lisp, closure, UP(symb), con1);
   return symb;
 }
 

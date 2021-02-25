@@ -77,12 +77,6 @@ lisp_prefix()
   return prefix;
 }
 
-void
-lisp_fini(const lisp_t lisp)
-{
-  module_fini(lisp);
-}
-
 /*
  * Return the length of a list.
  */
@@ -689,7 +683,7 @@ lisp_scope_get_symb(const lisp_t lisp, const atom_t a)
 }
 
 /*
- * Symbol matching.
+ * Symbols.
  */
 
 inline bool
@@ -701,6 +695,40 @@ lisp_symbol_match(const atom_t a, const symbol_t b)
 #else
   return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH) == 0;
 #endif
+}
+
+void
+lisp_symbol_write(const lisp_t lisp, const atom_t closure, const atom_t symbol,
+                  const atom_t value)
+{
+  /*
+   * If the symbol is scoped, update the value and the scope.
+   */
+  if (IS_SCOP(symbol)) {
+    /*
+     * Grab the scope's name and symbol.
+     */
+    atom_t nsp = lisp_scope_get_name(lisp, symbol);
+    atom_t sym = lisp_scope_get_symb(lisp, symbol);
+    X(lisp->slab, symbol);
+    /*
+     * Grab the scope and update the value.
+     */
+    atom_t scp = lisp_lookup(lisp, lisp->scopes, closure, &nsp->symbol);
+    LISP_SETQ(lisp, scp, lisp_cons(lisp, sym, value));
+    /*
+     * Prepare the scope.
+     */
+    atom_t val = lisp_cons(lisp, nsp, scp);
+    LISP_SETQ(lisp, lisp->scopes, val);
+  }
+  /*
+   * Otherwise, update the globals
+   */
+  else {
+    atom_t val = lisp_cons(lisp, symbol, value);
+    LISP_SETQ(lisp, lisp->globals, val);
+  }
 }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

@@ -29,8 +29,8 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
       atom_t nsp = lisp_scope_get_name(lisp, car);
       atom_t sym = lisp_scope_get_symb(lisp, car);
       X(lisp->slab, car);
-      atom_t mod =
-        lisp_cons(lisp, nsp, lisp_cons(lisp, sym, lisp_make_nil(lisp)));
+      atom_t lst = lisp_cons(lisp, sym, lisp_make_nil(lisp));
+      atom_t mod = lisp_cons(lisp, nsp, lst);
       res = module_load(lisp, mod);
       break;
     }
