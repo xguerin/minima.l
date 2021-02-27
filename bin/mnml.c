@@ -73,11 +73,9 @@ static void
 stage_newline(const lisp_t lisp, const atom_t cell,
               UNUSED const void* const data)
 {
-  atom_t nil = lisp_make_nil(lisp);
   fwrite("> ", 1, 2, stdout);
-  lisp_prin(lisp, nil, cell, true);
+  lisp_prin(lisp, cell, true);
   fwrite("\n", 1, 1, stdout);
-  X(lisp->slab, nil);
 }
 
 /*

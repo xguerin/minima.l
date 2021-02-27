@@ -24,7 +24,7 @@ lisp_prinl_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    * Print the evaluated CAR and recurse on CDR.
    */
-  lisp_prin(lisp, closure, car, false);
+  lisp_prin(lisp, car, false);
   return lisp_prinl_all(lisp, closure, cdr, car);
 }
 

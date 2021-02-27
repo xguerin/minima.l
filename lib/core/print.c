@@ -5,8 +5,7 @@
 #define IO_BUFFER_LEN 1024
 
 static size_t lisp_prin_atom(FILE* const handle, char* const buf,
-                             const size_t idx, const atom_t closure,
-                             const atom_t cell, const bool s);
+                             const size_t idx, const atom_t cell, const bool s);
 
 static size_t
 lisp_write(FILE* const handle, char* const buf, const size_t idx, void* data,
@@ -36,13 +35,13 @@ lisp_flush(FILE* const handle, char* const buf, const size_t idx)
 
 static size_t
 lisp_prin_pair(FILE* const handle, char* const buf, const size_t idx,
-               const atom_t closure, const atom_t cell, const bool s)
+               const atom_t cell, const bool s)
 {
   size_t nxt = 0;
   /*
    * Print CAR.
    */
-  nxt = lisp_prin_atom(handle, buf, idx, closure, CAR(cell), s);
+  nxt = lisp_prin_atom(handle, buf, idx, CAR(cell), s);
   /*
    * Print CDR.
    */
@@ -50,11 +49,11 @@ lisp_prin_pair(FILE* const handle, char* const buf, const size_t idx,
     if (IS_PAIR(CDR(cell))) {
       if (s)
         nxt = lisp_write(handle, buf, nxt, " ", 1);
-      return lisp_prin_pair(handle, buf, nxt, closure, CDR(cell), s);
+      return lisp_prin_pair(handle, buf, nxt, CDR(cell), s);
     } else {
       if (s)
         nxt = lisp_write(handle, buf, nxt, " . ", 3);
-      return lisp_prin_atom(handle, buf, nxt, closure, CDR(cell), s);
+      return lisp_prin_atom(handle, buf, nxt, CDR(cell), s);
     }
   }
   /*
@@ -64,7 +63,7 @@ lisp_prin_pair(FILE* const handle, char* const buf, const size_t idx,
 
 static size_t
 lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
-               const atom_t closure, const atom_t cell, const bool s)
+               const atom_t cell, const bool s)
 {
   switch (cell->type) {
     case T_NIL:
@@ -100,7 +99,7 @@ lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
       size_t nxt = idx;
       if (s)
         nxt = lisp_write(handle, buf, nxt, "(", 1);
-      nxt = lisp_prin_pair(handle, buf, nxt, closure, cell, s);
+      nxt = lisp_prin_pair(handle, buf, nxt, cell, s);
       if (s)
         nxt = lisp_write(handle, buf, nxt, ")", 1);
       return nxt;
@@ -125,12 +124,11 @@ lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
 }
 
 void
-lisp_prin(const lisp_t lisp, const atom_t closure, const atom_t cell,
-          const bool s)
+lisp_prin(const lisp_t lisp, const atom_t cell, const bool s)
 {
   FILE* handle = (FILE*)CAR(CAR(lisp->ochan))->number;
   char buffer[IO_BUFFER_LEN];
-  size_t idx = lisp_prin_atom(handle, buffer, 0, closure, cell, s);
+  size_t idx = lisp_prin_atom(handle, buffer, 0, cell, s);
   lisp_flush(handle, buffer, idx);
 }
 

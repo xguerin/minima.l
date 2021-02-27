@@ -24,7 +24,7 @@ lisp_print_all(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    * Print the evaluate CAR and recurse on CDR.
    */
-  lisp_prin(lisp, closure, car, true);
+  lisp_prin(lisp, car, true);
   if (!IS_NULL(cdr)) {
     fwrite(" ", 1, 1, (FILE*)CAR(CAR(lisp->ochan))->number);
   }
