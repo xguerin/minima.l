@@ -15,20 +15,20 @@ lisp_function_dup(const lisp_t lisp, const atom_t closure)
   atom_t car = lisp_eval(lisp, C, lisp_car(lisp, ANY));
   atom_t cdr = lisp_cdr(lisp, ANY);
   atom_t tgt = lisp_eval(lisp, C, lisp_car(lisp, cdr));
-  X(lisp->slab, cdr);
+  X(lisp, cdr);
   /*
    * Call DUP if target is NIL.
    */
   if (IS_NULL(tgt)) {
     int ret = dup(car->number);
-    X(lisp->slab, tgt, car);
+    X(lisp, tgt, car);
     return lisp_make_number(lisp, ret < 0 ? errno : ret);
   }
   /*
    * Otherwise call DUP2.
    */
   int ret = dup2(car->number, tgt->number);
-  X(lisp->slab, tgt, car);
+  X(lisp, tgt, car);
   return lisp_make_number(lisp, ret < 0 ? errno : ret);
 }
 

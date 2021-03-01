@@ -113,7 +113,7 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
   do {                           \
     atom_t old = __c;            \
     (__c) = UP(CDR(__c));        \
-    X((__l)->slab, old);         \
+    X((__l), old);               \
   } while (0)
 
 /*

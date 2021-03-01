@@ -57,7 +57,7 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
     atom_t cns = lisp_cons(lisp, UP(sym), val);                \
     atom_t tmp = lisp->globals;                                \
     lisp->globals = lisp_setq(lisp, lisp->globals, cns);       \
-    X(lisp->slab, tmp);                                        \
+    X(lisp, tmp);                                        \
     return sym;                                                \
   }
 

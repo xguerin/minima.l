@@ -12,12 +12,12 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure)
   atom_t sym = lisp_car(lisp, ANY);
   atom_t cdr = lisp_cdr(lisp, ANY);
   atom_t res = lisp_eval(lisp, C, lisp_car(lisp, cdr));
-  X(lisp->slab, cdr);
+  X(lisp, cdr);
   /*
    * Don't set anything if NIL.
    */
   if (unlikely(IS_NULL(res))) {
-    X(lisp->slab, sym);
+    X(lisp, sym);
     return res;
   }
   /*
@@ -25,7 +25,7 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure)
    */
   atom_t tmp = lisp->globals;
   lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, sym, UP(res)));
-  X(lisp->slab, tmp);
+  X(lisp, tmp);
   return res;
 }
 

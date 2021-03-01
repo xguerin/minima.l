@@ -21,7 +21,7 @@ lisp_exec_make_strings(const lisp_t lisp, const atom_t cell, char** array,
                        const size_t len, const size_t idx)
 {
   if (IS_NULL(cell) || idx == len) {
-    X(lisp->slab, cell);
+    X(lisp, cell);
     array[idx] = NULL;
     return idx;
   }
@@ -30,7 +30,7 @@ lisp_exec_make_strings(const lisp_t lisp, const atom_t cell, char** array,
   char buffer[PATH_MAX + 1];
   atom_t car = lisp_car(lisp, cell);
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   lisp_make_cstring(car, buffer, PATH_MAX, 0);
   array[idx] = strdup(buffer);
   return lisp_exec_make_strings(lisp, cdr, array, len, idx + 1);

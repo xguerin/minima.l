@@ -13,7 +13,7 @@ lisp_function_if(const lisp_t lisp, const atom_t closure)
   if (unlikely(IS_NULL(COND))) {
     atom_t cd1 = lisp_cdr(lisp, REM);
     atom_t els = lisp_car(lisp, cd1);
-    X(lisp->slab, cd1);
+    X(lisp, cd1);
     return lisp_eval(lisp, C, els);
   }
   /*

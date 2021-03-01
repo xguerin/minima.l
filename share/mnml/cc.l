@@ -276,11 +276,11 @@
 		(NUMBER . (prinl "{ .number = _" arg "->number };"))
 		(ATOM		. (prinl "{ .atom = UP(_" arg ") };"))
 		(_			. (prinl "{ .number = 0 }; /* Unsupported type " (str atype) " */")))
-	(if x (prinl (o|) "X(lisp->slab, _" arg ");")))
+	(if x (prinl (o|) "X(lisp, _" arg ");")))
 
 (def cc:gen:x (ARGS kvar ref)
 	"Generate X(REF)."
-	(prin (o|) "X(lisp->slab, ") (cc:value:atm ARGS kvar ref) (prinl ");"))
+	(prin (o|) "X(lisp, ") (cc:value:atm ARGS kvar ref) (prinl ");"))
 
 (def cc:value:get (ARGS kvar arg)
 	"Generate the C code for the ref R-value ARG."

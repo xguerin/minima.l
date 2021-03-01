@@ -41,7 +41,7 @@ lisp_decref(const atom_t atom, const char* const name)
  */
 
 slab_t
-slab_allocate()
+slab_new()
 {
   slab_t slab = (slab_t)malloc(sizeof(struct slab));
   memset(slab, 0, sizeof(struct slab));
@@ -106,10 +106,10 @@ slab_expand(const slab_t slab)
 }
 
 void
-slab_destroy(const slab_t slab)
+slab_delete(const slab_t slab)
 {
   TRACE("D %ld", slab->n_alloc - slab->n_free);
-  LISP_COLLECT(slab);
+  SLAB_COLLECT(slab);
   munmap(slab->entries, SLAB_SIZE);
   free(slab);
 }
@@ -119,7 +119,7 @@ slab_destroy(const slab_t slab)
  */
 
 atom_t
-lisp_allocate(const slab_t slab)
+slab_allocate(const slab_t slab)
 {
   /*
    * Expand if necessary. Die if we can't.
@@ -148,8 +148,8 @@ lisp_allocate(const slab_t slab)
   return entry;
 }
 
-static void
-lisp_free(const slab_t slab, const atom_t _p)
+void
+slab_deallocate(const slab_t slab, const atom_t _p)
 {
   size_t n = ((uintptr_t)_p - (uintptr_t)slab->entries) / sizeof(struct atom);
   atom_t entry = &slab->entries[n];
@@ -162,25 +162,6 @@ lisp_free(const slab_t slab, const atom_t _p)
   slab->n_free += 1;
 }
 
-void
-lisp_deallocate(const slab_t slab, const atom_t atom)
-{
-  TRACE_SLAB_SEXP(atom);
-  /*
-   * Most likely this is a pair.
-   */
-  if (likely(IS_PAIR(atom))) {
-    X(slab, CAR(atom));
-    X(slab, CDR(atom));
-    lisp_free(slab, atom);
-    return;
-  }
-  /*
-   * Process atoms.
-   */
-  lisp_free(slab, atom);
-}
-
 /*
  * Debug functions.
  */
@@ -188,7 +169,7 @@ lisp_deallocate(const slab_t slab, const atom_t atom)
 #ifdef LISP_ENABLE_DEBUG
 
 void
-lisp_collect(const slab_t slab)
+slab_collect(const slab_t slab)
 {
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
     atom_t entry = &slab->entries[i];

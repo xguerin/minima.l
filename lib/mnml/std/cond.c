@@ -10,7 +10,7 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
    * Sanity checks.
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
-    X(lisp->slab, cell, match);
+    X(lisp, cell, match);
     return lisp_make_nil(lisp);
   }
   /*
@@ -18,18 +18,18 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
    */
   atom_t car = lisp_car(lisp, match);
   atom_t cdr = lisp_cdr(lisp, match);
-  X(lisp->slab, match);
+  X(lisp, match);
   /*
    * Get args and prog.
    */
   atom_t args = lisp_car(lisp, car);
   atom_t prog = lisp_cdr(lisp, car);
-  X(lisp->slab, car);
+  X(lisp, car);
   /*
    * If the cond argument _, simply execute the program.
    */
   if (IS_WILD(args)) {
-    X(lisp->slab, args, cdr, cell);
+    X(lisp, args, cdr, cell);
     return lisp_eval(lisp, closure, prog);
   }
   /*
@@ -44,12 +44,12 @@ lisp_cond(const lisp_t lisp, const atom_t closure, const atom_t cell,
   /*
    */
   if (IS_TRUE(res)) {
-    X(lisp->slab, cdr, cell, res);
+    X(lisp, cdr, cell, res);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    */
-  X(lisp->slab, prog, res);
+  X(lisp, prog, res);
   return lisp_cond(lisp, closure, cell, cdr);
 }
 

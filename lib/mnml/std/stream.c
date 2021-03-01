@@ -15,7 +15,7 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    * Return the evaluated result if CELL is NIL.
    */
   if (IS_NULL(ANY)) {
-    X(lisp->slab, ANY);
+    X(lisp, ANY);
     return res;
   }
   /*
@@ -23,7 +23,7 @@ lisp_stream(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    */
   atom_t car = lisp_car(lisp, ANY);
   atom_t cdr = lisp_cdr(lisp, ANY);
-  X(lisp->slab, ANY);
+  X(lisp, ANY);
   /*
    * Bind the quoted result.
    */

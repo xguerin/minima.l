@@ -250,7 +250,7 @@ lisp_process_escapes(const lisp_t lisp, const atom_t cell, const bool esc,
   /*
    */
   if (IS_NULL(cell)) {
-    X(lisp->slab, cell);
+    X(lisp, cell);
     return res;
   }
   /*
@@ -258,18 +258,18 @@ lisp_process_escapes(const lisp_t lisp, const atom_t cell, const bool esc,
   atom_t nxt;
   atom_t car = lisp_car(lisp, cell);
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Process the character.
    */
   if (esc) {
     switch ((char)car->number) {
       case 'n':
-        X(lisp->slab, car);
+        X(lisp, car);
         car = lisp_make_char(lisp, '\n');
         break;
       case 't':
-        X(lisp->slab, car);
+        X(lisp, car);
         car = lisp_make_char(lisp, '\t');
         break;
       default:
@@ -278,7 +278,7 @@ lisp_process_escapes(const lisp_t lisp, const atom_t cell, const bool esc,
     nxt = lisp_append(lisp, res, car);
     nesc = false;
   } else if (car->number == '\\') {
-    X(lisp->slab, car);
+    X(lisp, car);
     nesc = true;
     nxt = res;
   } else {
@@ -345,7 +345,7 @@ lisp_collect_tails_assoc(const lisp_t lisp, const atom_t cell)
    * Not a list.
    */
   if (!IS_PAIR(cell)) {
-    X(lisp->slab, cell);
+    X(lisp, cell);
     return lisp_make_nil(lisp);
   }
   /*
@@ -353,12 +353,12 @@ lisp_collect_tails_assoc(const lisp_t lisp, const atom_t cell)
    */
   atom_t car = lisp_car(lisp, cell);
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Process CAR.
    */
   atom_t head = lisp_collect_tails(lisp, lisp_cdr(lisp, car));
-  X(lisp->slab, car);
+  X(lisp, car);
   /*
    * Process CDR.
    */
@@ -395,7 +395,7 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
         atom_t thn = lisp_collect_tails(lisp, lisp_car(lisp, cd1));
         atom_t cd2 = lisp_cdr(lisp, cd1);
         atom_t els = lisp_collect_tails(lisp, lisp_car(lisp, cd2));
-        X(lisp->slab, cell, cd0, cd1, cd2);
+        X(lisp, cell, cd0, cd1, cd2);
         res = lisp_conc(lisp, thn, els);
         break;
       }
@@ -407,7 +407,7 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
         atom_t cd0 = lisp_cdr(lisp, cell);
         atom_t cd1 = lisp_cdr(lisp, cd0);
         res = lisp_collect_tails_assoc(lisp, cd1);
-        X(lisp->slab, cell, cd0);
+        X(lisp, cell, cd0);
         break;
       }
       /*
@@ -418,7 +418,7 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
         FOREACH(cell, p) { NEXT(p); }
         atom_t last = UP(p->car);
         res = lisp_collect_tails(lisp, last);
-        X(lisp->slab, cell);
+        X(lisp, cell);
         break;
       }
       /*
@@ -429,7 +429,7 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
         atom_t cd0 = lisp_cdr(lisp, cell);
         atom_t cd1 = lisp_cdr(lisp, cd0);
         res = lisp_collect_tails(lisp, lisp_car(lisp, cd1));
-        X(lisp->slab, cell, cd0, cd1);
+        X(lisp, cell, cd0, cd1);
         break;
       }
       /*
@@ -487,7 +487,7 @@ lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb, const atom_t args,
   /*
    * Clean-up.
    */
-  X(lisp->slab, tails);
+  X(lisp, tails);
 }
 
 /*
@@ -630,10 +630,10 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
    */
   atom_t input, nil = lisp_make_nil(lisp), res = lisp_make_nil(lisp);
   while ((input = lisp_read(lisp, lisp_make_nil(lisp))) != NULL) {
-    X(lisp->slab, res);
+    X(lisp, res);
     res = lisp_eval(lisp, nil, input);
   }
-  X(lisp->slab, nil);
+  X(lisp, nil);
   /*
    * Pop the context and return the value.
    */

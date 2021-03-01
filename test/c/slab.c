@@ -16,14 +16,14 @@ alloc_free_test()
   /*
    * Allocate the slab allocator.
    */
-  slab_t slab = slab_allocate();
+  slab_t slab = slab_new();
   atom_t cells[16];
   /*
    * Allocate 16 cells.
    */
   ASSERT_EQUAL(slab->first, 0);
   for (size_t i = 0; i < 16; i += 1) {
-    cells[i] = lisp_allocate(slab);
+    cells[i] = slab_allocate(slab);
     cells[i]->refs = 1;
   }
   /*
@@ -31,7 +31,7 @@ alloc_free_test()
    */
   ASSERT_EQUAL(slab->first, 16);
   for (size_t i = 0; i < 16; i += 1) {
-    X(slab, cells[i]);
+    slab_deallocate(slab, cells[i]);
     ASSERT_EQUAL(slab->first, i);
   }
   /*
@@ -45,7 +45,7 @@ alloc_free_test()
   /*
    * Free the slab allocator.
    */
-  slab_destroy(slab);
+  slab_delete(slab);
   OK;
 }
 
@@ -55,14 +55,14 @@ alloc_full_test()
   /*
    * Allocate the slab allocator.
    */
-  slab_t slab = slab_allocate();
+  slab_t slab = slab_new();
   atom_t cells[CELL_COUNT];
   /*
    * Allocate all cells.
    */
   ASSERT_EQUAL(slab->first, 0);
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
-    cells[i] = lisp_allocate(slab);
+    cells[i] = slab_allocate(slab);
     cells[i]->refs = 1;
   }
   /*
@@ -70,7 +70,7 @@ alloc_full_test()
    */
   ASSERT_EQUAL(slab->first, -1U);
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
-    X(slab, cells[i]);
+    slab_deallocate(slab, cells[i]);
     ASSERT_EQUAL(slab->first, i);
   }
   /*
@@ -84,7 +84,7 @@ alloc_full_test()
   /*
    * Free the slab allocator.
    */
-  slab_destroy(slab);
+  slab_delete(slab);
   OK;
 }
 
@@ -94,7 +94,7 @@ alloc_xpnd_test()
   /*
    * Allocate the slab allocator.
    */
-  slab_t slab = slab_allocate();
+  slab_t slab = slab_new();
   const size_t count = 2 * CELL_COUNT;
   atom_t cells[count];
   /*
@@ -102,7 +102,7 @@ alloc_xpnd_test()
    */
   ASSERT_EQUAL(slab->first, 0);
   for (size_t i = 0; i < count; i += 1) {
-    cells[i] = lisp_allocate(slab);
+    cells[i] = slab_allocate(slab);
     cells[i]->refs = 1;
   }
   /*
@@ -110,7 +110,7 @@ alloc_xpnd_test()
    */
   ASSERT_EQUAL(slab->first, -1U);
   for (size_t i = 0; i < count; i += 1) {
-    X(slab, cells[i]);
+    slab_deallocate(slab, cells[i]);
     ASSERT_EQUAL(slab->first, i);
   }
   /*
@@ -124,7 +124,7 @@ alloc_xpnd_test()
   /*
    * Free the slab allocator.
    */
-  slab_destroy(slab);
+  slab_delete(slab);
   OK;
 }
 

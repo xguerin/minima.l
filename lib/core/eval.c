@@ -30,7 +30,7 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
       atom_t vl0 = lisp_car(lisp, val);
       atom_t oth = lisp_cdr(lisp, arg);
       atom_t rem = lisp_cdr(lisp, val);
-      X(lisp->slab, arg, val);
+      X(lisp, arg, val);
       /*
        * Bind CARs and process CDRs.
        */
@@ -44,7 +44,7 @@ lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
       break;
     }
     default: {
-      X(lisp->slab, arg, val);
+      X(lisp, arg, val);
       ret = closure;
       break;
     }
@@ -68,7 +68,7 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    */
   if (IS_NULL(args)) {
     rslt = lisp_cons(lisp, dscl, args);
-    X(lisp->slab, vals);
+    X(lisp, vals);
   }
   /*
    * If ARGS is a single symbol, bind the unevaluated values to it. That
@@ -83,7 +83,7 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    */
   else if (IS_NULL(vals)) {
     rslt = lisp_cons(lisp, dscl, args);
-    X(lisp->slab, vals);
+    X(lisp, vals);
   }
   /*
    * If there is an ARG and a VAL available, we grab the CAR of each and we
@@ -95,13 +95,13 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
      */
     atom_t arg = lisp_car(lisp, args);
     atom_t oth = lisp_cdr(lisp, args);
-    X(lisp->slab, args);
+    X(lisp, args);
     /*
      * Grab CAR and CDR from the values, evaluate CAR.
      */
     atom_t val = lisp_eval(lisp, cscl, lisp_car(lisp, vals));
     atom_t rem = lisp_cdr(lisp, vals);
-    X(lisp->slab, vals);
+    X(lisp, vals);
     /*
      * Then we bind the value to the argument. We do that to handle pattern
      * decomposition for non-symbolic arguments. Perform a recursive descent on
@@ -137,7 +137,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
    * Check if the function can be applied.
    */
   if (!lisp_may_apply(args, vals)) {
-    X(lisp->slab, func, vals, args);
+    X(lisp, func, vals, args);
     return lisp_make_nil(lisp);
   }
   /*
@@ -146,7 +146,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
   atom_t cdr0 = lisp_cdr(lisp, func);
   atom_t dscl = lisp_car(lisp, cdr0);
   atom_t body = lisp_cdr(lisp, cdr0);
-  X(lisp->slab, func, cdr0);
+  X(lisp, func, cdr0);
   /*
    * Bind the arguments and the values. The closure embedded in the lambda is
    * used as the run environment and augmented with the values of the arguments.
@@ -158,7 +158,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
    */
   atom_t bscl = lisp_car(lisp, bind);
   atom_t narg = lisp_cdr(lisp, bind);
-  X(lisp->slab, bind);
+  X(lisp, bind);
   /*
    * Evaluate the binary function.
    */
@@ -168,13 +168,13 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
      */
     atom_t dup = lisp_dup(lisp, bscl);
     atom_t cls = lisp_conc(lisp, dup, UP(closure));
-    X(lisp->slab, bscl);
+    X(lisp, bscl);
     /*
      * Call the binary function.
      */
     function_t fun = (function_t)body->number;
     rslt = fun(lisp, cls);
-    X(lisp->slab, body, narg, cls);
+    X(lisp, body, narg, cls);
   }
   /*
    * Evaluate the lisp function (tail call).
@@ -182,7 +182,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
   else if (IS_NULL(narg) && IS_TAIL_CALL(symb)) {
     rslt = lisp_cons(lisp, UP(symb), lisp_dup(lisp, bscl));
     rslt->flags = F_TAIL_CALL;
-    X(lisp->slab, body, narg, bscl);
+    X(lisp, body, narg, bscl);
   }
   /*
    * Evaluate the lisp function.
@@ -192,27 +192,27 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
      * Prepend the bind-site closure to the call-site closure.
      */
     atom_t dup = lisp_dup(lisp, bscl);
-    X(lisp->slab, narg, bscl);
+    X(lisp, narg, bscl);
     /*
      * Tail-call evaluation loop.
      */
   tailcall_loop:;
     atom_t cls = lisp_conc(lisp, dup, UP(closure));
     atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil(lisp));
-    X(lisp->slab, cls);
+    X(lisp, cls);
     /*
      * If it's a tail call, evaluate the function with the new arguments.
      */
     if (IS_TAIL_CALL(res) && lisp_symbol_match(CAR(res), &symb->symbol)) {
       dup = lisp_cdr(lisp, res);
-      X(lisp->slab, res);
+      X(lisp, res);
       goto tailcall_loop;
     }
     /*
      * Otherwise, leave the loop.
      */
     rslt = res;
-    X(lisp->slab, body);
+    X(lisp, body);
   }
   /*
    * Else handle partial application.
@@ -242,7 +242,7 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   atom_t car = lisp_car(lisp, cell);
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Evaluate CAR.
    */
@@ -271,7 +271,7 @@ lisp_eval_pair(const lisp_t lisp, const atom_t closure, const atom_t cell)
   else {
     rslt = lisp_cons(lisp, nxt, cdr);
   }
-  X(lisp->slab, car);
+  X(lisp, car);
   /*
    */
   TRACE_EVAL_SEXP(rslt);
@@ -296,7 +296,7 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
     }
     case T_SYMBOL: {
       rslt = lisp_lookup(lisp, closure, &cell->symbol);
-      X(lisp->slab, cell);
+      X(lisp, cell);
       break;
     }
     default: {

@@ -35,6 +35,76 @@ lisp_t lisp_new(const slab_t slab);
 void lisp_delete(const lisp_t lisp);
 
 /*
+ * Allocation functions.
+ */
+
+atom_t lisp_allocate(const lisp_t lisp);
+void lisp_deallocate(const lisp_t lisp, const atom_t cell);
+
+/*
+ * X macro.
+ */
+
+#define X_0(_l, __a)                  \
+  do {                                \
+    DOWN(__a);                        \
+    if (unlikely((__a)->refs == 0)) { \
+      lisp_deallocate(_l, __a);       \
+    }                                 \
+  } while (0)
+
+#define X_1(_l, _1) \
+  do {              \
+    X_0(_l, _1);    \
+  } while (0)
+
+#define X_2(_l, _2, ...)  \
+  do {                    \
+    X_0(_l, _2);          \
+    X_1(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_3(_l, _3, ...)  \
+  do {                    \
+    X_0(_l, _3);          \
+    X_2(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_4(_l, _4, ...)  \
+  do {                    \
+    X_0(_l, _4);          \
+    X_3(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_5(_l, _5, ...)  \
+  do {                    \
+    X_0(_l, _5);          \
+    X_4(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_6(_l, _6, ...)  \
+  do {                    \
+    X_0(_l, _6);          \
+    X_5(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_7(_l, _7, ...)  \
+  do {                    \
+    X_0(_l, _7);          \
+    X_6(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_8(_l, _8, ...)  \
+  do {                    \
+    X_0(_l, _8);          \
+    X_7(_l, __VA_ARGS__); \
+  } while (0)
+
+#define X_(_1, _2, _3, _4, _5, _6, _7, _8, NAME, ...) NAME
+#define X(_l, ...) \
+  X_(__VA_ARGS__, X_8, X_7, X_6, X_5, X_4, X_3, X_2, X_1)(_l, __VA_ARGS__)
+
+/*
  * Native function type.
  */
 

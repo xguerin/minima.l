@@ -20,24 +20,24 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   atom_t cdr0 = lisp_cdr(lisp, ANY);
   atom_t args = lisp_car(lisp, cdr0);
   if (!(IS_NULL(args) || IS_PAIR(args) || IS_SYMB(args))) {
-    X(lisp->slab, symb, cdr0, args);
+    X(lisp, symb, cdr0, args);
     return lisp_make_nil(lisp);
   }
   /*
    * Grab the body.
    */
   atom_t prog = lisp_cdr(lisp, cdr0);
-  X(lisp->slab, cdr0);
+  X(lisp, cdr0);
   /*
    * Check if there is a docstring in the declaration.
    */
   atom_t doc = lisp_car(lisp, prog);
   if (IS_PAIR(doc) && IS_CHAR(CAR(doc))) {
     atom_t nxt = lisp_cdr(lisp, prog);
-    X(lisp->slab, prog);
+    X(lisp, prog);
     prog = nxt;
   }
-  X(lisp->slab, doc);
+  X(lisp, doc);
   /*
    * Check if there is any tail call.
    */
@@ -53,7 +53,7 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   atom_t tmp = lisp->globals;
   lisp->globals =
     lisp_setq(lisp, lisp->globals, lisp_cons(lisp, UP(symb), con1));
-  X(lisp->slab, tmp);
+  X(lisp, tmp);
   return symb;
 }
 

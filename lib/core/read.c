@@ -27,7 +27,7 @@ lisp_read_pop(const lisp_t lisp)
   atom_t vls = CDR(CDR(chn));
   atom_t res = UP(CAR(vls));
   CDR(CDR(chn)) = UP(CDR(vls));
-  X(lisp->slab, vls);
+  X(lisp, vls);
   /*
    */
   TRACE_CHAN_SEXP(lisp->ichan);
@@ -38,7 +38,7 @@ atom_t
 lisp_read(const lisp_t lisp, const atom_t cell)
 {
   TRACE_CHAN_SEXP(lisp->ichan);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Grab the channel, the path and the content.
    */

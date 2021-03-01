@@ -14,7 +14,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   atom_t car = lisp_eval(lisp, closure, lisp_car(lisp, cell));
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Make sure that we are dealing with a symbol or a list.
    */
@@ -40,7 +40,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
          */
         char buffer[PATH_MAX + 1];
         lisp_make_cstring(car, buffer, PATH_MAX, 0);
-        X(lisp->slab, car);
+        X(lisp, car);
         /*
          * Load the file.
          */
@@ -55,7 +55,7 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
       break;
     }
     default: {
-      X(lisp->slab, car);
+      X(lisp, car);
       res = lisp_make_nil(lisp);
     }
   }
@@ -63,13 +63,13 @@ lisp_load(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * If CDR is NIL, return the result.
    */
   if (IS_NULL(cdr)) {
-    X(lisp->slab, cdr);
+    X(lisp, cdr);
     return res;
   }
   /*
    * Return the next evaluation otherwise.
    */
-  X(lisp->slab, res);
+  X(lisp, res);
   return lisp_load(lisp, closure, cdr);
 }
 

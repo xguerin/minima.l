@@ -50,7 +50,7 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
     /*
      * Keep the file descriptor around.
      */
-    X(lisp->slab, act);
+    X(lisp, act);
     act = lisp_make_true(lisp);
     /*
      * Call the callback if it is set.
@@ -59,7 +59,7 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
       atom_t fdn = lisp_car(lisp, fds);
       atom_t cn0 = lisp_cons(lisp, fdn, lisp_make_nil(lisp));
       atom_t cn1 = lisp_cons(lisp, UP(cb), cn0);
-      X(lisp->slab, act);
+      X(lisp, act);
       act = lisp_eval(lisp, closure, cn1);
     }
   }
@@ -83,16 +83,16 @@ process_r(const lisp_t lisp, const atom_t closure, const atom_t fds,
       /*
        * Return the new set.
        */
-      X(lisp->slab, act);
+      X(lisp, act);
       return cn0;
     }
     case T_NIL: {
-      X(lisp->slab, act);
+      X(lisp, act);
       close(CAR(fds)->number);
       return process_r(lisp, closure, CDR(fds), cb, set);
     }
     default: {
-      X(lisp->slab, act);
+      X(lisp, act);
       atom_t car = lisp_car(lisp, fds);
       atom_t nxt = process_r(lisp, closure, CDR(fds), cb, set);
       return lisp_cons(lisp, car, nxt);
@@ -107,7 +107,7 @@ process(const lisp_t lisp, const atom_t closure, const atom_t fds,
   MAKE_SYMBOL_STATIC(cb_s, cb_name, strlen(cb_name));
   atom_t cbk = lisp_make_symbol(lisp, cb_s);
   atom_t res = process_r(lisp, closure, fds, cbk, set);
-  X(lisp->slab, cbk);
+  X(lisp, cbk);
   return res;
 }
 

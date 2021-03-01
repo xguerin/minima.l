@@ -8,7 +8,7 @@ lisp_eval_cond(const lisp_t lisp, const atom_t closure, const atom_t cell)
   UP(cell);
   atom_t evl = lisp_eval(lisp, closure, cell);
   const bool res = !IS_NULL(evl);
-  X(lisp->slab, evl);
+  X(lisp, evl);
   return res;
 }
 
@@ -26,13 +26,13 @@ lisp_function_while(const lisp_t lisp, const atom_t closure)
    */
   atom_t res = lisp_make_nil(lisp);
   while (lisp_eval_cond(lisp, C, cnd)) {
-    X(lisp->slab, res);
+    X(lisp, res);
     res = lisp_prog(lisp, C, UP(prg), lisp_make_nil(lisp));
   }
   /*
    * Clean-up and return the result.
    */
-  X(lisp->slab, cnd, prg);
+  X(lisp, cnd, prg);
   return res;
 }
 

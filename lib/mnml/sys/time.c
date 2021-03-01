@@ -15,7 +15,7 @@ lisp_function_time(const lisp_t lisp, const atom_t closure)
     atom_t car = lisp_car(lisp, ANY);
     atom_t res = lisp_eval(lisp, C, car);
     result = lisp_timestamp() - begin;
-    X(lisp->slab, res);
+    X(lisp, res);
   }
   return lisp_make_number(lisp, result);
 }

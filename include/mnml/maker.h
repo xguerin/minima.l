@@ -31,7 +31,7 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t r_1 = lisp_make_symbol(__l, s_1);   \
-    X((__l)->slab, __r);                       \
+    X((__l), __r);                             \
     (__r) = r_1;                               \
   }
 
@@ -46,7 +46,7 @@
 #define S_REM(__l, __r, _1)                    \
   S_0(__l, __r);                               \
   {                                            \
-    X((__l)->slab, __r);                       \
+    X((__l), __r);                             \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t __1 = lisp_make_symbol(__l, s_1);   \
     MAKE_SYMBOL_STATIC(s_0, "REM", 3);         \

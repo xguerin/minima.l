@@ -49,78 +49,15 @@ atom_t lisp_decref(const atom_t, const char* const name);
  * Slab functions.
  */
 
-slab_t slab_allocate();
-void slab_destroy(const slab_t slab);
+slab_t slab_new();
+void slab_delete(const slab_t slab);
 
 /*
  * Allocation functions.
  */
 
-atom_t lisp_allocate(const slab_t slab);
-void lisp_deallocate(const slab_t slab, const atom_t cell);
-
-/*
- * X macro.
- */
-
-#define LISP_X(__s, __a)              \
-  do {                                \
-    DOWN(__a);                        \
-    if (unlikely((__a)->refs == 0)) { \
-      lisp_deallocate(__s, __a);      \
-    }                                 \
-  } while (0)
-
-#define X_1(__s, _1) \
-  do {               \
-    LISP_X(__s, _1); \
-  } while (0)
-
-#define X_2(__s, _2, ...)  \
-  do {                     \
-    LISP_X(__s, _2);       \
-    X_1(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_3(__s, _3, ...)  \
-  do {                     \
-    LISP_X(__s, _3);       \
-    X_2(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_4(__s, _4, ...)  \
-  do {                     \
-    LISP_X(__s, _4);       \
-    X_3(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_5(__s, _5, ...)  \
-  do {                     \
-    LISP_X(__s, _5);       \
-    X_4(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_6(__s, _6, ...)  \
-  do {                     \
-    LISP_X(__s, _6);       \
-    X_5(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_7(__s, _7, ...)  \
-  do {                     \
-    LISP_X(__s, _7);       \
-    X_6(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_8(__s, _8, ...)  \
-  do {                     \
-    LISP_X(__s, _8);       \
-    X_7(__s, __VA_ARGS__); \
-  } while (0)
-
-#define X_(_1, _2, _3, _4, _5, _6, _7, _8, NAME, ...) NAME
-#define X(__s, ...) \
-  X_(__VA_ARGS__, X_8, X_7, X_6, X_5, X_4, X_3, X_2, X_1)(__s, __VA_ARGS__)
+atom_t slab_allocate(const slab_t slab);
+void slab_deallocate(const slab_t slab, const atom_t cell);
 
 /*
  * Debug functions.
@@ -128,12 +65,12 @@ void lisp_deallocate(const slab_t slab, const atom_t cell);
 
 #ifdef LISP_ENABLE_DEBUG
 
-void lisp_collect(const slab_t slab);
-#define LISP_COLLECT(__s) lisp_collect(__s)
+void slab_collect(const slab_t slab);
+#define SLAB_COLLECT(_s) slab_collect(_s)
 
 #else
 
-#define LISP_COLLECT(__s)
+#define SLAB_COLLECT(_s)
 
 #endif
 

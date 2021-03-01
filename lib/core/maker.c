@@ -7,7 +7,7 @@
 atom_t
 lisp_make_char(const lisp_t lisp, const char c)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_CHAR;
   R->flags = 0;
   R->refs = 1;
@@ -19,7 +19,7 @@ lisp_make_char(const lisp_t lisp, const char c)
 atom_t
 lisp_make_number(const lisp_t lisp, const int64_t num)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_NUMBER;
   R->flags = 0;
   R->refs = 1;
@@ -42,7 +42,7 @@ lisp_make_string(const lisp_t lisp, const char* const str, const size_t len)
 atom_t
 lisp_make_symbol(const lisp_t lisp, const symbol_t sym)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_SYMBOL;
   R->flags = 0;
   R->refs = 1;
@@ -54,7 +54,7 @@ lisp_make_symbol(const lisp_t lisp, const symbol_t sym)
 atom_t
 lisp_make_nil(const lisp_t lisp)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_NIL;
   R->flags = 0;
   R->refs = 1;
@@ -65,7 +65,7 @@ lisp_make_nil(const lisp_t lisp)
 atom_t
 lisp_make_true(const lisp_t lisp)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_TRUE;
   R->flags = 0;
   R->refs = 1;
@@ -85,7 +85,7 @@ lisp_make_quote(const lisp_t lisp)
 atom_t
 lisp_make_wildcard(const lisp_t lisp)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_WILDCARD;
   R->flags = 0;
   R->refs = 1;

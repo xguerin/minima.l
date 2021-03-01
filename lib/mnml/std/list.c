@@ -14,7 +14,7 @@ lisp_list(const lisp_t lisp, const atom_t closure, const atom_t cell)
      */
     atom_t car = lisp_car(lisp, cell);
     atom_t cdr = lisp_cdr(lisp, cell);
-    X(lisp->slab, cell);
+    X(lisp, cell);
     /*
      * Recursively get the result.
      */

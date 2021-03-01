@@ -32,7 +32,7 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    * Sanity checks.
    */
   if (IS_NULL(match) || !IS_PAIR(match) || !IS_PAIR(CAR(match))) {
-    X(lisp->slab, ANY, match);
+    X(lisp, ANY, match);
     return lisp_make_nil(lisp);
   }
   /*
@@ -40,23 +40,23 @@ lisp_match(const lisp_t lisp, const atom_t closure, const atom_t ANY,
    */
   atom_t car = lisp_car(lisp, match);
   atom_t cdr = lisp_cdr(lisp, match);
-  X(lisp->slab, match);
+  X(lisp, match);
   /*
    * Get args and prog.
    */
   atom_t args = lisp_car(lisp, car);
   atom_t prog = lisp_cdr(lisp, car);
-  X(lisp->slab, car);
+  X(lisp, car);
   /*
    * Match the ANY with CAR.
    */
   if (atom_match(args, ANY)) {
-    X(lisp->slab, args, cdr, ANY);
+    X(lisp, args, cdr, ANY);
     return lisp_eval(lisp, closure, prog);
   }
   /*
    */
-  X(lisp->slab, args, prog);
+  X(lisp, args, prog);
   return lisp_match(lisp, closure, ANY, cdr);
 }
 

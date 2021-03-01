@@ -37,7 +37,7 @@ run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
   atom_t nil = lisp_make_nil(lisp);
   atom_t input, result = lisp_make_nil(lisp);
   while (keep_running) {
-    X(lisp->slab, result);
+    X(lisp, result);
     pread(lisp, nil, data);
     input = lisp_read(lisp, lisp_make_nil(lisp));
     if (input == NULL) {
@@ -47,7 +47,7 @@ run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
     result = lisp_eval(lisp, nil, input);
     pdone(lisp, result, data);
   }
-  X(lisp->slab, nil);
+  X(lisp, nil);
   return result;
 }
 
@@ -95,7 +95,7 @@ lisp_pop(const lisp_t lisp)
 {
   atom_t rslt = lisp_car(lisp, PAIRS);
   atom_t next = lisp_cdr(lisp, PAIRS);
-  X(lisp->slab, PAIRS);
+  X(lisp, PAIRS);
   PAIRS = next;
   return rslt;
 }
@@ -123,9 +123,9 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
     atom_t key = lisp_make_symbol(lisp, var);
     atom_t tmp = lisp->globals;
     lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-    X(lisp->slab, tmp);
+    X(lisp, tmp);
   } else {
-    X(lisp->slab, res);
+    X(lisp, res);
   }
 }
 
@@ -183,7 +183,7 @@ lisp_build_config(const lisp_t lisp)
   key = lisp_make_symbol(lisp, env);
   atom_t tmp = lisp->globals;
   lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-  X(lisp->slab, tmp);
+  X(lisp, tmp);
 }
 
 static void
@@ -212,9 +212,9 @@ lisp_build_env(const lisp_t lisp)
     atom_t key = lisp_make_symbol(lisp, env);
     atom_t tmp = lisp->globals;
     lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-    X(lisp->slab, tmp);
+    X(lisp, tmp);
   } else {
-    X(lisp->slab, res);
+    X(lisp, res);
   }
 }
 
@@ -241,7 +241,7 @@ lisp_load_defaults(const lisp_t lisp)
   atom_t cn2 = lisp_cons(lisp, sy2, cn1);
   atom_t cn3 = lisp_cons(lisp, mod, cn2);
   atom_t tmp = module_load(lisp, cn3);
-  X(lisp->slab, tmp);
+  X(lisp, tmp);
 }
 
 /*
@@ -327,7 +327,7 @@ main(const int argc, char** const argv)
   /*
    * Create a lisp context.
    */
-  slab_t slab = slab_allocate();
+  slab_t slab = slab_new();
   lisp_t lisp = lisp_new(slab);
   /*
    * Setup the debug variables.
@@ -384,12 +384,12 @@ main(const int argc, char** const argv)
       atom_t nil = lisp_make_nil(lisp);
       atom_t car = lisp_pop(lisp);
       if (IS_NULL(car)) {
-        X(lisp->slab, car);
+        X(lisp, car);
         break;
       }
-      X(lisp->slab, result);
+      X(lisp, result);
       result = lisp_eval(lisp, nil, car);
-      X(lisp->slab, nil);
+      X(lisp, nil);
     }
     /*
      * Pop the IO context.
@@ -399,7 +399,7 @@ main(const int argc, char** const argv)
     /*
      * Clear the PAIRS.
      */
-    X(lisp->slab, PAIRS);
+    X(lisp, PAIRS);
   } else {
     PUSH_IO_CONTEXT(lisp, lisp->ochan, stdout, cwd);
     result = lisp_load_file(lisp, filename);
@@ -409,7 +409,7 @@ main(const int argc, char** const argv)
    * Compute the return status.
    */
   int status = IS_NULL(result) ? -1 : 0;
-  X(lisp->slab, result);
+  X(lisp, result);
   /*
    * Unload modules.
    */
@@ -424,7 +424,7 @@ main(const int argc, char** const argv)
   if (check_slab && slab->n_alloc != slab->n_free) {
     status = -2;
   }
-  slab_destroy(slab);
+  slab_delete(slab);
   /*
    */
   return status;

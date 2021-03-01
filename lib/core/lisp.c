@@ -24,10 +24,40 @@ lisp_new(const slab_t slab)
 void
 lisp_delete(lisp_t lisp)
 {
-  X(lisp->slab, lisp->ochan);
-  X(lisp->slab, lisp->ichan);
-  X(lisp->slab, lisp->globals);
+  X(lisp, lisp->ochan);
+  X(lisp, lisp->ichan);
+  X(lisp, lisp->globals);
   free(lisp);
+}
+
+/*
+ * Allocation functions.
+ */
+
+atom_t
+lisp_allocate(const lisp_t lisp)
+{
+  return slab_allocate(lisp->slab);
+}
+
+void
+lisp_deallocate(const lisp_t lisp, const atom_t atom)
+{
+  TRACE_SLAB_SEXP(atom);
+  /*
+   * Most likely this is a pair.
+   */
+  if (likely(IS_PAIR(atom))) {
+    X(lisp, CAR(atom));
+    X(lisp, CDR(atom));
+    slab_deallocate(lisp->slab, atom);
+  }
+  /*
+   * Process atoms.
+   */
+  else {
+    slab_deallocate(lisp->slab, atom);
+  }
 }
 
 /*
@@ -94,7 +124,7 @@ lisp_cdr(const lisp_t lisp, const atom_t cell)
 atom_t
 lisp_cons(const lisp_t lisp, const atom_t car, const atom_t cdr)
 {
-  atom_t R = lisp_allocate(lisp->slab);
+  atom_t R = lisp_allocate(lisp);
   R->type = T_PAIR;
   R->refs = 1;
   CAR(R) = car;
@@ -111,11 +141,11 @@ lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr)
    */
   if (likely(IS_PAIR(car))) {
     FOREACH(car, p) { NEXT(p); }
-    X(lisp->slab, p->cdr);
+    X(lisp, p->cdr);
     p->cdr = cdr;
     R = car;
   } else {
-    X(lisp->slab, car);
+    X(lisp, car);
     R = cdr;
   }
   /*
@@ -135,7 +165,7 @@ lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair)
    * Check if pair is valid.
    */
   if (!IS_PAIR(pair) || !IS_SYMB(CAR(pair))) {
-    X(lisp->slab, pair);
+    X(lisp, pair);
     return UP(closure);
   }
   /*
@@ -153,14 +183,14 @@ lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair)
    * Replace car if its symbol matches pair's.
    */
   if (lisp_symbol_match(CAR(car), &CAR(pair)->symbol)) {
-    X(lisp->slab, car);
+    X(lisp, car);
     return lisp_cons(lisp, pair, cdr);
   }
   /*
    * Look further down the closure.
    */
   atom_t nxt = lisp_setq(lisp, cdr, pair);
-  X(lisp->slab, cdr);
+  X(lisp, cdr);
   return lisp_cons(lisp, car, nxt);
 }
 
@@ -180,12 +210,12 @@ lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
     atom_t cdr = lisp_cdr(lisp, cell);
     /*
      */
-    X(lisp->slab, cell, result);
+    X(lisp, cell, result);
     return lisp_prog(lisp, closure, cdr, res);
   }
   /*
    */
-  X(lisp->slab, cell);
+  X(lisp, cell);
   return result;
 }
 

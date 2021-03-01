@@ -257,7 +257,7 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
    */
   atom_t car = lisp_car(lisp, cell);
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Process the remainder.
    */
@@ -288,7 +288,7 @@ module_load_symbols_list(const module_entry_t* entries, const lisp_t lisp,
   /*
    * Return symbol list.
    */
-  X(lisp->slab, car);
+  X(lisp, car);
   return nxt;
 }
 
@@ -329,14 +329,14 @@ module_load_symbols(const module_entry_t* entries, const lisp_t lisp,
       atom_t tmp = result;
       result = lisp_cons(lisp, sym, tmp);
     }
-    X(lisp->slab, cell);
+    X(lisp, cell);
     return result;
   }
   /*
    * Check that cell is a list.
    */
   if (!IS_LIST(cell)) {
-    X(lisp->slab, cell);
+    X(lisp, cell);
     return lisp_make_nil(lisp);
   }
   /*
@@ -401,7 +401,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
     atom_t val = lisp_cons(lisp, UP(name), hnd);
     atom_t tmp = lisp->modules;
     lisp->modules = lisp_setq(lisp, lisp->modules, val);
-    X(lisp->slab, tmp);
+    X(lisp, tmp);
   }
   /*
    * Return the result.
@@ -463,7 +463,7 @@ module_fini(const lisp_t lisp)
     dlclose((void*)hnd);
     NEXT(p);
   }
-  X(lisp->slab, lisp->modules);
+  X(lisp, lisp->modules);
 }
 
 /*
@@ -479,12 +479,12 @@ module_load(const lisp_t lisp, const atom_t cell)
    */
   atom_t module_name = lisp_car(lisp, cell);
   atom_t symbol_list = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Check the format of the arguments.
    */
   if (IS_NULL(module_name) || !IS_SYMB(module_name)) {
-    X(lisp->slab, module_name, symbol_list);
+    X(lisp, module_name, symbol_list);
     return lisp_make_nil(lisp);
   }
   /*
@@ -498,7 +498,7 @@ module_load(const lisp_t lisp, const atom_t cell)
   bool found = module_find(paths, module_name, path);
   free(paths);
   if (!found) {
-    X(lisp->slab, module_name, symbol_list);
+    X(lisp, module_name, symbol_list);
     return lisp_make_nil(lisp);
   }
   /*
@@ -508,7 +508,7 @@ module_load(const lisp_t lisp, const atom_t cell)
   /*
    * Clean-up and return.
    */
-  X(lisp->slab, module_name);
+  X(lisp, module_name);
   return syms;
 }
 

@@ -16,7 +16,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
    * Check if sym is a symbol.
    */
   if (unlikely(!IS_SYMB(sym))) {
-    X(lisp->slab, sym, val);
+    X(lisp, sym, val);
     return lisp_make_nil(lisp);
   }
   /*
@@ -28,7 +28,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
     if (lisp_symbol_match(CAR(car), &sym->symbol)) {
       atom_t res = CDR(car);
       CDR(car) = val;
-      X(lisp->slab, sym);
+      X(lisp, sym);
       return res;
     }
     NEXT(c0);
@@ -42,7 +42,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
     if (lisp_symbol_match(CAR(car), &sym->symbol)) {
       atom_t res = CDR(car);
       CDR(car) = val;
-      X(lisp->slab, sym);
+      X(lisp, sym);
       return res;
     }
     NEXT(c1);
@@ -50,7 +50,7 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
   /*
    * Set the symbol in the closure stack.
    */
-  X(lisp->slab, sym, val);
+  X(lisp, sym, val);
   return lisp_make_nil(lisp);
 }
 

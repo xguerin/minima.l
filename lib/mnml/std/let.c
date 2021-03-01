@@ -12,7 +12,7 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
    * Check if the cell is a pair.
    */
   if (unlikely(!IS_PAIR(cell))) {
-    X(lisp->slab, cell);
+    X(lisp, cell);
     return env;
   }
   /*
@@ -20,12 +20,12 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
    */
   atom_t car = lisp_car(lisp, cell);
   atom_t cdr = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Return if the element is not a pair.
    */
   if (unlikely(!IS_PAIR(car))) {
-    X(lisp->slab, car, cdr);
+    X(lisp, car, cdr);
     return env;
   }
   /*
@@ -35,7 +35,7 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
   atom_t tmp = lisp_conc(lisp, dup, UP(closure));
   atom_t arg = lisp_car(lisp, car);
   atom_t nvl = lisp_cdr(lisp, car);
-  X(lisp->slab, car);
+  X(lisp, car);
   /*
    * Evaluate the value and bind it to the environment.
    */
@@ -70,7 +70,7 @@ lisp_let_bind(const lisp_t lisp, const atom_t closure, const atom_t env,
   /*
    * Process the remainder.
    */
-  X(lisp->slab, tmp);
+  X(lisp, tmp);
   return lisp_let_bind(lisp, closure, nxt, cdr);
 }
 
@@ -82,7 +82,7 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
    */
   atom_t bind = lisp_car(lisp, cell);
   atom_t prog = lisp_cdr(lisp, cell);
-  X(lisp->slab, cell);
+  X(lisp, cell);
   /*
    * Recursively apply the bind list.
    */
@@ -92,7 +92,7 @@ lisp_let(const lisp_t lisp, const atom_t closure, const atom_t cell)
    * Evaluate the prog with the new bind list.
    */
   atom_t res = lisp_prog(lisp, clos, prog, lisp_make_nil(lisp));
-  X(lisp->slab, clos);
+  X(lisp, clos);
   return res;
 }
 
