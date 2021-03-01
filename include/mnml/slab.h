@@ -8,7 +8,7 @@
  * Slab types.
  */
 
-typedef struct _slab
+typedef struct slab
 {
   size_t first;
   size_t n_alloc;
@@ -24,7 +24,7 @@ typedef struct _slab
 #define SLAB_SIZE (64ULL * 1024ULL * 1024ULL)
 #define PAGE_SIZE 4096ULL
 
-#define CELL_COUNT ((slab->n_pages * PAGE_SIZE) / sizeof(struct _atom))
+#define CELL_COUNT ((slab->n_pages * PAGE_SIZE) / sizeof(struct atom))
 
 /*
  * Reference count function.
@@ -63,12 +63,12 @@ void lisp_deallocate(const slab_t slab, const atom_t cell);
  * X macro.
  */
 
-#define LISP_X(__s, __a)            \
-  do {                              \
-    DOWN(__a);                      \
-    if (unlikely(__a->refs == 0)) { \
-      lisp_deallocate(__s, __a);    \
-    }                               \
+#define LISP_X(__s, __a)              \
+  do {                                \
+    DOWN(__a);                        \
+    if (unlikely((__a)->refs == 0)) { \
+      lisp_deallocate(__s, __a);      \
+    }                                 \
   } while (0)
 
 #define X_1(__s, _1) \

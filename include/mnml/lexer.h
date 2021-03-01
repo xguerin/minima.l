@@ -12,7 +12,7 @@ typedef void (*lisp_consumer_t)(const lisp_t lisp, const atom_t);
 /*
  * Lexer type.
  */
-typedef struct _lexer
+typedef struct lexer
 {
   int cs;
   int act;

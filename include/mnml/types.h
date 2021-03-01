@@ -17,7 +17,7 @@
  * Lisp types.
  */
 
-typedef enum _atom_type
+typedef enum atom_type
 {
   T_NIL,
   T_TRUE,
@@ -28,24 +28,24 @@ typedef enum _atom_type
   T_WILDCARD
 } atom_type_t;
 
-typedef enum _atom_flag
+typedef enum atom_flag
 {
   F_TAIL_CALL = 0x1,
 } atom_flag_t;
 
 #define ATOM_TYPES 7
 
-struct _atom;
+struct atom;
 
-typedef struct _pair
+typedef struct pair
 {
-  struct _atom* car;
-  struct _atom* cdr;
+  struct atom* car;
+  struct atom* cdr;
 } * pair_t;
 
 #define LISP_SYMBOL_LENGTH 16
 
-typedef union _symbol
+typedef union symbol
 {
   char val[LISP_SYMBOL_LENGTH];
   uint64_t word[2];
@@ -54,7 +54,7 @@ typedef union _symbol
 #endif
 } __attribute__((packed)) * symbol_t;
 
-typedef struct _atom
+typedef struct atom
 {
   uint32_t next;
   atom_type_t type : 16;
@@ -63,8 +63,8 @@ typedef struct _atom
   union
   {
     int64_t number;
-    union _symbol symbol;
-    struct _pair pair;
+    union symbol symbol;
+    struct pair pair;
   };
 } __attribute__((packed)) * atom_t;
 

@@ -66,11 +66,11 @@ lisp_test_fini(const lisp_t lisp)
 static bool
 basic_tests()
 {
-  struct _lisp lisp;
+  struct lisp lisp;
   /*
    * Make sure the atom size is always the same.
    */
-  assert(sizeof(struct _atom) == 32);
+  assert(sizeof(struct atom) == 32);
   /*
    * TEST 00.
    */
@@ -125,7 +125,7 @@ basic_tests()
 static bool
 car_cdr_tests()
 {
-  struct _lisp lisp;
+  struct lisp lisp;
   atom_t car = NULL, cdr = NULL;
   /*
    * TEST_00.
@@ -231,7 +231,7 @@ car_cdr_tests()
 static bool
 conc_cons_tests()
 {
-  struct _lisp lisp;
+  struct lisp lisp;
   atom_t tmp1 = NULL, tmp2 = NULL, tmp3 = NULL;
   /*
    * TEST_00.

@@ -107,8 +107,9 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
       /*
        * Process the list.
        */
-      if (alter)
+      if (alter) {
         fprintf(fp, "(");
+      }
       /*
        * Print CAR.
        */
@@ -126,8 +127,9 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
       }
       /*
        */
-      if (alter)
+      if (alter) {
         fprintf(fp, ")");
+      }
       break;
     case T_NUMBER:
 #if defined(__MACH__) || defined(__OpenBSD__)

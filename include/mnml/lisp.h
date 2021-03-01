@@ -8,21 +8,21 @@
  * Helper macros.
  */
 
-#define FOREACH(__c, __p)  \
-  pair_t __p = &__c->pair; \
-  if (!IS_NULL(__c))       \
+#define FOREACH(__c, __p)    \
+  pair_t __p = &(__c)->pair; \
+  if (!IS_NULL(__c))         \
     for (;;)
 
-#define NEXT(__p)         \
-  if (!IS_PAIR(__p->cdr)) \
-    break;                \
-  __p = &__p->cdr->pair
+#define NEXT(__p)           \
+  if (!IS_PAIR((__p)->cdr)) \
+    break;                  \
+  (__p) = &(__p)->cdr->pair
 
 /*
  * Lisp context type.
  */
 
-typedef struct _lisp
+typedef struct lisp
 {
   slab_t slab;
   atom_t globals;

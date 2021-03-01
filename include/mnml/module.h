@@ -20,7 +20,7 @@ void module_fini(const lisp_t lisp);
 typedef const char* (*module_name_t)();
 typedef atom_t (*module_load_t)(const lisp_t lisp);
 
-typedef struct _module_entry
+typedef struct module_entry
 {
   module_name_t name;
   module_load_t load;
@@ -135,14 +135,14 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
   static atom_t lisp_function_##_n(const lisp_t l, const atom_t c) \
   {                                                                \
     LISP_ARGS(c, C, _x, _y);                                       \
-    return lisp_make_number(l, _x->number _o _y->number);          \
+    return lisp_make_number(l, (_x)->number _o _y->number);        \
   }
 
-#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                                  \
-  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c)          \
-  {                                                                         \
-    LISP_ARGS(c, C, _x, _y);                                                \
-    return _x->number _o _y->number ? lisp_make_true(l) : lisp_make_nil(l); \
+#define BINARY_COMPARE_GEN(_n, _o, _x, _y)                                    \
+  static atom_t lisp_function_##_n(const lisp_t l, const atom_t c)            \
+  {                                                                           \
+    LISP_ARGS(c, C, _x, _y);                                                  \
+    return (_x)->number _o _y->number ? lisp_make_true(l) : lisp_make_nil(l); \
   }
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

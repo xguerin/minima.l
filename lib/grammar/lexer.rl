@@ -222,7 +222,7 @@ main := |*
 
 %% write data;
 
-typedef struct _region
+typedef struct region
 {
   size_t size;
   uint8_t data[];
@@ -232,7 +232,7 @@ typedef struct _region
 lexer_t
 lexer_create(const lisp_t lisp, const lisp_consumer_t consumer)
 {
-  lexer_t lexer = (lexer_t)malloc(sizeof(struct _lexer));
+  lexer_t lexer = (lexer_t)malloc(sizeof(struct lexer));
   %% write init;
   lexer->depth = 0;
   lexer->rem = 0;

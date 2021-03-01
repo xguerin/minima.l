@@ -104,16 +104,16 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
   do {                                                  \
     atom_t p = lisp_make_string(__l, __p, strlen(__p)); \
     atom_t x = lisp_cons(__l, p, lisp_make_nil(__l));   \
-    atom_t n = lisp_make_number(__l, (int64_t)__d);     \
+    atom_t n = lisp_make_number(__l, (int64_t)(__d));   \
     atom_t y = lisp_cons(__l, n, x);                    \
-    __c = lisp_cons(__l, y, __c);                       \
+    (__c) = lisp_cons(__l, y, __c);                     \
   } while (0)
 
 #define POP_IO_CONTEXT(__l, __c) \
   do {                           \
     atom_t old = __c;            \
-    __c = UP(CDR(__c));          \
-    X(__l->slab, old);           \
+    (__c) = UP(CDR(__c));        \
+    X((__l)->slab, old);         \
   } while (0)
 
 /*
@@ -122,17 +122,17 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
 #define FOR_EACH_TOKEN(__s, __d, __e, BLOCK)      \
   do {                                            \
     char* copy = strdup(__s);                     \
-    char *haystack = copy, *p, *__e;              \
+    char *haystack = copy, *p, *(__e);            \
     while ((p = strstr(haystack, __d)) != NULL) { \
       *p = 0;                                     \
-      __e = haystack;                             \
+      (__e) = haystack;                           \
       haystack = p + 1;                           \
       if (strlen(__e) > 0)                        \
-        BLOCK;                                    \
+        (BLOCK);                                  \
     }                                             \
-    __e = haystack;                               \
+    (__e) = haystack;                             \
     if (strlen(__e) > 0)                          \
-      BLOCK;                                      \
+      (BLOCK);                                    \
     free(copy);                                   \
   } while (0)
 

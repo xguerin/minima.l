@@ -9,16 +9,16 @@
  */
 
 #define MAKE_SYMBOL_STATIC(__v, __s, __n)                       \
-  symbol_t __v = (union _symbol*)alloca(sizeof(union _symbol)); \
-  __v->word[0] = 0;                                             \
-  __v->word[1] = 0;                                             \
-  strncpy(__v->val, __s, __n)
+  symbol_t __v = (union symbol*)alloca(sizeof(union symbol)); \
+  (__v)->word[0] = 0;                                           \
+  (__v)->word[1] = 0;                                           \
+  strncpy((__v)->val, __s, __n)
 
 #define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                      \
-  symbol_t __v = (union _symbol*)malloc(sizeof(union _symbol)); \
-  __v->word[0] = 0;                                             \
-  __v->word[1] = 0;                                             \
-  strncpy(__v->val, __s, __n)
+  symbol_t __v = (union symbol*)malloc(sizeof(union symbol)); \
+  (__v)->word[0] = 0;                                           \
+  (__v)->word[1] = 0;                                           \
+  strncpy((__v)->val, __s, __n)
 
 /*
  * CONS helpers.
@@ -31,8 +31,8 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t r_1 = lisp_make_symbol(__l, s_1);   \
-    X(__l->slab, __r);                         \
-    __r = r_1;                                 \
+    X((__l)->slab, __r);                       \
+    (__r) = r_1;                               \
   }
 
 #define LISP_CONS_NIL(__l, __r, _1)            \
@@ -40,18 +40,18 @@
   {                                            \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t __1 = lisp_make_symbol(__l, s_1);   \
-    __r = lisp_cons(__l, __1, __r);            \
+    (__r) = lisp_cons(__l, __1, __r);          \
   }
 
 #define LISP_CONS_REM(__l, __r, _1)            \
   LISP_CONS_0(__l, __r);                       \
   {                                            \
-    X(__l->slab, __r);                         \
+    X((__l)->slab, __r);                       \
     MAKE_SYMBOL_STATIC(s_1, #_1, strlen(#_1)); \
     atom_t __1 = lisp_make_symbol(__l, s_1);   \
     MAKE_SYMBOL_STATIC(s_0, "REM", 3);         \
     atom_t __0 = lisp_make_symbol(__l, s_0);   \
-    __r = lisp_cons(__l, __1, __0);            \
+    (__r) = lisp_cons(__l, __1, __0);          \
   }
 
 #define LISP_CONS_2(__l, __r, _2, _1) LISP_CONS_##_1(__l, __r, _2)

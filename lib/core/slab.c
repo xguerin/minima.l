@@ -43,8 +43,8 @@ lisp_decref(const atom_t atom, const char* const name)
 slab_t
 slab_allocate()
 {
-  slab_t slab = (slab_t)malloc(sizeof(struct _slab));
-  memset(slab, 0, sizeof(struct _slab));
+  slab_t slab = (slab_t)malloc(sizeof(struct slab));
+  memset(slab, 0, sizeof(struct slab));
   slab->n_pages = 16;
   /*
    * Allocate the slab (64MB).
@@ -141,7 +141,7 @@ lisp_allocate(const slab_t slab)
    * Prepare the new atom.
    */
 #ifdef LISP_ENABLE_DEBUG
-  memset(entry, 0, sizeof(struct _atom));
+  memset(entry, 0, sizeof(struct atom));
 #endif
   entry->next = IN_USE;
   slab->n_alloc += 1;
@@ -149,13 +149,13 @@ lisp_allocate(const slab_t slab)
 }
 
 static void
-lisp_free(const slab_t slab, const atom_t __p)
+lisp_free(const slab_t slab, const atom_t _p)
 {
-  size_t n = ((uintptr_t)__p - (uintptr_t)slab->entries) / sizeof(struct _atom);
+  size_t n = ((uintptr_t)_p - (uintptr_t)slab->entries) / sizeof(struct atom);
   atom_t entry = &slab->entries[n];
   TRACE_SLAB("%ld", n);
 #ifdef LISP_ENABLE_DEBUG
-  memset(entry, 0xA, sizeof(struct _atom));
+  memset(entry, 0xA, sizeof(struct atom));
 #endif
   entry->next = slab->first;
   slab->first = n;

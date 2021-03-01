@@ -8,19 +8,18 @@
  * Closure types.
  */
 
-struct _closure;
+struct closure;
 
-typedef union _value
+typedef union value
 {
   int64_t number;
   atom_t atom;
-  atom_t (*callback)(const lisp_t, const atom_t, struct _closure*,
-                     union _value);
+  atom_t (*callback)(const lisp_t, const atom_t, struct closure*, union value);
 } value_t;
 
-typedef struct _closure
+typedef struct closure
 {
-  struct _closure* C;
+  struct closure* C;
   value_t V[];
 } * closure_t;
 

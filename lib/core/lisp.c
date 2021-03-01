@@ -13,7 +13,7 @@
 lisp_t
 lisp_new(const slab_t slab)
 {
-  lisp_t lisp = (lisp_t)malloc(sizeof(struct _lisp));
+  lisp_t lisp = (lisp_t)malloc(sizeof(struct lisp));
   lisp->slab = slab;
   lisp->globals = lisp_make_nil(lisp);
   lisp->ichan = lisp_make_nil(lisp);

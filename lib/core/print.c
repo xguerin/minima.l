@@ -47,12 +47,14 @@ lisp_prin_pair(FILE* const handle, char* const buf, const size_t idx,
    */
   if (!IS_NULL(CDR(cell))) {
     if (IS_PAIR(CDR(cell))) {
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, " ", 1);
+      }
       return lisp_prin_pair(handle, buf, nxt, CDR(cell), s);
     } else {
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, " . ", 3);
+      }
       return lisp_prin_atom(handle, buf, nxt, CDR(cell), s);
     }
   }
@@ -97,11 +99,13 @@ lisp_prin_atom(FILE* const handle, char* const buf, const size_t idx,
     }
     case T_PAIR: {
       size_t nxt = idx;
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, "(", 1);
+      }
       nxt = lisp_prin_pair(handle, buf, nxt, cell, s);
-      if (s)
+      if (s) {
         nxt = lisp_write(handle, buf, nxt, ")", 1);
+      }
       return nxt;
     }
     case T_NUMBER: {
