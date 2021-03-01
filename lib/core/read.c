@@ -35,7 +35,7 @@ lisp_read_pop(const lisp_t lisp)
 }
 
 atom_t
-lisp_read(const lisp_t lisp, UNUSED const atom_t closure, const atom_t cell)
+lisp_read(const lisp_t lisp, const atom_t cell)
 {
   TRACE_CHAN_SEXP(lisp->ichan);
   X(lisp->slab, cell);

@@ -39,7 +39,7 @@ run(const lisp_t lisp, stage_t pread, const stage_t pdone, const void* data)
   while (keep_running) {
     X(lisp->slab, result);
     pread(lisp, nil, data);
-    input = lisp_read(lisp, nil, lisp_make_nil(lisp));
+    input = lisp_read(lisp, lisp_make_nil(lisp));
     if (input == NULL) {
       result = lisp_make_nil(lisp);
       break;

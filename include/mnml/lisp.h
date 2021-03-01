@@ -75,7 +75,7 @@ atom_t lisp_prog(const lisp_t lisp, const atom_t closure, const atom_t cell,
  * Read, eval, print functions.
  */
 
-atom_t lisp_read(const lisp_t lisp, const atom_t closure, const atom_t cell);
+atom_t lisp_read(const lisp_t lisp, const atom_t cell);
 atom_t lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell);
 void lisp_prin(const lisp_t lisp, const atom_t cell, const bool s);
 

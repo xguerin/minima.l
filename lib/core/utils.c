@@ -629,7 +629,7 @@ lisp_load_file(const lisp_t lisp, const char* const filepath)
    * Load all the entries
    */
   atom_t input, nil = lisp_make_nil(lisp), res = lisp_make_nil(lisp);
-  while ((input = lisp_read(lisp, nil, lisp_make_nil(lisp))) != NULL) {
+  while ((input = lisp_read(lisp, lisp_make_nil(lisp))) != NULL) {
     X(lisp->slab, res);
     res = lisp_eval(lisp, nil, input);
   }
