@@ -1,0 +1,1 @@
+Checks: '-*,bugprone-*,-bugprone-exception-escape,performance-*,readability-braces-around-statements'

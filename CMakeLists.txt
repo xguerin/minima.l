@@ -181,6 +181,38 @@ if(MNML_ENABLE_TESTS)
 endif()
 
 #
+# Formatting
+#
+
+find_package(ClangFormat)
+find_package(ClangTidy)
+
+file(GLOB_RECURSE SOURCES RELATIVE ${CMAKE_SOURCE_DIR} include/*.h lib/*.c)
+
+foreach (SOURCE ${SOURCES})
+  string(REGEX REPLACE "[/.]" "_" TARGET ${SOURCE})
+  string(TOLOWER ${TARGET} TARGET)
+  #
+  if (ClangFormat_FOUND)
+    add_custom_target(${TARGET}_format COMMAND clang-format -i -style=file ${CMAKE_SOURCE_DIR}/${SOURCE})
+    list(APPEND FORMAT_TARGETS ${TARGET}_format)
+  endif ()
+  #
+  if (ClangTidy_FOUND)
+    add_custom_target(${TARGET}_tidy COMMAND clang-tidy -fix -quiet -format-style=file -p ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/${SOURCE})
+    list(APPEND TIDY_TARGETS ${TARGET}_tidy)
+  endif ()
+endforeach ()
+
+if (ClangFormat_FOUND)
+  add_custom_target(format DEPENDS ${FORMAT_TARGETS})
+endif ()
+
+if (ClangTidy_FOUND)
+  add_custom_target(tidy DEPENDS ${TIDY_TARGETS})
+endif ()
+
+#
 # Headers
 #
 
