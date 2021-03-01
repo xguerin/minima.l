@@ -1,13 +1,15 @@
-#include "module.h"
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
-#include <mnml/maker.h>
+#include <mnml/module.h>
 #include <mnml/slab.h>
 #include <mnml/types.h>
-#include <mnml/utils.h>
+#include <dirent.h>
 #include <dlfcn.h>
+#include <errno.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 /*
  * Helper functions.
@@ -19,6 +21,158 @@
       dlclose(__h);       \
     }                     \
   } while (0)
+
+static const char*
+lisp_library_prefix()
+{
+  static bool is_set = false;
+  static char buffer[PATH_MAX];
+  if (!is_set) {
+    const char* prefix = lisp_prefix();
+    strcpy(buffer, prefix);
+    strcat(buffer, "/lib/mnml");
+    is_set = true;
+  }
+  return buffer;
+}
+
+static const char*
+lisp_usercache_prefix()
+{
+  static bool is_set = false;
+  static char buffer[PATH_MAX];
+  if (!is_set) {
+    strcpy(buffer, getenv("HOME"));
+    strcat(buffer, "/.mnml");
+    is_set = true;
+  }
+  return buffer;
+}
+
+static char*
+module_paths()
+{
+  static bool is_set = false;
+  static char buffer[8192];
+  /*
+   * Prepare the path if not set.
+   */
+  if (!is_set) {
+    /*
+     * Set the system prefix first.
+     */
+    strcpy(buffer, lisp_library_prefix());
+    /*
+     * Then, append the user cache path.
+     */
+    strcat(buffer, ":");
+    strcat(buffer, lisp_usercache_prefix());
+    /*
+     * Append the user-defined variable.
+     */
+    if (getenv("MNML_MODULE_PATH") != NULL) {
+      strcat(buffer, ":");
+      strcat(buffer, getenv("MNML_MODULE_PATH"));
+    }
+    /*
+     */
+    is_set = true;
+  }
+  /*
+   * Return the paths.
+   */
+  return strdup(buffer);
+}
+
+/*
+ * Module search.
+ */
+
+static bool
+module_find_at_path(const char* const dirpath, const char* const name,
+                    char* const path)
+{
+  TRACE_MODL("Searching module %s in %s", name, dirpath);
+  /*
+   * Open the directory pointed by entry.
+   */
+  DIR* dir = opendir(dirpath);
+  if (dir == NULL) {
+    ERROR("cannot open directory: %s", dirpath);
+    return false;
+  }
+  /*
+   * Create the library file name.
+   */
+#ifdef __MACH__
+  /* LIB NAME .DYLIB\0 = 3 + STRLEN(NAME) + 7 */
+  const size_t lib_name_len = strlen(name) + 10;
+#else
+  /* LIB NAME .SO\0 = 3 + STRLEN(NAME) + 3 */
+  const size_t lib_name_len = strlen(name) + 6;
+#endif
+  char* const lib_name = alloca(lib_name_len);
+  memset(lib_name, 0, lib_name_len);
+  strcpy(lib_name, "lib");
+  strcat(lib_name, name);
+#ifdef __MACH__
+  strcat(lib_name, ".dylib");
+#else
+  strcat(lib_name, ".so");
+#endif
+  /*
+   * Scan the directory.
+   */
+  struct dirent* de = NULL;
+  while ((de = readdir(dir)) != NULL) {
+    /*
+     * Check if the module is a binary module.
+     */
+    if (strcmp(de->d_name, lib_name) == 0) {
+      break;
+    }
+  }
+  /*
+   * If the module was not found, return.
+   */
+  if (de == NULL) {
+    TRACE_MODL("Module %s not found", name);
+    closedir(dir);
+    return false;
+  }
+  /*
+   * Build the file path.
+   */
+  memset(path, 0, PATH_MAX);
+  strcpy(path, dirpath);
+  strcat(path, "/");
+  strcat(path, de->d_name);
+  /*
+   * Return the result.
+   */
+  TRACE_MODL("Module %s found at %s", name, path);
+  closedir(dir);
+  return true;
+}
+
+static bool
+module_find(const char* const paths, const atom_t sym, char* const path)
+{
+  bool result = false;
+  /*
+   * Extract the symbol name.
+   */
+  char bsym[17] = { 0 };
+  strncpy(bsym, sym->symbol.val, LISP_SYMBOL_LENGTH);
+  TRACE_MODL("Looking for module %s", bsym);
+  /*
+   * Scan libraries in the path.
+   */
+  FOR_EACH_TOKEN(paths, ":", entry, {
+    result = !result ? module_find_at_path(entry, bsym, path) : result;
+  });
+  return result;
+}
 
 /*
  * Binary module load.
@@ -252,6 +406,109 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   /*
    * Return the result.
    */
+  return syms;
+}
+
+/*
+ * Lifecycle management.
+ */
+
+bool
+module_init(const lisp_t lisp)
+{
+  /*
+   * Reset the MODULES variable.
+   */
+  lisp->modules = lisp_make_nil(lisp);
+  /*
+   * Try to create the user cache directory.
+   */
+  struct stat ss;
+  int rc = stat(lisp_usercache_prefix(), &ss);
+  if (rc != 0) {
+    if (errno == ENOENT && mkdir(lisp_usercache_prefix(), S_IRWXU) == 0) {
+      return true;
+    }
+    ERROR("%s: %s", lisp_usercache_prefix(), strerror(errno));
+    return false;
+  }
+  /*
+   * Check the stats.
+   */
+  if ((ss.st_mode & S_IFDIR) == 0) {
+    ERROR("%s exists and is not a directory", lisp_usercache_prefix());
+    return false;
+  }
+  if ((ss.st_mode & S_IRWXU) == 0) {
+    ERROR("%s cannot be accessed", lisp_usercache_prefix());
+    return false;
+  }
+  /*
+   * Report the known load path.
+   */
+  TRACE_MODL("Module load path: %s", module_paths());
+  /*
+   * Good to go.
+   */
+  return true;
+}
+
+void
+module_fini(const lisp_t lisp)
+{
+  FOREACH(lisp->modules, p)
+  {
+    atom_t car = p->car;
+    atom_t hnd = CAR(CDR(car));
+    dlclose((void*)hnd);
+    NEXT(p);
+  }
+  X(lisp->slab, lisp->modules);
+}
+
+/*
+ * Main load function.
+ */
+
+atom_t
+module_load(const lisp_t lisp, const atom_t cell)
+{
+  TRACE_MODL_SEXP(cell);
+  /*
+   * Grab the module name and the symbol list.
+   */
+  atom_t module_name = lisp_car(lisp, cell);
+  atom_t symbol_list = lisp_cdr(lisp, cell);
+  X(lisp->slab, cell);
+  /*
+   * Check the format of the arguments.
+   */
+  if (IS_NULL(module_name) || !IS_SYMB(module_name)) {
+    X(lisp->slab, module_name, symbol_list);
+    return lisp_make_nil(lisp);
+  }
+  /*
+   * Load the environment variable.
+   */
+  char* paths = module_paths();
+  /*
+   * Find the module for the symbol. Returns where the module was found.
+   */
+  char path[PATH_MAX];
+  bool found = module_find(paths, module_name, path);
+  free(paths);
+  if (!found) {
+    X(lisp->slab, module_name, symbol_list);
+    return lisp_make_nil(lisp);
+  }
+  /*
+   * Load the symbols in the module.
+   */
+  atom_t syms = module_load_binary(path, lisp, module_name, symbol_list);
+  /*
+   * Clean-up and return.
+   */
+  X(lisp->slab, module_name);
   return syms;
 }
 
