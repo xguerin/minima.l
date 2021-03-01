@@ -222,13 +222,6 @@ main := |*
 
 %% write data;
 
-typedef struct region
-{
-  size_t size;
-  uint8_t data[];
-}
-* region_t;
-
 lexer_t
 lexer_create(const lisp_t lisp, const lisp_consumer_t consumer)
 {
