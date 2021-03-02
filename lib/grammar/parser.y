@@ -60,7 +60,7 @@ items(A) ::= items(B) TILDE prefix(C).
   atom_t nil = lisp_make_nil(lexer->lisp);
   C = lisp_eval(lexer->lisp, nil, C);
   A = lisp_conc(lexer->lisp, B, C);
-  X(lexer->lisp->slab, nil);
+  X(lexer->lisp, nil);
 }
 
 prefix(A) ::= item(B).
@@ -77,7 +77,7 @@ prefix(A) ::= BACKTICK item(B).
 {
   atom_t nil = lisp_make_nil(lexer->lisp);
   A = lisp_eval(lexer->lisp, nil, B);
-  X(lexer->lisp->slab, nil);
+  X(lexer->lisp, nil);
 }
 
 item(A) ::= NUMBER(B).

@@ -128,11 +128,11 @@ bool lisp_symbol_match(const atom_t a, const symbol_t b);
       (__e) = haystack;                           \
       haystack = p + 1;                           \
       if (strlen(__e) > 0)                        \
-        (BLOCK);                                  \
+        BLOCK; /* NOLINT */                       \
     }                                             \
     (__e) = haystack;                             \
     if (strlen(__e) > 0)                          \
-      (BLOCK);                                    \
+      BLOCK; /* NOLINT */                         \
     free(copy);                                   \
   } while (0)
 
