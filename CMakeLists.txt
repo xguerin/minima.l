@@ -19,7 +19,7 @@ set(CMAKE_C_COMPILER_NAMES clang gcc)
 # Project definition
 #
 
-project("minima.l" VERSION 1.0.0 LANGUAGES C)
+project("minima.l" VERSION 1.1.0 LANGUAGES C)
 
 #
 # Uninstall target
@@ -109,11 +109,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 #
 
 set(CMAKE_C_FLAGS "-Wall -Wextra -Werror")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
-
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3")
+
+if(MNML_ENABLE_SSE41)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
+endif()
 
 if(MNML_ENABLE_ASAN)
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
