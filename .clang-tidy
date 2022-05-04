@@ -1,1 +1,2 @@
-Checks: '-*,bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-exception-escape,performance-*,readability-braces-around-statements'
+Checks: '-*,bugprone-*,-bugprone-branch-clone,-bugprone-easily-swappable-parameters,-bugprone-exception-escape,performance-*,-performance-no-int-to-ptr,readability-braces-around-statements'
+WarningsAsErrors: '-*,bugprone-*,-bugprone-branch-clone,-bugprone-easily-swappable-parameters,-bugprone-exception-escape,performance-*,-performance-no-int-to-ptr,readability-braces-around-statements'

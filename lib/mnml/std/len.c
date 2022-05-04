@@ -10,7 +10,7 @@ lisp_function_len(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X);
   if (IS_LIST(X)) {
-    return lisp_make_number(lisp, lisp_len(X));
+    return lisp_make_number(lisp, (int64_t)lisp_len(X));
   }
   return lisp_make_nil(lisp);
 }

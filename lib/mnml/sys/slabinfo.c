@@ -7,8 +7,8 @@
 static atom_t USED
 lisp_function_slabinfo(const lisp_t lisp, UNUSED const atom_t closure)
 {
-  atom_t car = lisp_make_number(lisp, lisp->slab->n_alloc);
-  atom_t cdr = lisp_make_number(lisp, lisp->slab->n_free);
+  atom_t car = lisp_make_number(lisp, (int64_t)lisp->slab->n_alloc);
+  atom_t cdr = lisp_make_number(lisp, (int64_t)lisp->slab->n_free);
   return lisp_cons(lisp, car, cdr);
 }
 

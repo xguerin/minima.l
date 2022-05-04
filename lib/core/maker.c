@@ -11,7 +11,7 @@ lisp_make_char(const lisp_t lisp, const char c)
   R->type = T_CHAR;
   R->flags = 0;
   R->refs = 1;
-  R->number = c;
+  R->number = (int64_t)c;
   TRACE_MAKE_SEXP(R);
   return R;
 }

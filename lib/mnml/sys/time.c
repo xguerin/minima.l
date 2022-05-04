@@ -17,7 +17,7 @@ lisp_function_time(const lisp_t lisp, const atom_t closure)
     result = lisp_timestamp() - begin;
     X(lisp, res);
   }
-  return lisp_make_number(lisp, result);
+  return lisp_make_number(lisp, (int64_t)result);
 }
 
 LISP_MODULE_SETUP(time, time, ANY)

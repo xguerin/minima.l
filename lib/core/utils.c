@@ -415,7 +415,10 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
        */
       if (lisp_symbol_equal(CAR(cell), "prog") ||
           lisp_symbol_equal(CAR(cell), "|>")) {
-        FOREACH(cell, p) { NEXT(p); }
+        FOREACH(cell, p)
+        {
+          NEXT(p);
+        }
         atom_t last = UP(p->car);
         res = lisp_collect_tails(lisp, last);
         X(lisp, cell);
@@ -463,7 +466,10 @@ lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb, const atom_t args,
   /*
    * Grab the last expression of the body.
    */
-  FOREACH(body, pe) { NEXT(pe); }
+  FOREACH(body, pe)
+  {
+    NEXT(pe);
+  }
   atom_t last = UP(pe->car);
   /*
    * Extract the tails.

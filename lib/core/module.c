@@ -397,7 +397,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
    * Append the module and call the register function if it was found on disk.
    */
   if (add_to_cache) {
-    atom_t hnd = lisp_make_number(lisp, (uint64_t)handle);
+    atom_t hnd = lisp_make_number(lisp, (int64_t)handle);
     atom_t val = lisp_cons(lisp, UP(name), hnd);
     atom_t tmp = lisp->modules;
     lisp->modules = lisp_setq(lisp, lisp->modules, val);

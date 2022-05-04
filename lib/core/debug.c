@@ -93,8 +93,8 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
        */
       if (!IS_NULL(atom) && lisp_is_string(atom)) {
         char buffer[1024];
-        int len = lisp_make_cstring(atom, buffer, 1024, 0);
-        fprintf(fp, "\"%.*s\"", len, buffer);
+        size_t len = lisp_make_cstring(atom, buffer, 1024, 0);
+        fprintf(fp, "\"%.*s\"", (int)len, buffer);
         break;
       }
       /*

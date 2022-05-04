@@ -11,7 +11,7 @@ lisp_function_wait(const lisp_t lisp, const atom_t closure)
   /*
    * Get the PID.
    */
-  int tpid = X->number, state;
+  int tpid = (int)X->number, state;
   /*
    * Wait for the PID.
    */

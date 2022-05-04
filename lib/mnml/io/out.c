@@ -35,7 +35,7 @@ lisp_function_out(const lisp_t lisp, const atom_t closure)
       fd = dup(1);
       break;
     case T_NUMBER:
-      fd = dup(CHAN->number);
+      fd = dup((int)CHAN->number);
       break;
     case T_PAIR:
       /*

@@ -20,14 +20,14 @@ lisp_function_dup(const lisp_t lisp, const atom_t closure)
    * Call DUP if target is NIL.
    */
   if (IS_NULL(tgt)) {
-    int ret = dup(car->number);
+    int ret = dup((int)car->number);
     X(lisp, tgt, car);
     return lisp_make_number(lisp, ret < 0 ? errno : ret);
   }
   /*
    * Otherwise call DUP2.
    */
-  int ret = dup2(car->number, tgt->number);
+  int ret = dup2((int)car->number, (int)tgt->number);
   X(lisp, tgt, car);
   return lisp_make_number(lisp, ret < 0 ? errno : ret);
 }

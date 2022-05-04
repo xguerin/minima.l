@@ -7,7 +7,7 @@ static atom_t USED
 lisp_function_chr(const lisp_t lisp, const atom_t closure)
 {
   LISP_ARGS(closure, C, X);
-  char val = X->number;
+  char val = (char)X->number;
   return lisp_make_char(lisp, val);
 }
 

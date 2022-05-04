@@ -83,10 +83,10 @@ void lisp_debug_parse_flags();
 
 #else
 
-#define HEADER_SEXP(__c)                               \
-  do {                                                 \
-    FPRINTF(stderr, "[%06lu] {%c} - %s = ", __c->refs, \
-            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);      \
+#define HEADER_SEXP(__c)                                 \
+  do {                                                   \
+    FPRINTF(stderr, "[%06lu] {%c} - %s = ", (__c)->refs, \
+            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);        \
   } while (0)
 
 #define HEADER_REFC(__f, __t, __n)                              \

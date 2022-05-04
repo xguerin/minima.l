@@ -48,7 +48,7 @@ lisp_function_accept(const lisp_t lisp, const atom_t closure)
    */
   struct sockaddr_in addr;
   socklen_t len = sizeof(addr);
-  int res = accept(FD->number, (struct sockaddr*)&addr, &len);
+  int res = accept((int)FD->number, (struct sockaddr*)&addr, &len);
   if (res < 0) {
     TRACE("accept() failed: %s", strerror(errno));
     return lisp_make_nil(lisp);

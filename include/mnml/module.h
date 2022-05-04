@@ -41,24 +41,27 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
     lisp_module_##__s##_name, lisp_module_##__s##_load \
   }
 
-#define LISP_MODULE_SETUP(__s, __n, ...)                       \
-                                                               \
-  const char* USED lisp_module_##__s##_name() { return #__n; } \
-                                                               \
-  atom_t USED lisp_module_##__s##_load(const lisp_t lisp)      \
-  {                                                            \
-    MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);         \
-    atom_t sym = lisp_make_symbol(lisp, inp);                  \
-    LISP_CONS(lisp, arg, ##__VA_ARGS__);                       \
-    uintptr_t fun = (uintptr_t)lisp_function_##__s;            \
-    atom_t adr = lisp_make_number(lisp, fun);                  \
-    atom_t cn0 = lisp_cons(lisp, lisp_make_nil(lisp), adr);    \
-    atom_t val = lisp_cons(lisp, arg, cn0);                    \
-    atom_t cns = lisp_cons(lisp, UP(sym), val);                \
-    atom_t tmp = lisp->globals;                                \
-    lisp->globals = lisp_setq(lisp, lisp->globals, cns);       \
-    X(lisp, tmp);                                        \
-    return sym;                                                \
+#define LISP_MODULE_SETUP(__s, __n, ...)                    \
+                                                            \
+  const char* USED lisp_module_##__s##_name()               \
+  {                                                         \
+    return #__n;                                            \
+  }                                                         \
+                                                            \
+  atom_t USED lisp_module_##__s##_load(const lisp_t lisp)   \
+  {                                                         \
+    MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);      \
+    atom_t sym = lisp_make_symbol(lisp, inp);               \
+    LISP_CONS(lisp, arg, ##__VA_ARGS__);                    \
+    uintptr_t fun = (uintptr_t)lisp_function_##__s;         \
+    atom_t adr = lisp_make_number(lisp, fun);               \
+    atom_t cn0 = lisp_cons(lisp, lisp_make_nil(lisp), adr); \
+    atom_t val = lisp_cons(lisp, arg, cn0);                 \
+    atom_t cns = lisp_cons(lisp, UP(sym), val);             \
+    atom_t tmp = lisp->globals;                             \
+    lisp->globals = lisp_setq(lisp, lisp->globals, cns);    \
+    X(lisp, tmp);                                           \
+    return sym;                                             \
   }
 
 /*
@@ -69,8 +72,8 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
 
 #define LISP_ASSERT_ARG(_c, _a)                                            \
   {                                                                        \
-    MAKE_SYMBOL_STATIC(_##_a, #_a, LISP_SYMBOL_LENGTH);                    \
-    if (!lisp_symbol_match(CAR(CAR(_c)), _##_a)) {                         \
+    MAKE_SYMBOL_STATIC(sym_##_a, #_a, LISP_SYMBOL_LENGTH);                 \
+    if (!lisp_symbol_match(CAR(CAR(_c)), sym_##_a)) {                      \
       ERROR("Argument mismatch: %.16s %s", CAR(CAR(_c))->symbol.val, #_a); \
       abort();                                                             \
     }                                                                      \
