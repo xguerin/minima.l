@@ -23,9 +23,8 @@ lisp_function_setq(const lisp_t lisp, const atom_t closure)
   /*
    * Call SETQ.
    */
-  atom_t tmp = lisp->globals;
-  lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, sym, UP(res)));
-  X(lisp, tmp);
+  atom_t elt = lisp_cons(lisp, sym, UP(res));
+  lisp->globals = lisp_setq(lisp, lisp->globals, elt);
   return res;
 }
 

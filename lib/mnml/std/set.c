@@ -1,6 +1,7 @@
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
+#include <mnml/tree.h>
 
 static atom_t USED
 lisp_function_set(const lisp_t lisp, const atom_t closure)
@@ -36,19 +37,14 @@ lisp_function_set(const lisp_t lisp, const atom_t closure)
   /*
    * Look second in globals.
    */
-  FOREACH(lisp->globals, c1)
-  {
-    atom_t car = c1->car;
-    if (lisp_symbol_match(CAR(car), &sym->symbol)) {
-      atom_t res = CDR(car);
-      CDR(car) = val;
-      X(lisp, sym);
-      return res;
-    }
-    NEXT(c1);
+  atom_t elt = lisp_cons(lisp, sym, val);
+  atom_t res = lisp_tree_upd(lisp, lisp->globals, elt);
+  if (!IS_NULL(res)) {
+    return res;
   }
+  X(lisp, res);
   /*
-   * Set the symbol in the closure stack.
+   * The symbol was not found.
    */
   X(lisp, sym, val);
   return lisp_make_nil(lisp);

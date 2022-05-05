@@ -121,9 +121,8 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(var, "ARGV", 4);
     atom_t key = lisp_make_symbol(lisp, var);
-    atom_t tmp = lisp->globals;
-    lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-    X(lisp, tmp);
+    atom_t elt = lisp_cons(lisp, key, res);
+    lisp->globals = lisp_setq(lisp, lisp->globals, elt);
   } else {
     X(lisp, res);
   }
@@ -181,9 +180,8 @@ lisp_build_config(const lisp_t lisp)
    */
   MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
   key = lisp_make_symbol(lisp, env);
-  atom_t tmp = lisp->globals;
-  lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-  X(lisp, tmp);
+  atom_t elt = lisp_cons(lisp, key, res);
+  lisp->globals = lisp_setq(lisp, lisp->globals, elt);
 }
 
 static void
@@ -210,9 +208,8 @@ lisp_build_env(const lisp_t lisp)
   if (!IS_NULL(res)) {
     MAKE_SYMBOL_STATIC(env, "ENV", 3);
     atom_t key = lisp_make_symbol(lisp, env);
-    atom_t tmp = lisp->globals;
-    lisp->globals = lisp_setq(lisp, lisp->globals, lisp_cons(lisp, key, res));
-    X(lisp, tmp);
+    atom_t elt = lisp_cons(lisp, key, res);
+    lisp->globals = lisp_setq(lisp, lisp->globals, elt);
   } else {
     X(lisp, res);
   }
@@ -251,8 +248,9 @@ lisp_load_defaults(const lisp_t lisp)
 static void
 lisp_help(const char* const name)
 {
-  fprintf(stderr, "Usage: %s [-h|-v] [-e EXPR | FILE.L]\n", name);
+  fprintf(stderr, "Usage: %s [-b|-d|-h|-v] [-e EXPR | FILE.L]\n", name);
   fprintf(stderr, "Options:\n");
+  fprintf(stderr, "\t-b: bare mode, don't load anything by default\n");
   fprintf(stderr, "\t-d: return non-zero status if slab is not empty\n");
   fprintf(stderr, "\t-e: evaluate EXPR\n");
   fprintf(stderr, "\t-h: print this help\n");
@@ -278,10 +276,13 @@ main(const int argc, char** const argv)
    * Parse arguments.
    */
   int c;
-  bool check_slab = false;
+  bool check_slab = false, load_defaults = true;
   char* expr = NULL;
-  while ((c = GETOPT(argc, argv, "hvde:")) != -1) {
+  while ((c = GETOPT(argc, argv, "hvbde:")) != -1) {
     switch (c) {
+      case 'b':
+        load_defaults = false;
+        break;
       case 'd':
         check_slab = true;
         break;
@@ -342,13 +343,15 @@ main(const int argc, char** const argv)
     fprintf(stderr, "Minima.l engine initialization failed.\n");
     return __LINE__;
   }
-  lisp_load_defaults(lisp);
   /*
-   * Build ARGV, CONFIG and ENV.
+   * Load defaults.
    */
-  lisp_build_argv(lisp, argc - optind, &argv[optind]);
-  lisp_build_config(lisp);
-  lisp_build_env(lisp);
+  if (load_defaults) {
+    lisp_load_defaults(lisp);
+    lisp_build_argv(lisp, argc - optind, &argv[optind]);
+    lisp_build_config(lisp);
+    lisp_build_env(lisp);
+  }
   /*
    */
   atom_t result;

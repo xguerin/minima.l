@@ -1,6 +1,7 @@
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
 #include <mnml/slab.h>
+#include <mnml/tree.h>
 #include <mnml/utils.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,7 +55,9 @@ lisp_deallocate(const lisp_t lisp, const atom_t atom)
    * Most likely this is a pair.
    */
   if (likely(IS_PAIR(atom))) {
-    X(lisp, CAR(atom));
+    if (likely(!IS_WEAKREF(atom))) {
+      X(lisp, CAR(atom));
+    }
     X(lisp, CDR(atom));
     slab_deallocate(lisp->slab, atom);
   }
@@ -96,20 +99,20 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t atom)
   /*
    * Check the global environment.
    */
-  FOREACH(lisp->globals, g)
-  {
-    atom_t car = g->car;
-    if (lisp_symbol_match(CAR(car), &atom->symbol)) {
-      lisp->grefs += 1;
-      atom->cache = car;
-      return UP(CDR(car));
-    }
-    NEXT(g);
+  atom_t elt = lisp_tree_get(lisp, lisp->globals, &atom->symbol);
+  atom_t res = lisp_cdr(lisp, elt);
+  /*
+   * If the value exists, update the cache and the metrics.
+   */
+  if (!IS_NULL(elt)) {
+    lisp->grefs += 1;
+    atom->cache = elt;
   }
   /*
-   * Nothing found.
+   * Clean-up.
    */
-  return lisp_make_nil(lisp);
+  X(lisp, elt);
+  return res;
 }
 
 /*
@@ -157,7 +160,10 @@ lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr)
   /*
    */
   if (likely(IS_PAIR(car))) {
-    FOREACH(car, p) { NEXT(p); }
+    FOREACH(car, p)
+    {
+      NEXT(p);
+    }
     X(lisp, p->cdr);
     p->cdr = cdr;
     R = car;
@@ -188,28 +194,7 @@ lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair)
   /*
    * If the closure is NIL, return the wrapped pair.
    */
-  if (IS_NULL(closure)) {
-    return lisp_cons(lisp, pair, UP(closure));
-  }
-  /*
-   * Scan the closure for an existing key.
-   */
-  FOREACH(closure, g)
-  {
-    atom_t car = g->car;
-    if (lisp_symbol_match(CAR(car), &CAR(pair)->symbol)) {
-      const atom_t old = CDR(car);
-      CDR(car) = CDR(pair);
-      CDR(pair) = old;
-      X(lisp, pair);
-      return UP(closure);
-    }
-    NEXT(g);
-  }
-  /*
-   * If not, just append the new pair.
-   */
-  return lisp_cons(lisp, pair, UP(closure));
+  return lisp_tree_add(lisp, closure, pair);
 }
 
 /*

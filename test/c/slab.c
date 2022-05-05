@@ -2,10 +2,6 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 
-void
-syntax_error()
-{}
-
 /*
  * Tests.
  */

@@ -484,7 +484,7 @@ lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb, const atom_t args,
     if (IS_PAIR(pt->car)) {
       if (lisp_symbol_match(CAR(pt->car), &symb->symbol)) {
         if (lisp_may_apply(args, CDR(pt->car))) {
-          CAR(pt->car)->flags = F_TAIL_CALL;
+          SET_TAIL_CALL(CAR(pt->car));
         }
       }
     }
@@ -658,10 +658,16 @@ lisp_symbol_equal(const atom_t a, const char* const b)
   return strncmp(a->symbol.val, b, LISP_SYMBOL_LENGTH) == 0;
 }
 
+inline int
+lisp_symbol_compare(const atom_t a, const symbol_t b)
+{
+  return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH);
+}
+
 inline bool
 lisp_symbol_match(const atom_t a, const symbol_t b)
 {
-#ifdef LISP_ENABLE_SSE41
+#ifdef LISP_ENABLE_SSE42
   register __m128i res = _mm_xor_si128(a->symbol.tag, b->tag);
   return _mm_test_all_zeros(res, res);
 #else

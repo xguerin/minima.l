@@ -2,6 +2,7 @@
 #include <mnml/lisp.h>
 #include <mnml/module.h>
 #include <mnml/slab.h>
+#include <mnml/tree.h>
 #include <mnml/types.h>
 #include <dirent.h>
 #include <dlfcn.h>
@@ -217,6 +218,7 @@ module_load_at_path(const char* const path, const char* const name)
 static void*
 module_find_from_cache(const lisp_t lisp, const atom_t sym)
 {
+  void* result = NULL;
   /*
    * Check if modules is NIL.
    */
@@ -226,19 +228,15 @@ module_find_from_cache(const lisp_t lisp, const atom_t sym)
   /*
    * Scan all the module entries.
    */
-  FOREACH(lisp->modules, m)
-  {
-    atom_t car = m->car;
-    if (lisp_symbol_match(CAR(car), &sym->symbol)) {
-      void* handle = (void*)CDR(car)->number;
-      return handle;
-    }
-    NEXT(m);
+  atom_t entry = lisp_tree_get(lisp, lisp->modules, &sym->symbol);
+  if (!IS_NULL(entry)) {
+    result = (void*)CDR(entry)->number;
   }
   /*
-   * No match found.
+   * Return.
    */
-  return NULL;
+  X(lisp, entry);
+  return result;
 }
 
 static atom_t
@@ -399,9 +397,7 @@ module_load_binary(const char* const path, const lisp_t lisp, const atom_t name,
   if (add_to_cache) {
     atom_t hnd = lisp_make_number(lisp, (int64_t)handle);
     atom_t val = lisp_cons(lisp, UP(name), hnd);
-    atom_t tmp = lisp->modules;
     lisp->modules = lisp_setq(lisp, lisp->modules, val);
-    X(lisp, tmp);
   }
   /*
    * Return the result.
@@ -453,16 +449,18 @@ module_init(const lisp_t lisp)
   return true;
 }
 
+static bool
+module_dlclose(UNUSED const atom_t key, const atom_t value)
+{
+  dlclose((void*)value->number);
+  return false;
+}
+
 void
 module_fini(const lisp_t lisp)
 {
-  FOREACH(lisp->modules, p)
-  {
-    atom_t car = p->car;
-    atom_t hnd = CAR(CDR(car));
-    dlclose((void*)hnd);
-    NEXT(p);
-  }
+  atom_t result = lisp_tree_dfs(lisp, lisp->modules, module_dlclose);
+  X(lisp, result);
   X(lisp, lisp->modules);
 }
 

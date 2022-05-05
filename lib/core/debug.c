@@ -113,7 +113,11 @@ lisp_debug_atom(FILE* const fp, const atom_t atom, const bool alter,
       /*
        * Print CAR.
        */
-      lisp_debug_atom(fp, CAR(atom), true, level - 1);
+      if (IS_WEAKREF(atom)) {
+        fprintf(fp, "@");
+      } else {
+        lisp_debug_atom(fp, CAR(atom), true, level - 1);
+      }
       /*
        * Print CDR.
        */

@@ -50,4 +50,13 @@
     }                                              \
   } while (0)
 
+#define ASSERT_FALSE(__a)                          \
+  do {                                             \
+    int __l = __LINE__;                            \
+    if ((__a)) {                                   \
+      printf("line %d: " #__a " is false\n", __l); \
+      return false;                                \
+    }                                              \
+  } while (0)
+
 // vim: tw=80:sw=2:ts=2:sts=2:et

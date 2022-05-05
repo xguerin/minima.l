@@ -50,10 +50,8 @@ lisp_function_def(const lisp_t lisp, const atom_t closure)
   /*
    * Set the symbol's value.
    */
-  atom_t tmp = lisp->globals;
-  lisp->globals =
-    lisp_setq(lisp, lisp->globals, lisp_cons(lisp, UP(symb), con1));
-  X(lisp, tmp);
+  atom_t elt = lisp_cons(lisp, UP(symb), con1);
+  lisp->globals = lisp_setq(lisp, lisp->globals, elt);
   return symb;
 }
 

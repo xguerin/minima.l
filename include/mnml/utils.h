@@ -97,6 +97,8 @@ atom_t lisp_load_file(const lisp_t lisp, const char* const filepath);
 bool lisp_symbol_equal(const atom_t a, const char* const b);
 bool lisp_symbol_match(const atom_t a, const symbol_t b);
 
+int lisp_symbol_compare(const atom_t a, const symbol_t b);
+
 /*
  * IO context helpers.
  */

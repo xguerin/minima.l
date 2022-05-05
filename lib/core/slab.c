@@ -130,21 +130,17 @@ slab_allocate(const slab_t slab)
     }
   }
   /*
-   * Mark the slot as used.
+   * Allocate the entry.
    */
   size_t next = slab->first;
   atom_t entry = &slab->entries[next];
   slab->first = entry->next;
+  slab->n_alloc += 1;
   TRACE_SLAB("%ld->%ld 0x%lx", next, slab->first, (uintptr_t)entry);
   /*
-   * Prepare the new atom.
+   * Erase and return the entry.
    */
-#ifdef LISP_ENABLE_DEBUG
   memset(entry, 0, sizeof(struct atom));
-#endif
-  entry->next = 0;
-  entry->cache = NULL;
-  slab->n_alloc += 1;
   return entry;
 }
 
@@ -154,7 +150,7 @@ slab_deallocate(const slab_t slab, const atom_t _p)
   size_t n = ((uintptr_t)_p - (uintptr_t)slab->entries) / sizeof(struct atom);
   atom_t entry = &slab->entries[n];
   TRACE_SLAB("%ld", n);
-#ifdef LISP_ENABLE_DEBUG
+#if 0 // LISP_ENABLE_DEBUG
   memset(entry, 0xA, sizeof(struct atom));
 #endif
   entry->next = slab->first;

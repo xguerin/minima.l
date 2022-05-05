@@ -1,5 +1,4 @@
 #include "primitives.h"
-#include "utils.h"
 #include <mnml/debug.h>
 #include <mnml/lexer.h>
 #include <mnml/slab.h>
@@ -34,7 +33,7 @@ lisp_consumer(UNUSED const lisp_t lisp, const atom_t cell)
   result = cell;
 }
 
-void
+static void
 lisp_test_init(const lisp_t lisp)
 {
   lisp->slab = slab_new();
@@ -51,7 +50,7 @@ lisp_test_init(const lisp_t lisp)
 #endif
 }
 
-bool
+static bool
 lisp_test_fini(const lisp_t lisp)
 {
   X(lisp, lisp->globals);

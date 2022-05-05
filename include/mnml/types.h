@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#ifdef LISP_ENABLE_SSE41
+#ifdef LISP_ENABLE_SSE42
 #include <smmintrin.h>
 #endif
 
@@ -32,6 +32,8 @@ typedef enum atom_type
 typedef enum atom_flag
 {
   F_TAIL_CALL = 0x1,
+  F_HAS_COLOR = 0x2,
+  F_WEAKREF = 0x4,
 } atom_flag_t;
 
 #define ATOM_TYPES 7
@@ -50,7 +52,7 @@ typedef union symbol
 {
   char val[LISP_SYMBOL_LENGTH];
   uint64_t word[2];
-#ifdef LISP_ENABLE_SSE41
+#ifdef LISP_ENABLE_SSE42
   __m128i tag;
 #endif
 } __attribute__((packed)) * symbol_t;
@@ -87,7 +89,22 @@ typedef struct atom
 #define IS_LIST(__a) (IS_PAIR(__a) || IS_NULL(__a))
 #define IS_ATOM(__a) (!IS_LIST(__a))
 
-#define IS_TAIL_CALL(__a) ((__a)->flags == F_TAIL_CALL)
+/*
+ * Flags.
+ */
+
+#define IS_TAIL_CALL(__a) (((__a)->flags & F_TAIL_CALL) == F_TAIL_CALL)
+#define IS_COLORED(__a) (((__a)->flags & F_HAS_COLOR) == F_HAS_COLOR)
+#define IS_WEAKREF(__a) (((__a)->flags & F_WEAKREF) == F_WEAKREF)
+
+#define SET_TAIL_CALL(__a) ((__a)->flags |= F_TAIL_CALL)
+#define CLR_TAIL_CALL(__a) ((__a)->flags &= ~F_TAIL_CALL)
+
+#define SET_COLOR(__a) ((__a)->flags |= F_HAS_COLOR)
+#define CLR_COLOR(__a) ((__a)->flags &= ~F_HAS_COLOR)
+
+#define SET_WEAKREF(__a) ((__a)->flags |= F_WEAKREF)
+#define CLR_WEAKREF(__a) ((__a)->flags &= ~F_WEAKREF)
 
 /*
  * A function has the following format:

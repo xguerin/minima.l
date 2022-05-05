@@ -181,7 +181,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
    */
   else if (IS_NULL(narg) && IS_TAIL_CALL(symb)) {
     rslt = lisp_cons(lisp, UP(symb), lisp_dup(lisp, bscl));
-    rslt->flags = F_TAIL_CALL;
+    SET_TAIL_CALL(rslt);
     X(lisp, body, narg, bscl);
   }
   /*
