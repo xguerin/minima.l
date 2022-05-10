@@ -103,7 +103,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # C flags preferences
 #
 
-set(CMAKE_C_FLAGS "-Wall -Wextra -Werror")
+set(CMAKE_C_FLAGS "-Wall -Wextra -Werror -fno-plt")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3")
