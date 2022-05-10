@@ -30,6 +30,7 @@ typedef struct lisp
   atom_t ichan;
   atom_t ochan;
   size_t lrefs;
+  size_t crefs;
   size_t grefs;
   size_t total;
 } * lisp_t;
@@ -117,7 +118,7 @@ typedef atom_t (*function_t)(const lisp_t, const atom_t);
  * Symbol lookup.
  */
 
-atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym);
+atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t atom);
 
 /*
  * Lisp basic functions.

@@ -19,6 +19,7 @@
 
 typedef enum atom_type
 {
+  T_NONE,
   T_NIL,
   T_TRUE,
   T_CHAR,
@@ -56,10 +57,14 @@ typedef union symbol
 
 typedef struct atom
 {
-  uint32_t next;
+  union
+  {
+    uint32_t next;
+    uint32_t refs;
+  };
   atom_type_t type : 16;
   uint16_t flags;
-  uint64_t refs;
+  struct atom* cache;
   union
   {
     int64_t number;

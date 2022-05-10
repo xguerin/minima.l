@@ -295,7 +295,7 @@ lisp_eval(const lisp_t lisp, const atom_t closure, const atom_t cell)
       break;
     }
     case T_SYMBOL: {
-      rslt = lisp_lookup(lisp, closure, &cell->symbol);
+      rslt = lisp_lookup(lisp, closure, cell);
       X(lisp, cell);
       break;
     }

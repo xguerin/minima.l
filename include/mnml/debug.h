@@ -65,15 +65,15 @@ void lisp_debug_parse_flags();
 
 #if defined(__MACH__) || defined(__OpenBSD__)
 
-#define HEADER_SEXP(__c)                                  \
-  do {                                                    \
-    FPRINTF(stderr, "[%06llu] {%c} - %s = ", (__c)->refs, \
-            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);         \
+#define HEADER_SEXP(__c)                                \
+  do {                                                  \
+    FPRINTF(stderr, "[%06u] {%c} - %s = ", (__c)->refs, \
+            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);       \
   } while (0)
 
-#define HEADER_REFC(__f, __t, __n)                                \
-  do {                                                            \
-    FPRINTF(stderr, "[%2llu->%2llu] { } - %s = ", __f, __t, __n); \
+#define HEADER_REFC(__f, __t, __n)                            \
+  do {                                                        \
+    FPRINTF(stderr, "[%2u->%2u] { } - %s = ", __f, __t, __n); \
   } while (0)
 
 #define HEADER_SLOT(__i)                            \
@@ -83,15 +83,15 @@ void lisp_debug_parse_flags();
 
 #else
 
-#define HEADER_SEXP(__c)                                 \
-  do {                                                   \
-    FPRINTF(stderr, "[%06lu] {%c} - %s = ", (__c)->refs, \
-            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);        \
+#define HEADER_SEXP(__c)                                \
+  do {                                                  \
+    FPRINTF(stderr, "[%06u] {%c} - %s = ", (__c)->refs, \
+            IS_TAIL_CALL(__c) ? 'T' : ' ', #__c);       \
   } while (0)
 
-#define HEADER_REFC(__f, __t, __n)                              \
-  do {                                                          \
-    FPRINTF(stderr, "[%2lu->%2lu] { } - %s = ", __f, __t, __n); \
+#define HEADER_REFC(__f, __t, __n)                            \
+  do {                                                        \
+    FPRINTF(stderr, "[%2u->%2u] { } - %s = ", __f, __t, __n); \
   } while (0)
 
 #define HEADER_SLOT(__i)                            \

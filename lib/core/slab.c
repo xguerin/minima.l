@@ -5,7 +5,6 @@
 #include <string.h>
 #include <sys/mman.h>
 
-#define IN_USE (-2U)
 #define END_MK (-1U)
 
 /*
@@ -26,7 +25,7 @@ atom_t
 lisp_decref(const atom_t atom, const char* const name)
 {
   TRACE_REFC_SEXP(atom->refs, atom->refs - 1, name, atom);
-  if (atom->refs == 0xa0a0a0a0a0a0a0aULL) {
+  if (atom->refs == 0xA0A0A0A0UL) {
     TRACE("Double-free error: %s", name);
     abort();
   }
@@ -143,7 +142,8 @@ slab_allocate(const slab_t slab)
 #ifdef LISP_ENABLE_DEBUG
   memset(entry, 0, sizeof(struct atom));
 #endif
-  entry->next = IN_USE;
+  entry->next = 0;
+  entry->cache = NULL;
   slab->n_alloc += 1;
   return entry;
 }
@@ -158,6 +158,7 @@ slab_deallocate(const slab_t slab, const atom_t _p)
   memset(entry, 0xA, sizeof(struct atom));
 #endif
   entry->next = slab->first;
+  entry->type = T_NONE;
   slab->first = n;
   slab->n_free += 1;
 }
@@ -173,7 +174,7 @@ slab_collect(const slab_t slab)
 {
   for (size_t i = 0; i < CELL_COUNT; i += 1) {
     atom_t entry = &slab->entries[i];
-    if (entry->next == IN_USE) {
+    if (entry->type != T_NONE) {
       TRACE_SLOT_SEXP(i, entry);
     }
   }
