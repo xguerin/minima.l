@@ -53,7 +53,6 @@ message(STATUS "Build timestamp: " ${BUILD_TIMESTAMP})
 option(MNML_ENABLE_DEBUG       "Enable debug output"         ON)
 option(MNML_ENABLE_ASAN        "Enable address sanitizer"    OFF)
 option(MNML_ENABLE_MSAN        "Enable memory sanitizer"     OFF)
-option(MNML_ENABLE_SSE41       "Enable SSE4.1 optimizations" ON)
 option(MNML_ENABLE_TESTS       "Build and run tests"         ON)
 option(MNML_ENABLE_LISPY_TESTS "Enable LISPy tests"          ON)
 
@@ -93,10 +92,6 @@ if(MNML_ENABLE_DEBUG)
   add_definitions(-DLISP_ENABLE_DEBUG)
 endif()
 
-if(MNML_ENABLE_SSE41)
-  add_definitions(-DLISP_ENABLE_SSE41)
-endif()
-
 #
 # RPath and PIC configuration
 #
@@ -112,10 +107,6 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -Werror")
 set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -O3")
-
-if(MNML_ENABLE_SSE41)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
-endif()
 
 if(MNML_ENABLE_ASAN)
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
@@ -154,6 +145,20 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 9.0)
       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-address-of-packed-member")
   endif()
+endif()
+
+#
+# Check for SSE availability.
+#
+
+find_package(SSE)
+
+if(SSE_FOUND)
+  message(STATUS "SSE optimizations: ON")
+  add_definitions(-DLISP_ENABLE_SSE41)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse4.1")
+else()
+  message(STATUS "SSE optimizations: OFF")
 endif()
 
 #
