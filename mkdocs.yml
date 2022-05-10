@@ -15,5 +15,6 @@ nav:
         - Reference: manual/Reference.md
     - Notes:
         - Closures: notes/Closures.md
+        - Deconstruction: notes/Deconstruction.md
         - Continuations: notes/Continuations.md
         - "Type Inference": notes/Inference.md
