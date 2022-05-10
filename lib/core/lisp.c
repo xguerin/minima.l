@@ -18,12 +18,16 @@ lisp_new(const slab_t slab)
   lisp->globals = lisp_make_nil(lisp);
   lisp->ichan = lisp_make_nil(lisp);
   lisp->ochan = lisp_make_nil(lisp);
+  lisp->lrefs = 0;
+  lisp->grefs = 0;
+  lisp->total = 0;
   return lisp;
 }
 
 void
 lisp_delete(lisp_t lisp)
 {
+  TRACE("R %ld %ld %ld", lisp->lrefs, lisp->grefs, lisp->total);
   X(lisp, lisp->ochan);
   X(lisp, lisp->ichan);
   X(lisp, lisp->globals);
@@ -67,6 +71,7 @@ lisp_deallocate(const lisp_t lisp, const atom_t atom)
 atom_t
 lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
 {
+  lisp->total += 1;
   /*
    * Look for the symbol the closure.
    */
@@ -74,6 +79,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
   {
     atom_t car = a->car;
     if (lisp_symbol_match(CAR(car), sym)) {
+      lisp->lrefs += 1;
       return UP(CDR(car));
     }
     NEXT(a);
@@ -85,6 +91,7 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const symbol_t sym)
   {
     atom_t car = g->car;
     if (lisp_symbol_match(CAR(car), sym)) {
+      lisp->grefs += 1;
       return UP(CDR(car));
     }
     NEXT(g);
@@ -140,7 +147,10 @@ lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr)
   /*
    */
   if (likely(IS_PAIR(car))) {
-    FOREACH(car, p) { NEXT(p); }
+    FOREACH(car, p)
+    {
+      NEXT(p);
+    }
     X(lisp, p->cdr);
     p->cdr = cdr;
     R = car;

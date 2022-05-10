@@ -29,6 +29,9 @@ typedef struct lisp
   atom_t modules;
   atom_t ichan;
   atom_t ochan;
+  size_t lrefs;
+  size_t grefs;
+  size_t total;
 } * lisp_t;
 
 lisp_t lisp_new(const slab_t slab);
