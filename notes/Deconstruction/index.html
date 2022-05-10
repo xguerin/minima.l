@@ -8,10 +8,10 @@
     
     
     
-    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="shortcut icon" href="../../img/favicon.ico">
 
     
-    <title>Minima.l</title>
+    <title>Deconstruction - Minima.l</title>
     
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.0/css/all.css">
@@ -19,9 +19,9 @@
     <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack.min.css">
     <link href='//rsms.me/inter/inter.css' rel='stylesheet' type='text/css'>
     <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,400,300,600,700&subset=latin-ext,latin' rel='stylesheet' type='text/css'>
-    <link href="/css/bootstrap-custom.min.css" rel="stylesheet">
-    <link href="/css/base.min.css" rel="stylesheet">
-    <link href="/css/cinder.min.css" rel="stylesheet">
+    <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+    <link href="../../css/base.min.css" rel="stylesheet">
+    <link href="../../css/cinder.min.css" rel="stylesheet">
 
     
         
@@ -59,7 +59,7 @@
             <!-- Main title -->
 
             
-              <a class="navbar-brand" href="/.">Minima.l</a>
+              <a class="navbar-brand" href="../..">Minima.l</a>
             
         </div>
 
@@ -70,7 +70,7 @@
                 
                 
                     <li >
-                        <a href="/.">Home</a>
+                        <a href="../..">Home</a>
                     </li>
                 
                 
@@ -81,25 +81,25 @@
                         
                             
 <li >
-    <a href="/manual/Language/">Language</a>
+    <a href="../../manual/Language/">Language</a>
 </li>
 
                         
                             
 <li >
-    <a href="/manual/Interpreter/">Interpreter</a>
+    <a href="../../manual/Interpreter/">Interpreter</a>
 </li>
 
                         
                             
 <li >
-    <a href="/manual/Modules/">Modules</a>
+    <a href="../../manual/Modules/">Modules</a>
 </li>
 
                         
                             
 <li >
-    <a href="/manual/Reference/">Reference</a>
+    <a href="../../manual/Reference/">Reference</a>
 </li>
 
                         
@@ -108,31 +108,31 @@
                 
                 
                 
-                    <li class="dropdown">
+                    <li class="dropdown active">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Notes <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                         
                             
 <li >
-    <a href="/notes/Closures/">Closures</a>
+    <a href="../Closures/">Closures</a>
+</li>
+
+                        
+                            
+<li class="active">
+    <a href="./">Deconstruction</a>
 </li>
 
                         
                             
 <li >
-    <a href="/notes/Deconstruction/">Deconstruction</a>
+    <a href="../Continuations/">Continuations</a>
 </li>
 
                         
                             
 <li >
-    <a href="/notes/Continuations/">Continuations</a>
-</li>
-
-                        
-                            
-<li >
-    <a href="/notes/Inference/">Type Inference</a>
+    <a href="../Inference/">Type Inference</a>
 </li>
 
                         
@@ -148,6 +148,16 @@
                             <i class="fas fa-search"></i> Search
                         </a>
                     </li>
+                    <li >
+                        <a rel="prev" href="../Closures/">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </a>
+                    </li>
+                    <li >
+                        <a rel="next" href="../Continuations/">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </li>
             </ul>
         </div>
     </div>
@@ -155,16 +165,33 @@
 
     <div class="container">
         
+        
+        <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="first-level active"><a href="#deconstruction">Deconstruction</a></li>
+    </ul>
+</div></div>
+        <div class="col-md-9" role="main">
 
-    <div class="row-fluid">
-      <div id="main-content" class="span12">
-        <h1 id="404-page-not-found" style="text-align: center">404</h1>
-        <p style="text-align: center"><strong>Page not found</strong></p>
-        <p style="text-align: center"><a href="/">Home</a></p>
-      </div>
-    </div>
+<h1 id="deconstruction">Deconstruction</h1>
+<p>Deconstruction, or structural matching, is a mechanism that structurally match
+lisp values with patterns. For instance:</p>
+<pre><code>A       (1 . 2) -&gt; A = (1 . 2)
+(A . B) (1 . 2) -&gt; A = 1, B = 2
+</code></pre>
+<p>Deconstruction works by first matching a lisp value with a pattern, and then
+associating named variables with the corresponding element in the value. Named
+variables that cannot be matched are set to <code>NIL</code>.</p>
+<p>Matched variables are made available in the local closure of the execution
+context. As such, the following statements are functionally equivalent:</p>
+<pre><code class="language-minimal">(def ((A . B)) (prinl A B))
 
-
+(def (X)
+  (let (((A . B) . X))
+    (prinl A B)))
+</code></pre></div>
+        
+        
     </div>
 
     
@@ -182,7 +209,7 @@
       </footer>
     
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="/js/bootstrap-3.0.3.min.js"></script>
+    <script src="../../js/bootstrap-3.0.3.min.js"></script>
 
     
     <script src="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.0/build/highlight.min.js"></script>
@@ -194,10 +221,10 @@
     <script>hljs.initHighlightingOnLoad();</script>
     
 
-    <script>var base_url = "/"</script>
+    <script>var base_url = "../.."</script>
     
-    <script src="/js/base.js"></script>
-    <script src="/search/main.js"></script>
+    <script src="../../js/base.js"></script>
+    <script src="../../search/main.js"></script>
 
     <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
