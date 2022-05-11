@@ -21,7 +21,7 @@ lisp_function_sym(const lisp_t lisp, const atom_t closure)
   if (len == 0) {
     return lisp_make_nil(lisp);
   }
-  MAKE_SYMBOL_STATIC(symb, buffer, len);
+  MAKE_SYMBOL_STATIC(symb, buffer);
   return lisp_make_symbol(lisp, symb);
 }
 

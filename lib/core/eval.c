@@ -12,51 +12,8 @@
  * Argument bindings. CLOSURE, ARG and VAL are consumed.
  */
 
-atom_t
-lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
-          const atom_t val)
-{
-  atom_t ret;
-  TRACE_BIND_SEXP(arg);
-  TRACE_BIND_SEXP(val);
-  /*
-   */
-  switch (arg->type) {
-    case T_PAIR: {
-      /*
-       * Grab CARs and CDR, and clean-up.
-       */
-      atom_t sym = lisp_car(lisp, arg);
-      atom_t vl0 = lisp_car(lisp, val);
-      atom_t oth = lisp_cdr(lisp, arg);
-      atom_t rem = lisp_cdr(lisp, val);
-      X(lisp, arg, val);
-      /*
-       * Bind CARs and process CDRs.
-       */
-      atom_t cl0 = lisp_bind(lisp, closure, sym, vl0);
-      ret = lisp_bind(lisp, cl0, oth, rem);
-      break;
-    }
-    case T_SYMBOL: {
-      atom_t kvp = lisp_cons(lisp, arg, val);
-      ret = lisp_cons(lisp, kvp, closure);
-      break;
-    }
-    default: {
-      X(lisp, arg, val);
-      ret = closure;
-      break;
-    }
-  }
-  /*
-   */
-  TRACE_BIND_SEXP(ret);
-  return ret;
-}
-
 static atom_t
-lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
+lisp_eval_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
                const atom_t args, const atom_t vals)
 {
   atom_t rslt;
@@ -108,7 +65,7 @@ lisp_bind_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
      * the remaining arguments and values.
      */
     atom_t bind = lisp_bind(lisp, dscl, arg, val);
-    rslt = lisp_bind_args(lisp, cscl, bind, oth, rem);
+    rslt = lisp_eval_args(lisp, cscl, bind, oth, rem);
   }
   /*
    * Return the result.
@@ -152,7 +109,7 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
    * used as the run environment and augmented with the values of the arguments.
    * The call-site closure is used for the evaluation of the arguments.
    */
-  atom_t bind = lisp_bind_args(lisp, closure, dscl, args, vals);
+  atom_t bind = lisp_eval_args(lisp, closure, dscl, args, vals);
   /*
    * Extract the bound arguments, and remaining arguments and values,
    */

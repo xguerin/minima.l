@@ -2,8 +2,18 @@
 
 #include <stdint.h>
 
-#ifdef LISP_ENABLE_SSE42
+#ifdef LISP_ENABLE_SSE
 #include <smmintrin.h>
+#endif
+
+/*
+ * Global types.
+ */
+
+#ifdef LISP_ENABLE_SSE
+typedef __m128i int128_t;
+#else
+typedef __int128 int128_t;
 #endif
 
 /*
@@ -51,11 +61,14 @@ typedef struct pair
 typedef union symbol
 {
   char val[LISP_SYMBOL_LENGTH];
-  uint64_t word[2];
-#ifdef LISP_ENABLE_SSE42
-  __m128i tag;
-#endif
+  int128_t tag;
 } __attribute__((packed)) * symbol_t;
+
+#ifdef LISP_ENABLE_SSE
+#define NULL_TAG _mm_setzero_si128()
+#else
+#define NULL_TAG 0
+#endif
 
 typedef struct atom
 {

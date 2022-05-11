@@ -178,6 +178,53 @@ lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr)
 }
 
 /*
+ * Deconstruction mapping.
+ */
+
+atom_t
+lisp_bind(const lisp_t lisp, const atom_t closure, const atom_t arg,
+          const atom_t val)
+{
+  atom_t ret;
+  TRACE_BIND_SEXP(arg);
+  TRACE_BIND_SEXP(val);
+  /*
+   */
+  switch (arg->type) {
+    case T_PAIR: {
+      /*
+       * Grab CARs and CDR, and clean-up.
+       */
+      atom_t sym = lisp_car(lisp, arg);
+      atom_t vl0 = lisp_car(lisp, val);
+      atom_t oth = lisp_cdr(lisp, arg);
+      atom_t rem = lisp_cdr(lisp, val);
+      X(lisp, arg, val);
+      /*
+       * Bind CARs and process CDRs.
+       */
+      atom_t cl0 = lisp_bind(lisp, closure, sym, vl0);
+      ret = lisp_bind(lisp, cl0, oth, rem);
+      break;
+    }
+    case T_SYMBOL: {
+      atom_t kvp = lisp_cons(lisp, arg, val);
+      ret = lisp_cons(lisp, kvp, closure);
+      break;
+    }
+    default: {
+      X(lisp, arg, val);
+      ret = closure;
+      break;
+    }
+  }
+  /*
+   */
+  TRACE_BIND_SEXP(ret);
+  return ret;
+}
+
+/*
  * SETQ. PAIR is consumed.
  */
 

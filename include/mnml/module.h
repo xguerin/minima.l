@@ -50,7 +50,7 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
                                                             \
   atom_t USED lisp_module_##__s##_load(const lisp_t lisp)   \
   {                                                         \
-    MAKE_SYMBOL_STATIC(inp, #__n, LISP_SYMBOL_LENGTH);      \
+    MAKE_SYMBOL_STATIC(inp, #__n);                          \
     atom_t sym = lisp_make_symbol(lisp, inp);               \
     LISP_CONS(lisp, arg, ##__VA_ARGS__);                    \
     uintptr_t fun = (uintptr_t)lisp_function_##__s;         \
@@ -70,7 +70,7 @@ atom_t module_load(const lisp_t lisp, const atom_t cell);
 
 #define LISP_ASSERT_ARG(_c, _a)                                            \
   {                                                                        \
-    MAKE_SYMBOL_STATIC(sym_##_a, #_a, LISP_SYMBOL_LENGTH);                 \
+    MAKE_SYMBOL_STATIC(sym_##_a, #_a);                                     \
     if (!lisp_symbol_match(CAR(CAR(_c)), sym_##_a)) {                      \
       ERROR("Argument mismatch: %.16s %s", CAR(CAR(_c))->symbol.val, #_a); \
       abort();                                                             \

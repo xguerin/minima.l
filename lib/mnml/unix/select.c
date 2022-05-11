@@ -104,7 +104,7 @@ static atom_t
 process(const lisp_t lisp, const atom_t closure, const atom_t fds,
         const char* const cb_name, const fd_set* const set)
 {
-  MAKE_SYMBOL_STATIC(cb_s, cb_name, strlen(cb_name));
+  MAKE_SYMBOL_STATIC(cb_s, cb_name);
   atom_t cbk = lisp_make_symbol(lisp, cb_s);
   atom_t res = process_r(lisp, closure, fds, cbk, set);
   X(lisp, cbk);

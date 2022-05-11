@@ -15,7 +15,7 @@ lisp_function_readline(const lisp_t lisp, UNUSED const atom_t closure)
   size_t cap = 0;
   ssize_t len = getline(&line, &cap, handle);
   if (len < 0) {
-    MAKE_SYMBOL_STATIC(eof_s, "EOF", 3);
+    MAKE_SYMBOL_STATIC(eof_s, "EOF");
     return lisp_make_symbol(lisp, eof_s);
   }
   /*

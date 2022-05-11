@@ -211,7 +211,7 @@
 												(when (= kvar arg) (cc:gen:x ARGS kvar arg))
 												)))
 				(gensymb	. (\ (arg)
-											(prinl (o|) "MAKE_SYMBOL_STATIC(s_" arg ", \"" arg "\", " (len (str arg)) ");")
+											(prinl (o|) "MAKE_SYMBOL_STATIC(s_" arg ", \"" arg "\");")
 											(prinl (o|) "atom_t " arg " = lisp_make_symbol(lisp, s_" arg ");")
 											))
 				(genargs	. (\ (arg)

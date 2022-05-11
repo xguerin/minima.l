@@ -94,10 +94,29 @@ atom_t lisp_load_file(const lisp_t lisp, const char* const filepath);
  * Symbol matching.
  */
 
-bool lisp_symbol_equal(const atom_t a, const char* const b);
-bool lisp_symbol_match(const atom_t a, const symbol_t b);
+inline bool
+lisp_symbol_match(const atom_t a, const symbol_t b)
+{
+#ifdef LISP_ENABLE_SSE
+  register __m128i res = _mm_xor_si128(a->symbol.tag, b->tag);
+  return _mm_test_all_zeros(res, res);
+#else
+  return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH) == 0;
+#endif
+}
 
-int lisp_symbol_compare(const atom_t a, const symbol_t b);
+inline bool
+lisp_symbol_equal(const atom_t a, const char* const b)
+{
+  MAKE_SYMBOL_STATIC(s, b);
+  return lisp_symbol_match(a, s);
+}
+
+inline int
+lisp_symbol_compare(const atom_t a, const symbol_t b)
+{
+  return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH);
+}
 
 /*
  * IO context helpers.

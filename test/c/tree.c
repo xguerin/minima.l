@@ -230,21 +230,21 @@ test_add()
   /*
    * Create the symbols.
    */
-  MAKE_SYMBOL_STATIC(sn01, "01", 2);
+  MAKE_SYMBOL_STATIC(sn01, "01");
   const atom_t s01 = make_pair(&lisp, sn01, 1);
-  MAKE_SYMBOL_STATIC(sn02, "02", 2);
+  MAKE_SYMBOL_STATIC(sn02, "02");
   const atom_t s02 = make_pair(&lisp, sn02, 2);
-  MAKE_SYMBOL_STATIC(sn05, "05", 2);
+  MAKE_SYMBOL_STATIC(sn05, "05");
   const atom_t s05 = make_pair(&lisp, sn05, 5);
-  MAKE_SYMBOL_STATIC(sn07, "07", 2);
+  MAKE_SYMBOL_STATIC(sn07, "07");
   const atom_t s07 = make_pair(&lisp, sn07, 7);
-  MAKE_SYMBOL_STATIC(sn08, "08", 2);
+  MAKE_SYMBOL_STATIC(sn08, "08");
   const atom_t s08 = make_pair(&lisp, sn08, 8);
-  MAKE_SYMBOL_STATIC(sn11, "11", 2);
+  MAKE_SYMBOL_STATIC(sn11, "11");
   const atom_t s11 = make_pair(&lisp, sn11, 11);
-  MAKE_SYMBOL_STATIC(sn14, "14", 2);
+  MAKE_SYMBOL_STATIC(sn14, "14");
   const atom_t s14 = make_pair(&lisp, sn14, 14);
-  MAKE_SYMBOL_STATIC(sn15, "15", 2);
+  MAKE_SYMBOL_STATIC(sn15, "15");
   const atom_t s15 = make_pair(&lisp, sn15, 15);
   /*
    * Create an empty root.
@@ -297,21 +297,21 @@ test_get()
   /*
    * Create the symbols.
    */
-  MAKE_SYMBOL_STATIC(sn01, "01", 2);
+  MAKE_SYMBOL_STATIC(sn01, "01");
   const atom_t s01 = make_pair(&lisp, sn01, 1);
-  MAKE_SYMBOL_STATIC(sn02, "02", 2);
+  MAKE_SYMBOL_STATIC(sn02, "02");
   const atom_t s02 = make_pair(&lisp, sn02, 2);
-  MAKE_SYMBOL_STATIC(sn05, "05", 2);
+  MAKE_SYMBOL_STATIC(sn05, "05");
   const atom_t s05 = make_pair(&lisp, sn05, 5);
-  MAKE_SYMBOL_STATIC(sn07, "07", 2);
+  MAKE_SYMBOL_STATIC(sn07, "07");
   const atom_t s07 = make_pair(&lisp, sn07, 7);
-  MAKE_SYMBOL_STATIC(sn08, "08", 2);
+  MAKE_SYMBOL_STATIC(sn08, "08");
   const atom_t s08 = make_pair(&lisp, sn08, 8);
-  MAKE_SYMBOL_STATIC(sn11, "11", 2);
+  MAKE_SYMBOL_STATIC(sn11, "11");
   const atom_t s11 = make_pair(&lisp, sn11, 11);
-  MAKE_SYMBOL_STATIC(sn14, "14", 2);
+  MAKE_SYMBOL_STATIC(sn14, "14");
   const atom_t s14 = make_pair(&lisp, sn14, 14);
-  MAKE_SYMBOL_STATIC(sn15, "15", 2);
+  MAKE_SYMBOL_STATIC(sn15, "15");
   const atom_t s15 = make_pair(&lisp, sn15, 15);
   /*
    * Create an empty root.
@@ -366,7 +366,7 @@ test_rem()
     /*
      * Insert a single entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
@@ -393,13 +393,13 @@ test_rem()
     /*
      * Insert the first entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
      * Insert the second entry.
      */
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
     root = lisp_tree_add(&lisp, root, s02);
     /*
@@ -426,13 +426,13 @@ test_rem()
     /*
      * Insert the first entry.
      */
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
     root = lisp_tree_add(&lisp, root, s02);
     /*
      * Insert the second entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
@@ -459,13 +459,13 @@ test_rem()
     /*
      * Insert the first entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
      * Insert the second entry.
      */
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
     root = lisp_tree_add(&lisp, root, s02);
     /*
@@ -492,13 +492,13 @@ test_rem()
     /*
      * Insert the first entry.
      */
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
     root = lisp_tree_add(&lisp, root, s02);
     /*
      * Insert the second entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
@@ -525,19 +525,19 @@ test_rem()
     /*
      * Insert the first entry.
      */
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
     root = lisp_tree_add(&lisp, root, s02);
     /*
      * Insert the second entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
      * Insert the third entry.
      */
-    MAKE_SYMBOL_STATIC(sn03, "03", 2);
+    MAKE_SYMBOL_STATIC(sn03, "03");
     const atom_t s03 = make_pair(&lisp, sn03, 3);
     root = lisp_tree_add(&lisp, root, s03);
     /*
@@ -564,25 +564,25 @@ test_rem()
     /*
      * Insert the first entry.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
     root = lisp_tree_add(&lisp, root, s01);
     /*
      * Insert the second entry.
      */
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
     root = lisp_tree_add(&lisp, root, s02);
     /*
      * Insert the third entry.
      */
-    MAKE_SYMBOL_STATIC(sn03, "03", 2);
+    MAKE_SYMBOL_STATIC(sn03, "03");
     const atom_t s03 = make_pair(&lisp, sn03, 3);
     root = lisp_tree_add(&lisp, root, s03);
     /*
      * Insert the fourth entry.
      */
-    MAKE_SYMBOL_STATIC(sn04, "04", 2);
+    MAKE_SYMBOL_STATIC(sn04, "04");
     const atom_t s04 = make_pair(&lisp, sn04, 4);
     root = lisp_tree_add(&lisp, root, s04);
     /*
@@ -609,21 +609,21 @@ test_rem()
     /*
      * Create the symbols.
      */
-    MAKE_SYMBOL_STATIC(sn01, "01", 2);
+    MAKE_SYMBOL_STATIC(sn01, "01");
     const atom_t s01 = make_pair(&lisp, sn01, 1);
-    MAKE_SYMBOL_STATIC(sn02, "02", 2);
+    MAKE_SYMBOL_STATIC(sn02, "02");
     const atom_t s02 = make_pair(&lisp, sn02, 2);
-    MAKE_SYMBOL_STATIC(sn05, "05", 2);
+    MAKE_SYMBOL_STATIC(sn05, "05");
     const atom_t s05 = make_pair(&lisp, sn05, 5);
-    MAKE_SYMBOL_STATIC(sn07, "07", 2);
+    MAKE_SYMBOL_STATIC(sn07, "07");
     const atom_t s07 = make_pair(&lisp, sn07, 7);
-    MAKE_SYMBOL_STATIC(sn08, "08", 2);
+    MAKE_SYMBOL_STATIC(sn08, "08");
     const atom_t s08 = make_pair(&lisp, sn08, 8);
-    MAKE_SYMBOL_STATIC(sn11, "11", 2);
+    MAKE_SYMBOL_STATIC(sn11, "11");
     const atom_t s11 = make_pair(&lisp, sn11, 11);
-    MAKE_SYMBOL_STATIC(sn14, "14", 2);
+    MAKE_SYMBOL_STATIC(sn14, "14");
     const atom_t s14 = make_pair(&lisp, sn14, 14);
-    MAKE_SYMBOL_STATIC(sn15, "15", 2);
+    MAKE_SYMBOL_STATIC(sn15, "15");
     const atom_t s15 = make_pair(&lisp, sn15, 15);
     /*
      * Create an empty root.

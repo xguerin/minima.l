@@ -119,7 +119,7 @@ lisp_build_argv(const lisp_t lisp, const int argc, char** const argv)
    * Set the variable if the list is not NIL.
    */
   if (!IS_NULL(res)) {
-    MAKE_SYMBOL_STATIC(var, "ARGV", 4);
+    MAKE_SYMBOL_STATIC(var, "ARGV");
     atom_t key = lisp_make_symbol(lisp, var);
     atom_t elt = lisp_cons(lisp, key, res);
     lisp->globals = lisp_setq(lisp, lisp->globals, elt);
@@ -136,7 +136,7 @@ lisp_build_config(const lisp_t lisp)
   /*
    * Add the version string.
    */
-  MAKE_SYMBOL_STATIC(version, "VERSION", 7);
+  MAKE_SYMBOL_STATIC(version, "VERSION");
   key = lisp_make_symbol(lisp, version);
   val = lisp_make_string(lisp, MNML_VERSION, strlen(MNML_VERSION));
   con = lisp_cons(lisp, key, val);
@@ -144,7 +144,7 @@ lisp_build_config(const lisp_t lisp)
   /*
    * Add the prefix.
    */
-  MAKE_SYMBOL_STATIC(prefix, "PREFIX", 6);
+  MAKE_SYMBOL_STATIC(prefix, "PREFIX");
   key = lisp_make_symbol(lisp, prefix);
   val = lisp_make_string(lisp, lisp_prefix(), strlen(lisp_prefix()));
   con = lisp_cons(lisp, key, val);
@@ -152,7 +152,7 @@ lisp_build_config(const lisp_t lisp)
   /*
    * Add the compiler version.
    */
-  MAKE_SYMBOL_STATIC(compver, "COMPVER", 7);
+  MAKE_SYMBOL_STATIC(compver, "COMPVER");
   key = lisp_make_symbol(lisp, compver);
   val = lisp_make_string(lisp, MNML_COMPILER_VERSION,
                          strlen(MNML_COMPILER_VERSION));
@@ -161,7 +161,7 @@ lisp_build_config(const lisp_t lisp)
   /*
    * Add the compiler ID.
    */
-  MAKE_SYMBOL_STATIC(compid, "COMPID", 6);
+  MAKE_SYMBOL_STATIC(compid, "COMPID");
   key = lisp_make_symbol(lisp, compid);
   val = lisp_make_string(lisp, MNML_COMPILER_ID, strlen(MNML_COMPILER_ID));
   con = lisp_cons(lisp, key, val);
@@ -169,7 +169,7 @@ lisp_build_config(const lisp_t lisp)
   /*
    * Add the build timestamp.
    */
-  MAKE_SYMBOL_STATIC(buildts, "BUILD_TS", 8);
+  MAKE_SYMBOL_STATIC(buildts, "BUILD_TS");
   key = lisp_make_symbol(lisp, buildts);
   val =
     lisp_make_string(lisp, MNML_BUILD_TIMESTAMP, strlen(MNML_BUILD_TIMESTAMP));
@@ -178,7 +178,7 @@ lisp_build_config(const lisp_t lisp)
   /*
    * Set the variable if the list is not NIL.
    */
-  MAKE_SYMBOL_STATIC(env, "CONFIG", 6);
+  MAKE_SYMBOL_STATIC(env, "CONFIG");
   key = lisp_make_symbol(lisp, env);
   atom_t elt = lisp_cons(lisp, key, res);
   lisp->globals = lisp_setq(lisp, lisp->globals, elt);
@@ -206,7 +206,7 @@ lisp_build_env(const lisp_t lisp)
    * Set the variable if the list is not NIL.
    */
   if (!IS_NULL(res)) {
-    MAKE_SYMBOL_STATIC(env, "ENV", 3);
+    MAKE_SYMBOL_STATIC(env, "ENV");
     atom_t key = lisp_make_symbol(lisp, env);
     atom_t elt = lisp_cons(lisp, key, res);
     lisp->globals = lisp_setq(lisp, lisp->globals, elt);
@@ -225,10 +225,10 @@ lisp_load_defaults(const lisp_t lisp)
   /*
    * Load a default set of functions.
    */
-  MAKE_SYMBOL_STATIC(std, "std", 6);
-  MAKE_SYMBOL_STATIC(lod, "load", 4);
-  MAKE_SYMBOL_STATIC(qte, "quote", 5);
-  MAKE_SYMBOL_STATIC(def, "def", 3);
+  MAKE_SYMBOL_STATIC(std, "std");
+  MAKE_SYMBOL_STATIC(lod, "load");
+  MAKE_SYMBOL_STATIC(qte, "quote");
+  MAKE_SYMBOL_STATIC(def, "def");
   atom_t mod = lisp_make_symbol(lisp, std);
   atom_t sy0 = lisp_make_symbol(lisp, lod);
   atom_t sy1 = lisp_make_symbol(lisp, qte);
