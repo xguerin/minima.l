@@ -19,7 +19,7 @@ set(CMAKE_C_COMPILER_NAMES clang gcc)
 # Project definition
 #
 
-project("minima.l" VERSION 2.0.0 LANGUAGES C)
+project("minima.l" VERSION 2.1.0 LANGUAGES C)
 
 #
 # Uninstall target
@@ -112,24 +112,18 @@ if(MNML_ENABLE_ASAN)
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=address")
   set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=address")
-
-  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
-  set (CMAKE_LINKER_FLAGS_RELEASE "${CMAKE_LINKER_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=address")
-  set (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_LINKER_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=address")
+  add_link_options(-fno-omit-frame-pointer -fsanitize=address)
 endif()
 
 if(MNML_ENABLE_MSAN)
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=memory")
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=memory")
   set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=memory")
-
-  set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=memory")
-  set (CMAKE_LINKER_FLAGS_RELEASE "${CMAKE_LINKER_FLAGS_RELEASE} -fno-omit-frame-pointer -fsanitize=memory")
-  set (CMAKE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_LINKER_FLAGS_RELWITHDEBINFO} -fno-omit-frame-pointer -fsanitize=memory")
+  add_link_options(-fno-omit-frame-pointer -fsanitize=memory)
 endif()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-  set(CMAKE_LINKER_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=lld")
+  add_link_options(-fuse-ld=lld)
 endif()
 
 if(CMAKE_C_COMPILER_ID MATCHES "Clang")

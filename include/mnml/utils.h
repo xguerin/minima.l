@@ -7,6 +7,14 @@
 #include <string.h>
 
 /*
+ * Compiler macros.
+ */
+
+#define ALWAYS_INLINE __attribute__((always_inline))
+#define USED __attribute__((used))
+#define UNUSED __attribute__((unused))
+
+/*
  * Interpreter life cycle.
  */
 typedef void (*error_handler_t)(const lisp_t lisp);
@@ -94,7 +102,7 @@ atom_t lisp_load_file(const lisp_t lisp, const char* const filepath);
  * Symbol matching.
  */
 
-inline bool
+ALWAYS_INLINE inline bool
 lisp_symbol_match(const atom_t a, const symbol_t b)
 {
 #ifdef LISP_ENABLE_SSE
@@ -105,14 +113,14 @@ lisp_symbol_match(const atom_t a, const symbol_t b)
 #endif
 }
 
-inline bool
+ALWAYS_INLINE inline bool
 lisp_symbol_equal(const atom_t a, const char* const b)
 {
   MAKE_SYMBOL_STATIC(s, b);
   return lisp_symbol_match(a, s);
 }
 
-inline int
+ALWAYS_INLINE inline int
 lisp_symbol_compare(const atom_t a, const symbol_t b)
 {
   return memcmp(a->symbol.val, b->val, LISP_SYMBOL_LENGTH);
@@ -121,6 +129,7 @@ lisp_symbol_compare(const atom_t a, const symbol_t b)
 /*
  * IO context helpers.
  */
+
 #define PUSH_IO_CONTEXT(__l, __c, __d, __p)             \
   do {                                                  \
     atom_t p = lisp_make_string(__l, __p, strlen(__p)); \
@@ -140,6 +149,7 @@ lisp_symbol_compare(const atom_t a, const symbol_t b)
 /*
  * Scan PATH-like string format.
  */
+
 #define FOR_EACH_TOKEN(__s, __d, __e, BLOCK)      \
   do {                                            \
     char* copy = strdup(__s);                     \
@@ -156,11 +166,5 @@ lisp_symbol_compare(const atom_t a, const symbol_t b)
       BLOCK; /* NOLINT */                         \
     free(copy);                                   \
   } while (0)
-
-/*
- * Compiler macros.
- */
-#define USED __attribute__((used))
-#define UNUSED __attribute__((unused))
 
 // vim: tw=80:sw=2:ts=2:sts=2:et

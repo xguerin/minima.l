@@ -117,59 +117,64 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
   atom_t narg = lisp_cdr(lisp, bind);
   X(lisp, bind);
   /*
-   * Evaluate the binary function.
+   * Evaluate the function if all the arguments were bound.
    */
-  if (IS_NULL(narg) && IS_NUMB(body)) {
+  if (IS_NULL(narg)) {
     /*
-     * Prepend the bind-site closure to the call-site closure.
+     * Evaluate the binary function.
      */
-    atom_t dup = lisp_dup(lisp, bscl);
-    atom_t cls = lisp_conc(lisp, dup, UP(closure));
-    X(lisp, bscl);
-    /*
-     * Call the binary function.
-     */
-    function_t fun = (function_t)body->number;
-    rslt = fun(lisp, cls);
-    X(lisp, body, narg, cls);
-  }
-  /*
-   * Evaluate the lisp function (tail call).
-   */
-  else if (IS_NULL(narg) && IS_TAIL_CALL(symb)) {
-    rslt = lisp_cons(lisp, UP(symb), lisp_dup(lisp, bscl));
-    SET_TAIL_CALL(rslt);
-    X(lisp, body, narg, bscl);
-  }
-  /*
-   * Evaluate the lisp function.
-   */
-  else if (IS_NULL(narg)) {
-    /*
-     * Prepend the bind-site closure to the call-site closure.
-     */
-    atom_t dup = lisp_dup(lisp, bscl);
-    X(lisp, narg, bscl);
-    /*
-     * Tail-call evaluation loop.
-     */
-  tailcall_loop:;
-    atom_t cls = lisp_conc(lisp, dup, UP(closure));
-    atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil(lisp));
-    X(lisp, cls);
-    /*
-     * If it's a tail call, evaluate the function with the new arguments.
-     */
-    if (IS_TAIL_CALL(res) && lisp_symbol_match(CAR(res), &symb->symbol)) {
-      dup = lisp_cdr(lisp, res);
-      X(lisp, res);
-      goto tailcall_loop;
+    if (IS_NUMB(body)) {
+      /*
+       * Prepend the bind-site closure to the call-site closure.
+       */
+      atom_t dup = lisp_dup(lisp, bscl);
+      atom_t cls = lisp_conc(lisp, dup, UP(closure));
+      X(lisp, bscl);
+      /*
+       * Call the binary function.
+       */
+      function_t fun = (function_t)body->number;
+      rslt = fun(lisp, cls);
+      X(lisp, body, narg, cls);
     }
     /*
-     * Otherwise, leave the loop.
+     * Evaluate the lisp function (tail call).
      */
-    rslt = res;
-    X(lisp, body);
+    else if (IS_TAIL_CALL(symb)) {
+      rslt = lisp_cons(lisp, UP(symb), lisp_dup(lisp, bscl));
+      SET_TAIL_CALL(rslt);
+      X(lisp, body, narg, bscl);
+    }
+    /*
+     * Evaluate the lisp function.
+     */
+    else {
+      /*
+       * Prepend the bind-site closure to the call-site closure.
+       */
+      atom_t dup = lisp_dup(lisp, bscl);
+      X(lisp, narg, bscl);
+      /*
+       * Tail-call evaluation loop.
+       */
+    tailcall_loop:;
+      atom_t cls = lisp_conc(lisp, dup, UP(closure));
+      atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil(lisp));
+      X(lisp, cls);
+      /*
+       * If it's a tail call, evaluate the function with the new arguments.
+       */
+      if (IS_TAIL_CALL(res) && lisp_symbol_match(CAR(res), &symb->symbol)) {
+        dup = lisp_cdr(lisp, res);
+        X(lisp, res);
+        goto tailcall_loop;
+      }
+      /*
+       * Otherwise, leave the loop.
+       */
+      rslt = res;
+      X(lisp, body);
+    }
   }
   /*
    * Else handle partial application.

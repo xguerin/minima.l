@@ -690,12 +690,12 @@
 				(incd				. (append (assoc 'PREFIX CONFIG) "/include"))
 				(libd				. (append (assoc 'PREFIX CONFIG) "/lib"))
 				(flags			. (list
-												"-shared" "-fPIC" "-fomit-frame-pointer"
-												"-I" incd "-L" libd "-lminimal"
-												"-O3" "-g3" "-o" oout cout)))
-		(if (or (= osname "Linux") (= osname "Darwin"))
-			($+ flags '("-flto"))
-			flags
+												"-shared" "-fno-plt" "-fomit-frame-pointer"
+												"-I" incd "-O3" "-g3" "-o" oout cout)))
+		(match osname
+			("Darwin" . ($+ flags '("-flto" "-undefined" "dynamic_lookup")))
+			("Linux" . ($+ flags '("-flto")))
+			_ . flags
 			)))
 
 (def cc:build (MODULE SYMBS . TARGET)

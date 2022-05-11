@@ -14,7 +14,46 @@ set(MODULES io logic math std sys unix)
 foreach(MODULE ${MODULES})
   add_library(${MODULE} SHARED $<TARGET_OBJECTS:minimal_${MODULE}>)
   add_dependencies(${MODULE} minimal)
-  target_link_libraries(${MODULE} PUBLIC minimal)
+  #
+  if(APPLE)
+    target_link_options(${MODULE} PRIVATE
+      -Wl,-U,_MNML_DEBUG
+      -Wl,-U,_MNML_DEBUG_CLOS
+      -Wl,-U,_MNML_DEBUG_EVAL
+      -Wl,-U,_lisp_bind
+      -Wl,-U,_lisp_car
+      -Wl,-U,_lisp_cdr
+      -Wl,-U,_lisp_conc
+      -Wl,-U,_lisp_cons
+      -Wl,-U,_lisp_deallocate
+      -Wl,-U,_lisp_debug
+      -Wl,-U,_lisp_decref
+      -Wl,-U,_lisp_dup
+      -Wl,-U,_lisp_equ
+      -Wl,-U,_lisp_eval
+      -Wl,-U,_lisp_get_fullpath
+      -Wl,-U,_lisp_incref
+      -Wl,-U,_lisp_is_string
+      -Wl,-U,_lisp_len
+      -Wl,-U,_lisp_load_file
+      -Wl,-U,_lisp_make_char
+      -Wl,-U,_lisp_make_cstring
+      -Wl,-U,_lisp_make_nil
+      -Wl,-U,_lisp_make_number
+      -Wl,-U,_lisp_make_quote
+      -Wl,-U,_lisp_make_string
+      -Wl,-U,_lisp_make_symbol
+      -Wl,-U,_lisp_make_true
+      -Wl,-U,_lisp_mark_tail_calls
+      -Wl,-U,_lisp_neq
+      -Wl,-U,_lisp_prin
+      -Wl,-U,_lisp_prog
+      -Wl,-U,_lisp_read
+      -Wl,-U,_lisp_setq
+      -Wl,-U,_lisp_timestamp
+      -Wl,-U,_lisp_tree_upd
+      -Wl,-U,_module_load)
+  endif()
   #
   if(MNML_HAS_IPO)
     set_property(TARGET ${MODULE} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
