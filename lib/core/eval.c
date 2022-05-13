@@ -13,18 +13,18 @@
  */
 
 static atom_t
-lisp_eval_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
+lisp_eval_args(const lisp_t lisp, const atom_t closure, const atom_t atom,
                const atom_t args, const atom_t vals)
 {
   atom_t rslt;
   TRACE_BIND_SEXP(args);
   TRACE_BIND_SEXP(vals);
   /*
-   * Return (DSCL, NIL, VALS) if we run out of arguments. It can also be
-   * (DSCL, NIL, NIL) if there is no more values either.
+   * Return (DSCL, VALS) if we run out of arguments. It can also be
+   * (DSCL, NIL) if there is no more values either.
    */
   if (IS_NULL(args)) {
-    rslt = lisp_cons(lisp, dscl, args);
+    rslt = lisp_cons(lisp, atom, args);
     X(lisp, vals);
   }
   /*
@@ -32,14 +32,14 @@ lisp_eval_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
    * operation consumes all the values, so it returns (DSCL, NIL NIL).
    */
   else if (IS_SYMB(args)) {
-    atom_t head = lisp_bind(lisp, dscl, args, vals);
+    atom_t head = lisp_bind(lisp, atom, args, vals);
     rslt = lisp_cons(lisp, head, lisp_make_nil(lisp));
   }
   /*
    * Return (DSCL, ARGS, NIL) if we run out of values.
    */
   else if (IS_NULL(vals)) {
-    rslt = lisp_cons(lisp, dscl, args);
+    rslt = lisp_cons(lisp, atom, args);
     X(lisp, vals);
   }
   /*
@@ -56,7 +56,7 @@ lisp_eval_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
     /*
      * Grab CAR and CDR from the values, evaluate CAR.
      */
-    atom_t val = lisp_eval(lisp, cscl, lisp_car(lisp, vals));
+    atom_t val = lisp_eval(lisp, closure, lisp_car(lisp, vals));
     atom_t rem = lisp_cdr(lisp, vals);
     X(lisp, vals);
     /*
@@ -64,8 +64,8 @@ lisp_eval_args(const lisp_t lisp, const atom_t cscl, const atom_t dscl,
      * decomposition for non-symbolic arguments. Perform a recursive descent on
      * the remaining arguments and values.
      */
-    atom_t bind = lisp_bind(lisp, dscl, arg, val);
-    rslt = lisp_eval_args(lisp, cscl, bind, oth, rem);
+    atom_t bind = lisp_bind(lisp, atom, arg, val);
+    rslt = lisp_eval_args(lisp, closure, bind, oth, rem);
   }
   /*
    * Return the result.
@@ -105,11 +105,9 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
   atom_t body = lisp_cdr(lisp, cdr0);
   X(lisp, func, cdr0);
   /*
-   * Bind the arguments and the values. The closure embedded in the lambda is
-   * used as the run environment and augmented with the values of the arguments.
-   * The call-site closure is used for the evaluation of the arguments.
+   * Bind the arguments and the values.
    */
-  atom_t bind = lisp_eval_args(lisp, closure, dscl, args, vals);
+  atom_t bind = lisp_eval_args(lisp, closure, lisp_make_nil(lisp), args, vals);
   /*
    * Extract the bound arguments, and remaining arguments and values,
    */
@@ -125,17 +123,21 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
      */
     if (IS_NUMB(body)) {
       /*
-       * Prepend the bind-site closure to the call-site closure.
+       * In the case of binary functions, the embedded closure only contain
+       * curried arguments. Therefore, we just append those to the closure.
        */
-      atom_t dup = lisp_dup(lisp, bscl);
-      atom_t cls = lisp_conc(lisp, dup, UP(closure));
-      X(lisp, bscl);
+      atom_t clos = bscl;
+      if (!IS_NULL(dscl)) {
+        clos = lisp_conc(lisp, bscl, lisp_dup(lisp, dscl));
+      }
+      clos = lisp_conc(lisp, clos, UP(closure));
+      X(lisp, dscl);
       /*
        * Call the binary function.
        */
       function_t fun = (function_t)body->number;
-      rslt = fun(lisp, cls);
-      X(lisp, body, narg, cls);
+      rslt = fun(lisp, clos);
+      X(lisp, body, narg, clos);
     }
     /*
      * Return the (SYMB, BSCL) tail-call for further evaluation.
@@ -143,26 +145,30 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
     else if (IS_TAIL_CALL(symb)) {
       rslt = lisp_cons(lisp, UP(symb), bscl);
       SET_TAIL_CALL(rslt);
-      X(lisp, body, narg);
+      X(lisp, body, dscl, narg);
     }
     /*
      * Evaluate the lisp function.
      */
     else {
       /*
+       * Merge the definition-site closure first.
+       */
+      atom_t cls0 = lisp_merge(lisp, lisp_dup(lisp, closure), dscl);
+      X(lisp, dscl);
+      /*
        * Tail-call evaluation loop.
        */
       while (true) {
         /*
-         * Start with a fresh copy of the BSCL and prepend it the closure.
+         * Merge the bind-site closure.
          */
-        atom_t dup = lisp_dup(lisp, bscl);
-        atom_t cls = lisp_conc(lisp, dup, UP(closure));
+        atom_t cls1 = lisp_merge(lisp, lisp_dup(lisp, cls0), bscl);
         /*
          * Evaluate the function's body.
          */
-        atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil(lisp));
-        X(lisp, bscl, cls);
+        atom_t res = lisp_prog(lisp, cls1, UP(body), lisp_make_nil(lisp));
+        X(lisp, cls1);
         /*
          * If the result is not a tail call, stop the evaluation.
          */
@@ -173,20 +179,22 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
         /*
          * If it's a tail call, evaluate the function with the new arguments.
          */
+        X(lisp, bscl);
         bscl = lisp_cdr(lisp, res);
         X(lisp, res);
       }
       /*
        * Done.
        */
-      X(lisp, body, narg);
+      X(lisp, body, bscl, narg, cls0);
     }
   }
   /*
    * Else handle partial application.
    */
   else {
-    atom_t con0 = lisp_cons(lisp, bscl, body);
+    atom_t clos = lisp_conc(lisp, bscl, dscl);
+    atom_t con0 = lisp_cons(lisp, clos, body);
     rslt = lisp_cons(lisp, narg, con0);
   }
   /*

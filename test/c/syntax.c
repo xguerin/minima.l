@@ -332,6 +332,178 @@ conc_cons_tests()
 }
 
 /*
+ * CONC/CONS.
+ */
+
+static bool
+sss_tests()
+{
+  struct lisp lisp;
+  /*
+   * Initialize the interpreter.
+   */
+  lisp_test_init(&lisp);
+  /*
+   * Insert into NIL.
+   */
+  {
+    STEP("Insert into NIL");
+    /*
+     * Make a pair.
+     */
+    MAKE_SYMBOL_STATIC(sym, "hello");
+    const atom_t key = lisp_make_symbol(&lisp, sym);
+    const atom_t val = lisp_make_number(&lisp, 1);
+    const atom_t kvp = lisp_cons(&lisp, key, val);
+    /*
+     * Make an empty root.
+     */
+    atom_t root = lisp_make_nil(&lisp);
+    /*
+     * Insert the pair.
+     */
+    root = lisp_sss(&lisp, root, kvp);
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(root)), sym));
+    /*
+     * Clean-up.
+     */
+    X(&lisp, root);
+  }
+  /*
+   * Insert two in order.
+   */
+  {
+    STEP("Insert two in order");
+    /*
+     * Make pair 1.
+     */
+    MAKE_SYMBOL_STATIC(sym0, "hello");
+    const atom_t key0 = lisp_make_symbol(&lisp, sym0);
+    const atom_t val0 = lisp_make_number(&lisp, 0);
+    const atom_t kvp0 = lisp_cons(&lisp, key0, val0);
+    /*
+     * Make pair 2.
+     */
+    MAKE_SYMBOL_STATIC(sym1, "world");
+    const atom_t key1 = lisp_make_symbol(&lisp, sym1);
+    const atom_t val1 = lisp_make_number(&lisp, 1);
+    const atom_t kvp1 = lisp_cons(&lisp, key1, val1);
+    /*
+     * Make an empty root.
+     */
+    atom_t root = lisp_make_nil(&lisp);
+    /*
+     * Insert the first pair.
+     */
+    root = lisp_sss(&lisp, root, kvp0);
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(root)), sym0));
+    /*
+     * Insert the second pair.
+     */
+    root = lisp_sss(&lisp, root, kvp1);
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(root)), sym0));
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(CDR(root))), sym1));
+    /*
+     * Clean-up.
+     */
+    X(&lisp, root);
+  }
+  /*
+   * Insert two out of order.
+   */
+  {
+    STEP("Insert two out of order");
+    /*
+     * Make pair 1.
+     */
+    MAKE_SYMBOL_STATIC(sym0, "world");
+    const atom_t key0 = lisp_make_symbol(&lisp, sym0);
+    const atom_t val0 = lisp_make_number(&lisp, 0);
+    const atom_t kvp0 = lisp_cons(&lisp, key0, val0);
+    /*
+     * Make pair 2.
+     */
+    MAKE_SYMBOL_STATIC(sym1, "hello");
+    const atom_t key1 = lisp_make_symbol(&lisp, sym1);
+    const atom_t val1 = lisp_make_number(&lisp, 1);
+    const atom_t kvp1 = lisp_cons(&lisp, key1, val1);
+    /*
+     * Make an empty root.
+     */
+    atom_t root = lisp_make_nil(&lisp);
+    /*
+     * Insert the first pair.
+     */
+    root = lisp_sss(&lisp, root, kvp0);
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(root)), sym0));
+    /*
+     * Insert the second pair.
+     */
+    root = lisp_sss(&lisp, root, kvp1);
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(root)), sym1));
+    ASSERT_TRUE(lisp_symbol_match(CAR(CAR(CDR(root))), sym0));
+    /*
+     * Clean-up.
+     */
+    X(&lisp, root);
+  }
+  /*
+   * Overwrite.
+   */
+  {
+    STEP("Overwrite");
+    /*
+     * Make pair 1.
+     */
+    MAKE_SYMBOL_STATIC(sym0, "hello");
+    const atom_t key0 = lisp_make_symbol(&lisp, sym0);
+    const atom_t val0 = lisp_make_number(&lisp, 0);
+    const atom_t kvp0 = lisp_cons(&lisp, key0, val0);
+    /*
+     * Make pair 2.
+     */
+    MAKE_SYMBOL_STATIC(sym1, "world");
+    const atom_t key1 = lisp_make_symbol(&lisp, sym1);
+    const atom_t val1 = lisp_make_number(&lisp, 1);
+    const atom_t kvp1 = lisp_cons(&lisp, key1, val1);
+    /*
+     * Make pair 3.
+     */
+    MAKE_SYMBOL_STATIC(sym2, "world");
+    const atom_t key2 = lisp_make_symbol(&lisp, sym2);
+    const atom_t val2 = lisp_make_number(&lisp, 2);
+    const atom_t kvp2 = lisp_cons(&lisp, key2, val2);
+    /*
+     * Make an empty root.
+     */
+    atom_t root = lisp_make_nil(&lisp);
+    /*
+     * Insert the first pair.
+     */
+    root = lisp_sss(&lisp, root, kvp0);
+    /*
+     * Insert the second pair.
+     */
+    root = lisp_sss(&lisp, root, kvp1);
+    ASSERT_TRUE(CDR(CAR(CDR(root)))->number == 1);
+    /*
+     * Insert the third pair.
+     */
+    root = lisp_sss(&lisp, root, kvp2);
+    ASSERT_TRUE(CDR(CAR(CDR(root)))->number == 2);
+    /*
+     * Clean-up.
+     */
+    X(&lisp, root);
+  }
+  /*
+   * Clean-up.
+   */
+  ASSERT_TRUE(lisp_test_fini(&lisp));
+  OK;
+}
+
+/*
  * Main.
  */
 
@@ -341,6 +513,7 @@ main(UNUSED const int argc, UNUSED char** const argv)
   TEST(basic_tests);
   TEST(car_cdr_tests);
   TEST(conc_cons_tests);
+  TEST(sss_tests);
   return 0;
 }
 

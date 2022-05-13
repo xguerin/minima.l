@@ -7,11 +7,11 @@
 
 #define TEST(__t)           \
   do {                      \
-    printf("- " #__t "\n"); \
+    printf("* " #__t "\n"); \
     assert(__t());          \
   } while (0)
 
-#define STEP(__t) printf("> %s @ %d\n", __t, __LINE__)
+#define STEP(__t) printf("- L%d: %s\n", __LINE__, __t)
 
 #define OK       \
   do {           \

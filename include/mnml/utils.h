@@ -1,18 +1,11 @@
 #pragma once
 
+#include <mnml/compiler.h>
 #include <mnml/maker.h>
 #include <mnml/lisp.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-
-/*
- * Compiler macros.
- */
-
-#define ALWAYS_INLINE __attribute__((always_inline))
-#define USED __attribute__((used))
-#define UNUSED __attribute__((unused))
 
 /*
  * Interpreter life cycle.
@@ -53,6 +46,16 @@ bool lisp_neq(const atom_t a, const atom_t b);
  * Shallow duplicate: 1(1X 1X ...) -> 1(2X 2X ...).
  */
 atom_t lisp_dup(const lisp_t lisp, const atom_t cell);
+
+/*
+ * Set (K . V) in the root sorted ASSOC list.
+ */
+atom_t lisp_sss(const lisp_t lisp, const atom_t root, const atom_t kvp);
+
+/*
+ * Merge ((K . V)) in the root sorted assoc list.
+ */
+atom_t lisp_merge(const lisp_t lisp, atom_t root, const atom_t alst);
 
 /*
  * Return true if a cell is a string.

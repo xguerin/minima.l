@@ -89,6 +89,7 @@ test_left_rotation()
    * NIL root.
    */
   {
+    STEP("NIL root");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t r = lisp_tree_lrot(root, x);
@@ -99,6 +100,7 @@ test_left_rotation()
    * Node without right branch.
    */
   {
+    STEP("Node without right branch");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t r = lisp_tree_lrot(x, x);
@@ -109,6 +111,7 @@ test_left_rotation()
    * Node with a right branch without a left branch.
    */
   {
+    STEP("Node with a right branch without a left branch");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t y = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
@@ -124,6 +127,7 @@ test_left_rotation()
    * Node with a right branch with a left branch.
    */
   {
+    STEP("Node with a right branch with a left branch");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t y = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
@@ -158,6 +162,7 @@ test_right_rotation()
    * NIL root.
    */
   {
+    STEP("NIL root");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t r = lisp_tree_rrot(root, x);
@@ -168,6 +173,7 @@ test_right_rotation()
    * Node without left branch.
    */
   {
+    STEP("Node without left branch");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t r = lisp_tree_rrot(x, x);
@@ -178,6 +184,7 @@ test_right_rotation()
    * Node with a left branch without a right branch.
    */
   {
+    STEP("Node with a left branch without a right branch");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     const atom_t y = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
@@ -193,6 +200,7 @@ test_right_rotation()
    * Node with a left branch with a right branch.
    */
   {
+    STEP("Node with a left branch with a right branch");
     const atom_t root = lisp_make_nil(&lisp);
     const atom_t x = lisp_tree_new(&lisp, root, lisp_make_nil(&lisp));
     TRACE_SEXP(x);
@@ -230,6 +238,7 @@ test_add()
   /*
    * Create the symbols.
    */
+  STEP("Create the symbols");
   MAKE_SYMBOL_STATIC(sn01, "01");
   const atom_t s01 = make_pair(&lisp, sn01, 1);
   MAKE_SYMBOL_STATIC(sn02, "02");
@@ -249,10 +258,12 @@ test_add()
   /*
    * Create an empty root.
    */
+  STEP("Create an empty root");
   atom_t root = lisp_make_nil(&lisp);
   /*
-   * Initial insertions and validation.
+   * Initial insertions and validations.
    */
+  STEP("Initial insertions and validations");
   root = lisp_tree_add(&lisp, root, s01);
   ASSERT_TRUE(lisp_symbol_match(KEY(root), sn01));
   root = lisp_tree_add(&lisp, root, s02);
@@ -265,11 +276,13 @@ test_add()
   /*
    * Last insertion and validation.
    */
+  STEP("Last insertion and validation");
   root = lisp_tree_add(&lisp, root, s15);
   ASSERT_TRUE(lisp_symbol_match(KEY(root), sn07));
   /*
    * Insert existing key.
    */
+  STEP("Insert existing key");
   const atom_t s05p = make_pair(&lisp, sn05, 5);
   const atom_t invl = lisp_tree_add(&lisp, root, s05p);
   ASSERT_TRUE(invl == root);
@@ -297,6 +310,7 @@ test_get()
   /*
    * Create the symbols.
    */
+  STEP("Create the symbols");
   MAKE_SYMBOL_STATIC(sn01, "01");
   const atom_t s01 = make_pair(&lisp, sn01, 1);
   MAKE_SYMBOL_STATIC(sn02, "02");
@@ -316,10 +330,12 @@ test_get()
   /*
    * Create an empty root.
    */
+  STEP("Create an empty root");
   atom_t root = lisp_make_nil(&lisp);
   /*
-   * Initial insertions and validation.
+   * Initial insertions.
    */
+  STEP("Initial insertions");
   root = lisp_tree_add(&lisp, root, s01);
   root = lisp_tree_add(&lisp, root, s02);
   root = lisp_tree_add(&lisp, root, s05);
@@ -331,6 +347,7 @@ test_get()
   /*
    * Get some values.
    */
+  STEP("Get some values");
   const atom_t v0 = lisp_tree_get(&lisp, root, sn11);
   ASSERT_EQUAL(CDR(v0)->number, 11);
   X(&lisp, v0);
@@ -359,6 +376,7 @@ test_rem()
    * Single-item tree.
    */
   {
+    STEP("Single-item tree");
     /*
      * Create an empty root.
      */
@@ -386,6 +404,7 @@ test_rem()
    * Two-item tree (NIL, A, B), delete leaf.
    */
   {
+    STEP("Two-item tree (NIL, A, B), delete leaf");
     /*
      * Create an empty root.
      */
@@ -419,6 +438,7 @@ test_rem()
    * Two-item tree (B, A, NIL), delete leaf.
    */
   {
+    STEP("Two-item tree (B, A, NIL), delete leaf");
     /*
      * Create an empty root.
      */
@@ -452,6 +472,7 @@ test_rem()
    * Two-item tree (NIL, A, B), delete root.
    */
   {
+    STEP("Two-item tree (NIL, A, B), delete root");
     /*
      * Create an empty root.
      */
@@ -485,6 +506,7 @@ test_rem()
    * Two-item tree (B, A, NIL), delete root.
    */
   {
+    STEP("Two-item tree (B, A, NIL), delete root");
     /*
      * Create an empty root.
      */
@@ -518,6 +540,7 @@ test_rem()
    * Three-item tree (B, A, C), delete root.
    */
   {
+    STEP("Three-item tree (B, A, C), delete root");
     /*
      * Create an empty root.
      */
@@ -557,6 +580,7 @@ test_rem()
    * Four-item tree (B, A, (NIL, C, D)), delete middle.
    */
   {
+    STEP("Four-item tree (B, A, (NIL, C, D)), delete middle");
     /*
      * Create an empty root.
      */
@@ -602,6 +626,7 @@ test_rem()
    * Larger tree.
    */
   {
+    STEP("Larger tree");
     /*
      * Initialize the interpreter.
      */
