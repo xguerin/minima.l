@@ -19,7 +19,7 @@ set(CMAKE_C_COMPILER_NAMES clang gcc)
 # Project definition
 #
 
-project("minima.l" VERSION 2.1.0 LANGUAGES C)
+project("minima.l" VERSION 2.2.0 LANGUAGES C)
 
 #
 # Uninstall target
@@ -219,6 +219,7 @@ endif ()
 
 set(HEADERS
   include/mnml/closure.h
+  include/mnml/compiler.h
   include/mnml/debug.h
   include/mnml/lisp.h
   include/mnml/maker.h
@@ -246,15 +247,4 @@ add_custom_target(minimal_headers
 # Install headers
 #
 
-install(
-  FILES
-  include/mnml/closure.h
-  include/mnml/debug.h
-  include/mnml/lisp.h
-  include/mnml/maker.h
-  include/mnml/module.h
-  include/mnml/slab.h
-  include/mnml/types.h
-  include/mnml/utils.h
-  DESTINATION
-  include/mnml)
+install(FILES ${HEADERS} DESTINATION include/mnml)

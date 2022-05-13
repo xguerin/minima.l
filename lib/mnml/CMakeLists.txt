@@ -45,6 +45,7 @@ foreach(MODULE ${MODULES})
       -Wl,-U,_lisp_make_symbol
       -Wl,-U,_lisp_make_true
       -Wl,-U,_lisp_mark_tail_calls
+      -Wl,-U,_lisp_merge
       -Wl,-U,_lisp_neq
       -Wl,-U,_lisp_prin
       -Wl,-U,_lisp_prog

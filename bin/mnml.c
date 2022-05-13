@@ -387,7 +387,7 @@ main(const int argc, char** const argv)
       atom_t nil = lisp_make_nil(lisp);
       atom_t car = lisp_pop(lisp);
       if (IS_NULL(car)) {
-        X(lisp, car);
+        X(lisp, nil, car);
         break;
       }
       X(lisp, result);

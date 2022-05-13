@@ -190,6 +190,67 @@ lisp_dup(const lisp_t lisp, const atom_t cell)
 }
 
 /*
+ * Set (K . V) in the root ASSOC list.
+ */
+
+atom_t
+lisp_sss(const lisp_t lisp, const atom_t root, const atom_t kvp)
+{
+  /*
+   * Check for NIL.
+   */
+  if (IS_NULL(root)) {
+    return lisp_cons(lisp, kvp, root);
+  }
+  /*
+   * Grab CAR and CDR.
+   */
+  const atom_t car = CAR(root);
+  const atom_t cdr = CDR(root);
+  /*
+   * Check the ordering.
+   */
+  const int cmp = lisp_symbol_compare(CAR(car), &CAR(kvp)->symbol);
+  /*
+   * If CAR(p) < CAR(kvp), check the next item.
+   */
+  if (cmp < 0) {
+    CDR(root) = lisp_sss(lisp, cdr, kvp);
+    return root;
+  }
+  /*
+   * If CAR(p) = CAR(kvp), replace the value.
+   */
+  else if (cmp == 0) {
+    CAR(root) = kvp;
+    X(lisp, car);
+    return root;
+  }
+  /*
+   * If CAR(p) > CAR(kvp), insert the pair.
+   */
+  else {
+    return lisp_cons(lisp, kvp, root);
+  }
+}
+
+/*
+ * Merge ((K . V)) in the root sorted assoc list.
+ */
+
+atom_t
+lisp_merge(const lisp_t lisp, atom_t root, const atom_t alst)
+{
+  FOREACH(alst, elt)
+  {
+    const atom_t kvp = elt->car;
+    root = lisp_sss(lisp, root, UP(kvp));
+    NEXT(elt);
+  }
+  return root;
+}
+
+/*
  * Return true if a cell is a string.
  */
 
@@ -420,7 +481,10 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
        */
       if (lisp_symbol_equal(CAR(cell), "prog") ||
           lisp_symbol_equal(CAR(cell), "|>")) {
-        FOREACH(cell, p) { NEXT(p); }
+        FOREACH(cell, p)
+        {
+          NEXT(p);
+        }
         atom_t last = UP(p->car);
         res = lisp_collect_tails(lisp, last);
         X(lisp, cell);
@@ -468,7 +532,10 @@ lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb, const atom_t args,
   /*
    * Grab the last expression of the body.
    */
-  FOREACH(body, pe) { NEXT(pe); }
+  FOREACH(body, pe)
+  {
+    NEXT(pe);
+  }
   atom_t last = UP(pe->car);
   /*
    * Extract the tails.
