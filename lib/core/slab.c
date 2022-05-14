@@ -82,6 +82,13 @@ slab_expand(const slab_t slab)
   const size_t size = (slab->n_pages << 1) * PAGE_SIZE;
   TRACE_SLAB("0x%lx", (uintptr_t)slab->entries);
   /*
+   * Check that the requested size is within the slab boundaries.
+   */
+  if (size > SLAB_SIZE) {
+    ERROR("No more pages: requested=%lu, allocated=%llu", size, SLAB_SIZE);
+    return false;
+  }
+  /*
    * Commit twice the amount of memory.
    */
   int res = mprotect(slab->entries, size, PROT_READ | PROT_WRITE);
