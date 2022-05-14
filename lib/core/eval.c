@@ -138,42 +138,48 @@ lisp_eval_func(const lisp_t lisp, const atom_t closure, const atom_t symb,
       X(lisp, body, narg, cls);
     }
     /*
-     * Evaluate the lisp function (tail call).
+     * Return the (SYMB, BSCL) tail-call for further evaluation.
      */
     else if (IS_TAIL_CALL(symb)) {
-      rslt = lisp_cons(lisp, UP(symb), lisp_dup(lisp, bscl));
+      rslt = lisp_cons(lisp, UP(symb), bscl);
       SET_TAIL_CALL(rslt);
-      X(lisp, body, narg, bscl);
+      X(lisp, body, narg);
     }
     /*
      * Evaluate the lisp function.
      */
     else {
       /*
-       * Prepend the bind-site closure to the call-site closure.
-       */
-      atom_t dup = lisp_dup(lisp, bscl);
-      X(lisp, narg, bscl);
-      /*
        * Tail-call evaluation loop.
        */
-    tailcall_loop:;
-      atom_t cls = lisp_conc(lisp, dup, UP(closure));
-      atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil(lisp));
-      X(lisp, cls);
-      /*
-       * If it's a tail call, evaluate the function with the new arguments.
-       */
-      if (IS_TAIL_CALL(res) && lisp_symbol_match(CAR(res), &symb->symbol)) {
-        dup = lisp_cdr(lisp, res);
+      while (true) {
+        /*
+         * Start with a fresh copy of the BSCL and prepend it the closure.
+         */
+        atom_t dup = lisp_dup(lisp, bscl);
+        atom_t cls = lisp_conc(lisp, dup, UP(closure));
+        /*
+         * Evaluate the function's body.
+         */
+        atom_t res = lisp_prog(lisp, cls, UP(body), lisp_make_nil(lisp));
+        X(lisp, bscl, cls);
+        /*
+         * If the result is not a tail call, stop the evaluation.
+         */
+        if (!IS_TAIL_CALL(res) || !lisp_symbol_match(CAR(res), &symb->symbol)) {
+          rslt = res;
+          break;
+        }
+        /*
+         * If it's a tail call, evaluate the function with the new arguments.
+         */
+        bscl = lisp_cdr(lisp, res);
         X(lisp, res);
-        goto tailcall_loop;
       }
       /*
-       * Otherwise, leave the loop.
+       * Done.
        */
-      rslt = res;
-      X(lisp, body);
+      X(lisp, body, narg);
     }
   }
   /*
