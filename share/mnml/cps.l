@@ -360,13 +360,16 @@
 	"Fold the types in LST and check for errors."
 	(foldr
 		(\ (e acc)
-			(if (|> (nil? acc) (or (= e acc)) (or (= acc 'UNDEF))) e 'ERROR))
+			(if (or (nil? acc)
+						(or (= e acc) (= acc 'UNDEF)))
+				e 'ERROR))
 		lst NIL))
 
 (def cps:type:fold (alst)
 	"Fold the type list ALST and check for errors."
 	(foldr
-		(\ ((symb . types) acc0) (cons (cons symb (cps:type:fold1 types)) acc0))
+		(\ ((symb . types) acc0)
+			(cons (cons symb (cps:type:fold1 types)) acc0))
 		alst NIL))
 
 (def cps:type:findl (kvar body alst)

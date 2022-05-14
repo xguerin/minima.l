@@ -5,12 +5,15 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <dirent.h>
-#include <dlfcn.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 
 /*
  * Syntax error handler.
@@ -56,16 +59,18 @@ lisp_prefix()
 {
   static bool is_set = false;
   static char prefix[PATH_MAX] = { 0 };
-  Dl_info libInfo;
   /*
-   * Compute this library path.
+   * Compute this binary path.
    */
-  if (!is_set && dladdr(&lisp_prefix, &libInfo) != 0) {
+  if (!is_set) {
     char buffer[PATH_MAX] = { 0 };
-#if defined(__OpenBSD__)
-    strlcpy(buffer, libInfo.dli_fname, 4096);
+#if defined(__linux__)
+    (void)readlink("/proc/self/exe", buffer, PATH_MAX);
+#elif defined(__APPLE__)
+    uint32_t size = sizeof(buffer);
+    (void)_NSGetExecutablePath(buffer, &size);
 #else
-    strcpy(buffer, libInfo.dli_fname);
+#error "Plaform not supported"
 #endif
     const char* dname = dirname(dirname(buffer));
     strcpy(prefix, dname);
@@ -415,10 +420,7 @@ lisp_collect_tails(const lisp_t lisp, const atom_t cell)
        */
       if (lisp_symbol_equal(CAR(cell), "prog") ||
           lisp_symbol_equal(CAR(cell), "|>")) {
-        FOREACH(cell, p)
-        {
-          NEXT(p);
-        }
+        FOREACH(cell, p) { NEXT(p); }
         atom_t last = UP(p->car);
         res = lisp_collect_tails(lisp, last);
         X(lisp, cell);
@@ -466,10 +468,7 @@ lisp_mark_tail_calls(const lisp_t lisp, const atom_t symb, const atom_t args,
   /*
    * Grab the last expression of the body.
    */
-  FOREACH(body, pe)
-  {
-    NEXT(pe);
-  }
+  FOREACH(body, pe) { NEXT(pe); }
   atom_t last = UP(pe->car);
   /*
    * Extract the tails.
