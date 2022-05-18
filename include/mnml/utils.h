@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mnml/compiler.h>
-#include <mnml/maker.h>
 #include <mnml/lisp.h>
 #include <stdbool.h>
 #include <stdlib.h>

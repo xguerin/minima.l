@@ -2,7 +2,6 @@
 
 #include <mnml/debug.h>
 #include <mnml/lisp.h>
-#include <mnml/maker.h>
 #include <mnml/utils.h>
 #include <stdbool.h>
 
@@ -27,6 +26,72 @@ typedef struct module_entry
 } module_entry_t;
 
 atom_t module_load(const lisp_t lisp, const atom_t cell);
+
+/*
+ * CONS helpers.
+ */
+
+#define S_0(__l, __r) atom_t __r = lisp_make_nil(__l)
+
+#define S_1(__l, __r, _1)                    \
+  S_0(__l, __r);                             \
+  {                                          \
+    MAKE_SYMBOL_STATIC(s_1, #_1);            \
+    atom_t r_1 = lisp_make_symbol(__l, s_1); \
+    X((__l), __r);                           \
+    (__r) = r_1;                             \
+  }
+
+#define S_NIL(__l, __r, _1)                  \
+  S_0(__l, __r);                             \
+  {                                          \
+    MAKE_SYMBOL_STATIC(s_1, #_1);            \
+    atom_t __1 = lisp_make_symbol(__l, s_1); \
+    (__r) = lisp_cons(__l, __1, __r);        \
+  }
+
+#define S_REM(__l, __r, _1)                  \
+  S_0(__l, __r);                             \
+  {                                          \
+    X((__l), __r);                           \
+    MAKE_SYMBOL_STATIC(s_1, #_1);            \
+    atom_t __1 = lisp_make_symbol(__l, s_1); \
+    MAKE_SYMBOL_STATIC(s_0, "REM");          \
+    atom_t __0 = lisp_make_symbol(__l, s_0); \
+    (__r) = lisp_cons(__l, __1, __0);        \
+  }
+
+#define S_2(__l, __r, _2, _1) S_##_1(__l, __r, _2)
+
+#define S_3(__l, __r, _3, ...)               \
+  S_2(__l, __r, __VA_ARGS__);                \
+  {                                          \
+    MAKE_SYMBOL_STATIC(s_3, #_3);            \
+    atom_t __3 = lisp_make_symbol(__l, s_3); \
+    __r = lisp_cons(__l, __3, __r);          \
+  }
+
+#define S_4(__l, __r, _4, ...)               \
+  S_3(__l, __r, __VA_ARGS__);                \
+  {                                          \
+    MAKE_SYMBOL_STATIC(s_4, #_4);            \
+    atom_t __4 = lisp_make_symbol(__l, s_4); \
+    __r = lisp_cons(__l, __4, __r);          \
+  }
+
+#define S_5(__l, __r, _5, ...)               \
+  S_4(__l, __r, __VA_ARGS__);                \
+  {                                          \
+    MAKE_SYMBOL_STATIC(s_5, #_5);            \
+    atom_t __5 = lisp_make_symbol(__l, s_5); \
+    __r = lisp_cons(__l, __5, __r);          \
+  }
+
+#define S_(_1, _2, _3, _4, _5, NAME, ...) NAME
+
+#define LISP_CONS(__l, __r, ...)           \
+  S_(__VA_ARGS__, S_5, S_4, S_3, S_2, S_1) \
+  (__l, __r, __VA_ARGS__)
 
 /*
  * Initialization macros.

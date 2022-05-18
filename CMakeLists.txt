@@ -19,7 +19,7 @@ set(CMAKE_C_COMPILER_NAMES clang gcc)
 # Project definition
 #
 
-project("minima.l" VERSION 2.2.0 LANGUAGES C)
+project("minima.l" VERSION 2.3.0 LANGUAGES C)
 
 #
 # Uninstall target
@@ -222,7 +222,6 @@ set(HEADERS
   include/mnml/compiler.h
   include/mnml/debug.h
   include/mnml/lisp.h
-  include/mnml/maker.h
   include/mnml/module.h
   include/mnml/slab.h
   include/mnml/types.h

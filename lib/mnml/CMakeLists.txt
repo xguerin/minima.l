@@ -25,6 +25,7 @@ foreach(MODULE ${MODULES})
       -Wl,-U,_lisp_cdr
       -Wl,-U,_lisp_conc
       -Wl,-U,_lisp_cons
+      -Wl,-U,_lisp_allocate
       -Wl,-U,_lisp_deallocate
       -Wl,-U,_lisp_debug
       -Wl,-U,_lisp_decref

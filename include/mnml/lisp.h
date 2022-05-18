@@ -1,8 +1,11 @@
 #pragma once
 
+#include <mnml/compiler.h>
+#include <mnml/debug.h>
 #include <mnml/slab.h>
 #include <mnml/types.h>
 #include <stdbool.h>
+#include <string.h>
 
 /*
  * Helper macros.
@@ -35,11 +38,21 @@ typedef struct lisp
   size_t total;
 } * lisp_t;
 
+/*
+ * Native function type.
+ */
+
+typedef atom_t (*function_t)(const lisp_t, const atom_t);
+
+/*
+ * Context allocation.
+ */
+
 lisp_t lisp_new(const slab_t slab);
 void lisp_delete(const lisp_t lisp);
 
 /*
- * Allocation functions.
+ * Atom allocation.
  */
 
 atom_t lisp_allocate(const lisp_t lisp);
@@ -109,10 +122,103 @@ void lisp_deallocate(const lisp_t lisp, const atom_t cell);
   X_(__VA_ARGS__, X_8, X_7, X_6, X_5, X_4, X_3, X_2, X_1)(_l, __VA_ARGS__)
 
 /*
- * Native function type.
+ * Symbol makers.
  */
 
-typedef atom_t (*function_t)(const lisp_t, const atom_t);
+#define MAKE_SYMBOL_STATIC(__v, __s)                          \
+  symbol_t __v = (union symbol*)alloca(sizeof(union symbol)); \
+  (__v)->tag = NULL_TAG;                                      \
+  strncpy((__v)->val, __s, LISP_SYMBOL_LENGTH)
+
+#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                    \
+  symbol_t __v = (union symbol*)malloc(sizeof(union symbol)); \
+  (__v)->tag = NULL_TAG;                                      \
+  strncpy((__v)->val, __s, __n)
+
+/*
+ * Atom makers.
+ */
+
+ALWAYS_INLINE inline atom_t
+lisp_make_char(const lisp_t lisp, const char c)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_CHAR;
+  R->flags = 0;
+  R->refs = 1;
+  R->number = (int64_t)c;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_make_number(const lisp_t lisp, const int64_t num)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_NUMBER;
+  R->flags = 0;
+  R->refs = 1;
+  R->number = num;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_make_nil(const lisp_t lisp)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_NIL;
+  R->flags = 0;
+  R->refs = 1;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_make_true(const lisp_t lisp)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_TRUE;
+  R->flags = 0;
+  R->refs = 1;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_make_symbol(const lisp_t lisp, const symbol_t sym)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_SYMBOL;
+  R->flags = 0;
+  R->refs = 1;
+  R->symbol = *sym;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_make_wildcard(const lisp_t lisp)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_WILDCARD;
+  R->flags = 0;
+  R->refs = 1;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_make_quote(const lisp_t lisp)
+{
+  MAKE_SYMBOL_STATIC(quote, "quote");
+  atom_t R = lisp_make_symbol(lisp, quote);
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+atom_t lisp_make_string(const lisp_t lisp, const char* const str,
+                        const size_t len);
 
 /*
  * Symbol lookup.
@@ -124,16 +230,42 @@ atom_t lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t atom);
  * Lisp basic functions.
  */
 
-atom_t lisp_car(const lisp_t lisp, const atom_t cell);
-atom_t lisp_cdr(const lisp_t lisp, const atom_t cell);
+ALWAYS_INLINE inline atom_t
+lisp_car(const lisp_t lisp, const atom_t cell)
+{
+  if (likely(IS_PAIR(cell))) {
+    return UP(CAR(cell));
+  }
+  return lisp_make_nil(lisp);
+}
+
+ALWAYS_INLINE inline atom_t
+lisp_cdr(const lisp_t lisp, const atom_t cell)
+{
+  if (likely(IS_PAIR(cell))) {
+    return UP(CDR(cell));
+  }
+  return lisp_make_nil(lisp);
+}
 
 /*
  * Internal list construction functions. CONS is pure, CONC is destructive.
  * NOTE Both functions consume their arguments.
  */
 
-atom_t lisp_cons(const lisp_t lisp, const atom_t a, const atom_t b);
-atom_t lisp_conc(const lisp_t lisp, const atom_t a, const atom_t b);
+ALWAYS_INLINE inline atom_t
+lisp_cons(const lisp_t lisp, const atom_t car, const atom_t cdr)
+{
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_PAIR;
+  R->refs = 1;
+  CAR(R) = car;
+  CDR(R) = cdr;
+  TRACE_CONS_SEXP(R);
+  return R;
+}
+
+atom_t lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr);
 
 /*
  * Evaluation and closure functions.
