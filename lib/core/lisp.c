@@ -70,6 +70,21 @@ lisp_deallocate(const lisp_t lisp, const atom_t atom)
 }
 
 /*
+ * Atom makers.
+ */
+
+atom_t
+lisp_make_string(const lisp_t lisp, const char* const str, const size_t len)
+{
+  atom_t res = lisp_make_nil(lisp);
+  for (size_t i = 0; i < len; i += 1) {
+    atom_t c = lisp_make_char(lisp, str[len - i - 1]);
+    res = lisp_cons(lisp, c, res);
+  }
+  return lisp_process_escapes(lisp, res, false, lisp_make_nil(lisp));
+}
+
+/*
  * Symbol lookup.
  */
 
@@ -116,42 +131,8 @@ lisp_lookup(const lisp_t lisp, const atom_t closure, const atom_t atom)
 }
 
 /*
- * Basic functions.
- */
-
-atom_t
-lisp_car(const lisp_t lisp, const atom_t cell)
-{
-  if (likely(IS_PAIR(cell))) {
-    return UP(CAR(cell));
-  }
-  return lisp_make_nil(lisp);
-}
-
-atom_t
-lisp_cdr(const lisp_t lisp, const atom_t cell)
-{
-  if (likely(IS_PAIR(cell))) {
-    return UP(CDR(cell));
-  }
-  return lisp_make_nil(lisp);
-}
-
-/*
  * Internal list construction functions.
  */
-
-atom_t
-lisp_cons(const lisp_t lisp, const atom_t car, const atom_t cdr)
-{
-  atom_t R = lisp_allocate(lisp);
-  R->type = T_PAIR;
-  R->refs = 1;
-  CAR(R) = car;
-  CDR(R) = cdr;
-  TRACE_CONS_SEXP(R);
-  return R;
-}
 
 atom_t
 lisp_conc(const lisp_t lisp, const atom_t car, const atom_t cdr)

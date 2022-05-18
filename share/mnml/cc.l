@@ -516,7 +516,6 @@
 	"Generate C code prologue."
 	(prinl "#include <mnml/closure.h>")
 	(prinl "#include <mnml/lisp.h>")
-	(prinl "#include <mnml/maker.h>")
 	(prinl "#include <mnml/module.h>")
 	(prinl "#include <mnml/slab.h>")
 	(prinl "#include <mnml/types.h>")

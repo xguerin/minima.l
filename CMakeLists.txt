@@ -222,7 +222,6 @@ set(HEADERS
   include/mnml/compiler.h
   include/mnml/debug.h
   include/mnml/lisp.h
-  include/mnml/maker.h
   include/mnml/module.h
   include/mnml/slab.h
   include/mnml/types.h
