@@ -19,7 +19,9 @@ foreach(MODULE ${MODULES})
     target_link_options(${MODULE} PRIVATE
       -Wl,-U,_MNML_DEBUG
       -Wl,-U,_MNML_DEBUG_CLOS
+      -Wl,-U,_MNML_DEBUG_CONS
       -Wl,-U,_MNML_DEBUG_EVAL
+      -Wl,-U,_MNML_DEBUG_MAKE
       -Wl,-U,_lisp_bind
       -Wl,-U,_lisp_car
       -Wl,-U,_lisp_cdr
