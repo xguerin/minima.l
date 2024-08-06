@@ -1,7 +1,7 @@
 # Minima.l
 
 Opinionated LISP dialect that takes some of its inspirations from [Picolisp](https://picolisp.com),
-[CHICKEN Scheme](http://call-cc.org), and other great languages. The source code is located [here](https://git.sr.ht/~xguerin/minima.l).
+[CHICKEN Scheme](http://call-cc.org), and other great languages. The source code is located [here](https://github.com/xguerin/minima.l).
 
 ## Example
 ```lisp
