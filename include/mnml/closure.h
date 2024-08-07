@@ -21,7 +21,7 @@ typedef struct closure
 {
   struct closure* C;
   value_t V[];
-} * closure_t;
+}* closure_t;
 
 typedef atom_t (*callback_t)(const lisp_t, const atom_t, closure_t, value_t);
 

@@ -23,7 +23,7 @@ typedef struct lexer
   lisp_t lisp;
   lisp_consumer_t consumer;
   void* parser;
-} * lexer_t;
+}* lexer_t;
 
 /*
  * Lexer lifecycle.

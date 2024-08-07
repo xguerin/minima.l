@@ -36,7 +36,7 @@ typedef struct lisp
   size_t crefs;
   size_t grefs;
   size_t total;
-} * lisp_t;
+}* lisp_t;
 
 /*
  * Native function type.
@@ -130,10 +130,22 @@ void lisp_deallocate(const lisp_t lisp, const atom_t cell);
   (__v)->tag = NULL_TAG;                                      \
   strncpy((__v)->val, __s, LISP_SYMBOL_LENGTH)
 
-#define MAKE_SYMBOL_DYNAMIC(__v, __s, __n)                    \
+#define MAKE_SYMBOL_STATIC_N(__v, __s, __n)                              \
+  size_t __l = (__n) <= LISP_SYMBOL_LENGTH ? (__n) : LISP_SYMBOL_LENGTH; \
+  symbol_t __v = (union symbol*)alloca(sizeof(union symbol));            \
+  (__v)->tag = NULL_TAG;                                                 \
+  strncpy((__v)->val, __s, __l)
+
+#define MAKE_SYMBOL_DYNAMIC(__v, __s)                         \
   symbol_t __v = (union symbol*)malloc(sizeof(union symbol)); \
   (__v)->tag = NULL_TAG;                                      \
-  strncpy((__v)->val, __s, __n)
+  strncpy((__v)->val, __s, LISP_SYMBOL_LENGTH)
+
+#define MAKE_SYMBOL_DYNAMIC_N(__v, __s, __n)                             \
+  size_t __l = (__n) <= LISP_SYMBOL_LENGTH ? (__n) : LISP_SYMBOL_LENGTH; \
+  symbol_t __v = (union symbol*)malloc(sizeof(union symbol));            \
+  (__v)->tag = NULL_TAG;                                                 \
+  strncpy((__v)->val, __s, __l)
 
 /*
  * Atom makers.
@@ -219,6 +231,57 @@ lisp_make_quote(const lisp_t lisp)
 
 atom_t lisp_make_string(const lisp_t lisp, const char* const str,
                         const size_t len);
+
+/*
+ * FFI-specific interface.
+ */
+
+void lisp_io_push(const lisp_t lisp);
+void lisp_io_pop(const lisp_t lisp);
+
+ALWAYS_INLINE inline atom_t
+lisp_make_symbol_from_string(const lisp_t lisp, const char* const str,
+                             const size_t len)
+{
+  MAKE_SYMBOL_STATIC_N(sym, str, len);
+  atom_t R = lisp_allocate(lisp);
+  R->type = T_SYMBOL;
+  R->flags = 0;
+  R->refs = 1;
+  R->symbol = *sym;
+  TRACE_MAKE_SEXP(R);
+  return R;
+}
+
+ALWAYS_INLINE inline int
+lisp_get_type(const atom_t atom)
+{
+  return atom->type;
+}
+
+ALWAYS_INLINE inline char
+lisp_get_char(const atom_t atom)
+{
+  return (char)atom->number;
+}
+
+ALWAYS_INLINE inline int64_t
+lisp_get_number(const atom_t atom)
+{
+  return atom->number;
+}
+
+ALWAYS_INLINE inline const char*
+lisp_get_symbol(const atom_t atom)
+{
+  return atom->symbol.val;
+}
+
+ALWAYS_INLINE inline void
+lisp_drop(const lisp_t lisp, const atom_t atom)
+{
+  X(lisp, atom);
+}
 
 /*
  * Symbol lookup.
