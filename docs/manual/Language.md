@@ -7,6 +7,7 @@ The source encoding is UTF-8.
 ## Comment
 ```lisp
 # This is a comment
+; This is a comment
 ```
 ## Types
 

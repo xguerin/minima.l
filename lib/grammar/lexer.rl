@@ -174,7 +174,7 @@ char    = '^' . (print - '\\' | "\\\\" | "\\e" | "\\n" | "\\r" | "\\t") $!parse_
 string  = '"' . ([^"] | '\\' '"')* . '"';
 marks   = [!@$%&*_+\-={}\[\]:;|\\<>?,./];
 symbol  = (alpha | marks) . (alnum | marks){,15} $!parse_error;
-comment = '#' . [^\n]*;
+comment = ('#' | ';') . [^\n]*;
 
 purge := any* %{ fgoto main; };
 
