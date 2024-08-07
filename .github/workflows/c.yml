@@ -1,0 +1,24 @@
+name: C
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: cmake lemon ragel
+          version: 1.0
+      - name: configure
+        run: cmake .
+      - name: format
+        run: make format
