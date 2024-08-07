@@ -19,6 +19,44 @@ jobs:
           packages: cmake lemon ragel
           version: 1.0
       - name: configure
-        run: cmake .
+        run: cmake -B build .
       - name: format
-        run: make format
+        run: make -C build format-check
+  tidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: cmake lemon ragel
+          version: 1.0
+      - name: configure
+        run: cmake -B build .
+      - name: tidy
+        run: make -C build tidy-check
+  test-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: cmake lemon ragel
+          version: 1.0
+      - name: configure
+        run: cmake -B build .
+      - name: build
+        run: make -C build
+      - name: test
+        run: make -C build test
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: brew
+        run: brew install lemon ragel
+      - name: configure
+        run: cmake -B build .
+      - name: build
+        run: make -C build 
+      - name: test
+        run: make -C build test
