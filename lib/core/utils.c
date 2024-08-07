@@ -4,15 +4,13 @@
 #include <mnml/slab.h>
 #include <mnml/utils.h>
 #include <dirent.h>
+#include <dlfcn.h>
 #include <libgen.h>
+#include <limits.h>
 #include <limits.h>
 #include <stdio.h>
 #include <time.h>
 #include <unistd.h>
-
-#ifdef __APPLE__
-#include <mach-o/dyld.h>
-#endif
 
 /*
  * Syntax error handler.
@@ -62,15 +60,13 @@ lisp_prefix()
    * Compute this binary path.
    */
   if (!is_set) {
+    Dl_info dl_info;
     char buffer[PATH_MAX] = { 0 };
-#if defined(__linux__)
-    (void)readlink("/proc/self/exe", buffer, PATH_MAX);
-#elif defined(__APPLE__)
-    uint32_t size = sizeof(buffer);
-    (void)_NSGetExecutablePath(buffer, &size);
-#else
-#error "Plaform not supported"
-#endif
+    if (dladdr(lisp_prefix, &dl_info)) {
+      strncpy(buffer, dl_info.dli_fname, PATH_MAX);
+    } else {
+      strncpy(buffer, "/usr/local/bin/mnml", PATH_MAX);
+    }
     const char* dname = dirname(dirname(buffer));
     strcpy(prefix, dname);
     is_set = true;

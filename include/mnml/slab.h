@@ -15,7 +15,7 @@ typedef struct slab
   size_t n_free;
   size_t n_pages;
   atom_t entries;
-} * slab_t;
+}* slab_t;
 
 /*
  * Slab macros.

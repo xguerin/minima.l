@@ -158,7 +158,7 @@ action tok_symbol
 { 
   const char * start = UNPREFIX(ts);
   size_t len = te - start;
-  MAKE_SYMBOL_DYNAMIC(sym, start, len);
+  MAKE_SYMBOL_DYNAMIC_N(sym, start, len);
   Parse(lexer->parser, SYMBOL, sym, lexer);
   lisp_consume_token(lexer);
 }

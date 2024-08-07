@@ -29,14 +29,14 @@ typedef __int128 int128_t;
 
 typedef enum atom_type
 {
-  T_NONE,
-  T_NIL,
-  T_TRUE,
-  T_CHAR,
-  T_NUMBER,
-  T_PAIR,
-  T_SYMBOL,
-  T_WILDCARD
+  T_NONE = 0,
+  T_NIL = 1,
+  T_TRUE = 2,
+  T_CHAR = 3,
+  T_NUMBER = 4,
+  T_PAIR = 5,
+  T_SYMBOL = 6,
+  T_WILDCARD = 7
 } atom_type_t;
 
 typedef enum atom_flag
@@ -54,7 +54,7 @@ typedef struct pair
 {
   struct atom* car;
   struct atom* cdr;
-} * pair_t;
+}* pair_t;
 
 #define LISP_SYMBOL_LENGTH 16
 

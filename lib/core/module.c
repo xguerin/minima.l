@@ -510,4 +510,27 @@ module_load(const lisp_t lisp, const atom_t cell)
   return syms;
 }
 
+/*
+ * Load defaults.
+ */
+
+void
+module_load_defaults(const lisp_t lisp)
+{
+  MAKE_SYMBOL_STATIC(std, "std");
+  MAKE_SYMBOL_STATIC(lod, "load");
+  MAKE_SYMBOL_STATIC(qte, "quote");
+  MAKE_SYMBOL_STATIC(def, "def");
+  atom_t mod = lisp_make_symbol(lisp, std);
+  atom_t sy0 = lisp_make_symbol(lisp, lod);
+  atom_t sy1 = lisp_make_symbol(lisp, qte);
+  atom_t sy2 = lisp_make_symbol(lisp, def);
+  atom_t cn0 = lisp_cons(lisp, sy0, lisp_make_nil(lisp));
+  atom_t cn1 = lisp_cons(lisp, sy1, cn0);
+  atom_t cn2 = lisp_cons(lisp, sy2, cn1);
+  atom_t cn3 = lisp_cons(lisp, mod, cn2);
+  atom_t tmp = module_load(lisp, cn3);
+  X(lisp, tmp);
+}
+
 // vim: tw=80:sw=2:ts=2:sts=2:et

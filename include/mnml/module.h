@@ -27,6 +27,8 @@ typedef struct module_entry
 
 atom_t module_load(const lisp_t lisp, const atom_t cell);
 
+void module_load_defaults(const lisp_t lisp);
+
 /*
  * CONS helpers.
  */

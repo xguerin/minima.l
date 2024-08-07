@@ -217,7 +217,7 @@ lisp_setq(const lisp_t lisp, const atom_t closure, const atom_t pair)
    */
   if (!IS_PAIR(pair) || !IS_SYMB(CAR(pair))) {
     X(lisp, pair);
-    return UP(closure);
+    return closure;
   }
   /*
    * If the closure is NIL, return the wrapped pair.
