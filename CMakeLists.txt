@@ -197,20 +197,26 @@ foreach (SOURCE ${SOURCES})
   if (ClangFormat_FOUND)
     add_custom_target(${TARGET}_format COMMAND clang-format -i -style=file ${CMAKE_SOURCE_DIR}/${SOURCE})
     list(APPEND FORMAT_TARGETS ${TARGET}_format)
+    add_custom_target(${TARGET}_format_check COMMAND clang-format -n -Werror -style=file ${CMAKE_SOURCE_DIR}/${SOURCE})
+    list(APPEND FORMAT_CHECK_TARGETS ${TARGET}_format_check)
   endif ()
   #
   if (ClangTidy_FOUND)
     add_custom_target(${TARGET}_tidy COMMAND clang-tidy -fix -quiet -format-style=file -p ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/${SOURCE})
     list(APPEND TIDY_TARGETS ${TARGET}_tidy)
   endif ()
+    add_custom_target(${TARGET}_tidy_check COMMAND clang-tidy -quiet -format-style=file -p ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/${SOURCE})
+    list(APPEND TIDY_CHECK_TARGETS ${TARGET}_tidy_check)
 endforeach ()
 
 if (ClangFormat_FOUND)
   add_custom_target(format DEPENDS ${FORMAT_TARGETS})
+  add_custom_target(format-check DEPENDS ${FORMAT_CHECK_TARGETS})
 endif ()
 
 if (ClangTidy_FOUND)
   add_custom_target(tidy DEPENDS ${TIDY_TARGETS})
+  add_custom_target(tidy-check DEPENDS ${TIDY_CHECK_TARGETS})
 endif ()
 
 #
@@ -224,6 +230,7 @@ set(HEADERS
   include/mnml/lisp.h
   include/mnml/module.h
   include/mnml/slab.h
+  include/mnml/tree.h
   include/mnml/types.h
   include/mnml/utils.h)
 
